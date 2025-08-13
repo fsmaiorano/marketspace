@@ -1,0 +1,88 @@
+services:
+  keycloakdb:
+    image: postgres:latest
+
+  catalogdb:
+    image: postgres:latest
+  
+  minio:
+    image: minio/minio:latest
+  
+  basketdb:
+    image: postgres:latest
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.3
+  
+  distributedcache:
+    image: redis:latest
+  
+  orderdb:
+    image: postgres:latest
+
+  merchantdb:
+    image: postgres:latest
+
+  messagebroker:
+    image: rabbitmq:management
+  
+  catalog.api:
+    image: ${DOCKER_REGISTRY-}catalogapi
+    platform: linux/amd64
+    depends_on:
+      - catalogdb
+    build:
+      context: .
+      dockerfile: Services/Catalog/Catalog.Api/Dockerfile
+  
+  basket.api:
+    image: ${DOCKER_REGISTRY-}basketapi
+    platform: linux/amd64
+    depends_on:
+      - basketdb
+    build:
+      context: .
+      dockerfile: Services/Basket/Basket.Api/Dockerfile
+  
+  discount.grpc:
+    image: ${DOCKER_REGISTRY-}discountgrpc
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Services/Discount/Discount.Grpc/Dockerfile
+  
+  ordering.api:
+    image: ${DOCKER_REGISTRY-}orderingapi
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Services/Ordering/Ordering.Api/Dockerfile
+      
+  merchant.api:
+    image: ${DOCKER_REGISTRY-}merchantapi
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Services/Merchant/Merchant.Api/Dockerfile
+  
+  gatewayapi:
+    image: ${DOCKER_REGISTRY-}gatewayapi
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Gateways/GatewayApi/Dockerfile
+
+  webapp:
+    image: ${DOCKER_REGISTRY-}webapp
+    build:
+      context: .
+      dockerfile: UserInterfaces/WebApplication/Dockerfile
+
+volumes:
+  postgres_catalog:
+  postgres_basket:
+  postgres_keycloak:
+  postgres_order:
+  postgres_merchant:
+  minio_data:
+  
