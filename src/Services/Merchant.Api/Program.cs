@@ -37,3 +37,11 @@ app.UseSwaggerUI(options =>
 CreateMerchantEndpoint.MapEndpoint(app);
 
 app.Run();
+
+public partial class Program
+{
+    public static void Main(string[] args)
+    {
+        // The actual entry point is handled by the top-level statements above.
+    }
+}

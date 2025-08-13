@@ -1,6 +1,7 @@
 using BuildingBlocks;
 using Merchant.Api.Domain.Entities;
 using Merchant.Api.Domain.Repositories;
+using Merchant.Api.Domain.ValueObjects;
 
 namespace Merchant.Api.Application.Merchant.CreateMerchant;
 
@@ -16,7 +17,7 @@ public sealed class CreateMerchantHandler(IMerchantRepository repository, ILogge
                 command.Description,
                 command.Address,
                 command.PhoneNumber,
-                command.Email);
+                Email.Of(command.Email));
             
             int result = await repository.AddAsync(merchantEntity);
             

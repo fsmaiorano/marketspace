@@ -6,16 +6,16 @@ using Merchant.Api.Domain.Entities;
 using Merchant.Api.Domain.Exceptions;
 using Merchant.Api.Domain.Repositories;
 using Merchant.Api.Domain.ValueObjects;
-using MockFactory;
+using Builder;
 
-namespace Merchant.Api.UnitTest.Application.Merchant.CreateMerchant;
+namespace Merchant.Test.Application.Merchant.CreateMerchant;
 
 public class CreateMerchantHandlerTests
 {
     [Fact]
     public async Task HandleAsync_ShouldReturnSuccessResult_WhenNoExceptionOccurs()
     {
-        MerchantEntity? merchant = MerchantMockBuilder.CreateMerchantFaker("").Generate();
+        MerchantEntity? merchant = MerchantBuilder.CreateMerchantFaker("").Generate();
         Mock<IMerchantRepository> repositoryMock = new();
         Mock<ILogger<CreateMerchantHandler>> loggerMock = new();
 
@@ -27,12 +27,7 @@ public class CreateMerchantHandlerTests
 
         CreateMerchantHandler handler = new CreateMerchantHandler(repositoryMock.Object, loggerMock.Object);
 
-        CreateMerchantCommand command = new(
-            merchant.Name,
-            merchant.Description,
-            merchant.Address,
-            merchant.PhoneNumber,
-            merchant.Email);
+        CreateMerchantCommand command = MerchantBuilder.CreateCreateMerchantCommandFaker().Generate();
 
         // Act
         Result<CreateMerchantResult> result = await handler.HandleAsync(command);
@@ -48,9 +43,9 @@ public class CreateMerchantHandlerTests
     {
         try
         {
-            MerchantEntity? merchant = MerchantMockBuilder.CreateMerchantFaker(email: "wrong-email-format").Generate();
+            MerchantEntity? merchant = MerchantBuilder.CreateMerchantFaker(email: "wrong-email-format").Generate();
         }
-        catch (DomainException ex) 
+        catch (DomainException ex)
         {
             Assert.IsType<DomainException>(ex);
         }
