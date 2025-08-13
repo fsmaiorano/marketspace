@@ -29,10 +29,8 @@ public class CreateMerchantHandlerTests
 
         CreateMerchantCommand command = MerchantBuilder.CreateCreateMerchantCommandFaker().Generate();
 
-        // Act
         Result<CreateMerchantResult> result = await handler.HandleAsync(command);
 
-        // Assert
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Value);
         Assert.NotEqual(Guid.Empty, result.Value.MerchantId);
