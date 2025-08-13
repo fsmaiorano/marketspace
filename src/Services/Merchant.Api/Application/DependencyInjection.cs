@@ -10,9 +10,7 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddScoped<IMerchantRepository, MerchantRepository>();
-
         services.AddScoped<ICreateMerchantHandler, CreateMerchantHandler>();
-
         return services;
     }
 }

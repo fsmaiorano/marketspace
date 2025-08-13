@@ -7,6 +7,7 @@ using Merchant.Api.Domain.Exceptions;
 using Merchant.Api.Domain.Repositories;
 using Merchant.Api.Domain.ValueObjects;
 using Builder;
+using System.Text.Json;
 
 namespace Merchant.Test.Application.Merchant.CreateMerchant;
 
