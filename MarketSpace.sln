@@ -23,11 +23,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{0F
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Merchant", "Merchant", "{851B950C-5743-4DD7-8550-7CE31215BBB7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Merchant.Api.UnitTest", "tests\Services\Merchant\Merchant.Api.UnitTest\Merchant.Api.UnitTest.csproj", "{354D6D3C-C20D-47C3-B001-44B036E93F14}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Merchant.Test", "tests\Services\Merchant\Merchant.Test\Merchant.Test.csproj", "{354D6D3C-C20D-47C3-B001-44B036E93F14}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MockFactory", "MockFactory", "{1B4665F8-FE05-41AD-B192-8EB8ACD98F60}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Builders", "Builders", "{1B4665F8-FE05-41AD-B192-8EB8ACD98F60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MockFactory", "tests\MockFactory\MockFactory\MockFactory.csproj", "{3EDA3849-6371-41DE-A426-84AC64BEE29F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Builder", "tests\MockFactory\Builder\Builder.csproj", "{3EDA3849-6371-41DE-A426-84AC64BEE29F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

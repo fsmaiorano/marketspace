@@ -23,6 +23,7 @@ public class MerchantEntity : Aggregate<MerchantId>
     {
         return new MerchantEntity
         {
+            Id = MerchantId.Of(Guid.NewGuid()),
             Name = name,
             Description = description,
             Address = address,
