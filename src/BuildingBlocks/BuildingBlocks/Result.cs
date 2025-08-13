@@ -1,9 +1,14 @@
+using System.Text.Json.Serialization;
+
 namespace BuildingBlocks;
 
 public class Result<T>
 {
     public bool IsSuccess { get; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Error { get; }
+
     public T? Value { get; }
 
     private Result(T value)

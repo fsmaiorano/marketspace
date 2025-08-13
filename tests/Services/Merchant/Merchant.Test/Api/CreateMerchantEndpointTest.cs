@@ -72,5 +72,10 @@ public class CreateMerchantEndpointTest : IClassFixture<MerchantApiFactory>
         CreateMerchantCommand command = MerchantBuilder.CreateCreateMerchantCommandFaker().Generate();
         HttpResponseMessage response = await _client.PostAsJsonAsync("/merchant", command);
         response.EnsureSuccessStatusCode();
+        
+        CreateMerchantResult? result = await response.Content.ReadFromJsonAsync<CreateMerchantResult>();
+        result.Should().NotBeNull();
+        result!.MerchantId.Should().NotBeEmpty();
+        result.MerchantId.Should().NotBe(Guid.Empty);
     }
 }
