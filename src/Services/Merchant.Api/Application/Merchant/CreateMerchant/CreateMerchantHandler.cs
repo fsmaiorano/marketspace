@@ -4,10 +4,10 @@ using Merchant.Api.Domain.Repositories;
 
 namespace Merchant.Api.Application.Merchant.CreateMerchant;
 
-public class CreateMerchantHandler(IMerchantRepository repository, ILogger<CreateMerchantHandler> logger)
+public sealed class CreateMerchantHandler(IMerchantRepository repository, ILogger<CreateMerchantHandler> logger)
     : ICreateMerchantHandler
 {
-    public virtual async Task<Result<CreateMerchantResult>> HandleAsync(CreateMerchantCommand command)
+    public async Task<Result<CreateMerchantResult>> HandleAsync(CreateMerchantCommand command)
     {
         try
         {
