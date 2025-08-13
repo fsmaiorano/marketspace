@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{E2
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Merchant", "Merchant", "{2FD5E243-48F5-4AC0-A517-1ABF6BB1B708}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Merchant.Api", "src\Services\Merchant.Api\Merchant.Api.csproj", "{B74189CC-FF66-4C92-A72A-CE33BAF796CC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Merchant.Api", "src\Services\Merchant\Merchant.Api\Merchant.Api.csproj", "{B74189CC-FF66-4C92-A72A-CE33BAF796CC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C38A8607-17BA-43D8-97BC-5808977A347F}"
 	ProjectSection(SolutionItems) = preProject

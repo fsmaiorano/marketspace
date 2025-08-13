@@ -1,0 +1,14 @@
+@Merchant.Api_HostAddress = https://localhost:5055
+
+POST {{Merchant.Api_HostAddress}}/Merchant
+Accept: application/json
+
+{
+  "Name" : "Runolfsdottir - Mills",
+  "Description" : "Unde aliquam ut excepturi eveniet excepturi animi.",
+  "Address" : "622 Flatley Forks, Moseberg, Central African Republic",
+  "PhoneNumber" : "962-484-9252",
+  "Email" : "Donny_Franecki73@yahoo.com"
+}
+
+###
