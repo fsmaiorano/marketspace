@@ -25,8 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\..\src\BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj" />
-      <ProjectReference Include="..\..\..\..\src\Services\Merchant.Api\Merchant.Api.csproj" />
+      <ProjectReference Include="..\..\..\..\src\Services\Merchant\Merchant.Api\Merchant.Api.csproj" />
       <ProjectReference Include="..\..\..\MockFactory\Builder\Builder.csproj" />
     </ItemGroup>
 
