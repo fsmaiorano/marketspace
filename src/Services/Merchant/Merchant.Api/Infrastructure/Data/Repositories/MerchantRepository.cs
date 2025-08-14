@@ -1,6 +1,7 @@
 using Merchant.Api.Domain.Entities;
 using Merchant.Api.Domain.Repositories;
 using Merchant.Api.Domain.ValueObjects;
+using Microsoft.EntityFrameworkCore;
 
 namespace Merchant.Api.Infrastructure.Data.Repositories;
 
@@ -19,7 +20,7 @@ public class MerchantRepository(IMerchantDbContext dbContext) : IMerchantReposit
     {
         ArgumentNullException.ThrowIfNull(merchant, nameof(merchant));
 
-        MerchantEntity storedEntity = await GetByIdAsync(merchant.Id, cancellationToken)
+        MerchantEntity storedEntity = await GetByIdAsync(merchant.Id, cancellationToken: cancellationToken)
                                       ?? throw new InvalidOperationException(
                                           $"Merchant with ID {merchant.Id} not found.");
 
@@ -35,7 +36,7 @@ public class MerchantRepository(IMerchantDbContext dbContext) : IMerchantReposit
 
     public async Task<int> RemoveAsync(MerchantId id, CancellationToken cancellationToken = default)
     {
-        MerchantEntity? storedEntity = await GetByIdAsync(id, cancellationToken)
+        MerchantEntity? storedEntity = await GetByIdAsync(id, cancellationToken: cancellationToken)
                                        ?? throw new InvalidOperationException(
                                            $"Merchant with ID {id} not found.");
 
@@ -43,8 +44,14 @@ public class MerchantRepository(IMerchantDbContext dbContext) : IMerchantReposit
         return await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<MerchantEntity?> GetByIdAsync(MerchantId id, CancellationToken cancellationToken = default)
+    public async Task<MerchantEntity?> GetByIdAsync(MerchantId id, bool isTrackingEnabled = true,
+        CancellationToken cancellationToken = default)
     {
-        return await dbContext.Merchants.FindAsync([id], cancellationToken: cancellationToken);
+        if (isTrackingEnabled)
+            return await dbContext.Merchants.FirstOrDefaultAsync(m => m.Id.Equals(id),
+                cancellationToken: cancellationToken);
+
+        return await dbContext.Merchants.AsNoTracking()
+            .FirstOrDefaultAsync(m => m.Id.Equals(id), cancellationToken);
     }
 }
