@@ -27,7 +27,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Merchant.Test", "tests\Serv
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Builders", "Builders", "{1B4665F8-FE05-41AD-B192-8EB8ACD98F60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Builder", "tests\MockFactory\Builder\Builder.csproj", "{3EDA3849-6371-41DE-A426-84AC64BEE29F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Builder", "tests\Builders\Builder\Builder.csproj", "{3EDA3849-6371-41DE-A426-84AC64BEE29F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
