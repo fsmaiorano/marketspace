@@ -1,4 +1,3 @@
-using BuildingBlocks;
 using Merchant.Api.Domain.Entities;
 using Merchant.Api.Domain.Repositories;
 using Merchant.Api.Domain.ValueObjects;
@@ -32,6 +31,7 @@ public sealed class CreateMerchantHandler(IMerchantRepository repository, ILogge
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "An error occurred while creating the merchant: {Command}", command);
             return Result<CreateMerchantResult>.Failure($"An error occurred while creating the merchant: {ex.Message}");
         }
     }

@@ -32,4 +32,24 @@ public class MerchantEntity : Aggregate<MerchantId>
             CreatedAt = DateTimeOffset.UtcNow
         };
     }
+
+    public static MerchantEntity Update(
+        Guid id,
+        string name,
+        string description,
+        string address,
+        string phoneNumber,
+        Email email)
+    {
+        return new MerchantEntity
+        {
+            Id = MerchantId.Of(id),
+            Name = name,
+            Description = description,
+            Address = address,
+            PhoneNumber = phoneNumber,
+            Email = email,
+            UpdatedAt = DateTimeOffset.UtcNow
+        };
+    }
 }

@@ -1,6 +1,1 @@
-namespace Merchant.Api;
-
-public class GlobalUsings
-{
-    
-}
+global using BuildingBlocks;
