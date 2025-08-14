@@ -1,10 +1,4 @@
-﻿using SeedApp;
-using Merchant.Api.Infrastructure.Data;
-using Builder;
-using Merchant.Api.Domain.Entities;
-using Microsoft.Extensions.DependencyInjection;
-
-MarketSpaceSeedFactory factory = new();
+﻿MarketSpaceSeedFactory factory = new();
 IServiceScopeFactory scopeFactory = factory.Services.GetRequiredService<IServiceScopeFactory>();
 
 using IServiceScope scope = scopeFactory.CreateScope();
@@ -22,4 +16,3 @@ for (int i = 0; i < createMerchantCounter; i++)
 }
 
 dbContext.SaveChanges();
-

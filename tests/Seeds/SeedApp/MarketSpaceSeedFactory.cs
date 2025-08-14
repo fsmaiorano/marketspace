@@ -1,8 +1,3 @@
-using Merchant.Api.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-
 namespace SeedApp;
 
 public class MarketSpaceSeedFactory
