@@ -1,0 +1,17 @@
+global using Builder;
+global using BuildingBlocks;
+global using FluentAssertions;
+global using Merchant.Api.Application.Merchant.CreateMerchant;
+global using Merchant.Api.Application.Merchant.UpdateMerchant;
+global using Merchant.Api.Domain.Entities;
+global using Merchant.Api.Domain.Exceptions;
+global using Merchant.Api.Domain.Repositories;
+global using Merchant.Api.Domain.ValueObjects;
+global using Merchant.Api.Infrastructure.Data;
+global using Microsoft.AspNetCore.Hosting;
+global using Microsoft.AspNetCore.Mvc.Testing;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Logging;
+global using Moq;
+global using System.Net.Http.Json;

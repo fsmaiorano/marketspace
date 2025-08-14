@@ -4,7 +4,7 @@ using Merchant.Api.Endpoints;
 using Merchant.Api.Infrastructure;
 using Merchant.Api.Infrastructure.Data.Extensions;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 
@@ -17,7 +17,7 @@ builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
@@ -35,6 +35,7 @@ app.UseSwaggerUI(options =>
 });
 
 CreateMerchantEndpoint.MapEndpoint(app);
+UpdateMerchantEndpoint.MapEndpoint(app);
 
 app.Run();
 

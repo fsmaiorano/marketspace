@@ -1,8 +1,10 @@
+using Merchant.Api.Domain.ValueObjects;
+
 namespace Merchant.Api.Application.Merchant.UpdateMerchant;
 
 public class UpdateMerchantCommand
 {
-    public Guid Id { get; set; } 
+    public required Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
