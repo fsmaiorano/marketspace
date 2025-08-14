@@ -1,11 +1,6 @@
 namespace Merchant.Api.Application.Merchant.CreateMerchant;
 
-public class CreateMerchantResult()
+public class CreateMerchantResult(Guid merchantId)
 {
-    public Guid MerchantId { get; init; }
-
-    public CreateMerchantResult(Guid merchantId) : this()
-    {
-        MerchantId = merchantId;
-    }
+    public Guid MerchantId { get; init; } = merchantId;
 }
