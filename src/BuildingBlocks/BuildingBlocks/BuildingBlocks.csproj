@@ -11,5 +11,4 @@
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.8"/>
         <PackageReference Include="System.Text.Encodings.Web" Version="9.0.8"/>
     </ItemGroup>
-
 </Project>
