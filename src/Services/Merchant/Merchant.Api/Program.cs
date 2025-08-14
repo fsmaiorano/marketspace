@@ -34,8 +34,11 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty;
 });
 
+app.UseExceptionHandler(options => { });
+
 CreateMerchantEndpoint.MapEndpoint(app);
 UpdateMerchantEndpoint.MapEndpoint(app);
+DeleteMerchantEndpoint.MapEndpoint(app);
 
 app.Run();
 

@@ -1,4 +1,4 @@
-namespace Merchant.Test.Api;
+namespace Merchant.Test.Api.Endpoints;
 
 public class UpdateMerchantEndpointTest(MerchantApiFactory factory) : IClassFixture<MerchantApiFactory>
 {
@@ -67,19 +67,21 @@ public class UpdateMerchantEndpointTest(MerchantApiFactory factory) : IClassFixt
         dbContext.Merchants.Add(merchant);
         await dbContext.SaveChangesAsync();
 
+        UpdateMerchantCommand command = new UpdateMerchantCommand
+        {
+            Id = merchant.Id.Value,
+            Name = "Updated Merchant Name",
+            Description = "Updated Description",
+            Email = merchant.Email.Value,
+            Address = merchant.Address,
+            PhoneNumber = merchant.PhoneNumber
+        };
+
         HttpResponseMessage response = await _client.PutAsJsonAsync($"/merchant",
-            new UpdateMerchantCommand
-            {
-                Id = merchant.Id.Value,
-                Name = "Updated Merchant Name",
-                Description = "Updated Description",
-                Email = merchant.Email.Value,
-                Address = merchant.Address,
-                PhoneNumber = merchant.PhoneNumber
-            });
-        response.EnsureSuccessStatusCode();
+            command);
 
         UpdateMerchantResult? result = await response.Content.ReadFromJsonAsync<UpdateMerchantResult>();
         result.Should().NotBeNull();
+        result!.IsSuccess.Should().BeTrue();
     }
 }

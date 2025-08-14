@@ -5,8 +5,8 @@ namespace Merchant.Api.Domain.Repositories;
 
 public interface IMerchantRepository
 {
-    Task<int> AddAsync(MerchantEntity merchant);
-    Task<int> UpdateAsync(MerchantEntity merchant);
-    Task DeleteAsync(MerchantEntity merchant);
-    Task<MerchantEntity?> GetByIdAsync(MerchantId id);
+    Task<int> AddAsync(MerchantEntity merchant, CancellationToken cancellationToken = default);
+    Task<int> UpdateAsync(MerchantEntity merchant, CancellationToken cancellationToken = default);
+    Task<int> RemoveAsync(MerchantId id, CancellationToken cancellationToken = default);
+    Task<MerchantEntity?> GetByIdAsync(MerchantId id, CancellationToken cancellationToken = default);
 }
