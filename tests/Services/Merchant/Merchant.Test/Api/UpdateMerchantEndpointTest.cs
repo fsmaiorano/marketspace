@@ -1,0 +1,85 @@
+namespace Merchant.Test.Api;
+
+public class UpdateMerchantEndpointTest(MerchantApiFactory factory) : IClassFixture<MerchantApiFactory>
+{
+    private readonly HttpClient _client = factory.CreateClient();
+    private readonly Mock<IUpdateMerchantHandler> _mockHandler = new();
+    private readonly MerchantApiFactory _factory = factory;
+
+    [Fact]
+    public async Task Returns_Failure_When_Merchant_Not_Found()
+    {
+        Guid merchantId = Guid.NewGuid();
+
+        _mockHandler
+            .Setup(h => h.HandleAsync(It.IsAny<UpdateMerchantCommand>()))
+            .ReturnsAsync(Result<UpdateMerchantResult>.Failure("Merchant not found."));
+
+        UpdateMerchantCommand command = new UpdateMerchantCommand { Id = merchantId };
+
+        Result<UpdateMerchantResult> response = await _mockHandler.Object.HandleAsync(command);
+
+        response.IsSuccess.Should().BeFalse();
+        response.Error.Should().Be("Merchant not found.");
+    }
+
+    [Fact]
+    public async Task Returns_Failure_When_Exception_Occurs()
+    {
+        Guid merchantId = Guid.NewGuid();
+
+        _mockHandler
+            .Setup(h => h.HandleAsync(It.IsAny<UpdateMerchantCommand>()))
+            .ThrowsAsync(new Exception("Unexpected error"));
+
+        UpdateMerchantCommand command = new UpdateMerchantCommand { Id = merchantId };
+
+        Func<Task> act = async () => await _mockHandler.Object.HandleAsync(command);
+
+        await act.Should().ThrowAsync<Exception>().WithMessage("Unexpected error");
+    }
+
+    [Fact]
+    public async Task Returns_Success_When_Merchant_Updated()
+    {
+        Guid merchantId = Guid.NewGuid();
+
+        _mockHandler
+            .Setup(h => h.HandleAsync(It.IsAny<UpdateMerchantCommand>()))
+            .ReturnsAsync(Result<UpdateMerchantResult>.Success(new UpdateMerchantResult(isSuccess: true)));
+
+        UpdateMerchantCommand command = new UpdateMerchantCommand { Id = merchantId };
+
+        Result<UpdateMerchantResult> response = await _mockHandler.Object.HandleAsync(command);
+
+        response.IsSuccess.Should().BeTrue();
+        response.Value?.IsSuccess.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Can_Update_Merchant_Endpoint()
+    {
+        using IServiceScope scope = _factory.Services.CreateScope();
+        MerchantDbContext dbContext = scope.ServiceProvider.GetRequiredService<MerchantDbContext>();
+
+        MerchantEntity? merchant = MerchantBuilder.CreateMerchantFaker().Generate();
+
+        dbContext.Merchants.Add(merchant);
+        await dbContext.SaveChangesAsync();
+
+        HttpResponseMessage response = await _client.PutAsJsonAsync($"/merchant",
+            new UpdateMerchantCommand
+            {
+                Id = merchant.Id.Value,
+                Name = "Updated Merchant Name",
+                Description = "Updated Description",
+                Email = merchant.Email.Value,
+                Address = merchant.Address,
+                PhoneNumber = merchant.PhoneNumber
+            });
+        response.EnsureSuccessStatusCode();
+
+        UpdateMerchantResult? result = await response.Content.ReadFromJsonAsync<UpdateMerchantResult>();
+        result.Should().NotBeNull();
+    }
+}

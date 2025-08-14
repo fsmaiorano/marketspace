@@ -5,11 +5,11 @@ namespace Merchant.Api.Domain.Entities;
 
 public class MerchantEntity : Aggregate<MerchantId>
 {
-    public string Name { get; private set; } = null!;
-    public string Description { get; private set; } = null!;
-    public string Address { get; private set; } = null!;
-    public string PhoneNumber { get; private set; } = null!;
-    public Email Email { get; private set; } = null!;
+    public string Name { get; set; } = null!;
+    public string Description { get; set; } = null!;
+    public string Address { get; set; } = null!;
+    public string PhoneNumber { get; set; } = null!;
+    public Email Email { get; set; } = null!;
 
     public new DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
@@ -30,26 +30,6 @@ public class MerchantEntity : Aggregate<MerchantId>
             PhoneNumber = phoneNumber,
             Email = email,
             CreatedAt = DateTimeOffset.UtcNow
-        };
-    }
-
-    public static MerchantEntity Update(
-        Guid id,
-        string name,
-        string description,
-        string address,
-        string phoneNumber,
-        Email email)
-    {
-        return new MerchantEntity
-        {
-            Id = MerchantId.Of(id),
-            Name = name,
-            Description = description,
-            Address = address,
-            PhoneNumber = phoneNumber,
-            Email = email,
-            UpdatedAt = DateTimeOffset.UtcNow
         };
     }
 }

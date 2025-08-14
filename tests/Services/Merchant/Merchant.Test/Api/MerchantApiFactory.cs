@@ -1,9 +1,3 @@
-using Microsoft.AspNetCore.Mvc.Testing;
-using Merchant.Api.Infrastructure.Data;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-
 namespace Merchant.Test.Api;
 
 public class MerchantApiFactory : WebApplicationFactory<Program>

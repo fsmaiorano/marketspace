@@ -2,10 +2,10 @@ namespace Merchant.Api.Application.Merchant.UpdateMerchant;
 
 public class UpdateMerchantResult()
 {
-    public Guid MerchantId { get; init; }
+    public bool IsSuccess { get; init; }
 
-    public UpdateMerchantResult(Guid merchantId) : this()
+    public UpdateMerchantResult(bool isSuccess) : this()
     {
-        MerchantId = merchantId;
+        this.IsSuccess = isSuccess;
     }
 }

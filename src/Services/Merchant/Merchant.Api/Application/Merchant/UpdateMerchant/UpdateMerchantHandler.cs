@@ -11,26 +11,19 @@ public sealed class UpdateMerchantHandler(IMerchantRepository merchantRepository
     {
         try
         {
-            MerchantEntity? storedMerchant = await merchantRepository.GetByIdAsync(command.Id);
-
-            if (storedMerchant is null)
-            {
-                logger.LogWarning("Merchant not found: {MerchantId}", command.Id);
-                return Result<UpdateMerchantResult>.Failure("Merchant not found.");
-            }
-
-            MerchantEntity merchantEntity = MerchantEntity.Update(
-                command.Id,
+            MerchantEntity merchantEntity = MerchantEntity.Create(
                 command.Name,
                 command.Description,
                 command.Address,
                 command.PhoneNumber,
                 Email.Of(command.Email));
+            
+            merchantEntity.Id = MerchantId.Of(command.Id);
 
             await merchantRepository.UpdateAsync(merchantEntity);
             logger.LogInformation("Merchant updated successfully: {MerchantId}", command.Id);
 
-            return Result<UpdateMerchantResult>.Success(new UpdateMerchantResult(merchantEntity.Id.Value));
+            return Result<UpdateMerchantResult>.Success(new UpdateMerchantResult(isSuccess: true));
         }
         catch (Exception ex)
         {

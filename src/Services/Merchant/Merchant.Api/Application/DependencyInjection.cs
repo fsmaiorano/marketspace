@@ -1,4 +1,5 @@
 using Merchant.Api.Application.Merchant.CreateMerchant;
+using Merchant.Api.Application.Merchant.UpdateMerchant;
 using Merchant.Api.Domain.Repositories;
 using Merchant.Api.Infrastructure.Data.Repositories;
 
@@ -11,6 +12,7 @@ public static class DependencyInjection
     {
         services.AddScoped<IMerchantRepository, MerchantRepository>();
         services.AddScoped<ICreateMerchantHandler, CreateMerchantHandler>();
+        services.AddScoped<IUpdateMerchantHandler, UpdateMerchantHandler>();
         return services;
     }
 }
