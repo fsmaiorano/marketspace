@@ -6,19 +6,20 @@ namespace Merchant.Api.Infrastructure.Data.Repositories;
 
 public class MerchantRepository(IMerchantDbContext dbContext) : IMerchantRepository
 {
-    public async Task<int> AddAsync(MerchantEntity merchant)
+    public async Task<int> AddAsync(MerchantEntity merchant, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(merchant, nameof(merchant));
+        merchant.Id = MerchantId.Of(Guid.NewGuid());
         merchant.CreatedAt = DateTimeOffset.UtcNow;
-        await dbContext.Merchants.AddAsync(merchant);
-        return await dbContext.SaveChangesAsync();
+        await dbContext.Merchants.AddAsync(merchant, cancellationToken);
+        return await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<int> UpdateAsync(MerchantEntity merchant)
+    public async Task<int> UpdateAsync(MerchantEntity merchant, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(merchant, nameof(merchant));
 
-        MerchantEntity storedEntity = await GetByIdAsync(merchant.Id)
+        MerchantEntity storedEntity = await GetByIdAsync(merchant.Id, cancellationToken)
                                       ?? throw new InvalidOperationException(
                                           $"Merchant with ID {merchant.Id} not found.");
 
@@ -29,18 +30,21 @@ public class MerchantRepository(IMerchantDbContext dbContext) : IMerchantReposit
         storedEntity.Email = merchant.Email;
         storedEntity.UpdatedAt = DateTimeOffset.UtcNow;
 
-        return await dbContext.SaveChangesAsync();
+        return await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public Task DeleteAsync(MerchantEntity merchant)
+    public async Task<int> RemoveAsync(MerchantId id, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(merchant, nameof(merchant));
-        dbContext.Merchants.Remove(merchant);
-        return dbContext.SaveChangesAsync();
+        MerchantEntity? storedEntity = await GetByIdAsync(id, cancellationToken)
+                                       ?? throw new InvalidOperationException(
+                                           $"Merchant with ID {id} not found.");
+
+        dbContext.Merchants.Remove(storedEntity);
+        return await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<MerchantEntity?> GetByIdAsync(MerchantId id)
+    public async Task<MerchantEntity?> GetByIdAsync(MerchantId id, CancellationToken cancellationToken = default)
     {
-        return await dbContext.Merchants.FindAsync(id);
+        return await dbContext.Merchants.FindAsync([id], cancellationToken: cancellationToken);
     }
 }

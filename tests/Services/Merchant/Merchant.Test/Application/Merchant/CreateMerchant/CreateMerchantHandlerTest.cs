@@ -9,11 +9,13 @@ public class CreateMerchantHandlerTest
         Mock<IMerchantRepository> repositoryMock = new();
         Mock<ILogger<CreateMerchantHandler>> loggerMock = new();
 
-        repositoryMock.Setup(r => r.AddAsync(It.IsAny<MerchantEntity>())).ReturnsAsync((MerchantEntity m) =>
-        {
-            m.Id = MerchantId.Of(Guid.NewGuid());
-            return 1;
-        });
+        repositoryMock
+            .Setup(r => r.AddAsync(It.IsAny<MerchantEntity>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((MerchantEntity m, CancellationToken _) =>
+            {
+                m.Id = MerchantId.Of(Guid.NewGuid());
+                return 1;
+            });
 
         CreateMerchantHandler handler = new CreateMerchantHandler(repositoryMock.Object, loggerMock.Object);
 

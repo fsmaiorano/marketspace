@@ -10,11 +10,11 @@ public class UpdateMerchantHandlerTest
         Mock<ILogger<UpdateMerchantHandler>> loggerMock = new();
 
         MerchantId merchantId = MerchantId.Of(Guid.NewGuid());
-        
-        repositoryMock.Setup(r => r.UpdateAsync(It.IsAny<MerchantEntity>()))
+
+        repositoryMock.Setup(r => r.UpdateAsync(It.IsAny<MerchantEntity>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(1);
 
-        repositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<MerchantId>()))
+        repositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<MerchantId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(() => merchant);
 
         UpdateMerchantHandler handler = new UpdateMerchantHandler(repositoryMock.Object, loggerMock.Object);

@@ -1,4 +1,5 @@
 using Merchant.Api.Application.Merchant.UpdateMerchant;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Merchant.Api.Endpoints;
 
@@ -7,7 +8,7 @@ public static class UpdateMerchantEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPut("/merchant",
-                async (UpdateMerchantCommand command, IUpdateMerchantHandler handler) =>
+                async ([FromBody] UpdateMerchantCommand command, [FromServices] IUpdateMerchantHandler handler) =>
                 {
                     Result<UpdateMerchantResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess

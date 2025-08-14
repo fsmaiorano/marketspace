@@ -1,4 +1,4 @@
-namespace Merchant.Test.Api;
+namespace Merchant.Test.Api.Endpoints;
 
 public class CreateMerchantEndpointTest(MerchantApiFactory factory) : IClassFixture<MerchantApiFactory>
 {
