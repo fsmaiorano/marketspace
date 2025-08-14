@@ -11,12 +11,15 @@ public class UpdateMerchantHandlerTest
 
         MerchantId merchantId = MerchantId.Of(Guid.NewGuid());
 
+        // repositoryMock.Setup(r => r.UpdateAsync(It.IsAny<MerchantEntity>()))
+        //     .Returns((MerchantEntity m) =>
+        //     {
+        //         m.Id = merchantId;
+        //         return Task.FromResult(m);
+        //     });
+        
         repositoryMock.Setup(r => r.UpdateAsync(It.IsAny<MerchantEntity>()))
-            .Returns((MerchantEntity m) =>
-            {
-                m.Id = merchantId;
-                return Task.FromResult(m);
-            });
+            .ReturnsAsync(1);
 
         repositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<MerchantId>()))
             .ReturnsAsync(() => merchant);

@@ -23,7 +23,7 @@ public sealed class UpdateMerchantHandler(IMerchantRepository merchantRepository
             await merchantRepository.UpdateAsync(merchantEntity);
             logger.LogInformation("Merchant updated successfully: {MerchantId}", command.Id);
 
-            return Result<UpdateMerchantResult>.Success(new UpdateMerchantResult(isSuccess: true));
+            return Result<UpdateMerchantResult>.Success(new UpdateMerchantResult(true));
         }
         catch (Exception ex)
         {

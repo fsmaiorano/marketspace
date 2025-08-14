@@ -1,11 +1,6 @@
 namespace Merchant.Api.Application.Merchant.UpdateMerchant;
 
-public class UpdateMerchantResult()
+public class UpdateMerchantResult(bool isSuccess)
 {
-    public bool IsSuccess { get; init; }
-
-    public UpdateMerchantResult(bool isSuccess) : this()
-    {
-        this.IsSuccess = isSuccess;
-    }
+    public bool IsSuccess { get; init; } = isSuccess;
 }
