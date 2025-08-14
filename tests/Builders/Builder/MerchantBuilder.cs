@@ -15,7 +15,7 @@ public static class MerchantBuilder
             .RuleFor(m => m.Name, f => f.Company.CompanyName())
             .RuleFor(m => m.Description, f => f.Lorem.Sentence())
             .RuleFor(m => m.Address, f => f.Address.FullAddress())
-            .RuleFor(m => m.PhoneNumber, f => f.Phone.PhoneNumber())
+            .RuleFor(m => m.PhoneNumber, f => f.Phone.PhoneNumber("###-###-####"))
             .RuleFor(m => m.Email,
                 f => string.IsNullOrWhiteSpace(email) ? Email.Of(f.Internet.Email()) : Email.Of(email));
     }
@@ -26,7 +26,7 @@ public static class MerchantBuilder
             .RuleFor(m => m.Name, f => f.Company.CompanyName())
             .RuleFor(m => m.Description, f => f.Lorem.Sentence())
             .RuleFor(m => m.Address, f => f.Address.FullAddress())
-            .RuleFor(m => m.PhoneNumber, f => f.Phone.PhoneNumber())
+            .RuleFor(m => m.PhoneNumber, f => f.Phone.PhoneNumber("###-###-####"))
             .RuleFor(m => m.Email,
                 f => string.IsNullOrWhiteSpace(email) ? "marketspace@marketspace.com" : email);
     }

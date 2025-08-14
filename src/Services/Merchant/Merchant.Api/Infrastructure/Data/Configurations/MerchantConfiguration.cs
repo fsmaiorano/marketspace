@@ -29,7 +29,7 @@ public class MerchantConfiguration : IEntityTypeConfiguration<Merchant.Api.Domai
         
         builder.Property(m => m.PhoneNumber)
             .IsRequired()
-            .HasMaxLength(15);
+            .HasMaxLength(50);
 
         builder.Property(m => m.Email)
             .IsRequired()

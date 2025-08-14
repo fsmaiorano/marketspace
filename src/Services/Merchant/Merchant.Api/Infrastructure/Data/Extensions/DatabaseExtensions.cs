@@ -6,12 +6,12 @@ public static class DatabaseExtensions
 {
     public static async Task InitialiseDatabaseAsync(this WebApplication app)
     {
-        using var scope = app.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<MerchantDbContext>();
+        using IServiceScope scope = app.Services.CreateScope();
+        MerchantDbContext context = scope.ServiceProvider.GetRequiredService<MerchantDbContext>();
 
         try
         {
-            var created = await context.Database.EnsureCreatedAsync();
+            bool created = await context.Database.EnsureCreatedAsync();
 
             if (!created)
             {
