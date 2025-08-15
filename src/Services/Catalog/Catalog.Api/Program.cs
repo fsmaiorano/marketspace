@@ -1,5 +1,6 @@
 using BuildingBlocks.Exceptions;
 using Catalog.Api.Application;
+using Catalog.Api.Endpoints;
 using Catalog.Api.Infrastructure;
 using Catalog.Api.Infrastructure.Data.Extensions;
 
@@ -34,6 +35,11 @@ app.UseSwaggerUI(options =>
 });
 
 app.UseExceptionHandler(options => { });
+
+CreateCatalogEndpoint.MapEndpoint(app);
+UpdateCatalogEndpoint.MapEndpoint(app);
+DeleteCatalogEndpoint.MapEndpoint(app);
+GetCatalogByIdEndpoint.MapEndpoint(app);
 
 app.Run();
 

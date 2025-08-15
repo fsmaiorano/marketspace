@@ -26,7 +26,7 @@ public sealed class CreateMerchantHandler(IMerchantRepository repository, ILogge
                 return Result<CreateMerchantResult>.Failure("Failed to create merchant.");
             }
             
-            logger.LogInformation("Merchant created successfully: {MerchantId}", merchantEntity.Id);
+            logger.LogInformation("Catalog created successfully: {MerchantId}", merchantEntity.Id);
             return Result<CreateMerchantResult>.Success(new CreateMerchantResult(merchantEntity.Id.Value));
         }
         catch (Exception ex)

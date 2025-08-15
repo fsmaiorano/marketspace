@@ -1,23 +1,25 @@
+using BuildingBlocks;
+using Catalog.Api.Application.Catalog.GetCatalogById;
 using Merchant.Api.Application.Merchant.GetMerchantById;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Merchant.Api.Endpoints;
+namespace Catalog.Api.Endpoints;
 
-public static class GetMerchantByIdEndpoint
+public static class GetCatalogByIdEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/merchant/{id:guid}", async ([FromRoute] Guid id, [FromServices] IGetMerchantByIdHandler handler) =>
+        app.MapGet("/catalog/{id:guid}", async ([FromRoute] Guid id, [FromServices] IGetCatalogByIdHandler handler) =>
             {
-                GetMerchantByIdQuery query = new(id);
-                Result<GetMerchantByIdResult> result = await handler.HandleAsync(query);
+                GetCatalogByIdQuery query = new(id);
+                Result<GetCatalogByIdResult> result = await handler.HandleAsync(query);
                 return result.IsSuccess
                     ? Results.Ok(result.Value)
                     : Results.NotFound(result.Error);
             })
             .WithName("GetCatalogById")
             .WithTags("Catalog")
-            .Produces<GetMerchantByIdResult>(StatusCodes.Status200OK)
+            .Produces<GetCatalogByIdResult>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
     }

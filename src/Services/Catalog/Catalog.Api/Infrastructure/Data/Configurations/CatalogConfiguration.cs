@@ -37,7 +37,7 @@ public class CatalogConfiguration : IEntityTypeConfiguration<CatalogEntity>
         builder.Property(c => c.Categories)
             .HasConversion(
                 categories => string.Join(',', categories),
-                dbCategories => dbCategories.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+                dbCategories => dbCategories.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList().AsReadOnly())
             .HasMaxLength(500);
     }
 }

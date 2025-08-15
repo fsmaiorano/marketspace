@@ -16,7 +16,7 @@ public class GetMerchantByIdHandler(IMerchantRepository merchantRepository, ILog
             MerchantEntity? merchant = await merchantRepository.GetByIdAsync(merchantId, isTrackingEnabled: false);
 
             if (merchant is null)
-                return Result<GetMerchantByIdResult>.Failure($"Merchant with ID {query.Id} not found.");
+                return Result<GetMerchantByIdResult>.Failure($"Catalog with ID {query.Id} not found.");
 
             GetMerchantByIdResult result = new
             (

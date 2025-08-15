@@ -22,7 +22,7 @@ for (int i = 0; i < createMerchantCounter; i++)
     merchantEntity.Id = merchant.Id;
 
     dbContext.Merchants.Add(merchantEntity);
-    Console.WriteLine("Merchant created: " + merchant.Name + " (" + merchant.Email + ")");
+    Console.WriteLine("Catalog created: " + merchant.Name + " (" + merchant.Email + ")");
 }
 
 dbContext.SaveChanges();

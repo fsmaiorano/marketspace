@@ -13,8 +13,8 @@ public class GetMerchantByIdEndpointTest(MerchantApiFactory factory) : IClassFix
     {
         Guid merchantId = Guid.NewGuid();
         GetMerchantByIdQuery query = new GetMerchantByIdQuery(merchantId);
-        GetMerchantByIdResult result = new GetMerchantByIdResult(merchantId, "Test Merchant", "merchant@merchant.com",
-            "1234567890", "123 Merchant St");
+        GetMerchantByIdResult result = new GetMerchantByIdResult(merchantId, "Test Catalog", "merchant@merchant.com",
+            "1234567890", "123 Catalog St");
 
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<GetMerchantByIdQuery>()))
@@ -31,7 +31,7 @@ public class GetMerchantByIdEndpointTest(MerchantApiFactory factory) : IClassFix
         Guid merchantId = Guid.NewGuid();
         GetMerchantByIdQuery query = new GetMerchantByIdQuery(merchantId);
         Result<GetMerchantByIdResult> result =
-            Result<GetMerchantByIdResult>.Failure($"Merchant with ID {query.Id} not found.");
+            Result<GetMerchantByIdResult>.Failure($"Catalog with ID {query.Id} not found.");
 
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<GetMerchantByIdQuery>()))
@@ -39,7 +39,7 @@ public class GetMerchantByIdEndpointTest(MerchantApiFactory factory) : IClassFix
 
         Result<GetMerchantByIdResult> response = await _mockHandler.Object.HandleAsync(query);
         response.IsSuccess.Should().BeFalse();
-        response.Error.Should().Be($"Merchant with ID {query.Id} not found.");
+        response.Error.Should().Be($"Catalog with ID {query.Id} not found.");
     }
 
     [Fact]

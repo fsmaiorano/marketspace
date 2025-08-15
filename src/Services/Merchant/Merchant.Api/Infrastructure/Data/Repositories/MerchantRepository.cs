@@ -21,7 +21,7 @@ public class MerchantRepository(IMerchantDbContext dbContext) : IMerchantReposit
 
         MerchantEntity storedEntity = await GetByIdAsync(merchant.Id, cancellationToken: cancellationToken)
                                       ?? throw new InvalidOperationException(
-                                          $"Merchant with ID {merchant.Id} not found.");
+                                          $"Catalog with ID {merchant.Id} not found.");
 
         storedEntity.Update(
             merchant.Name,
@@ -37,7 +37,7 @@ public class MerchantRepository(IMerchantDbContext dbContext) : IMerchantReposit
     {
         MerchantEntity? storedEntity = await GetByIdAsync(id, cancellationToken: cancellationToken)
                                        ?? throw new InvalidOperationException(
-                                           $"Merchant with ID {id} not found.");
+                                           $"Catalog with ID {id} not found.");
 
         dbContext.Merchants.Remove(storedEntity);
         return await dbContext.SaveChangesAsync(cancellationToken);
