@@ -11,7 +11,17 @@ for (int i = 0; i < createMerchantCounter; i++)
 {
     MerchantEntity merchant = MerchantBuilder.CreateMerchantFaker().Generate();
     merchant.CreatedBy = "seed";
-    dbContext.Merchants.Add(merchant);
+
+    MerchantEntity merchantEntity = MerchantEntity.Create(
+        merchant.Name,
+        merchant.Description,
+        merchant.Address,
+        merchant.PhoneNumber,
+        merchant.Email);
+
+    merchantEntity.Id = merchant.Id;
+
+    dbContext.Merchants.Add(merchantEntity);
     Console.WriteLine("Merchant created: " + merchant.Name + " (" + merchant.Email + ")");
 }
 
