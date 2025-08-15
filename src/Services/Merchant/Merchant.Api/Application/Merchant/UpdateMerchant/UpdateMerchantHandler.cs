@@ -4,7 +4,7 @@ using Merchant.Api.Domain.ValueObjects;
 
 namespace Merchant.Api.Application.Merchant.UpdateMerchant;
 
-public sealed class UpdateMerchantHandler(IMerchantRepository merchantRepository, ILogger<UpdateMerchantHandler> logger)
+public sealed class UpdateMerchantHandler(IMerchantRepository repository, ILogger<UpdateMerchantHandler> logger)
     : IUpdateMerchantHandler
 {
     public async Task<Result<UpdateMerchantResult>> HandleAsync(UpdateMerchantCommand command)
@@ -20,7 +20,7 @@ public sealed class UpdateMerchantHandler(IMerchantRepository merchantRepository
             
             merchantEntity.Id = MerchantId.Of(command.Id);
 
-            await merchantRepository.UpdateAsync(merchantEntity);
+            await repository.UpdateAsync(merchantEntity);
             logger.LogInformation("Catalog updated successfully: {MerchantId}", command.Id);
 
             return Result<UpdateMerchantResult>.Success(new UpdateMerchantResult(true));

@@ -4,7 +4,7 @@ using Merchant.Api.Domain.ValueObjects;
 
 namespace Merchant.Api.Application.Merchant.GetMerchantById;
 
-public class GetMerchantByIdHandler(IMerchantRepository merchantRepository, ILogger<GetMerchantByIdHandler> logger)
+public class GetMerchantByIdHandler(IMerchantRepository repository, ILogger<GetMerchantByIdHandler> logger)
     : IGetMerchantByIdHandler
 {
     public async Task<Result<GetMerchantByIdResult>> HandleAsync(GetMerchantByIdQuery query)
@@ -13,7 +13,7 @@ public class GetMerchantByIdHandler(IMerchantRepository merchantRepository, ILog
         {
             MerchantId merchantId = MerchantId.Of(query.Id);
 
-            MerchantEntity? merchant = await merchantRepository.GetByIdAsync(merchantId, isTrackingEnabled: false);
+            MerchantEntity? merchant = await repository.GetByIdAsync(merchantId, isTrackingEnabled: false);
 
             if (merchant is null)
                 return Result<GetMerchantByIdResult>.Failure($"Catalog with ID {query.Id} not found.");
