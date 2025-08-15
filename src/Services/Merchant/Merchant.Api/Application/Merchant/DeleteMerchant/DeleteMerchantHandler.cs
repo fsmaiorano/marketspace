@@ -3,7 +3,7 @@ using Merchant.Api.Domain.ValueObjects;
 
 namespace Merchant.Api.Application.Merchant.DeleteMerchant;
 
-public class DeleteMerchantHandler(IMerchantRepository merchantRepository, ILogger<DeleteMerchantHandler> logger)
+public class DeleteMerchantHandler(IMerchantRepository repository, ILogger<DeleteMerchantHandler> logger)
     : IDeleteMerchantHandler
 {
     public async Task<Result<DeleteMerchantResult>> HandleAsync(DeleteMerchantCommand command)
@@ -12,7 +12,7 @@ public class DeleteMerchantHandler(IMerchantRepository merchantRepository, ILogg
         {
             MerchantId merchantId = MerchantId.Of(command.Id);
 
-            await merchantRepository.RemoveAsync(merchantId);
+            await repository.RemoveAsync(merchantId);
             logger.LogInformation("Catalog deleted successfully: {MerchantId}", command.Id);
             return Result<DeleteMerchantResult>.Success(new DeleteMerchantResult(true));
         }
