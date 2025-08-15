@@ -6,10 +6,10 @@ MerchantDbContext dbContext = scope.ServiceProvider.GetRequiredService<MerchantD
 
 const int createMerchantCounter = 100;
 
+// Create merchants
 for (int i = 0; i < createMerchantCounter; i++)
 {
     MerchantEntity merchant = MerchantBuilder.CreateMerchantFaker().Generate();
-    merchant.CreatedAt = DateTime.UtcNow;
     merchant.CreatedBy = "seed";
     dbContext.Merchants.Add(merchant);
     Console.WriteLine("Merchant created: " + merchant.Name + " (" + merchant.Email + ")");

@@ -1,4 +1,4 @@
-using Merchant.Api.Domain.Exceptions;
+using BuildingBlocks.Exceptions;
 
 namespace Merchant.Api.Domain.ValueObjects;
 

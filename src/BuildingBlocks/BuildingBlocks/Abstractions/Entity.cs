@@ -1,4 +1,4 @@
-namespace Merchant.Api.Domain.Abstractions;
+namespace BuildingBlocks.Abstractions;
 
 public interface IEntity<T> : IEntity
 {
