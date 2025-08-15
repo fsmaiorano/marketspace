@@ -11,7 +11,6 @@ public class MerchantRepository(IMerchantDbContext dbContext) : IMerchantReposit
     {
         ArgumentNullException.ThrowIfNull(merchant, nameof(merchant));
         merchant.Id = MerchantId.Of(Guid.NewGuid());
-        merchant.CreatedAt = DateTimeOffset.UtcNow;
         await dbContext.Merchants.AddAsync(merchant, cancellationToken);
         return await dbContext.SaveChangesAsync(cancellationToken);
     }
@@ -24,12 +23,12 @@ public class MerchantRepository(IMerchantDbContext dbContext) : IMerchantReposit
                                       ?? throw new InvalidOperationException(
                                           $"Merchant with ID {merchant.Id} not found.");
 
-        storedEntity.Name = merchant.Name;
-        storedEntity.Description = merchant.Description;
-        storedEntity.Address = merchant.Address;
-        storedEntity.PhoneNumber = merchant.PhoneNumber;
-        storedEntity.Email = merchant.Email;
-        storedEntity.UpdatedAt = DateTimeOffset.UtcNow;
+        storedEntity.Update(
+            merchant.Name,
+            merchant.Description,
+            merchant.Address,
+            merchant.PhoneNumber,
+            merchant.Email);
 
         return await dbContext.SaveChangesAsync(cancellationToken);
     }

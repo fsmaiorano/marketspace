@@ -24,6 +24,7 @@ public class UpdateMerchantHandlerTest
         {
             Id = merchantId.Value,
             Name = $"{merchant.Name}_Updated",
+            Description = merchant.Description,
             Email = merchant.Email.Value,
             PhoneNumber = merchant.PhoneNumber,
             Address = merchant.Address

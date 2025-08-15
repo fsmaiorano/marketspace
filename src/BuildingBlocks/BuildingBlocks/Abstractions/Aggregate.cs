@@ -1,4 +1,4 @@
-namespace Merchant.Api.Domain.Abstractions;
+namespace BuildingBlocks.Abstractions;
 
 public interface IAggregate<T> : IAggregate, IEntity<T>
 {
