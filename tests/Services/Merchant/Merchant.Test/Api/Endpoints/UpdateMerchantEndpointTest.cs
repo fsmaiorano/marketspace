@@ -13,14 +13,14 @@ public class UpdateMerchantEndpointTest(MerchantApiFactory factory) : IClassFixt
 
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<UpdateMerchantCommand>()))
-            .ReturnsAsync(Result<UpdateMerchantResult>.Failure("Merchant not found."));
+            .ReturnsAsync(Result<UpdateMerchantResult>.Failure("Catalog not found."));
 
         UpdateMerchantCommand command = new UpdateMerchantCommand { Id = merchantId };
 
         Result<UpdateMerchantResult> response = await _mockHandler.Object.HandleAsync(command);
 
         response.IsSuccess.Should().BeFalse();
-        response.Error.Should().Be("Merchant not found.");
+        response.Error.Should().Be("Catalog not found.");
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public class UpdateMerchantEndpointTest(MerchantApiFactory factory) : IClassFixt
         UpdateMerchantCommand command = new UpdateMerchantCommand
         {
             Id = merchant.Id.Value,
-            Name = "Updated Merchant Name",
+            Name = "Updated Catalog Name",
             Description = "Updated Description",
             Email = merchant.Email.Value,
             Address = merchant.Address,

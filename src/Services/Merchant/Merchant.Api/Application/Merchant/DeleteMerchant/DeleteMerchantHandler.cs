@@ -13,7 +13,7 @@ public class DeleteMerchantHandler(IMerchantRepository merchantRepository, ILogg
             MerchantId merchantId = MerchantId.Of(command.Id);
 
             await merchantRepository.RemoveAsync(merchantId);
-            logger.LogInformation("Merchant deleted successfully: {MerchantId}", command.Id);
+            logger.LogInformation("Catalog deleted successfully: {MerchantId}", command.Id);
             return Result<DeleteMerchantResult>.Success(new DeleteMerchantResult(true));
         }
         catch (Exception ex)

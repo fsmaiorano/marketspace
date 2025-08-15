@@ -14,8 +14,8 @@ public static class DeleteMerchantEndpoint
                     ? Results.Ok(result.Value)
                     : Results.BadRequest(result.Error);
             })
-            .WithName("DeleteMerchant")
-            .WithTags("Merchant")
+            .WithName("DeleteCatalog")
+            .WithTags("Catalog")
             .Produces<DeleteMerchantResult>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);

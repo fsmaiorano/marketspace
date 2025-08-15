@@ -22,7 +22,7 @@ namespace Merchant.Api.Infrastructure.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Merchant.Api.Domain.Entities.MerchantEntity", b =>
+            modelBuilder.Entity("Catalog.Api.Domain.Entities.MerchantEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");

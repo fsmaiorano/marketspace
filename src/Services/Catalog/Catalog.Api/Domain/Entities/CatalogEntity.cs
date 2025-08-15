@@ -1,12 +1,13 @@
 using BuildingBlocks.Abstractions;
 using Catalog.Api.Domain.ValueObjects;
+using System.Collections.ObjectModel;
 
 namespace Catalog.Api.Domain.Entities;
 
 public class CatalogEntity : Aggregate<CatalogId>
 {
     public string Name { get; private set; } = string.Empty;
-    public IReadOnlyCollection<string> Categories => _categories.AsReadOnly();
+    public ReadOnlyCollection<string> Categories => _categories.AsReadOnly();
     private readonly List<string> _categories = [];
     public string Description { get; private set; } = string.Empty;
     public string ImageUrl { get; private set; } = string.Empty;

@@ -21,7 +21,7 @@ public sealed class UpdateMerchantHandler(IMerchantRepository merchantRepository
             merchantEntity.Id = MerchantId.Of(command.Id);
 
             await merchantRepository.UpdateAsync(merchantEntity);
-            logger.LogInformation("Merchant updated successfully: {MerchantId}", command.Id);
+            logger.LogInformation("Catalog updated successfully: {MerchantId}", command.Id);
 
             return Result<UpdateMerchantResult>.Success(new UpdateMerchantResult(true));
         }
