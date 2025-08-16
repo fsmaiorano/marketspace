@@ -12,7 +12,7 @@ public static class GetMerchantByIdEndpoint
                 GetMerchantByIdQuery query = new(id);
                 Result<GetMerchantByIdResult> result = await handler.HandleAsync(query);
                 return result.IsSuccess
-                    ? Results.Ok(result.Value)
+                    ? Results.Ok(result)
                     : Results.NotFound(result.Error);
             })
             .WithName("GetMerchantById")

@@ -1,4 +1,6 @@
 using Merchant.Api.Application.Merchant.GetMerchantById;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Merchant.Test.Api.Endpoints;
 
@@ -13,8 +15,14 @@ public class GetMerchantByIdEndpointTest(MerchantApiFactory factory) : IClassFix
     {
         Guid merchantId = Guid.NewGuid();
         GetMerchantByIdQuery query = new GetMerchantByIdQuery(merchantId);
-        GetMerchantByIdResult result = new GetMerchantByIdResult(merchantId, "Test Catalog", "merchant@merchant.com",
-            "1234567890", "123 Catalog St");
+        GetMerchantByIdResult result = new GetMerchantByIdResult
+        {
+            Id = merchantId,
+            Name = "Test Merchant",
+            Email = "merchant@marketspace.com",
+            PhoneNumber = "123456789",
+            Address = "123 Market St, City, Country"
+        };
 
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<GetMerchantByIdQuery>()))
@@ -22,7 +30,7 @@ public class GetMerchantByIdEndpointTest(MerchantApiFactory factory) : IClassFix
 
         Result<GetMerchantByIdResult> response = await _mockHandler.Object.HandleAsync(query);
         response.IsSuccess.Should().BeTrue();
-        response.Value.Should().NotBeNull();
+        response.Data.Should().NotBeNull();
     }
 
     [Fact]
@@ -66,8 +74,14 @@ public class GetMerchantByIdEndpointTest(MerchantApiFactory factory) : IClassFix
         await dbContext.SaveChangesAsync();
 
         GetMerchantByIdQuery query = new(merchant.Id.Value);
-        GetMerchantByIdResult result = new(merchant.Id.Value,
-            merchant.Name, merchant.Email.Value, merchant.PhoneNumber, merchant.Address);
+        GetMerchantByIdResult result = new GetMerchantByIdResult()
+        {
+            Id = merchant.Id.Value,
+            Name = merchant.Name,
+            Email = merchant.Email.Value,
+            PhoneNumber = merchant.PhoneNumber,
+            Address = merchant.Address
+        };
 
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<GetMerchantByIdQuery>()))
@@ -76,7 +90,9 @@ public class GetMerchantByIdEndpointTest(MerchantApiFactory factory) : IClassFix
         HttpRequestMessage request = new(HttpMethod.Get, $"/merchant/{merchant.Id.Value}");
         HttpResponseMessage response = await _client.SendAsync(request);
         response.EnsureSuccessStatusCode();
-        GetMerchantByIdResult? responseResult = await response.Content.ReadFromJsonAsync<GetMerchantByIdResult>();
+
+        Result<GetMerchantByIdResult>? responseResult =
+            await response.Content.ReadFromJsonAsync<Result<GetMerchantByIdResult>>();
         responseResult.Should().NotBeNull();
     }
 }

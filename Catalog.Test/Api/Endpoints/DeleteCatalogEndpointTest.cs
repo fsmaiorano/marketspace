@@ -32,7 +32,7 @@ public class DeleteCatalogEndpointTest(CatalogApiFactory factory) : IClassFixtur
         Result<DeleteCatalogResult> response = await _mockHandler.Object.HandleAsync(command);
 
         response.IsSuccess.Should().BeTrue();
-        response.Value.Should().NotBeNull();
+        response.Data.Should().NotBeNull();
     }
 
     [Fact]

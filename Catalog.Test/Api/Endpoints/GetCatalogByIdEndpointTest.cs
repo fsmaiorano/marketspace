@@ -2,6 +2,7 @@ using Builder;
 using BuildingBlocks;
 using Catalog.Api.Application.Catalog.GetCatalogById;
 using Catalog.Api.Domain.Entities;
+using Catalog.Api.Domain.ValueObjects;
 using Catalog.Api.Infrastructure.Data;
 using FluentAssertions;
 using Merchant.Api.Application.Merchant.GetMerchantById;
@@ -22,13 +23,16 @@ public class GetCatalogByIdEndpointTest(CatalogApiFactory factory) : IClassFixtu
     {
         Guid merchantId = Guid.NewGuid();
         GetCatalogByIdQuery query = new GetCatalogByIdQuery(merchantId);
-        GetCatalogByIdResult result = new GetCatalogByIdResult(
-            merchantId,
-            "Test Merchant",
-            "sdasdasd",
-            "1234567890",
-            55.99m,
-            new List<string> { "Category1", "Category2" }.AsReadOnly());
+        GetCatalogByIdResult result = new GetCatalogByIdResult
+        {
+            Id = Guid.NewGuid(),
+            Name = "Test Catalog",
+            Description = "This is a test catalog",
+            ImageUrl = "http://example.com/image.jpg",
+            Price = 99.99m,
+            Categories = new List<string> { "Category1", "Category2" }
+        };
+
 
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<GetCatalogByIdQuery>()))
@@ -36,7 +40,7 @@ public class GetCatalogByIdEndpointTest(CatalogApiFactory factory) : IClassFixtu
 
         Result<GetCatalogByIdResult> response = await _mockHandler.Object.HandleAsync(query);
         response.IsSuccess.Should().BeTrue();
-        response.Value.Should().NotBeNull();
+        response.Data.Should().NotBeNull();
     }
 
     [Fact]
@@ -75,27 +79,32 @@ public class GetCatalogByIdEndpointTest(CatalogApiFactory factory) : IClassFixtu
         using IServiceScope scope = _factory.Services.CreateScope();
         CatalogDbContext dbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
 
-        CatalogEntity? merchant = CatalogBuilder.CreateCatalogFaker().Generate();
-        dbContext.Catalogs.Add(merchant);
+        CatalogEntity? catalog = CatalogBuilder.CreateCatalogFaker().Generate();
+
+        catalog.Id = CatalogId.Of(Guid.NewGuid());
+
+        dbContext.Catalogs.Add(catalog);
         await dbContext.SaveChangesAsync();
 
-        GetCatalogByIdQuery query = new(merchant.Id.Value);
-        GetCatalogByIdResult result = new GetCatalogByIdResult(
-            merchant.Id.Value,
-            "Test Merchant",
-            "sdasdasd",
-            "1234567890",
-            55.99m,
-            new List<string> { "Category1", "Category2" }.AsReadOnly());
+        GetCatalogByIdResult result = new GetCatalogByIdResult
+        {
+            Id = catalog.Id.Value,
+            Name = catalog.Name,
+            Description = catalog.Description,
+            ImageUrl = catalog.ImageUrl,
+            Price = catalog.Price.Value,
+            Categories = catalog.Categories.Select(c => c).ToList()
+        };
 
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<GetCatalogByIdQuery>()))
             .ReturnsAsync(Result<GetCatalogByIdResult>.Success(result));
 
-        HttpRequestMessage request = new(HttpMethod.Get, $"/merchant/{merchant.Id.Value}");
+        HttpRequestMessage request = new(HttpMethod.Get, $"/catalog/{catalog.Id.Value}");
         HttpResponseMessage response = await _client.SendAsync(request);
         response.EnsureSuccessStatusCode();
-        GetCatalogByIdResult? responseResult = await response.Content.ReadFromJsonAsync<GetCatalogByIdResult>();
-        responseResult.Should().NotBeNull();
+        Result<GetCatalogByIdResult>? responseResult =
+            await response.Content.ReadFromJsonAsync<Result<GetCatalogByIdResult>>();
+        responseResult?.Data.Should().NotBeNull();
     }
 }

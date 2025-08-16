@@ -13,7 +13,7 @@ public static class CreateCatalogEndpoint
                 {
                     Result<CreateCatalogResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess
-                        ? Results.Ok(result.Value)
+                        ? Results.Ok(result.Data)
                         : Results.BadRequest(result.Error);
                 })
             .WithName("CreateCatalog")

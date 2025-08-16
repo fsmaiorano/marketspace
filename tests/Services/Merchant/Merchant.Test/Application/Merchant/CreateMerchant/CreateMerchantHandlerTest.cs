@@ -24,8 +24,8 @@ public class CreateMerchantHandlerTest
         Result<CreateMerchantResult> result = await handler.HandleAsync(command);
 
         Assert.True(result.IsSuccess);
-        Assert.NotNull(result.Value);
-        Assert.NotEqual(Guid.Empty, result.Value.MerchantId);
+        Assert.NotNull(result.Data);
+        Assert.NotEqual(Guid.Empty, result.Data.MerchantId);
     }
 
     [Fact]

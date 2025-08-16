@@ -12,7 +12,7 @@ public static class CreateMerchantEndpoint
             {
                 Result<CreateMerchantResult> result = await handler.HandleAsync(command);
                 return result.IsSuccess
-                    ? Results.Ok(result.Value)
+                    ? Results.Ok(result)
                     : Results.BadRequest(result.Error);
             })
             .WithName("CreateMerchant")

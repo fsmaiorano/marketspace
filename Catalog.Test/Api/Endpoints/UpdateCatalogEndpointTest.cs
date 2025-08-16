@@ -2,6 +2,7 @@ using Builder;
 using BuildingBlocks;
 using Catalog.Api.Application.Catalog.UpdateCatalog;
 using Catalog.Api.Domain.Entities;
+using Catalog.Api.Domain.ValueObjects;
 using Catalog.Api.Infrastructure.Data;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,13 +20,13 @@ public class UpdateCatalogEndpointTest(CatalogApiFactory factory) : IClassFixtur
     [Fact]
     public async Task Returns_Failure_When_Catalog_Not_Found()
     {
-        Guid merchantId = Guid.NewGuid();
+        Guid catalogId = Guid.NewGuid();
 
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<UpdateCatalogCommand>()))
             .ReturnsAsync(Result<UpdateCatalogResult>.Failure("Catalog not found."));
 
-        UpdateCatalogCommand command = new UpdateCatalogCommand { Id = merchantId };
+        UpdateCatalogCommand command = new UpdateCatalogCommand { Id = catalogId };
 
         Result<UpdateCatalogResult> response = await _mockHandler.Object.HandleAsync(command);
 
@@ -36,13 +37,13 @@ public class UpdateCatalogEndpointTest(CatalogApiFactory factory) : IClassFixtur
     [Fact]
     public async Task Returns_Failure_When_Exception_Occurs()
     {
-        Guid merchantId = Guid.NewGuid();
+        Guid catalogId = Guid.NewGuid();
 
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<UpdateCatalogCommand>()))
             .ThrowsAsync(new Exception("Unexpected error"));
 
-        UpdateCatalogCommand command = new UpdateCatalogCommand { Id = merchantId };
+        UpdateCatalogCommand command = new UpdateCatalogCommand { Id = catalogId };
 
         Func<Task> act = async () => await _mockHandler.Object.HandleAsync(command);
 
@@ -52,18 +53,18 @@ public class UpdateCatalogEndpointTest(CatalogApiFactory factory) : IClassFixtur
     [Fact]
     public async Task Returns_Success_When_Catalog_Updated()
     {
-        Guid merchantId = Guid.NewGuid();
+        Guid catalogId = Guid.NewGuid();
 
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<UpdateCatalogCommand>()))
             .ReturnsAsync(Result<UpdateCatalogResult>.Success(new UpdateCatalogResult(isSuccess: true)));
 
-        UpdateCatalogCommand command = new UpdateCatalogCommand { Id = merchantId };
+        UpdateCatalogCommand command = new UpdateCatalogCommand { Id = catalogId };
 
         Result<UpdateCatalogResult> response = await _mockHandler.Object.HandleAsync(command);
 
         response.IsSuccess.Should().BeTrue();
-        response.Value?.IsSuccess.Should().BeTrue();
+        response.Data?.IsSuccess.Should().BeTrue();
     }
 
     [Fact]
@@ -72,17 +73,24 @@ public class UpdateCatalogEndpointTest(CatalogApiFactory factory) : IClassFixtur
         using IServiceScope scope = _factory.Services.CreateScope();
         CatalogDbContext dbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
 
-        CatalogEntity? merchant = CatalogBuilder.CreateCatalogFaker().Generate();
+        CatalogEntity? catalog = CatalogBuilder.CreateCatalogFaker().Generate();
 
-        dbContext.Catalogs.Add(merchant);
+        catalog.Id = CatalogId.Of(Guid.NewGuid());
+
+        dbContext.Catalogs.Add(catalog);
         await dbContext.SaveChangesAsync();
 
         UpdateCatalogCommand command = new UpdateCatalogCommand
         {
-            Id = merchant.Id.Value, Name = "Updated Catalog Name", Description = "Updated Description",
+            Id = catalog.Id.Value,
+            Name = "Updated Catalog Name",
+            Description = "Updated Description",
+            Categories = catalog.Categories,
+            Price = catalog.Price.Value,
+            ImageUrl = catalog.ImageUrl
         };
 
-        HttpResponseMessage response = await _client.PutAsJsonAsync($"/merchant",
+        HttpResponseMessage response = await _client.PutAsJsonAsync($"/catalog",
             command);
 
         UpdateCatalogResult? result = await response.Content.ReadFromJsonAsync<UpdateCatalogResult>();

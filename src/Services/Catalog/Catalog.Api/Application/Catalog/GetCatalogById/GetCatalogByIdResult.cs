@@ -1,19 +1,16 @@
 using System.Collections.ObjectModel;
+using System.Text.Json.Serialization;
 
 namespace Catalog.Api.Application.Catalog.GetCatalogById;
 
-public class GetCatalogByIdResult(
-    Guid id,
-    string name,
-    string description,
-    string imageUrl,
-    decimal price,
-    ReadOnlyCollection<string> categories)
+public class GetCatalogByIdResult
 {
-    public Guid Id { get; init; } = id;
-    public string Name { get; init; } = name;
-    public string Description { get; init; } = description;
-    public string ImageUrl { get; init; } = imageUrl;
-    public decimal Price { get; init; } = price;
-    public ReadOnlyCollection<string> Categories { get; init; } = categories;
+    public Guid Id { get; init; } = Guid.Empty;
+    public string Name { get; init; } = string.Empty;
+    public string Description { get; init; } = string.Empty;
+    public string ImageUrl { get; init; } = string.Empty;
+    public decimal Price { get; init; } = 0.0m;
+    
+    [JsonPropertyName("categories")]
+    public IReadOnlyList<string> Categories { get; init; } = Array.Empty<string>();
 }

@@ -21,13 +21,15 @@ public class GetCatalogByIdHandler(ICatalogRepository repository, ILogger<GetCat
             if (catalog is null)
                 return Result<GetCatalogByIdResult>.Failure($"Catalog with ID {query.Id} not found.");
 
-            GetCatalogByIdResult result = new(
-                id: catalog.Id.Value,
-                name: catalog.Name,
-                description: catalog.Description,
-                imageUrl: catalog.ImageUrl,
-                categories: new ReadOnlyCollection<string>(catalog.Categories),
-                price: catalog.Price.Value);
+            GetCatalogByIdResult result = new GetCatalogByIdResult
+            {
+                Id = catalog.Id.Value,
+                Name = catalog.Name,
+                Description = catalog.Description,
+                ImageUrl = catalog.ImageUrl,
+                Price = catalog.Price.Value,
+                Categories = new ReadOnlyCollection<string>(catalog.Categories.ToList())
+            };
 
             return Result<GetCatalogByIdResult>.Success(result);
         }

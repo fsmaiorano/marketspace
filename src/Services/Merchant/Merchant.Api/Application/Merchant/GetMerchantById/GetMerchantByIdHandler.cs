@@ -18,14 +18,14 @@ public class GetMerchantByIdHandler(IMerchantRepository repository, ILogger<GetM
             if (merchant is null)
                 return Result<GetMerchantByIdResult>.Failure($"Catalog with ID {query.Id} not found.");
 
-            GetMerchantByIdResult result = new
-            (
-                merchant.Id.Value,
-                merchant.Name,
-                merchant.Email.Value,
-                merchant.PhoneNumber,
-                merchant.Address
-            );
+            GetMerchantByIdResult result = new GetMerchantByIdResult
+            {
+                Id = merchant.Id.Value,
+                Name = merchant.Name,
+                Email = merchant.Email.Value,
+                PhoneNumber = merchant.PhoneNumber,
+                Address = merchant.Address
+            };
 
             return Result<GetMerchantByIdResult>.Success(result);
         }
