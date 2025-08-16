@@ -60,6 +60,7 @@ public class CreateCatalogEndpointTest(CatalogApiFactory factory) : IClassFixtur
     public async Task Can_Create_Catalog_Endpoint()
     {
         CreateCatalogCommand command = CatalogBuilder.CreateCreateCatalogCommandFaker().Generate();
+        
         HttpResponseMessage response = await _client.PostAsJsonAsync("/catalog", command);
         response.EnsureSuccessStatusCode();
 
