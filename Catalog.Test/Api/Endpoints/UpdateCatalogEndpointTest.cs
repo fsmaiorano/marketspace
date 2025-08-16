@@ -87,7 +87,8 @@ public class UpdateCatalogEndpointTest(CatalogApiFactory factory) : IClassFixtur
             Description = "Updated Description",
             Categories = catalog.Categories,
             Price = catalog.Price.Value,
-            ImageUrl = catalog.ImageUrl
+            ImageUrl = catalog.ImageUrl,
+            MerchantId = catalog.MerchantId
         };
 
         HttpResponseMessage response = await _client.PutAsJsonAsync($"/catalog",

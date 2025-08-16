@@ -17,7 +17,8 @@ public sealed class CreateCatalogHandler(ICatalogRepository repository, ILogger<
                 description: command.Description,
                 imageUrl: command.ImageUrl,
                 categories: command.Categories,
-                price: Price.Of(command.Price)
+                price: Price.Of(command.Price),
+                merchantId: command.MerchantId
             );
 
             int result = await repository.AddAsync(catalogEntity);

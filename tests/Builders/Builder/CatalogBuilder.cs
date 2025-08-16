@@ -16,7 +16,7 @@ public static class CatalogBuilder
         "Tools", "Software"
     };
 
-    public static Faker<CatalogEntity> CreateCatalogFaker()
+    public static Faker<CatalogEntity> CreateCatalogFaker(Guid merchantId = default)
     {
         return new Faker<CatalogEntity>()
             .CustomInstantiator(f => CatalogEntity.Create(
@@ -24,8 +24,8 @@ public static class CatalogBuilder
                 categories: f.PickRandom(ProductCategories, f.Random.Int(1, 4)),
                 description: f.Commerce.ProductDescription(),
                 imageUrl: f.Image.PicsumUrl(800, 600),
-                price: Price.Of(f.Finance.Amount(1, 1000, 2)
-                )
+                price: Price.Of(f.Finance.Amount(1, 1000, 2)),
+                merchantId: merchantId.Equals(Guid.Empty) ? f.Random.Guid() : merchantId
             ));
     }
 
@@ -38,7 +38,8 @@ public static class CatalogBuilder
                 description: f.Lorem.Sentence(),
                 imageUrl: f.Image.PicsumUrl(800, 600),
                 price: f.Finance.Amount(1, 1000, 2),
-                categories: f.PickRandom(ProductCategories, f.Random.Int(1, 10)).ToList()
+                categories: f.PickRandom(ProductCategories, f.Random.Int(1, 10)).ToList(),
+                merchantId: f.Random.Guid()
             ));
     }
 

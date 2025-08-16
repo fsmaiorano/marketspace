@@ -31,4 +31,8 @@
       <ProjectReference Include="..\..\..\BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Infrastructure\Data\Migrations\" />
+    </ItemGroup>
+
 </Project>

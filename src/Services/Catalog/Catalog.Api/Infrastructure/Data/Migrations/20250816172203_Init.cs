@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Merchant.Api.Infrastructure.Data.Migrations
+namespace Catalog.Api.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
     public partial class Init : Migration
@@ -12,15 +12,16 @@ namespace Merchant.Api.Infrastructure.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Merchants",
+                name: "Catalogs",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Categories = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    Address = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    PhoneNumber = table.Column<string>(type: "character varying(15)", maxLength: 15, nullable: false),
-                    Email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    ImageUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    Price = table.Column<decimal>(type: "numeric", nullable: false),
+                    MerchantId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     CreatedBy = table.Column<string>(type: "text", nullable: true),
@@ -29,12 +30,12 @@ namespace Merchant.Api.Infrastructure.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Merchants", x => x.Id);
+                    table.PrimaryKey("PK_Catalogs", x => x.Id);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Merchants_Id",
-                table: "Merchants",
+                name: "IX_Catalogs_Id",
+                table: "Catalogs",
                 column: "Id",
                 unique: true);
         }
@@ -43,7 +44,7 @@ namespace Merchant.Api.Infrastructure.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Merchants");
+                name: "Catalogs");
         }
     }
 }
