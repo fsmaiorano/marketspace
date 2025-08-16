@@ -2,6 +2,7 @@ using Builder;
 using BuildingBlocks;
 using Catalog.Api.Application.Catalog.DeleteCatalog;
 using Catalog.Api.Domain.Entities;
+using Catalog.Api.Domain.ValueObjects;
 using Catalog.Api.Infrastructure.Data;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +20,7 @@ public class DeleteCatalogEndpointTest(CatalogApiFactory factory) : IClassFixtur
     [Fact]
     public async Task Returns_Ok_When_Catalog_Is_Deleted_Successfully()
     {
-        Guid merchantId = Guid.NewGuid();
+        Guid catalogId = Guid.NewGuid();
 
         DeleteCatalogCommand command = CatalogBuilder.CreateDeleteCatalogCommandFaker().Generate();
         Result<DeleteCatalogResult> result = Result<DeleteCatalogResult>.Success(new DeleteCatalogResult(true));
@@ -65,13 +66,15 @@ public class DeleteCatalogEndpointTest(CatalogApiFactory factory) : IClassFixtur
         using IServiceScope scope = _factory.Services.CreateScope();
         CatalogDbContext dbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
 
-        CatalogEntity? merchant = CatalogBuilder.CreateCatalogFaker().Generate();
+        CatalogEntity? catalog = CatalogBuilder.CreateCatalogFaker().Generate();
+        
+        catalog.Id = CatalogId.Of(Guid.NewGuid());
 
-        dbContext.Catalogs.Add(merchant);
+        dbContext.Catalogs.Add(catalog);
         await dbContext.SaveChangesAsync();
 
-        DeleteCatalogCommand command = CatalogBuilder.CreateDeleteCatalogCommandFaker(merchant.Id.Value).Generate();
-        HttpRequestMessage request = new(HttpMethod.Delete, "/merchant") { Content = JsonContent.Create(command) };
+        DeleteCatalogCommand command = CatalogBuilder.CreateDeleteCatalogCommandFaker(catalog.Id.Value).Generate();
+        HttpRequestMessage request = new(HttpMethod.Delete, "/catalog") { Content = JsonContent.Create(command) };
         HttpResponseMessage response = await _client.SendAsync(request);
         response.EnsureSuccessStatusCode();
         DeleteCatalogResult? result = await response.Content.ReadFromJsonAsync<DeleteCatalogResult>();
