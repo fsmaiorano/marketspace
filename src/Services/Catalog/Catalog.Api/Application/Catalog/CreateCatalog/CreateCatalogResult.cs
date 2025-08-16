@@ -1,6 +1,6 @@
 namespace Catalog.Api.Application.Catalog.CreateCatalog;
 
-public class CreateCatalogResult(Guid merchantId)
+public class CreateCatalogResult(Guid catalogId)
 {
-    public Guid MerchantId { get; init; } = merchantId;
+    public Guid CatalogId { get; init; } = catalogId;
 }

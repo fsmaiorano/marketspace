@@ -15,8 +15,8 @@ public static class CreateMerchantEndpoint
                     ? Results.Ok(result.Value)
                     : Results.BadRequest(result.Error);
             })
-            .WithName("CreateCatalog")
-            .WithTags("Catalog")
+            .WithName("CreateMerchant")
+            .WithTags("Merchant")
             .Produces<CreateMerchantResult>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);

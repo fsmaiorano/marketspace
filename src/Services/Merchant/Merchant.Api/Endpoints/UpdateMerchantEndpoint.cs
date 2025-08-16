@@ -15,8 +15,8 @@ public static class UpdateMerchantEndpoint
                         ? Results.Ok(result.Value)
                         : Results.BadRequest(result.Error);
                 })
-            .WithName("UpdateCatalog")
-            .WithTags("Catalog")
+            .WithName("UpdateMerchant")
+            .WithTags("Merchant")
             .Produces<UpdateMerchantResult>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);

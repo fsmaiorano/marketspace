@@ -43,4 +43,4 @@ GetCatalogByIdEndpoint.MapEndpoint(app);
 
 app.Run();
 
-public partial class Program;
+public partial class CatalogProgram;
