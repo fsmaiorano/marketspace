@@ -1,6 +1,6 @@
 namespace Merchant.Test.Api;
 
-public class MerchantApiFactory : WebApplicationFactory<Program>
+public class MerchantApiFactory : WebApplicationFactory<MerchantProgram>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {

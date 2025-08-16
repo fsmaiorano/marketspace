@@ -15,8 +15,8 @@ public static class GetMerchantByIdEndpoint
                     ? Results.Ok(result.Value)
                     : Results.NotFound(result.Error);
             })
-            .WithName("GetCatalogById")
-            .WithTags("Catalog")
+            .WithName("GetMerchantById")
+            .WithTags("Merchant")
             .Produces<GetMerchantByIdResult>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
