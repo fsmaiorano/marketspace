@@ -3,6 +3,7 @@ using Catalog.Api.Domain.Entities;
 using Catalog.Api.Domain.Repositories;
 using Catalog.Api.Domain.ValueObjects;
 using Merchant.Api.Application.Merchant.GetMerchantById;
+using System.Collections.ObjectModel;
 
 namespace Catalog.Api.Application.Catalog.GetCatalogById;
 
@@ -25,7 +26,7 @@ public class GetCatalogByIdHandler(ICatalogRepository repository, ILogger<GetCat
                 name: catalog.Name,
                 description: catalog.Description,
                 imageUrl: catalog.ImageUrl,
-                categories: catalog.Categories,
+                categories: new ReadOnlyCollection<string>(catalog.Categories),
                 price: catalog.Price.Value);
 
             return Result<GetCatalogByIdResult>.Success(result);

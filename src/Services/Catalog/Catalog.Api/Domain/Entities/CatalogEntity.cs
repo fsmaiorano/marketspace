@@ -7,8 +7,7 @@ namespace Catalog.Api.Domain.Entities;
 public class CatalogEntity : Aggregate<CatalogId>
 {
     public string Name { get; private set; } = string.Empty;
-    public ReadOnlyCollection<string> Categories => _categories.AsReadOnly();
-    private readonly List<string> _categories = [];
+    public List<string> Categories { get; set; } = [];
     public string Description { get; private set; } = string.Empty;
     public string ImageUrl { get; private set; } = string.Empty;
     public Price Price { get; private set; } = null!;
@@ -33,34 +32,38 @@ public class CatalogEntity : Aggregate<CatalogId>
         if (price == null)
             throw new ArgumentNullException(nameof(price));
 
-        var entity = new CatalogEntity
+        CatalogEntity entity = new CatalogEntity
         {
             Name = name,
             Description = description,
             ImageUrl = imageUrl,
             Price = price,
+            Categories = [..categories.Distinct()],
             CreatedAt = DateTimeOffset.UtcNow
         };
-        entity._categories.AddRange(categories.Distinct());
+
         return entity;
     }
-
+    
     public void AddCategory(string category)
     {
-        if (!string.IsNullOrWhiteSpace(category) && !_categories.Contains(category))
-            _categories.Add(category);
-    }
+        if (string.IsNullOrWhiteSpace(category))
+            throw new ArgumentException("Category cannot be null or empty.", nameof(category));
 
+        if (!Categories.Contains(category))
+        {
+            Categories.Add(category);
+        }
+    }
+    
     public void RemoveCategory(string category)
     {
-        _categories.Remove(category);
-    }
+        if (string.IsNullOrWhiteSpace(category))
+            throw new ArgumentException("Category cannot be null or empty.", nameof(category));
 
-    public bool HasCategory(string category)
-    {
-        return _categories.Contains(category);
+        Categories.Remove(category);
     }
-
+    
     public void Update(
         string name,
         IEnumerable<string> categories,
@@ -72,8 +75,7 @@ public class CatalogEntity : Aggregate<CatalogId>
         Description = description;
         ImageUrl = imageUrl;
         Price = price;
-        _categories.Clear();
-        _categories.AddRange(categories.Distinct());
+        Categories = new List<string>(categories.Distinct());
         UpdatedAt = DateTimeOffset.UtcNow;
     }
 }
