@@ -21,8 +21,8 @@ public class CreateMerchantEndpointTest(MerchantApiFactory factory) : IClassFixt
         Result<CreateMerchantResult> response = await _mockHandler.Object.HandleAsync(command);
 
         response.IsSuccess.Should().BeTrue();
-        response.Value.Should().NotBeNull();
-        response.Value!.MerchantId.Should().Be(merchantId);
+        response.Data.Should().NotBeNull();
+        response.Data!.MerchantId.Should().Be(merchantId);
     }
 
     [Fact]
@@ -57,9 +57,9 @@ public class CreateMerchantEndpointTest(MerchantApiFactory factory) : IClassFixt
         HttpResponseMessage response = await _client.PostAsJsonAsync("/merchant", command);
         response.EnsureSuccessStatusCode();
         
-        CreateMerchantResult? result = await response.Content.ReadFromJsonAsync<CreateMerchantResult>();
+        Result<CreateMerchantResult>? result = await response.Content.ReadFromJsonAsync<Result<CreateMerchantResult>>();
         result.Should().NotBeNull();
-        result!.MerchantId.Should().NotBeEmpty();
-        result.MerchantId.Should().NotBe(Guid.Empty);
+        result!.Data?.MerchantId.Should().NotBeEmpty();
+        result.Data?.MerchantId.Should().NotBe(Guid.Empty);
     }
 }

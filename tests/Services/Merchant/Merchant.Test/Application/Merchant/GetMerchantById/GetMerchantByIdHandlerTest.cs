@@ -20,6 +20,6 @@ public class GetMerchantByIdHandlerTest
         Result<GetMerchantByIdResult> result = await handler.HandleAsync(query);
 
         Assert.True(result.IsSuccess);
-        Assert.NotNull(result.Value);
+        Assert.NotNull(result.Data);
     }
 }

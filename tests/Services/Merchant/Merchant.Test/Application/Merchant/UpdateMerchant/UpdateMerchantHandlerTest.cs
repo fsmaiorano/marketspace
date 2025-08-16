@@ -33,6 +33,6 @@ public class UpdateMerchantHandlerTest
         Result<UpdateMerchantResult> result = await handler.HandleAsync(command);
 
         Assert.True(result.IsSuccess);
-        Assert.NotNull(result.Value);
+        Assert.NotNull(result.Data);
     }
 }

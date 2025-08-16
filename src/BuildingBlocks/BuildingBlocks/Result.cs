@@ -2,25 +2,22 @@ using System.Text.Json.Serialization;
 
 namespace BuildingBlocks;
 
-public class Result<T>
+[method: JsonConstructor]
+public class Result<T>(bool isSuccess, string? error, T? data)
 {
-    public bool IsSuccess { get; }
+    public bool IsSuccess { get; } = isSuccess;
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? Error { get; }
+    public string? Error { get; } = error;
 
-    public T? Value { get; }
+    public T? Data { get; } = data;
 
-    private Result(T value)
+    private Result(T data) : this(true, null, data)
     {
-        IsSuccess = true;
-        Value = value;
     }
 
-    private Result(string error)
+    private Result(string error) : this(false, error, default(T?))
     {
-        IsSuccess = false;
-        Error = error;
     }
 
     public static Result<T> Success(T value) => new(value);

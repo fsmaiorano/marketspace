@@ -23,7 +23,7 @@ public class DeleteMerchantEndpointTest(MerchantApiFactory factory) : IClassFixt
         Result<DeleteMerchantResult> response = await _mockHandler.Object.HandleAsync(command);
 
         response.IsSuccess.Should().BeTrue();
-        response.Value.Should().NotBeNull();
+        response.Data.Should().NotBeNull();
     }
 
     [Fact]

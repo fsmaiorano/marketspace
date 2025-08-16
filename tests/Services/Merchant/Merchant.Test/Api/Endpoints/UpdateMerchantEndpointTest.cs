@@ -53,7 +53,7 @@ public class UpdateMerchantEndpointTest(MerchantApiFactory factory) : IClassFixt
         Result<UpdateMerchantResult> response = await _mockHandler.Object.HandleAsync(command);
 
         response.IsSuccess.Should().BeTrue();
-        response.Value?.IsSuccess.Should().BeTrue();
+        response.Data?.IsSuccess.Should().BeTrue();
     }
 
     [Fact]

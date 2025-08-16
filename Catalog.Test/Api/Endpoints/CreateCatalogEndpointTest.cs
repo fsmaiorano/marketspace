@@ -28,7 +28,7 @@ public class CreateCatalogEndpointTest(CatalogApiFactory factory) : IClassFixtur
         Result<CreateCatalogResult> response = await _mockHandler.Object.HandleAsync(command);
 
         response.IsSuccess.Should().BeTrue();
-        response.Value.Should().NotBeNull();
+        response.Data.Should().NotBeNull();
     }
 
     [Fact]
