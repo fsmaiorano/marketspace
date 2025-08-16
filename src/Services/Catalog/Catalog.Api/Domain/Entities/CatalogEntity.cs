@@ -1,6 +1,5 @@
 using BuildingBlocks.Abstractions;
 using Catalog.Api.Domain.ValueObjects;
-using System.Collections.ObjectModel;
 
 namespace Catalog.Api.Domain.Entities;
 
@@ -11,6 +10,7 @@ public class CatalogEntity : Aggregate<CatalogId>
     public string Description { get; private set; } = string.Empty;
     public string ImageUrl { get; private set; } = string.Empty;
     public Price Price { get; private set; } = null!;
+    public Guid MerchantId { get; private set; } = Guid.Empty;
     public new DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset? UpdatedAt { get; private set; }
 
@@ -19,18 +19,26 @@ public class CatalogEntity : Aggregate<CatalogId>
         IEnumerable<string> categories,
         string description,
         string imageUrl,
-        Price price)
+        Price price,
+        Guid merchantId)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Name is required.", nameof(name));
+
         if (categories == null)
             throw new ArgumentNullException(nameof(categories));
+
         if (string.IsNullOrWhiteSpace(description))
             throw new ArgumentException("Description is required.", nameof(description));
+
         if (string.IsNullOrWhiteSpace(imageUrl))
             throw new ArgumentException("ImageUrl is required.", nameof(imageUrl));
+
         if (price == null)
             throw new ArgumentNullException(nameof(price));
+
+        if (merchantId == Guid.Empty)
+            throw new ArgumentException("MerchantId cannot be empty.", nameof(merchantId));
 
         CatalogEntity entity = new CatalogEntity
         {
@@ -38,13 +46,14 @@ public class CatalogEntity : Aggregate<CatalogId>
             Description = description,
             ImageUrl = imageUrl,
             Price = price,
+            MerchantId = merchantId,
             Categories = [..categories.Distinct()],
             CreatedAt = DateTimeOffset.UtcNow
         };
 
         return entity;
     }
-    
+
     public void AddCategory(string category)
     {
         if (string.IsNullOrWhiteSpace(category))
@@ -55,7 +64,7 @@ public class CatalogEntity : Aggregate<CatalogId>
             Categories.Add(category);
         }
     }
-    
+
     public void RemoveCategory(string category)
     {
         if (string.IsNullOrWhiteSpace(category))
@@ -63,7 +72,7 @@ public class CatalogEntity : Aggregate<CatalogId>
 
         Categories.Remove(category);
     }
-    
+
     public void Update(
         string name,
         IEnumerable<string> categories,

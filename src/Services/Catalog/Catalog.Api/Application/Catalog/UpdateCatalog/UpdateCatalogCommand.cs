@@ -8,4 +8,5 @@ public class UpdateCatalogCommand
     public string ImageUrl { get; set; } = string.Empty;
     public decimal Price { get; set; } = 0.0m;
     public List<string> Categories { get; set; } = [];
+    public Guid MerchantId { get; set; } = Guid.Empty;
 }

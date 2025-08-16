@@ -39,5 +39,8 @@ public class CatalogConfiguration : IEntityTypeConfiguration<CatalogEntity>
                 categories => string.Join(',', categories),
                 dbCategories => dbCategories.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
             .HasMaxLength(500);
+
+        builder.Property(m => m.MerchantId)
+            .IsRequired();
     }
 }
