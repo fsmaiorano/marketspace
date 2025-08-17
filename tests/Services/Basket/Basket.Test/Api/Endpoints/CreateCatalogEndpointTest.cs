@@ -22,7 +22,7 @@ public class CreateBasketEndpointTest(BasketApiFactory factory) : IClassFixture<
         CreateBasketCommand command = BasketBuilder.CreateBasketCommandFaker().Generate();
 
         ShoppingCartDto cartDto = BasketBuilder.CreateShoppingCartDtoFaker().Generate();
-        
+
         Result<CreateBasketResult>
             result = Result<CreateBasketResult>.Success(new CreateBasketResult(cartDto));
 
@@ -65,7 +65,7 @@ public class CreateBasketEndpointTest(BasketApiFactory factory) : IClassFixture<
     public async Task Can_Create_Basket_Endpoint()
     {
         CreateBasketCommand command = BasketBuilder.CreateBasketCommandFaker().Generate();
-        
+
         HttpResponseMessage response = await _client.PostAsJsonAsync("/basket", command);
         response.EnsureSuccessStatusCode();
 

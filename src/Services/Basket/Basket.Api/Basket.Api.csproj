@@ -22,6 +22,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj" />
+      <ProjectReference Include="..\..\Catalog\Catalog.Api\Catalog.Api.csproj" />
     </ItemGroup>
 
 </Project>
