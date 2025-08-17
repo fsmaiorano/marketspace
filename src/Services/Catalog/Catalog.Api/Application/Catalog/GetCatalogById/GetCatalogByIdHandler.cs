@@ -2,7 +2,6 @@ using BuildingBlocks;
 using Catalog.Api.Domain.Entities;
 using Catalog.Api.Domain.Repositories;
 using Catalog.Api.Domain.ValueObjects;
-using Merchant.Api.Application.Merchant.GetMerchantById;
 using System.Collections.ObjectModel;
 
 namespace Catalog.Api.Application.Catalog.GetCatalogById;

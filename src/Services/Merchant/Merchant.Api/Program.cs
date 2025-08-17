@@ -43,4 +43,7 @@ GetMerchantByIdEndpoint.MapEndpoint(app);
 
 app.Run();
 
-public partial class MerchantProgram;
+namespace Merchant.Api
+{
+    public partial class MerchantProgram;
+}

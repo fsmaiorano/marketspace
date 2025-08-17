@@ -14,7 +14,7 @@ public class BasketDbContext
     }
 
     public IMongoCollection<ShoppingCartEntity> ShoppingCart =>
-        _database.GetCollection<ShoppingCartEntity>("ShoppingCart");
+        _database.GetCollection<ShoppingCartEntity>("ShoppingCartDto");
 
     public IMongoCollection<ShoppingCartItemEntity> ShoppingCartItems =>
         _database.GetCollection<ShoppingCartItemEntity>("ShoppingCartItems");
