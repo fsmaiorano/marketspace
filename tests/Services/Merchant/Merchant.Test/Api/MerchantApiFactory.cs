@@ -1,3 +1,5 @@
+using Merchant.Api;
+
 namespace Merchant.Test.Api;
 
 public class MerchantApiFactory : WebApplicationFactory<MerchantProgram>

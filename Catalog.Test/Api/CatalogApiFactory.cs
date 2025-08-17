@@ -1,3 +1,4 @@
+using Catalog.Api;
 using Catalog.Api.Infrastructure.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;

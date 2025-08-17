@@ -1,4 +1,4 @@
-namespace Merchant.Api.Application.Merchant.GetMerchantById;
+namespace Catalog.Api.Application.Catalog.GetCatalogById;
 
 public record GetCatalogByIdQuery(Guid Id) 
 {

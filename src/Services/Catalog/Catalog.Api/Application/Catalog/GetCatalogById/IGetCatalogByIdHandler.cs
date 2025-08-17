@@ -1,5 +1,4 @@
 using BuildingBlocks;
-using Merchant.Api.Application.Merchant.GetMerchantById;
 
 namespace Catalog.Api.Application.Catalog.GetCatalogById;
 

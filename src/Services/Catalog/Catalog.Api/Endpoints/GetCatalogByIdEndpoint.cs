@@ -1,6 +1,5 @@
 using BuildingBlocks;
 using Catalog.Api.Application.Catalog.GetCatalogById;
-using Merchant.Api.Application.Merchant.GetMerchantById;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
