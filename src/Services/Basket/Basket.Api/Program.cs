@@ -31,3 +31,8 @@ app.UseSwaggerUI(options =>
 app.UseExceptionHandler(options => { });
 
 app.Run();
+
+namespace Basket.Api
+{
+    public partial class BasketProgram;
+}

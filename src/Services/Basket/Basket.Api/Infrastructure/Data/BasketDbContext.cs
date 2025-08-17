@@ -3,7 +3,13 @@ using MongoDB.Driver;
 
 namespace Basket.Api.Infrastructure.Data;
 
-public class BasketDbContext
+public interface IBasketDbContext
+{
+    IMongoCollection<ShoppingCartEntity> ShoppingCart { get; }
+    IMongoCollection<ShoppingCartItemEntity> ShoppingCartItems { get; }
+}
+
+public class BasketDbContext : IBasketDbContext
 {
     private readonly IMongoDatabase _database;
 
