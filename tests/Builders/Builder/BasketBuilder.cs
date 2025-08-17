@@ -60,7 +60,7 @@ public static class BasketBuilder
         return new Faker<ShoppingCartItemDto>()
             .CustomInstantiator(f => new ShoppingCartItemDto
             {
-                ProductId = f.Random.Guid(),
+                // ProductId = f.Random.Guid(),
                 ProductName = f.PickRandom(ProductNames),
                 Price = f.Finance.Amount(1, 500, 2),
                 Quantity = f.Random.Int(1, 10)

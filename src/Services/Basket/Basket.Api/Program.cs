@@ -1,13 +1,15 @@
+using Basket.Api.Application;
 using Basket.Api.Endpoints;
 using Basket.Api.Infrastructure;
 using BuildingBlocks.Exceptions;
-using Catalog.Api.Endpoints;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 
-builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services
+    .AddApplicationServices(builder.Configuration)
+    .AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
@@ -32,11 +34,11 @@ app.UseSwaggerUI(options =>
 
 app.UseExceptionHandler(options => { });
 
-app.Run();
-
-CreateCatalogEndpoint.MapEndpoint(app);
+CreateBasketEndpoint.MapEndpoint(app);
 DeleteBasketEndpoint.MapEndpoint(app);
 GetBasketByIdEndpoint.MapEndpoint(app);
+
+app.Run();
 
 namespace Basket.Api
 {

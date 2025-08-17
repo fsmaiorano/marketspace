@@ -69,7 +69,8 @@ public class CreateBasketEndpointTest(BasketApiFactory factory) : IClassFixture<
         HttpResponseMessage response = await _client.PostAsJsonAsync("/basket", command);
         response.EnsureSuccessStatusCode();
 
-        CreateBasketResult? result = await response.Content.ReadFromJsonAsync<CreateBasketResult>();
-        result.Should().NotBeNull();
+        Result<CreateBasketResult>? result = await response.Content.ReadFromJsonAsync<Result<CreateBasketResult>>();
+        result.Data.ShoppingCart.Should().NotBeNull();
+        result.IsSuccess.Should().BeTrue();
     }
 }
