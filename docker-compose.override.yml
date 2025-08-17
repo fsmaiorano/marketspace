@@ -39,15 +39,12 @@ services:
   
   basketdb:
     container_name: basketdb
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=BasketDb
+    image: mongo:6.0
     restart: always
     ports:
-      - "5433:5432"
+      - "27017:27017"
     volumes:
-      - postgres_basket:/var/lib/postgresql/data
+      - mongo_basket_data:/data/db
   
   distributedcache:
     container_name: distributedcache
@@ -117,8 +114,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
-      - ConnectionStrings__Database=Server=basketdb;Port=5432;Database=BasketDb;User Id=postgres;Password=postgres;;Include Error Detail=true;
-      - ConnectionStrings__Redis=distributedcache:6379
+      - DatabaseSettings__ConnectionString=mongodb://basketdb:27017
+      - DatabaseSettings__DatabaseName=BasketDb
+      - DatabaseSettings__CollectionName=ShoppingCarts
       - GrpcSettings__DiscountUrl=https://discountgrpc:8081
       - MessageBroker__Host=amqp://ecommerce-mq:5672
       - MessageBroker__UserName=guest
@@ -255,18 +253,18 @@ services:
 #    volumes:
 #      - ./myrealm.json:/opt/keycloak/data/import/myrealm.json
 
-  webapp:
-    container_name: webapp
-    environment:
-      - NODE_ENV=production
-    depends_on:
-      - gatewayapi
-      - keycloak
-    restart: always
-    volumes:
-      - ./UserInterfaces/WebApplication/nginx.conf:/etc/nginx/conf.d/default.conf
-    ports:
-      - "80:80"
-      - "4001:4001"
-      - "4041:4041"
-
+#  webapp:
+#    container_name: webapp
+#    environment:
+#      - NODE_ENV=production
+#    depends_on:
+#      - gatewayapi
+#      - keycloak
+#    restart: always
+#    volumes:
+#      - ./UserInterfaces/WebApplication/nginx.conf:/etc/nginx/conf.d/default.conf
+#    ports:
+#      - "80:80"
+#      - "4001:4001"
+#      - "4041:4041"
+#

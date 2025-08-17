@@ -72,17 +72,17 @@ services:
       context: .
       dockerfile: Gateways/GatewayApi/Dockerfile
 
-  webapp:
-    image: ${DOCKER_REGISTRY-}webapp
-    build:
-      context: .
-      dockerfile: UserInterfaces/WebApplication/Dockerfile
+#  webapp:
+#    image: ${DOCKER_REGISTRY-}webapp
+#    build:
+#      context: .
+#      dockerfile: UserInterfaces/WebApplication/Dockerfile
 
 volumes:
   postgres_catalog:
-  postgres_basket:
   postgres_keycloak:
   postgres_order:
   postgres_merchant:
+  mongo_basket_data:
   minio_data:
   
