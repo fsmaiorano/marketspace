@@ -38,7 +38,7 @@ app.UseExceptionHandler(options => { });
 
 CreateCatalogEndpoint.MapEndpoint(app);
 UpdateCatalogEndpoint.MapEndpoint(app);
-DeleteCatalogEndpoint.MapEndpoint(app);
+DeleteBasketEndpoint.MapEndpoint(app);
 GetCatalogByIdEndpoint.MapEndpoint(app);
 
 app.Run();
