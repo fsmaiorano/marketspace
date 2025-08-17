@@ -13,7 +13,7 @@ public static class DeleteBasketEndpoint
                 {
                     Result<DeleteBasketResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess
-                        ? Results.Ok(result.Data)
+                        ? Results.Ok(result)
                         : Results.BadRequest(result.Error);
                 })
             .WithName("DeleteBasket")

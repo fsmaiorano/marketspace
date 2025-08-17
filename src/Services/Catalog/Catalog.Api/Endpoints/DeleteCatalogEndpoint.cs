@@ -13,7 +13,7 @@ public static class DeleteCatalogEndpoint
                 {
                     Result<DeleteCatalogResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess
-                        ? Results.Ok(result.Data)
+                        ? Results.Ok(result)
                         : Results.BadRequest(result.Error);
                 })
             .WithName("DeleteCatalog")
