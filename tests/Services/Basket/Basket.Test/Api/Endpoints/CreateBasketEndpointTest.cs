@@ -17,8 +17,6 @@ public class CreateBasketEndpointTest(BasketApiFactory factory) : IClassFixture<
     [Fact]
     public async Task Returns_Ok_When_Basket_Is_Created_Successfully()
     {
-        Guid merchantId = Guid.NewGuid();
-
         CreateBasketCommand command = BasketBuilder.CreateBasketCommandFaker().Generate();
 
         ShoppingCartDto cartDto = BasketBuilder.CreateShoppingCartDtoFaker().Generate();
