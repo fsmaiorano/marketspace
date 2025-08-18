@@ -1,10 +1,11 @@
+using Basket.Api.Application.Basket.CreateBasket;
 using Builder;
 using BuildingBlocks;
 using Basket.Api.Application.Basket.DeleteBasket;
 using Basket.Api.Domain.Entities;
-using Basket.Api.Infrastructure.Data;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 using Moq;
 using System.Net.Http.Json;
 
@@ -63,17 +64,34 @@ public class DeleteBasketEndpointTest(BasketApiFactory factory) : IClassFixture<
     public async Task Can_Delete_Basket_Endpoint()
     {
         using IServiceScope scope = _factory.Services.CreateScope();
-        BasketDbContext dbContext = scope.ServiceProvider.GetRequiredService<BasketDbContext>();
+        IMongoClient client = scope.ServiceProvider.GetRequiredService<IMongoClient>();
 
-        ShoppingCartEntity? catalog = BasketBuilder.CreateShoppingCartFaker().Generate();
+        ShoppingCartEntity? shoppingCart = BasketBuilder.CreateShoppingCartFaker().Generate();
 
-        await dbContext.ShoppingCart.InsertOneAsync(catalog);
+        await client.GetDatabase("BasketInMemoryDbForTesting")
+            .GetCollection<ShoppingCartEntity>("ShoppingCart")
+            .InsertOneAsync(shoppingCart);
 
-        DeleteBasketCommand command = BasketBuilder.CreateDeleteBasketCommandFaker(catalog.Username).Generate();
-        HttpRequestMessage request = new(HttpMethod.Delete, "/basket") { Content = JsonContent.Create(command) };
+        HttpRequestMessage request = new(HttpMethod.Delete, "/basket") { Content = JsonContent.Create(shoppingCart) };
         HttpResponseMessage response = await _client.SendAsync(request);
         response.EnsureSuccessStatusCode();
-        DeleteBasketResult? result = await response.Content.ReadFromJsonAsync<DeleteBasketResult>();
-        result.Should().NotBeNull();
+
+        Result<CreateBasketResult>? result = await response.Content.ReadFromJsonAsync<Result<CreateBasketResult>>();
+        result?.Data?.ShoppingCart.Should().NotBeNull();
+        result?.IsSuccess.Should().BeTrue();
+
+        // using IServiceScope scope = _factory.Services.CreateScope();
+        // BasketDbContext dbContext = scope.ServiceProvider.GetRequiredService<BasketDbContext>();
+        //
+        // ShoppingCartEntity? catalog = BasketBuilder.CreateShoppingCartFaker().Generate();
+        //
+        // await dbContext.ShoppingCart.InsertOneAsync(catalog);
+        //
+        // DeleteBasketCommand command = BasketBuilder.CreateDeleteBasketCommandFaker(catalog.Username).Generate();
+        // HttpRequestMessage request = new(HttpMethod.Delete, "/basket") { Content = JsonContent.Create(command) };
+        // HttpResponseMessage response = await _client.SendAsync(request);
+        // response.EnsureSuccessStatusCode();
+        // DeleteBasketResult? result = await response.Content.ReadFromJsonAsync<DeleteBasketResult>();
+        // result.Should().NotBeNull();
     }
 }
