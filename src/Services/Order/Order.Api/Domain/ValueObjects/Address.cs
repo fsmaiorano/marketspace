@@ -39,6 +39,23 @@ public record Address
         return new Address(firstName, lastName, emailAddress, addressLine, country, state, zipCode);
     }
 
+    public static Address FromString(string addressString)
+    {
+        if (string.IsNullOrWhiteSpace(addressString))
+            throw new ArgumentException("Address string cannot be empty.", nameof(addressString));
+
+        var parts = addressString.Split('|');
+        if (parts.Length != 7)
+            throw new ArgumentException("Invalid address string format.", nameof(addressString));
+
+        return new Address(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]);
+    }
+
+    public override string ToString()
+    {
+        return $"{FirstName}|{LastName}|{EmailAddress}|{AddressLine}|{Country}|{State}|{ZipCode}";
+    }
+
     private static void ValidateInput(string value, string parameterName)
     {
         if (string.IsNullOrWhiteSpace(value))

@@ -173,8 +173,6 @@ services:
       - ASPNETCORE_Kestrel__Certificates__Default__Password=password
     restart: unless-stopped
     depends_on:
-      messagebroker:
-        condition: service_started
       orderdb:
         condition: service_started
     ports:
