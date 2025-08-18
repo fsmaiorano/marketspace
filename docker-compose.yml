@@ -14,17 +14,17 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.3
   
-  distributedcache:
-    image: redis:latest
+#  distributedcache:
+#    image: redis:latest
   
-  orderdb:
-    image: postgres:latest
+#  orderdb:
+#    image: postgres:latest
 
   merchantdb:
     image: postgres:latest
-
-  messagebroker:
-    image: rabbitmq:management
+#
+#  messagebroker:
+#    image: rabbitmq:management
   
   catalog.api:
     image: ${DOCKER_REGISTRY-}catalogapi
@@ -33,7 +33,7 @@ services:
       - catalogdb
     build:
       context: .
-      dockerfile: Services/Catalog/Catalog.Api/Dockerfile
+      dockerfile: ./src/Services/Catalog/Catalog.Api/Dockerfile
   
   basket.api:
     image: ${DOCKER_REGISTRY-}basketapi
@@ -42,35 +42,35 @@ services:
       - basketdb
     build:
       context: .
-      dockerfile: Services/Basket/Basket.Api/Dockerfile
+      dockerfile: ./src/Services/Basket/Basket.Api/Dockerfile
   
-  discount.grpc:
-    image: ${DOCKER_REGISTRY-}discountgrpc
-    platform: linux/amd64
-    build:
-      context: .
-      dockerfile: Services/Discount/Discount.Grpc/Dockerfile
-  
-  ordering.api:
-    image: ${DOCKER_REGISTRY-}orderingapi
-    platform: linux/amd64
-    build:
-      context: .
-      dockerfile: Services/Ordering/Ordering.Api/Dockerfile
-      
+#  discount.grpc:
+#    image: ${DOCKER_REGISTRY-}discountgrpc
+#    platform: linux/amd64
+#    build:
+#      context: .
+#      dockerfile: ./src/Services/Discount/Discount.Grpc/Dockerfile
+#  
+#  ordering.api:
+#    image: ${DOCKER_REGISTRY-}orderingapi
+#    platform: linux/amd64
+#    build:
+#      context: .
+#      dockerfile: ./src/Services/Ordering/Ordering.Api/Dockerfile
+#      
   merchant.api:
     image: ${DOCKER_REGISTRY-}merchantapi
     platform: linux/amd64
     build:
       context: .
-      dockerfile: Services/Merchant/Merchant.Api/Dockerfile
-  
-  gatewayapi:
-    image: ${DOCKER_REGISTRY-}gatewayapi
-    platform: linux/amd64
-    build:
-      context: .
-      dockerfile: Gateways/GatewayApi/Dockerfile
+      dockerfile: ./src/Services/Merchant/Merchant.Api/Dockerfile
+#  
+#  gatewayapi:
+#    image: ${DOCKER_REGISTRY-}gatewayapi
+#    platform: linux/amd64
+#    build:
+#      context: .
+#      dockerfile: ./src/Gateways/GatewayApi/Dockerfile
 
 #  webapp:
 #    image: ${DOCKER_REGISTRY-}webapp
@@ -81,7 +81,7 @@ services:
 volumes:
   postgres_catalog:
   postgres_keycloak:
-  postgres_order:
+#  postgres_order:
   postgres_merchant:
   mongo_basket_data:
   minio_data:

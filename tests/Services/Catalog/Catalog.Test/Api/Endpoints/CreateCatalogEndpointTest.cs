@@ -66,7 +66,7 @@ public class CreateCatalogEndpointTest(CatalogApiFactory factory) : IClassFixtur
 
         Result<CreateCatalogResult>? result = await response.Content.ReadFromJsonAsync<Result<CreateCatalogResult>>();
         result.Should().NotBeNull();
-        result.IsSuccess.Should().BeTrue();
-        result.Data.Should().NotBeNull();
+        result?.IsSuccess.Should().BeTrue();
+        result?.Data.Should().NotBeNull();
     }
 }
