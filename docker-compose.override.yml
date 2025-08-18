@@ -268,3 +268,10 @@ services:
 #      - "4001:4001"
 #      - "4041:4041"
 #
+
+volumes:
+  postgres_catalog:
+  postgres_keycloak:
+  postgres_merchant:
+  minio_data:
+  mongo_basket_data:

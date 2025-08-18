@@ -25,7 +25,6 @@ public class MinioBucket : IMinioBucket
     public async Task<(string objectName, string objectUrl)> SendImageAsync(string imageUrl)
     {
         string fileExtension = Path.GetExtension(imageUrl);
-        string objectName = $"{Guid.NewGuid()}{fileExtension}";
 
         try
         {
@@ -46,6 +45,11 @@ public class MinioBucket : IMinioBucket
                 getResponse.EnsureSuccessStatusCode();
                 contentType = getResponse.Content.Headers.ContentType?.ToString() ?? "application/octet-stream";
             }
+
+            if (string.IsNullOrEmpty(fileExtension))
+                fileExtension = GetExtensionFromContentType(contentType);
+
+            string objectName = $"{Guid.NewGuid()}{fileExtension}";
 
             using HttpResponseMessage response = await httpClient.GetAsync(imageUrl);
             response.EnsureSuccessStatusCode();
@@ -135,6 +139,27 @@ public class MinioBucket : IMinioBucket
     private static HttpClient CreateHttpClient()
     {
         return new HttpClient();
+    }
+
+    private static string GetExtensionFromContentType(string contentType)
+    {
+        // Remove charset e outros parâmetros do content-type
+        string mimeType = contentType.Split(';')[0].Trim().ToLowerInvariant();
+
+        return mimeType switch
+        {
+            "image/jpeg" => ".jpg",
+            "image/jpg" => ".jpg",
+            "image/png" => ".png",
+            "image/gif" => ".gif",
+            "image/webp" => ".webp",
+            "image/bmp" => ".bmp",
+            "image/tiff" => ".tiff",
+            "image/svg+xml" => ".svg",
+            "image/x-icon" => ".ico",
+            "image/vnd.microsoft.icon" => ".ico",
+            _ => ".jpg" // Default para JPEG se não conseguir detectar
+        };
     }
 
     // private static Task<IMinioClient> CreateMinioClient(string endpoint = "localhost:9000", string accessKey = "admin",
