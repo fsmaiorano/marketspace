@@ -9,16 +9,14 @@ public class BasketRepository : IBasketRepository
 {
     private readonly IMongoCollection<ShoppingCartEntity> _collection;
 
-    public BasketRepository(IOptions<DatabaseSettings> settings)
+    public BasketRepository(IMongoDatabase database, IOptions<DatabaseSettings> settings)
     {
-        MongoClient client = new MongoClient(settings.Value.ConnectionString);
-        IMongoDatabase? database = client.GetDatabase(settings.Value.DatabaseName);
         _collection = database.GetCollection<ShoppingCartEntity>(settings.Value.CollectionName);
     }
 
     public async Task<ShoppingCartEntity> CreateCartAsync(ShoppingCartEntity cart)
     {
-        await DeleteCartAsync(cart.Username); 
+        await DeleteCartAsync(cart.Username);
         await _collection.InsertOneAsync(cart);
         return cart;
     }

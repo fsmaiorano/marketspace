@@ -24,6 +24,7 @@ public class BasketApiFactory : WebApplicationFactory<BasketProgram>
                              d.ServiceType == typeof(IBasketDbContext) ||
                              d.ServiceType.FullName.Contains(nameof(BasketDbContext)) ||
                              d.ServiceType.FullName.Contains(nameof(IBasketDbContext)) ||
+                             d.ServiceType.FullName.Contains(nameof(IMongoClient)) ||
                              d.ServiceType.FullName.Contains("EntityFramework") ||
                              d.ServiceType.FullName.Contains("Npgsql")))
                 .ToList();
