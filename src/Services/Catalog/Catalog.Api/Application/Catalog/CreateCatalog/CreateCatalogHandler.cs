@@ -20,20 +20,22 @@ public sealed class CreateCatalogHandler(
     {
         try
         {
+            (string objectName, string _) = await minioBucket.SendImageAsync(command.ImageUrl);
+            
+            if (string.IsNullOrEmpty(objectName))
+            {
+                logger.LogError("Image upload failed for command: {Command}", command);
+                return Result<CreateCatalogResult>.Failure("Image upload failed.");
+            }
+
             CatalogEntity catalogEntity = CatalogEntity.Create(
                 name: command.Name,
                 description: command.Description,
-                imageUrl: command.ImageUrl,
+                imageUrl: objectName,
                 categories: command.Categories,
                 price: Price.Of(command.Price),
                 merchantId: command.MerchantId
             );
-
-            // IMinioClient storage = await MinioBucket.CreateMinioClient(storageSettings.Value.Endpoint,
-            //     storageSettings.Value.AccessKey,
-            //     storageSettings.Value.SecretKey);
-            
-            (string objectName, string objectUrl) minioResult = await minioBucket.SendImageAsync(command.ImageUrl);
 
             int result = await repository.AddAsync(catalogEntity);
 
