@@ -23,7 +23,7 @@ new ContainerBuilder()
     .WithCommand("server", "/data", "--console-address", ":9001")
     .Build();
 
-const int createMerchantCounter = 10;
+const int createMerchantCounter = 100;
 
 List<MerchantEntity> createdMerchants = [];
 List<ShoppingCartEntity> createdShoppingCarts = [];
@@ -52,23 +52,26 @@ for (int i = 0; i < createMerchantCounter; i++)
 // Create catalog
 for (int i = 0; i < createdMerchants.Count; i++)
 {
-    CatalogEntity catalog = CatalogBuilder.CreateCatalogFaker().Generate();
-    catalog.CreatedBy = "seed";
-    
-    (string objectName, string _) = await minioBucket.SendImageAsync(catalog.ImageUrl);
+    await Task.Run(async () =>
+    {
+        CatalogEntity catalog = CatalogBuilder.CreateCatalogFaker().Generate();
+        catalog.CreatedBy = "seed";
 
-    CatalogEntity catalogEntity = CatalogEntity.Create(
-        name: catalog.Name,
-        description: catalog.Description,
-        imageUrl: objectName,
-        merchantId: createdMerchants.ElementAt(i).Id.Value,
-        categories: catalog.Categories,
-        price: catalog.Price
-    );
+        (string objectName, string _) = await minioBucket.SendImageAsync(catalog.ImageUrl);
 
-    catalogEntity.Id = CatalogId.Of(Guid.NewGuid());
-    catalogDbContext.Catalogs.Add(catalogEntity);
-    catalogDbContext.SaveChanges();
+        CatalogEntity catalogEntity = CatalogEntity.Create(
+            name: catalog.Name,
+            description: catalog.Description,
+            imageUrl: objectName,
+            merchantId: createdMerchants.ElementAt(i).Id.Value,
+            categories: catalog.Categories,
+            price: catalog.Price
+        );
+
+        catalogEntity.Id = CatalogId.Of(Guid.NewGuid());
+        catalogDbContext.Catalogs.Add(catalogEntity);
+        catalogDbContext.SaveChanges();
+    });
 }
 
 // Create basket
@@ -79,12 +82,7 @@ IMongoCollection<ShoppingCartEntity>
 for (int i = 0; i < createdMerchants.Count; i++)
 {
     ShoppingCartEntity shoppingCart =
-        Builder.BasketBuilder.CreateShoppingCartFaker(username: createdMerchants.ElementAt(i).Name);
+        BasketBuilder.CreateShoppingCartFaker(username: createdMerchants.ElementAt(i).Name);
     createdShoppingCarts.Add(shoppingCart);
     shoppingCartCollection.InsertMany(createdShoppingCarts);
 }
-
-
-
-
-
