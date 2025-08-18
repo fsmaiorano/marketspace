@@ -46,23 +46,23 @@ services:
     volumes:
       - mongo_basket_data:/data/db
   
-#  distributedcache:
-#    container_name: distributedcache
-#    restart: always
-#    ports:
-#      - "6379:6379"
-#
-#  orderdb:
-#    container_name: orderdb
-#    environment:
-#      - POSTGRES_USER=postgres
-#      - POSTGRES_PASSWORD=postgres
-#      - POSTGRES_DB=OrderDb
-#    restart: always
-#    ports:
-#      - "5435:5432"
-#    volumes:
-#      - postgres_order:/var/lib/postgresql/data
+  #  distributedcache:
+  #    container_name: distributedcache
+  #    restart: always
+  #    ports:
+  #      - "6379:6379"
+  #
+  orderdb:
+    container_name: orderdb
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=OrderDb
+    restart: always
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_order:/var/lib/postgresql/data
   
   merchantdb:
     container_name: merchantdb
@@ -76,16 +76,16 @@ services:
     volumes:
       - postgres_merchant:/var/lib/postgresql/data
   
-#  messagebroker:
-#    container_name: messagebroker
-#    hostname: ecommerce-mq
-#    environment:
-#      - RABBITMQ_DEFAULT_USER=guest
-#      - RABBITMQ_DEFAULT_PASS=guest
-#    restart: always
-#    ports:
-#      - "5672:5672"
-#      - "15672:15672"
+  #  messagebroker:
+  #    container_name: messagebroker
+  #    hostname: ecommerce-mq
+  #    environment:
+  #      - RABBITMQ_DEFAULT_USER=guest
+  #      - RABBITMQ_DEFAULT_PASS=guest
+  #    restart: always
+  #    ports:
+  #      - "5672:5672"
+  #      - "15672:15672"
   
   catalog.api:
     container_name: catalogapi
@@ -125,9 +125,9 @@ services:
       - ASPNETCORE_Kestrel__Certificates__Default__Password=password
     depends_on:
       - basketdb
-#      - distributedcache
-#      - discount.grpc
-#      - messagebroker
+    #      - distributedcache
+    #      - discount.grpc
+    #      - messagebroker
     ports:
       - "6001:8080"
       - "6061:8081"
@@ -136,56 +136,56 @@ services:
       #   - ${HOME}/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
       - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
       - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
+    
+    #  discount.grpc:
+    #    container_name: discountgrpc
+    #    environment:
+    #      - ASPNETCORE_ENVIRONMENT=Production
+    #      - ASPNETCORE_HTTP_PORTS=8080
+    #      - ASPNETCORE_HTTPS_PORTS=8081
+    #      - ConnectionStrings__Database=Data Source=discountdb
+    #      - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
+    #      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+    #    depends_on:
+    #      - basketdb
+    #      - distributedcache
+    #    ports:
+    #      - "6002:8080"
+    #      - "6062:8081"
+    #    volumes:
+    #      #   - ${HOME}/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
+    #      #   - ${HOME}/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
+    #      - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
+    #      - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
   
-#  discount.grpc:
-#    container_name: discountgrpc
-#    environment:
-#      - ASPNETCORE_ENVIRONMENT=Production
-#      - ASPNETCORE_HTTP_PORTS=8080
-#      - ASPNETCORE_HTTPS_PORTS=8081
-#      - ConnectionStrings__Database=Data Source=discountdb
-#      - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
-#      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
-#    depends_on:
-#      - basketdb
-#      - distributedcache
-#    ports:
-#      - "6002:8080"
-#      - "6062:8081"
-#    volumes:
-#      #   - ${HOME}/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
-#      #   - ${HOME}/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
-#      - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
-#      - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
+  order.api:
+    container_name: orderapi
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ConnectionStrings__Database=Server=orderdb;Port=5432;Database=OrderDb;User Id=postgres;Password=postgres;;Include Error Detail=true;
+      - MessageBroker__Host=amqp://ecommerce-mq:5672
+      - MessageBroker__UserName=guest
+      - MessageBroker__Password=guest
+      - FeatureManagement__OrderFullfilment=false
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+    restart: unless-stopped
+    depends_on:
+      messagebroker:
+        condition: service_started
+      orderdb:
+        condition: service_started
+    ports:
+      - "6003:8080"
+      - "6063:8081"
+    volumes:
+      #   - ${HOME}/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
+      #   - ${HOME}/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
+      - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
+      - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
 
-#  ordering.api:
-#    container_name: orderingapi
-#    environment:
-#      - ASPNETCORE_ENVIRONMENT=Production
-#      - ASPNETCORE_HTTP_PORTS=8080
-#      - ASPNETCORE_HTTPS_PORTS=8081
-#      - ConnectionStrings__Database=Server=orderdb;Port=5432;Database=OrderDb;User Id=postgres;Password=postgres;;Include Error Detail=true;
-#      - MessageBroker__Host=amqp://ecommerce-mq:5672
-#      - MessageBroker__UserName=guest
-#      - MessageBroker__Password=guest
-#      - FeatureManagement__OrderFullfilment=false
-#      - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
-#      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
-#    restart: unless-stopped
-#    depends_on:
-#      messagebroker:
-#        condition: service_started
-#      orderdb:
-#        condition: service_started
-#    ports:
-#      - "6003:8080"
-#      - "6063:8081"
-#    volumes:
-#      #   - ${HOME}/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
-#      #   - ${HOME}/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
-#      - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
-#      - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
-#        
   merchant.api:
     container_name: merchantapi
     environment:
@@ -208,26 +208,26 @@ services:
       - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
       - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
   
-#  gatewayapi:
-#    container_name: gatewayapi
-#    environment:
-#      - ASPNETCORE_ENVIRONMENT=Production
-#      - ASPNETCORE_HTTP_PORTS=8080
-#      - ASPNETCORE_HTTPS_PORTS=8081
-#      - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
-#      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
-#    depends_on:
-#      - catalog.api
-#      - basket.api
-#      - ordering.api
-#    ports:
-#      - "6004:8080"
-#      - "6064:8081"
-#    volumes:
-#      #   - ${HOME}/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
-#      #   - ${HOME}/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
-#      - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
-#      - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
+  #  gatewayapi:
+  #    container_name: gatewayapi
+  #    environment:
+  #      - ASPNETCORE_ENVIRONMENT=Production
+  #      - ASPNETCORE_HTTP_PORTS=8080
+  #      - ASPNETCORE_HTTPS_PORTS=8081
+  #      - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
+  #      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+  #    depends_on:
+  #      - catalog.api
+  #      - basket.api
+  #      - order.api
+  #    ports:
+  #      - "6004:8080"
+  #      - "6064:8081"
+  #    volumes:
+  #      #   - ${HOME}/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
+  #      #   - ${HOME}/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
+  #      - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
+  #      - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
   
   keycloak:
     container_name: keycloak
@@ -273,5 +273,6 @@ volumes:
   postgres_catalog:
   postgres_keycloak:
   postgres_merchant:
+  postgres_order:
   minio_data:
   mongo_basket_data:
