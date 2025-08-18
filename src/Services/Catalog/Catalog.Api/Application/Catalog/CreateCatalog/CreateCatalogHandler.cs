@@ -21,7 +21,7 @@ public sealed class CreateCatalogHandler(
         try
         {
             (string objectName, string _) = await minioBucket.SendImageAsync(command.ImageUrl);
-            
+
             if (string.IsNullOrEmpty(objectName))
             {
                 logger.LogError("Image upload failed for command: {Command}", command);
