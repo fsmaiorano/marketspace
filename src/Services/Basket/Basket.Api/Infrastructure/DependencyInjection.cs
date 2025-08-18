@@ -20,7 +20,7 @@ public static class DependencyInjection
         string databaseName = configuration.GetSection("DatabaseSettings:DatabaseName").Value
                               ?? throw new InvalidOperationException("Database name is not configured.");
 
-        services.AddSingleton<IMongoClient>(sp => new MongoClient(connectionString));
+        services.AddSingleton<IMongoClient>(_ => new MongoClient(connectionString));
 
         services.AddScoped(sp =>
         {
