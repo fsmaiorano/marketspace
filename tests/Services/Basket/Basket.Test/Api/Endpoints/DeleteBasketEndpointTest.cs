@@ -76,22 +76,7 @@ public class DeleteBasketEndpointTest(BasketApiFactory factory) : IClassFixture<
         HttpResponseMessage response = await _client.SendAsync(request);
         response.EnsureSuccessStatusCode();
 
-        Result<CreateBasketResult>? result = await response.Content.ReadFromJsonAsync<Result<CreateBasketResult>>();
-        result?.Data?.ShoppingCart.Should().NotBeNull();
+        Result<DeleteBasketResult>? result = await response.Content.ReadFromJsonAsync<Result<DeleteBasketResult>>();
         result?.IsSuccess.Should().BeTrue();
-
-        // using IServiceScope scope = _factory.Services.CreateScope();
-        // BasketDbContext dbContext = scope.ServiceProvider.GetRequiredService<BasketDbContext>();
-        //
-        // ShoppingCartEntity? catalog = BasketBuilder.CreateShoppingCartFaker().Generate();
-        //
-        // await dbContext.ShoppingCart.InsertOneAsync(catalog);
-        //
-        // DeleteBasketCommand command = BasketBuilder.CreateDeleteBasketCommandFaker(catalog.Username).Generate();
-        // HttpRequestMessage request = new(HttpMethod.Delete, "/basket") { Content = JsonContent.Create(command) };
-        // HttpResponseMessage response = await _client.SendAsync(request);
-        // response.EnsureSuccessStatusCode();
-        // DeleteBasketResult? result = await response.Content.ReadFromJsonAsync<DeleteBasketResult>();
-        // result.Should().NotBeNull();
     }
 }
