@@ -66,14 +66,15 @@ public class MinioBucket : IMinioBucket
                 .WithObjectSize(response.Content.Headers.ContentLength ?? -1)
                 .WithContentType(contentType));
 
-            Console.WriteLine($"Imagem '{objectName}' enviada para MinIO com sucesso!");
+            Console.WriteLine($"Image '{objectName}' successfully uploaded to bucket '{BucketName}'!");
+            
 
             string? objectUrl = await GetImageAsync(objectName);
             return (objectName, objectUrl)!;
         }
         catch (Exception e)
         {
-            Console.WriteLine($"Erro: {e.Message}");
+            Console.WriteLine($"Error: {e.Message}");
             return (string.Empty, string.Empty);
         }
     }
@@ -87,12 +88,12 @@ public class MinioBucket : IMinioBucket
                 .WithObject(imageName)
                 .WithExpiry(60 * 60)); // URL valid for 1 hour
 
-            Console.WriteLine($"URL temporária: {presignedUrl}");
+            Console.WriteLine($"Temporary Url: {presignedUrl}");
             return presignedUrl;
         }
         catch (Exception e)
         {
-            Console.WriteLine($"Erro ao baixar arquivo: {e.Message}");
+            Console.WriteLine($"Error generating presigned URL: {e.Message}");
             return string.Empty;
         }
     }
@@ -128,11 +129,11 @@ public class MinioBucket : IMinioBucket
                 .WithBucket(BucketName)
                 .WithObject(imageName));
 
-            Console.WriteLine($"Imagem '{imageName}' removida com sucesso!");
+            Console.WriteLine($"Image '{imageName}' successfully removed!");
         }
         catch (Exception e)
         {
-            Console.WriteLine($"Erro ao remover imagem: {e.Message}");
+            Console.WriteLine($"Error removing image: {e.Message}");
         }
     }
 
@@ -143,7 +144,6 @@ public class MinioBucket : IMinioBucket
 
     private static string GetExtensionFromContentType(string contentType)
     {
-        // Remove charset e outros parâmetros do content-type
         string mimeType = contentType.Split(';')[0].Trim().ToLowerInvariant();
 
         return mimeType switch
@@ -158,19 +158,7 @@ public class MinioBucket : IMinioBucket
             "image/svg+xml" => ".svg",
             "image/x-icon" => ".ico",
             "image/vnd.microsoft.icon" => ".ico",
-            _ => ".jpg" // Default para JPEG se não conseguir detectar
+            _ => ".jpg"
         };
     }
-
-    // private static Task<IMinioClient> CreateMinioClient(string endpoint = "localhost:9000", string accessKey = "admin",
-    //     string secretKey = "admin123")
-    //
-    // {
-    //     IMinioClient? minio = new MinioClient()
-    //         .WithEndpoint(endpoint)
-    //         .WithCredentials(accessKey, secretKey)
-    //         .Build();
-    //
-    //     return Task.FromResult<IMinioClient>(minio);
-    // }
 }

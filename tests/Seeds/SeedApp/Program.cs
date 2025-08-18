@@ -1,8 +1,10 @@
 ﻿using Basket.Api.Domain.Entities;
+using BuildingBlocks.Storage.Minio;
 using Catalog.Api.Domain.Entities;
 using Catalog.Api.Domain.ValueObjects;
 using Catalog.Api.Infrastructure.Data;
 using MongoDB.Driver;
+using DotNet.Testcontainers.Builders;
 
 MarketSpaceSeedFactory factory = new();
 IServiceScopeFactory scopeFactory = factory.Services.GetRequiredService<IServiceScopeFactory>();
@@ -11,11 +13,19 @@ using IServiceScope scope = scopeFactory.CreateScope();
 MerchantDbContext merchantDbContext = scope.ServiceProvider.GetRequiredService<MerchantDbContext>();
 CatalogDbContext catalogDbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
 IMongoClient basketMongoClient = scope.ServiceProvider.GetRequiredService<IMongoClient>();
+IMinioBucket minioBucket = scope.ServiceProvider.GetRequiredService<IMinioBucket>();
+
+new ContainerBuilder()
+    .WithImage("minio/minio:latest")
+    .WithEnvironment("MINIO_ROOT_USER", "admin")
+    .WithEnvironment("MINIO_ROOT_PASSWORD", "admin123")
+    .WithPortBinding(9000, true)
+    .WithCommand("server", "/data", "--console-address", ":9001")
+    .Build();
 
 const int createMerchantCounter = 10;
 
 List<MerchantEntity> createdMerchants = [];
-List<CatalogEntity> createdCatalogs = [];
 List<ShoppingCartEntity> createdShoppingCarts = [];
 
 // Create merchants
@@ -36,6 +46,7 @@ for (int i = 0; i < createMerchantCounter; i++)
     merchantDbContext.Merchants.Add(merchantEntity);
     Console.WriteLine("Catalog created: " + merchant.Name + " (" + merchant.Email + ")");
     createdMerchants.Add(merchantEntity);
+    merchantDbContext.SaveChanges();
 }
 
 // Create catalog
@@ -43,19 +54,21 @@ for (int i = 0; i < createdMerchants.Count; i++)
 {
     CatalogEntity catalog = CatalogBuilder.CreateCatalogFaker().Generate();
     catalog.CreatedBy = "seed";
+    
+    (string objectName, string _) = await minioBucket.SendImageAsync(catalog.ImageUrl);
 
     CatalogEntity catalogEntity = CatalogEntity.Create(
         name: catalog.Name,
         description: catalog.Description,
-        imageUrl: catalog.ImageUrl,
+        imageUrl: objectName,
         merchantId: createdMerchants.ElementAt(i).Id.Value,
         categories: catalog.Categories,
         price: catalog.Price
     );
 
     catalogEntity.Id = CatalogId.Of(Guid.NewGuid());
-    createdCatalogs.Add(catalogEntity);
     catalogDbContext.Catalogs.Add(catalogEntity);
+    catalogDbContext.SaveChanges();
 }
 
 // Create basket
@@ -68,8 +81,10 @@ for (int i = 0; i < createdMerchants.Count; i++)
     ShoppingCartEntity shoppingCart =
         Builder.BasketBuilder.CreateShoppingCartFaker(username: createdMerchants.ElementAt(i).Name);
     createdShoppingCarts.Add(shoppingCart);
+    shoppingCartCollection.InsertMany(createdShoppingCarts);
 }
 
-merchantDbContext.SaveChanges();
-catalogDbContext.SaveChanges();
-shoppingCartCollection.InsertMany(createdShoppingCarts);
+
+
+
+
