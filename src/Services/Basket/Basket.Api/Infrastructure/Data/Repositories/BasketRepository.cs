@@ -23,9 +23,7 @@ public class BasketRepository : IBasketRepository
 
     public async Task<ShoppingCartEntity?> GetCartAsync(string username)
     {
-        return await _collection
-            .Find(cart => cart.Username == username)
-            .FirstOrDefaultAsync();
+        return await _collection.Find(sc => sc.Username.Equals(username)).FirstOrDefaultAsync();
     }
 
     public async Task<bool> CheckoutAsync(string username)

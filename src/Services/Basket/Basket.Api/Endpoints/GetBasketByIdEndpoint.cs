@@ -8,14 +8,15 @@ public static class GetBasketByIdEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/basket/{username}", async ([FromRoute] string username, [FromServices] IGetBasketByIdHandler handler) =>
-            {
-                GetBasketByIdQuery query = new GetBasketByIdQuery(username);
-                Result<GetBasketByIdResult> result = await handler.HandleAsync(query);
-                return result.IsSuccess
-                    ? Results.Ok(result)
-                    : Results.NotFound(result.Error);
-            })
+        app.MapGet("/basket/{username}",
+                async ([FromRoute] string username, [FromServices] IGetBasketByIdHandler handler) =>
+                {
+                    GetBasketByIdQuery query = new(username);
+                    Result<GetBasketByIdResult> result = await handler.HandleAsync(query);
+                    return result.IsSuccess
+                        ? Results.Ok(result)
+                        : Results.NotFound(result.Error);
+                })
             .WithName("GetBasketById")
             .WithTags("Basket")
             .Produces<GetBasketByIdResult>(StatusCodes.Status200OK)
