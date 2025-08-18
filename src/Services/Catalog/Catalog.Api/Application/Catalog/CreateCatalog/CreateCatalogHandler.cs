@@ -1,11 +1,19 @@
 using BuildingBlocks;
+using BuildingBlocks.Storage.Minio;
+using Catalog.Api.Application.Config;
 using Catalog.Api.Domain.Entities;
 using Catalog.Api.Domain.Repositories;
 using Catalog.Api.Domain.ValueObjects;
+using Microsoft.Extensions.Options;
+using Minio;
 
 namespace Catalog.Api.Application.Catalog.CreateCatalog;
 
-public sealed class CreateCatalogHandler(ICatalogRepository repository, ILogger<CreateCatalogHandler> logger)
+public sealed class CreateCatalogHandler(
+    ICatalogRepository repository,
+    ILogger<CreateCatalogHandler> logger,
+    IMinioBucket minioBucket
+)
     : ICreateCatalogHandler
 {
     public async Task<Result<CreateCatalogResult>> HandleAsync(CreateCatalogCommand command)
@@ -20,6 +28,12 @@ public sealed class CreateCatalogHandler(ICatalogRepository repository, ILogger<
                 price: Price.Of(command.Price),
                 merchantId: command.MerchantId
             );
+
+            // IMinioClient storage = await MinioBucket.CreateMinioClient(storageSettings.Value.Endpoint,
+            //     storageSettings.Value.AccessKey,
+            //     storageSettings.Value.SecretKey);
+            
+            (string objectName, string objectUrl) minioResult = await minioBucket.SendImageAsync(command.ImageUrl);
 
             int result = await repository.AddAsync(catalogEntity);
 
