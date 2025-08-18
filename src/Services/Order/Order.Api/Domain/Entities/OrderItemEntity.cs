@@ -8,7 +8,7 @@ public class OrderItemEntity : Aggregate<OrderItemId>
     public OrderId OrderId { get; private set; } = null!;
     public CatalogId CatalogId { get; private set; } = null!;
     public int Quantity { get; private set; } = 0;
-    public Price Price { get; private set; }
+    public Price Price { get; private set; } = null!;
 
     public static OrderItemEntity Create(
         OrderItemId orderItemId,
