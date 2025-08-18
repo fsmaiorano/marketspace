@@ -6,6 +6,7 @@ using Basket.Api.Domain.Entities;
 using Basket.Api.Infrastructure.Data;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 using Moq;
 using System.Net.Http.Json;
 
@@ -67,22 +68,15 @@ public class GetBasketByIdEndpointTest(BasketApiFactory factory) : IClassFixture
     public async Task Can_Get_Basket_By_Id_Endpoint()
     {
         using IServiceScope scope = _factory.Services.CreateScope();
-        BasketDbContext dbContext = scope.ServiceProvider.GetRequiredService<BasketDbContext>();
+        IMongoClient client = scope.ServiceProvider.GetRequiredService<IMongoClient>();
 
-        ShoppingCartEntity entity = BasketBuilder.CreateShoppingCartFaker().Generate();
-        GetBasketByIdQuery query = new GetBasketByIdQuery(entity.Username);
-        ShoppingCartDto dto = BasketBuilder.CreateShoppingCartDtoFaker().Generate();
+        ShoppingCartEntity? shoppingCart = BasketBuilder.CreateShoppingCartFaker().Generate();
 
+        await client.GetDatabase("BasketInMemoryDbForTesting")
+            .GetCollection<ShoppingCartEntity>("ShoppingCart")
+            .InsertOneAsync(shoppingCart);
 
-        await dbContext.ShoppingCart.InsertOneAsync(entity);
-
-        GetBasketByIdResult result = new(dto);
-
-        _mockHandler
-            .Setup(h => h.HandleAsync(It.IsAny<GetBasketByIdQuery>()))
-            .ReturnsAsync(Result<GetBasketByIdResult>.Success(result));
-
-        HttpRequestMessage request = new(HttpMethod.Get, $"/basket/{entity.Username}");
+        HttpRequestMessage request = new(HttpMethod.Get, $"/basket/{shoppingCart.Username}");
         HttpResponseMessage response = await _client.SendAsync(request);
         response.EnsureSuccessStatusCode();
         Result<GetBasketByIdResult>? responseResult =
