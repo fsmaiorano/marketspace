@@ -7,13 +7,13 @@ public class MinioFixture
 {
     public string MinioEndpoint { get; private set; } = string.Empty;
     private readonly IContainer _minioContainer;
-    public string Endpoint { get; private set; }
-    public string AccessKey => "admin";
-    public string SecretKey => "admin123";
+    public string? Endpoint { get; private set; }
+    private static string AccessKey => "admin";
+    private static string SecretKey => "admin123";
 
     public MinioFixture()
     {
-        _minioContainer =  new ContainerBuilder()
+        _minioContainer = new ContainerBuilder()
             .WithImage("minio/minio:latest")
             .WithEnvironment("MINIO_ROOT_USER", AccessKey)
             .WithEnvironment("MINIO_ROOT_PASSWORD", SecretKey)
