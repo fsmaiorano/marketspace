@@ -17,16 +17,22 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItemEntity>
         builder.HasIndex(o => o.Id).IsUnique();
 
         builder.Property(o => o.OrderId)
-            .IsRequired();
+            .IsRequired()
+            .HasConversion(orderId => orderId.Value,
+                dbId => OrderId.Of(dbId));
 
         builder.Property(o => o.CatalogId)
-            .IsRequired();
+            .IsRequired()
+            .HasConversion(catalogId => catalogId.Value,
+                dbId => CatalogId.Of(dbId));
 
         builder.Property(o => o.Quantity)
             .IsRequired();
 
         builder.Property(o => o.Price)
             .IsRequired()
-            .HasColumnType("decimal(18,2)");
+            .HasConversion(
+                price => price.Value,
+                dbPrice => Price.Of(dbPrice));
     }
 }

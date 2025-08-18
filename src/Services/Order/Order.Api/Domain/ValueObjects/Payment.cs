@@ -30,4 +30,24 @@ public record Payment
 
         return new Payment(cardNumber, cardName, expiration, cvv, paymentMethod);
     }
+
+    public static Payment FromString(string paymentString)
+    {
+        if (string.IsNullOrWhiteSpace(paymentString))
+            throw new ArgumentException("Payment string cannot be empty.", nameof(paymentString));
+
+        var parts = paymentString.Split('|');
+        if (parts.Length != 5)
+            throw new ArgumentException("Invalid payment string format.", nameof(paymentString));
+
+        if (!int.TryParse(parts[4], out var paymentMethod))
+            throw new ArgumentException("Invalid payment method format.", nameof(paymentString));
+
+        return new Payment(parts[0], parts[1], parts[2], parts[3], paymentMethod);
+    }
+
+    public override string ToString()
+    {
+        return $"{CardNumber}|{CardName}|{Expiration}|{Cvv}|{PaymentMethod}";
+    }
 }
