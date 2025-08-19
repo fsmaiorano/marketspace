@@ -2,13 +2,13 @@ namespace Order.Api.Domain.ValueObjects;
 
 public record Address
 {
-    public string FirstName { get; set; } = null!;
-    public string LastName { get; set; } = null!;
-    public string EmailAddress { get; set; } = null!;
-    public string AddressLine { get; set; } = null!;
-    public string Country { get; set; } = null!;
-    public string State { get; set; } = null!;
-    public string ZipCode { get; set; } = null!;
+    private string FirstName { get; set; } = null!;
+    private string LastName { get; set; } = null!;
+    private string EmailAddress { get; set; } = null!;
+    private string AddressLine { get; set; } = null!;
+    private string Country { get; set; } = null!;
+    private string State { get; set; } = null!;
+    private string ZipCode { get; set; } = null!;
 
     protected Address()
     {
@@ -44,7 +44,7 @@ public record Address
         if (string.IsNullOrWhiteSpace(addressString))
             throw new ArgumentException("Address string cannot be empty.", nameof(addressString));
 
-        var parts = addressString.Split('|');
+        string[] parts = addressString.Split('|');
         if (parts.Length != 7)
             throw new ArgumentException("Invalid address string format.", nameof(addressString));
 

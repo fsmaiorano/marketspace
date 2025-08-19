@@ -14,6 +14,52 @@ public class OrderEntity : Aggregate<OrderId>
     public List<OrderItemEntity> Items { get; private set; } = [];
     public Price TotalAmount { get; private set; } = Price.Of(0);
 
+    private void AddItem(OrderItemEntity item)
+    {
+        ArgumentNullException.ThrowIfNull(item, nameof(item));
+
+        if (item.OrderId.Value != Id.Value)
+            throw new ArgumentException("OrderItem must belong to this order.", nameof(item));
+
+        OrderItemEntity? existingItem = Items.FirstOrDefault(i => i.OrderId.Value == item.OrderId.Value);
+        if (existingItem != null)
+        {
+            UpdateItemQuantity(item.OrderId, existingItem.Quantity + item.Quantity);
+        }
+        else
+        {
+            Items.Add(item);
+            CalculateAndSetTotalAmount();
+        }
+    }
+
+    private void ClearItems()
+    {
+        Items.Clear();
+        CalculateAndSetTotalAmount();
+    }
+
+    public OrderEntity()
+    {
+    }
+
+    private void UpdateItemQuantity(OrderId orderId, int quantity)
+    {
+        ArgumentNullException.ThrowIfNull(orderId, nameof(orderId));
+
+        if (quantity <= 0)
+            throw new ArgumentOutOfRangeException(nameof(quantity), "Quantity must be greater than zero.");
+
+        OrderItemEntity? item = Items.FirstOrDefault(i => i.OrderId.Value == orderId.Value);
+        if (item == null)
+            throw new InvalidOperationException($"OrderItem with OrderId {orderId.Value} not found.");
+
+        Items.Remove(item);
+        OrderItemEntity updatedItem = OrderItemEntity.Update(item.Id, Id, item.CatalogId, quantity, item.Price);
+        Items.Add(updatedItem);
+        CalculateAndSetTotalAmount();
+    }
+
     private void CalculateAndSetTotalAmount()
     {
         if (Items.Count == 0)
@@ -26,42 +72,75 @@ public class OrderEntity : Aggregate<OrderId>
         TotalAmount = Price.Of(total);
     }
 
-    public OrderEntity()
-    {
-        
-    }
-    
     public static OrderEntity Create(
-        OrderId orderId,
         CustomerId customerId,
         Address shippingAddress,
         Address billingAddress,
         Payment payment,
-        List<OrderItemEntity> items)
+        IEnumerable<OrderItemEntity>? items = null)
     {
-        ArgumentNullException.ThrowIfNull(orderId, nameof(orderId));
         ArgumentNullException.ThrowIfNull(customerId, nameof(customerId));
         ArgumentNullException.ThrowIfNull(shippingAddress, nameof(shippingAddress));
         ArgumentNullException.ThrowIfNull(billingAddress, nameof(billingAddress));
         ArgumentNullException.ThrowIfNull(payment, nameof(payment));
         ArgumentNullException.ThrowIfNull(items, nameof(items));
 
-        if (orderId.Value == Guid.Empty)
-            throw new ArgumentException("OrderId cannot be empty.", nameof(orderId));
         if (customerId.Value == Guid.Empty)
             throw new ArgumentException("CustomerId cannot be empty.", nameof(customerId));
 
-        var order = new OrderEntity
+        OrderEntity order = new OrderEntity
         {
-            Id = orderId,
             CustomerId = customerId,
             ShippingAddress = shippingAddress,
             BillingAddress = billingAddress,
             Payment = payment,
-            Items = items
         };
 
+        foreach (OrderItemEntity orderItem in items)
+        {
+            order.AddItem(orderItem);
+        }
+
         order.CalculateAndSetTotalAmount();
+
         return order;
+    }
+
+    public static OrderEntity Update(
+        OrderId id,
+        CustomerId customerId,
+        Address shippingAddress,
+        Address billingAddress,
+        Payment payment,
+        OrderStatusEnum status,
+        IEnumerable<OrderItemEntity>? items = null)
+    {
+        ArgumentNullException.ThrowIfNull(id, nameof(id));
+        ArgumentNullException.ThrowIfNull(customerId, nameof(customerId));
+        ArgumentNullException.ThrowIfNull(shippingAddress, nameof(shippingAddress));
+        ArgumentNullException.ThrowIfNull(billingAddress, nameof(billingAddress));
+        ArgumentNullException.ThrowIfNull(payment, nameof(payment));
+        ArgumentNullException.ThrowIfNull(items, nameof(items));
+
+        if (id.Value == Guid.Empty)
+            throw new ArgumentException("OrderId cannot be empty.", nameof(id));
+
+        OrderEntity updatedOrder = new OrderEntity
+        {
+            Id = id,
+            CustomerId = customerId,
+            ShippingAddress = shippingAddress,
+            BillingAddress = billingAddress,
+            Payment = payment,
+            Status = status
+        };
+
+
+        foreach (OrderItemEntity orderItem in items)
+        {
+            updatedOrder.AddItem(orderItem);
+        }
+
+        return updatedOrder;
     }
 }
