@@ -1,5 +1,4 @@
 using BuildingBlocks;
-using Order.Api.Application.Dto;
 using Order.Api.Domain.Entities;
 using Order.Api.Domain.Repositories;
 using Order.Api.Domain.ValueObjects;
@@ -20,11 +19,8 @@ public sealed class CreateOrderHandler(
             Address shippingAddress = command.ShippingAddress.ToAddress();
             Address billingAddress = command.BillingAddress.ToAddress();
             Payment payment = command.Payment.ToPayment();
-            List<OrderItemEntity> orderItems = [];
-            orderItems.AddRange(command.Items.Select(orderItem => OrderItemEntity.Create(orderId: null,
-                catalogId: CatalogId.Of(orderItem.CatalogId), quantity: orderItem.Quantity,
-                price: Price.Of(orderItem.Price))));
-
+            List<OrderItemEntity> orderItems = command.Items.Select(item => item.ToOrderItemEntity()).ToList();
+            
             OrderEntity orderEntity = OrderEntity.Create(
                 customerId: CustomerId.Of(command.CustomerId),
                 shippingAddress: shippingAddress,
