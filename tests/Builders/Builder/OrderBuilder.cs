@@ -124,7 +124,7 @@ public static class OrderBuilder
             .RuleFor(c => c.Payment, f => CreatePaymentDtoFaker().Generate())
             .RuleFor(c => c.Status, f => f.PickRandom(OrderStatuses))
             .RuleFor(c => c.Items, f => CreateOrderItemDtoFaker().Generate(f.Random.Int(1, 5)))
-            .RuleFor(c => c.TotalAmount, f => Price.Of(f.Finance.Amount(1, 5000, 2)));
+            .RuleFor(c => c.TotalAmount, f => f.Finance.Amount(1, 5000, 2));
     }
 
     public static Faker<UpdateOrderCommand> CreateUpdateOrderCommandFaker(Guid? orderId = null)
@@ -137,7 +137,7 @@ public static class OrderBuilder
             .RuleFor(m => m.Payment, f => CreatePaymentDtoFaker().Generate())
             .RuleFor(m => m.Status, f => f.PickRandom(OrderStatuses))
             .RuleFor(m => m.Items, f => CreateOrderItemDtoFaker().Generate(f.Random.Int(1, 5)))
-            .RuleFor(m => m.TotalAmount, f => Price.Of(f.Finance.Amount(1, 5000, 2)));
+            .RuleFor(c => c.TotalAmount, f => f.Finance.Amount(1, 5000, 2));
     }
 
     public static Faker<DeleteOrderCommand> CreateDeleteOrderCommandFaker(Guid? orderId = null)
