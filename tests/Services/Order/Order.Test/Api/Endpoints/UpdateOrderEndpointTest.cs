@@ -89,7 +89,7 @@ public class UpdateOrderEndpointTest(OrderApiFactory factory) : IClassFixture<Or
             BillingAddress = OrderBuilder.CreateAddressDtoFaker().Generate(),
             Payment = OrderBuilder.CreatePaymentDtoFaker(),
             Status = order.Status,
-            TotalAmount = order.TotalAmount,
+            TotalAmount = order.TotalAmount.Value,
             Items = OrderBuilder.CreateOrderItemDtoFaker(10)
         };
 

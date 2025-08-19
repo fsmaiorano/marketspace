@@ -6,11 +6,11 @@ namespace Order.Api.Application.Order.CreateOrder;
 
 public class CreateOrderCommand
 {
-    public Guid CustomerId { get; private set; } = Guid.Empty;
-    public AddressDto ShippingAddress { get; private set; } = null!;
-    public AddressDto BillingAddress { get; private set; } = null!;
-    public PaymentDto Payment { get; private set; } = null!;
-    public OrderStatusEnum Status { get; private set; } = OrderStatusEnum.Pending;
-    public List<OrderItemDto> Items { get; private set; } = [];
-    public Price TotalAmount { get; private set; } = Price.Of(0);
+    public Guid CustomerId { get; set; } = Guid.Empty;
+    public AddressDto ShippingAddress { get; set; } = null!;
+    public AddressDto BillingAddress { get; set; } = null!;
+    public PaymentDto Payment { get; set; } = null!;
+    public OrderStatusEnum Status { get; set; } = OrderStatusEnum.Pending;
+    public List<OrderItemDto> Items { get; set; } = [];
+    public decimal TotalAmount { get; set; } = 0.0m;
 }

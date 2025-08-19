@@ -13,5 +13,5 @@ public class UpdateOrderCommand
     public PaymentDto Payment { get; set; } = null!;
     public OrderStatusEnum Status { get; set; } = OrderStatusEnum.Pending;
     public List<OrderItemDto> Items { get; set; } = [];
-    public Price TotalAmount { get; set; } = Price.Of(0);
+    public decimal TotalAmount { get; set; } = 0.0m;
 }
