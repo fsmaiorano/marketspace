@@ -24,7 +24,14 @@ public class OrderItemEntity : Aggregate<OrderItemId>
             throw new ArgumentOutOfRangeException(nameof(quantity), "Quantity must be greater than zero.");
         if (price == null) throw new ArgumentNullException(nameof(price));
 
-        return new OrderItemEntity { OrderId = orderId, CatalogId = catalogId, Quantity = quantity, Price = price };
+        return new OrderItemEntity
+        {
+            Id = OrderItemId.Of(Guid.NewGuid()),
+            OrderId = orderId,
+            CatalogId = catalogId,
+            Quantity = quantity,
+            Price = price
+        };
     }
 
     public static OrderItemEntity Update(
