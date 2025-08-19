@@ -16,12 +16,14 @@ public sealed class CreateOrderHandler(
     {
         try
         {
+            OrderId orderId = OrderId.Of(Guid.NewGuid());
             Address shippingAddress = command.ShippingAddress.ToAddress();
             Address billingAddress = command.BillingAddress.ToAddress();
             Payment payment = command.Payment.ToPayment();
-            List<OrderItemEntity> orderItems = command.Items.Select(item => item.ToOrderItemEntity()).ToList();
+            List<OrderItemEntity> orderItems = command.Items.Select(item => orderId.ToOrderItemEntity(item)).ToList();
             
             OrderEntity orderEntity = OrderEntity.Create(
+                orderId: orderId,
                 customerId: CustomerId.Of(command.CustomerId),
                 shippingAddress: shippingAddress,
                 billingAddress: billingAddress,

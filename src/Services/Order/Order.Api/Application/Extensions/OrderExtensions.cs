@@ -30,15 +30,10 @@ public static class OrderExtensions
         );
     }
 
-    public static List<OrderItemEntity> ToOrderItemEntities(this List<OrderItemDto> orderItemDtos)
-    {
-        return orderItemDtos.Select(ToOrderItemEntity).ToList();
-    }
-
-    public static OrderItemEntity ToOrderItemEntity(this OrderItemDto orderItemDto)
+    public static OrderItemEntity ToOrderItemEntity(this OrderId orderId, OrderItemDto orderItemDto)
     {
         return OrderItemEntity.Create(
-            orderId: null,
+            orderId: orderId,
             catalogId: CatalogId.Of(orderItemDto.CatalogId),
             quantity: orderItemDto.Quantity,
             price: Price.Of(orderItemDto.Price)

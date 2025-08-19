@@ -14,11 +14,12 @@ public class OrderEntity : Aggregate<OrderId>
     public List<OrderItemEntity> Items { get; private set; } = [];
     public Price TotalAmount { get; private set; } = Price.Of(0);
 
-    private void AddItem(OrderItemEntity item)
+    private void AddItem(OrderId orderId, OrderItemEntity item)
     {
         try
         {
-            OrderItemEntity? existingItem = Items.FirstOrDefault(i => i.CatalogId.Value == item.CatalogId.Value);
+            OrderItemEntity? existingItem = Items.FirstOrDefault(i =>
+                i.OrderId.Value == orderId.Value && i.CatalogId.Value == item.CatalogId.Value);
             if (existingItem != null)
             {
                 UpdateItemQuantity(item.OrderId, existingItem.Quantity + item.Quantity);
@@ -75,12 +76,14 @@ public class OrderEntity : Aggregate<OrderId>
     }
 
     public static OrderEntity Create(
+        OrderId orderId,
         CustomerId customerId,
         Address shippingAddress,
         Address billingAddress,
         Payment payment,
         IEnumerable<OrderItemEntity>? items = null)
     {
+        ArgumentNullException.ThrowIfNull(orderId, nameof(orderId));
         ArgumentNullException.ThrowIfNull(customerId, nameof(customerId));
         ArgumentNullException.ThrowIfNull(shippingAddress, nameof(shippingAddress));
         ArgumentNullException.ThrowIfNull(billingAddress, nameof(billingAddress));
@@ -92,6 +95,7 @@ public class OrderEntity : Aggregate<OrderId>
 
         OrderEntity order = new OrderEntity
         {
+            Id = orderId,
             CustomerId = customerId,
             ShippingAddress = shippingAddress,
             BillingAddress = billingAddress,
@@ -100,7 +104,7 @@ public class OrderEntity : Aggregate<OrderId>
 
         foreach (OrderItemEntity orderItem in items)
         {
-            order.AddItem(orderItem);
+            order.AddItem(orderId, orderItem);
         }
 
         order.CalculateAndSetTotalAmount();
@@ -109,7 +113,7 @@ public class OrderEntity : Aggregate<OrderId>
     }
 
     public static OrderEntity Update(
-        OrderId id,
+        OrderId orderId,
         CustomerId customerId,
         Address shippingAddress,
         Address billingAddress,
@@ -117,19 +121,19 @@ public class OrderEntity : Aggregate<OrderId>
         OrderStatusEnum status,
         IEnumerable<OrderItemEntity>? items = null)
     {
-        ArgumentNullException.ThrowIfNull(id, nameof(id));
+        ArgumentNullException.ThrowIfNull(orderId, nameof(orderId));
         ArgumentNullException.ThrowIfNull(customerId, nameof(customerId));
         ArgumentNullException.ThrowIfNull(shippingAddress, nameof(shippingAddress));
         ArgumentNullException.ThrowIfNull(billingAddress, nameof(billingAddress));
         ArgumentNullException.ThrowIfNull(payment, nameof(payment));
         ArgumentNullException.ThrowIfNull(items, nameof(items));
 
-        if (id.Value == Guid.Empty)
-            throw new ArgumentException("OrderId cannot be empty.", nameof(id));
+        if (orderId.Value == Guid.Empty)
+            throw new ArgumentException("OrderId cannot be empty.", nameof(orderId));
 
         OrderEntity updatedOrder = new OrderEntity
         {
-            Id = id,
+            Id = orderId,
             CustomerId = customerId,
             ShippingAddress = shippingAddress,
             BillingAddress = billingAddress,
@@ -140,7 +144,7 @@ public class OrderEntity : Aggregate<OrderId>
 
         foreach (OrderItemEntity orderItem in items)
         {
-            updatedOrder.AddItem(orderItem);
+            updatedOrder.AddItem(orderId, orderItem);
         }
 
         return updatedOrder;

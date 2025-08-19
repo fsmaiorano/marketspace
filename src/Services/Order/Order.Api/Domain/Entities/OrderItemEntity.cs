@@ -16,6 +16,7 @@ public class OrderItemEntity : Aggregate<OrderItemId>
         int quantity,
         Price price)
     {
+        ArgumentNullException.ThrowIfNull(orderId, nameof(orderId));
         ArgumentNullException.ThrowIfNull(catalogId, nameof(catalogId));
         if (catalogId.Value == Guid.Empty)
             throw new ArgumentException("CatalogId cannot be empty.", nameof(catalogId));
