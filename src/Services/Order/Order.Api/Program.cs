@@ -1,5 +1,6 @@
 using BuildingBlocks.Exceptions;
 using Order.Api.Application;
+using Order.Api.Endpoints;
 using Order.Api.Infrastructure;
 using Order.Api.Infrastructure.Data.Extensions;
 
@@ -32,6 +33,11 @@ app.UseSwaggerUI(options =>
 });
 
 app.UseExceptionHandler(options => { });
+
+CreateOrderEndpoint.MapEndpoint(app);
+UpdateOrderEndpoint.MapEndpoint(app);
+DeleteOrderEndpoint.MapEndpoint(app);
+GetOrderByIdEndpoint.MapEndpoint(app);
 
 app.Run();
 
