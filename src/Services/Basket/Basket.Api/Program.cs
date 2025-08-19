@@ -35,7 +35,7 @@ app.UseSwaggerUI(options =>
 app.UseExceptionHandler(options => { });
 
 CreateBasketEndpoint.MapEndpoint(app);
-DeleteBasketEndpoint.MapEndpoint(app);
+DeleteCatalogEndpoint.MapEndpoint(app);
 GetBasketByIdEndpoint.MapEndpoint(app);
 
 app.Run();

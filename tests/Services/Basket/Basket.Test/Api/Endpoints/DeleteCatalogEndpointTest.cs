@@ -11,7 +11,7 @@ using System.Net.Http.Json;
 
 namespace Basket.Test.Api.Endpoints;
 
-public class DeleteBasketEndpointTest(BasketApiFactory factory) : IClassFixture<BasketApiFactory>
+public class DeleteCatalogEndpointTest(BasketApiFactory factory) : IClassFixture<BasketApiFactory>
 {
     private readonly HttpClient _client = factory.CreateClient();
     private readonly Mock<IDeleteBasketHandler> _mockHandler = new();

@@ -14,6 +14,7 @@
       <ProjectReference Include="..\..\..\src\Services\Basket\Basket.Api\Basket.Api.csproj" />
       <ProjectReference Include="..\..\..\src\Services\Catalog\Catalog.Api\Catalog.Api.csproj" />
       <ProjectReference Include="..\..\..\src\Services\Merchant\Merchant.Api\Merchant.Api.csproj" />
+      <ProjectReference Include="..\..\..\src\Services\Order\Order.Api\Order.Api.csproj" />
     </ItemGroup>
 
 </Project>

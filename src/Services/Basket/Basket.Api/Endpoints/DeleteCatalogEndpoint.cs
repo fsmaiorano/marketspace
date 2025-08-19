@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Basket.Api.Endpoints;
 
-public static class DeleteBasketEndpoint
+public static class DeleteCatalogEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
