@@ -16,20 +16,22 @@ public class OrderEntity : Aggregate<OrderId>
 
     private void AddItem(OrderItemEntity item)
     {
-        ArgumentNullException.ThrowIfNull(item, nameof(item));
-
-        if (item.OrderId.Value != Id.Value)
-            throw new ArgumentException("OrderItem must belong to this order.", nameof(item));
-
-        OrderItemEntity? existingItem = Items.FirstOrDefault(i => i.OrderId.Value == item.OrderId.Value);
-        if (existingItem != null)
+        try
         {
-            UpdateItemQuantity(item.OrderId, existingItem.Quantity + item.Quantity);
+            OrderItemEntity? existingItem = Items.FirstOrDefault(i => i.CatalogId.Value == item.CatalogId.Value);
+            if (existingItem != null)
+            {
+                UpdateItemQuantity(item.OrderId, existingItem.Quantity + item.Quantity);
+            }
+            else
+            {
+                Items.Add(item);
+                CalculateAndSetTotalAmount();
+            }
         }
-        else
+        catch (Exception ex)
         {
-            Items.Add(item);
-            CalculateAndSetTotalAmount();
+            throw;
         }
     }
 
