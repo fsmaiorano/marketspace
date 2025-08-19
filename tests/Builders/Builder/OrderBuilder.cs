@@ -35,6 +35,7 @@ public static class OrderBuilder
     {
         return new Faker<OrderEntity>()
             .CustomInstantiator(f => OrderEntity.Create(
+                orderId: OrderId.Of(f.Random.Guid()),
                 customerId: customerId == Guid.Empty ? CustomerId.Of(f.Random.Guid()) : CustomerId.Of(customerId),
                 shippingAddress: CreateAddressFaker().Generate(),
                 billingAddress: CreateAddressFaker().Generate(),

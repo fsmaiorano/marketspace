@@ -11,7 +11,6 @@ public class OrderRepository(IOrderDbContext dbContext) : IOrderRepository
     public async Task<int> AddAsync(OrderEntity order, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(order, nameof(order));
-        order.Id = OrderId.Of(Guid.NewGuid());
         await dbContext.Orders.AddAsync(order, cancellationToken);
         return await dbContext.SaveChangesAsync(cancellationToken);
     }
