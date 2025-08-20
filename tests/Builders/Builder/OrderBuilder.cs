@@ -13,22 +13,14 @@ public static class OrderBuilder
 {
     private static readonly OrderStatusEnum[] OrderStatuses =
     {
-        OrderStatusEnum.Pending,
-        OrderStatusEnum.Processing,
-        OrderStatusEnum.Completed,
-        OrderStatusEnum.ReadyForDelivery,
-        OrderStatusEnum.DeliveryInProgress,
-        OrderStatusEnum.Delivered,
-        OrderStatusEnum.Finalized,
-        OrderStatusEnum.Cancelled,
-        OrderStatusEnum.CancelledByCustomer
+        OrderStatusEnum.Pending, OrderStatusEnum.Processing, OrderStatusEnum.Completed,
+        OrderStatusEnum.ReadyForDelivery, OrderStatusEnum.DeliveryInProgress, OrderStatusEnum.Delivered,
+        OrderStatusEnum.Finalized, OrderStatusEnum.Cancelled, OrderStatusEnum.CancelledByCustomer
     };
 
     private static readonly PaymentMethodEnum[] PaymentMethods =
     {
-        PaymentMethodEnum.Cash,
-        PaymentMethodEnum.CreditCard,
-        PaymentMethodEnum.DebitCard
+        PaymentMethodEnum.Cash, PaymentMethodEnum.CreditCard, PaymentMethodEnum.DebitCard
     };
 
     public static Faker<OrderEntity> CreateOrderFaker(Guid customerId = default)
@@ -39,7 +31,8 @@ public static class OrderBuilder
                 customerId: customerId == Guid.Empty ? CustomerId.Of(f.Random.Guid()) : CustomerId.Of(customerId),
                 shippingAddress: CreateAddressFaker().Generate(),
                 billingAddress: CreateAddressFaker().Generate(),
-                payment: CreatePaymentFaker().Generate()
+                payment: CreatePaymentFaker().Generate(),
+                items: CreateOrderItemFaker().Generate(f.Random.Int(1, 5))
             ));
     }
 
@@ -109,7 +102,7 @@ public static class OrderBuilder
             .RuleFor(o => o.Quantity, f => f.Random.Int(1, 10))
             .RuleFor(o => o.Price, f => f.Finance.Amount(1, 1000, 2));
     }
-    
+
     public static Faker<List<OrderItemDto>> CreateOrderItemDtoFaker(int count)
     {
         return new Faker<List<OrderItemDto>>()

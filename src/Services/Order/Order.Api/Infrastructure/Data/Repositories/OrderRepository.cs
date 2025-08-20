@@ -36,9 +36,14 @@ public class OrderRepository(IOrderDbContext dbContext) : IOrderRepository
         return await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public Task<int> RemoveAsync(OrderId id, CancellationToken cancellationToken = default)
+    public async Task<int> RemoveAsync(OrderId id, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        OrderEntity? storedEntity = await GetByIdAsync(id, cancellationToken: cancellationToken)
+                                    ?? throw new InvalidOperationException(
+                                        $"Order with ID {id} not found.");
+
+        dbContext.Orders.Remove(storedEntity);
+        return await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<OrderEntity?> GetByIdAsync(OrderId id, bool isTrackingEnabled = true,
