@@ -5,6 +5,7 @@ using Catalog.Api.Application;
 using Catalog.Api.Endpoints;
 using Catalog.Api.Infrastructure;
 using Catalog.Api.Infrastructure.Data.Extensions;
+using Serilog;
 using Serilog.Extensions.Hosting;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -23,6 +24,7 @@ builder.Services
         options.ServiceVersion = "1.0.0";
     });
 
+builder.Host.UseSerilog();
 builder.Services.AddSingleton<DiagnosticContext>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

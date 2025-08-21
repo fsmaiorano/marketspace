@@ -20,7 +20,6 @@ public class BasketApiFactory : WebApplicationFactory<BasketProgram>
     {
         builder.ConfigureServices(services =>
         {
-            // Remove production services
             List<ServiceDescriptor> descriptorsToRemove = services
                 .Where(d => d.ServiceType.FullName != null &&
                             (d.ServiceType == typeof(BasketDbContext) ||
@@ -35,7 +34,6 @@ public class BasketApiFactory : WebApplicationFactory<BasketProgram>
             foreach (ServiceDescriptor descriptor in descriptorsToRemove)
                 services.Remove(descriptor);
 
-            // Configure test MongoDB
             MongoDbRunner? runner = MongoDbRunner.Start();
             
             services.AddSingleton<IMongoClient>(sp => new MongoClient(runner.ConnectionString));
@@ -48,7 +46,6 @@ public class BasketApiFactory : WebApplicationFactory<BasketProgram>
 
             services.AddScoped<IBasketRepository, BasketRepository>();
 
-            // Configure test logging to avoid Serilog issues
             services.RemoveAll<ILoggerFactory>();
             services.TryAddSingleton<DiagnosticContext>();
             services.AddLogging(loggingBuilder => loggingBuilder.AddConsole().SetMinimumLevel(LogLevel.Warning));

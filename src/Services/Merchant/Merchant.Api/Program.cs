@@ -16,7 +16,7 @@ builder.Services
     .AddApplicationServices(builder.Configuration)
     .AddInfrastructureServices(builder.Configuration);
 
-builder.Host.UseSerilog();
+
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 builder.Services
     .AddObservability(builder.Configuration, options =>
@@ -25,6 +25,7 @@ builder.Services
         options.ServiceVersion = "1.0.0";
     });
 
+builder.Host.UseSerilog();
 builder.Services.AddSingleton<DiagnosticContext>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
