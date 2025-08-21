@@ -5,6 +5,7 @@ using Merchant.Api.Application;
 using Merchant.Api.Endpoints;
 using Merchant.Api.Infrastructure;
 using Merchant.Api.Infrastructure.Data.Extensions;
+using Serilog;
 using Serilog.Extensions.Hosting;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,7 @@ builder.Services
     .AddApplicationServices(builder.Configuration)
     .AddInfrastructureServices(builder.Configuration);
 
+builder.Host.UseSerilog();
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 builder.Services.AddApplicationLogger()
     .AddObservability(builder.Configuration, options =>

@@ -64,7 +64,7 @@ public static class ObservabilityExtensions
             loggerConfig.WriteTo.Console(new CompactJsonFormatter());
 
         Log.Logger = loggerConfig.CreateLogger();
-
+ 
         services.AddSingleton(Log.Logger);
         services.AddLogging(builder =>
         {
