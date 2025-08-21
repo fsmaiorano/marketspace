@@ -1,4 +1,5 @@
 using BuildingBlocks.Exceptions;
+using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
 using Catalog.Api.Application;
 using Catalog.Api.Endpoints;
@@ -14,6 +15,7 @@ builder.Services
     .AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+builder.Services.AddApplicationLogger();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

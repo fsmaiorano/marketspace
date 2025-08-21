@@ -8,9 +8,9 @@ public static class ApplicationLoggerExtensions
 {
     public static IServiceCollection AddApplicationLogger(this IServiceCollection services)
     {
+        services.AddHttpContextAccessor();
         services.TryAddScoped<ICorrelationIdService, CorrelationIdService>();
         services.TryAddScoped<IApplicationLogger, ApplicationLogger>();
-        services.TryAddScoped<IApplicationLoggerFactory, ApplicationLoggerFactory>();
 
         return services;
     }
