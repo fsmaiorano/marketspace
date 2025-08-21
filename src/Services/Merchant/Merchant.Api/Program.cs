@@ -1,4 +1,5 @@
 using BuildingBlocks.Exceptions;
+using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
 using Merchant.Api.Application;
 using Merchant.Api.Endpoints;
@@ -14,6 +15,7 @@ builder.Services
     .AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+builder.Services.AddApplicationLogger(); 
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -34,6 +36,7 @@ app.UseSwaggerUI(options =>
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
     options.RoutePrefix = string.Empty;
 });
+
 
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseExceptionHandler(options => { });

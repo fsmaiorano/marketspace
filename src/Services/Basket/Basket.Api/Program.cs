@@ -2,6 +2,7 @@ using Basket.Api.Application;
 using Basket.Api.Endpoints;
 using Basket.Api.Infrastructure;
 using BuildingBlocks.Exceptions;
+using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,7 @@ builder.Services
     .AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+builder.Services.AddApplicationLogger(); 
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

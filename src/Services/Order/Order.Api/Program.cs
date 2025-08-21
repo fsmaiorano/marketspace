@@ -1,4 +1,5 @@
 using BuildingBlocks.Exceptions;
+using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
 using Order.Api.Application;
 using Order.Api.Endpoints;
@@ -12,6 +13,7 @@ builder.Services
     .AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+builder.Services.AddApplicationLogger(); 
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
