@@ -1,4 +1,5 @@
 using BuildingBlocks.Exceptions;
+using BuildingBlocks.Middlewares;
 using Order.Api.Application;
 using Order.Api.Endpoints;
 using Order.Api.Infrastructure;
@@ -32,6 +33,7 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty;
 });
 
+app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseExceptionHandler(options => { });
 
 CreateOrderEndpoint.MapEndpoint(app);

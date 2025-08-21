@@ -23,6 +23,7 @@ public static class DependencyInjection
             options.UseNpgsql(connectionString);
         });
 
+        services.AddHttpContextAccessor();
         services.AddScoped<ICatalogDbContext, CatalogDbContext>();
 
         return services;

@@ -22,6 +22,7 @@ public static class DependencyInjection
             options.UseNpgsql(connectionString);
         });
 
+        services.AddHttpContextAccessor();
         services.AddScoped<IOrderDbContext, OrderDbContext>();
 
         return services;

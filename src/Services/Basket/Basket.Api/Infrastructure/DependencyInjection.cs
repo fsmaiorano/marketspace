@@ -28,6 +28,7 @@ public static class DependencyInjection
             return client.GetDatabase(databaseName);
         });
 
+        services.AddHttpContextAccessor();
         services.AddScoped<IBasketRepository, BasketRepository>();
 
         return services;
