@@ -23,5 +23,16 @@ public sealed class ObservabilityOptions
     public bool EnableAspNetCoreInstrumentation { get; set; } = true;
     /// <summary>Include HttpClient instrumentation (default true).</summary>
     public bool EnableHttpClientInstrumentation { get; set; } = true;
+    /// <summary>Enable Prometheus exporter for metrics (default false).</summary>
+    public bool EnablePrometheusExporter { get; set; } = false;
+    /// <summary>Prometheus metrics endpoint port (default 9464).</summary>
+    public int PrometheusPort { get; set; } = 9464;
+    /// <summary>Enable Jaeger exporter for tracing (default false).</summary>
+    public bool EnableJaegerExporter { get; set; } = false;
+    /// <summary>Jaeger endpoint (ex: http://jaeger:14268/api/traces). If null, default is used.</summary>
+    public string? JaegerEndpoint { get; set; }
+    /// <summary>Enable Loki sink for logs (default false).</summary>
+    public bool EnableLoki { get; set; } = false;
+    /// <summary>Loki URL (ex: http://loki:3100). If null, Loki sink is not added.</summary>
+    public string? LokiUrl { get; set; }
 }
-

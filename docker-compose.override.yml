@@ -248,24 +248,70 @@ services:
     restart: always
     ports:
       - "7005:8080"
-#    volumes:
-#      - ./myrealm.json:/opt/keycloak/data/import/myrealm.json
+  #    volumes:
+  #      - ./myrealm.json:/opt/keycloak/data/import/myrealm.json
+  
+  #  webapp:
+  #    container_name: webapp
+  #    environment:
+  #      - NODE_ENV=production
+  #    depends_on:
+  #      - gatewayapi
+  #      - keycloak
+  #    restart: always
+  #    volumes:
+  #      - ./UserInterfaces/WebApplication/nginx.conf:/etc/nginx/conf.d/default.conf
+  #    ports:
+  #      - "80:80"
+  #      - "4001:4001"
+  #      - "4041:4041"
+  #
 
-#  webapp:
-#    container_name: webapp
-#    environment:
-#      - NODE_ENV=production
-#    depends_on:
-#      - gatewayapi
-#      - keycloak
-#    restart: always
-#    volumes:
-#      - ./UserInterfaces/WebApplication/nginx.conf:/etc/nginx/conf.d/default.conf
-#    ports:
-#      - "80:80"
-#      - "4001:4001"
-#      - "4041:4041"
-#
+  otelcollector:
+    container_name: otel-collector
+    command: [ "--config=/etc/otel-collector-config.yaml" ]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "55679:55679" # health check
+
+  prometheus:
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  loki:
+    container_name: loki
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./loki-config.yaml:/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+
+  jaeger:
+    container_name: jaeger
+    ports:
+      - "16686:16686" # UI
+      - "14250:14250" # gRPC
+      - "14268:14268" # HTTP
+
+  grafana:
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+      - loki
+      - jaeger
 
 volumes:
   postgres_catalog:
@@ -274,3 +320,8 @@ volumes:
   postgres_order:
   minio_data:
   mongo_basket_data:
+  otel_collector_config:
+  prometheus_data:
+  loki_data:
+  jaeger_data:
+  grafana_data:

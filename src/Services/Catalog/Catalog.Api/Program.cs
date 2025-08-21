@@ -16,7 +16,7 @@ builder.Services
     .AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
-builder.Services.AddApplicationLogger()
+builder.Services
     .AddObservability(builder.Configuration, options =>
     {
         options.ServiceName = "Catalog.Api";

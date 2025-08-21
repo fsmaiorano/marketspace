@@ -64,19 +64,34 @@ services:
     build:
       context: .
       dockerfile: ./src/Services/Merchant/Merchant.Api/Dockerfile
-#  
-#  gatewayapi:
-#    image: ${DOCKER_REGISTRY-}gatewayapi
-#    platform: linux/amd64
-#    build:
-#      context: .
-#      dockerfile: ./src/Gateways/GatewayApi/Dockerfile
+  #  
+  #  gatewayapi:
+  #    image: ${DOCKER_REGISTRY-}gatewayapi
+  #    platform: linux/amd64
+  #    build:
+  #      context: .
+  #      dockerfile: ./src/Gateways/GatewayApi/Dockerfile
+  
+  #  webapp:
+  #    image: ${DOCKER_REGISTRY-}webapp
+  #    build:
+  #      context: .
+  #      dockerfile: UserInterfaces/WebApplication/Dockerfile
 
-#  webapp:
-#    image: ${DOCKER_REGISTRY-}webapp
-#    build:
-#      context: .
-#      dockerfile: UserInterfaces/WebApplication/Dockerfile
+  otelcollector:
+    image: otel/opentelemetry-collector:latest
+  
+  prometheus:
+    image: prom/prometheus:latest
+
+  loki:
+    image: grafana/loki:latest
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    
+  grafana:
+      image: grafana/grafana:latest
 
 volumes:
   postgres_catalog:
@@ -85,4 +100,10 @@ volumes:
   postgres_merchant:
   mongo_basket_data:
   minio_data:
+  otel_collector_config:
+  prometheus_data:
+  loki_data:
+  jaeger_data:
+  grafana_data:
+      
   
