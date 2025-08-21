@@ -22,8 +22,14 @@
         <PackageReference Include="OpenTelemetry" Version="1.8.1" />
         <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.8.1" />
         <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.8.1" />
-        <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
-        <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
-        <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
+        <PackageReference Include="OpenTelemetry.Exporter.Jaeger" Version="1.5.1" />
+        <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.8.1" />
+        <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.8.1" />
+        <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.8.1" />
+        <!-- Serilog Loki sink -->
+        <PackageReference Include="Serilog.Sinks.Grafana.Loki" Version="8.3.0" />
+        <!-- Prometheus metrics via prometheus-net -->
+        <PackageReference Include="prometheus-net" Version="8.2.1" />
+        <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
     </ItemGroup>
 </Project>

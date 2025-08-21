@@ -18,7 +18,7 @@ builder.Services
 
 builder.Host.UseSerilog();
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
-builder.Services.AddApplicationLogger()
+builder.Services
     .AddObservability(builder.Configuration, options =>
     {
         options.ServiceName = "Merchant.Api";

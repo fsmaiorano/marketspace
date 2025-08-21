@@ -10,18 +10,25 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
 using BuildingBlocks.Loggers.Enrichers;
+using BuildingBlocks.Services.Correlation;
+using Serilog.Sinks.Grafana.Loki;
+using Prometheus;
 
 namespace BuildingBlocks.Loggers;
 
 public static class ObservabilityExtensions
 {
-    public static IServiceCollection AddObservability(this IServiceCollection services, IConfiguration configuration, Action<ObservabilityOptions>? configure = null)
+    public static IServiceCollection AddObservability(this IServiceCollection services, IConfiguration configuration,
+        Action<ObservabilityOptions>? configure = null)
     {
+        services.AddHttpContextAccessor();
+        services.AddScoped<ICorrelationIdService, CorrelationIdService>();
+
         ObservabilityOptions opts = new ObservabilityOptions();
         configuration.GetSection("Observability").Bind(opts);
         configure?.Invoke(opts);
 
-        opts.ServiceName ??= AppDomain.CurrentDomain.FriendlyName ?? "UnknownService";
+        opts.ServiceName ??= "UnknownService";
 
         ResourceBuilder resourceBuilder = ResourceBuilder.CreateDefault()
             .AddService(opts.ServiceName, serviceVersion: opts.ServiceVersion)
@@ -39,6 +46,10 @@ public static class ObservabilityExtensions
                 if (opts.EnableHttpClientInstrumentation) b.AddHttpClientInstrumentation();
                 if (!string.IsNullOrWhiteSpace(opts.OtlpEndpoint))
                     b.AddOtlpExporter(o => o.Endpoint = new Uri(opts.OtlpEndpoint!));
+                if (opts.EnableJaegerExporter)
+                {
+                    b.AddJaegerExporter();
+                }
             })
             .WithMetrics(b =>
             {
@@ -49,6 +60,12 @@ public static class ObservabilityExtensions
                 if (!string.IsNullOrWhiteSpace(opts.OtlpEndpoint))
                     b.AddOtlpExporter(o => o.Endpoint = new Uri(opts.OtlpEndpoint!));
             });
+
+        // Prometheus metrics (using prometheus-net)
+        if (opts.EnablePrometheusExporter)
+        {
+            services.AddSingleton(Metrics.DefaultRegistry);
+        }
 
         LoggerConfiguration loggerConfig = new LoggerConfiguration()
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
@@ -62,9 +79,11 @@ public static class ObservabilityExtensions
 
         if (opts.EnableSerilogConsole)
             loggerConfig.WriteTo.Console(new CompactJsonFormatter());
+        if (opts.EnableLoki && !string.IsNullOrWhiteSpace(opts.LokiUrl))
+            loggerConfig.WriteTo.GrafanaLoki(opts.LokiUrl!);
 
         Log.Logger = loggerConfig.CreateLogger();
- 
+
         services.AddSingleton(Log.Logger);
         services.AddLogging(builder =>
         {
@@ -80,6 +99,16 @@ public static class ObservabilityExtensions
         Activity.DefaultIdFormat = ActivityIdFormat.W3C;
         Activity.ForceDefaultIdFormat = true;
         app.UseSerilogRequestLogging();
+
+        // Add Prometheus metrics endpoint if enabled
+        var observabilityOptions = new ObservabilityOptions();
+        app.Configuration.GetSection("Observability").Bind(observabilityOptions);
+        if (observabilityOptions.EnablePrometheusExporter)
+        {
+            app.UseHttpMetrics();
+            app.MapMetrics();
+        }
+
         return app;
     }
 }
