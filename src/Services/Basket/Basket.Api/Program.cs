@@ -37,6 +37,7 @@ app.UseExceptionHandler(options => { });
 CreateBasketEndpoint.MapEndpoint(app);
 DeleteBasketEndpoint.MapEndpoint(app);
 GetBasketByIdEndpoint.MapEndpoint(app);
+CheckoutBasketEndpoint.MapEndpoint(app);
 
 app.Run();
 
