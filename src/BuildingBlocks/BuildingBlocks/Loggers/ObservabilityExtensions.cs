@@ -79,6 +79,7 @@ public static class ObservabilityExtensions
 
         if (opts.EnableSerilogConsole)
             loggerConfig.WriteTo.Console(new CompactJsonFormatter());
+        
         if (opts.EnableLoki && !string.IsNullOrWhiteSpace(opts.LokiUrl))
             loggerConfig.WriteTo.GrafanaLoki(opts.LokiUrl!);
 

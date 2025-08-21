@@ -4,7 +4,7 @@ using Basket.Api.Infrastructure;
 using BuildingBlocks.Exceptions;
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
-using Serilog.Extensions.Hosting;
+using Serilog;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +22,7 @@ builder.Services
         options.ServiceVersion = "1.0.0";
     });
 
-builder.Services.AddSingleton<DiagnosticContext>();
+builder.Host.UseSerilog();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -46,9 +46,10 @@ app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseObservability();
 app.UseExceptionHandler(options => { });
 
+// Map all basket endpoints
 CreateBasketEndpoint.MapEndpoint(app);
-DeleteBasketEndpoint.MapEndpoint(app);
 GetBasketByIdEndpoint.MapEndpoint(app);
+DeleteBasketEndpoint.MapEndpoint(app);
 CheckoutBasketEndpoint.MapEndpoint(app);
 
 app.Run();

@@ -5,6 +5,7 @@ using Order.Api.Application;
 using Order.Api.Endpoints;
 using Order.Api.Infrastructure;
 using Order.Api.Infrastructure.Data.Extensions;
+using Serilog;
 using Serilog.Extensions.Hosting;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -21,6 +22,7 @@ builder.Services
         options.ServiceVersion = "1.0.0";
     });
 
+builder.Host.UseSerilog();
 builder.Services.AddSingleton<DiagnosticContext>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
