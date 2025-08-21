@@ -16,7 +16,10 @@ public class GetMerchantByIdHandler(IMerchantRepository repository, ILogger<GetM
             MerchantEntity? merchant = await repository.GetByIdAsync(merchantId, isTrackingEnabled: false);
 
             if (merchant is null)
+            {
+                logger.LogInformation("Merchant with ID {MerchantId} not found.", query.Id);
                 return Result<GetMerchantByIdResult>.Failure($"Catalog with ID {query.Id} not found.");
+            }
 
             GetMerchantByIdResult result = new GetMerchantByIdResult
             {
