@@ -5,6 +5,7 @@ using Order.Api.Application;
 using Order.Api.Endpoints;
 using Order.Api.Infrastructure;
 using Order.Api.Infrastructure.Data.Extensions;
+using Serilog.Extensions.Hosting;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -13,8 +14,14 @@ builder.Services
     .AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
-builder.Services.AddApplicationLogger(); 
+builder.Services.AddApplicationLogger()
+    .AddObservability(builder.Configuration, options =>
+    {
+        options.ServiceName = "Order.Api";
+        options.ServiceVersion = "1.0.0";
+    });
 
+builder.Services.AddSingleton<DiagnosticContext>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -36,6 +43,7 @@ app.UseSwaggerUI(options =>
 });
 
 app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseObservability();
 app.UseExceptionHandler(options => { });
 
 CreateOrderEndpoint.MapEndpoint(app);

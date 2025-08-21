@@ -5,8 +5,12 @@ using Basket.Api.Infrastructure.Data.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Mongo2Go;
 using MongoDB.Driver;
+using Serilog;
+using Serilog.Extensions.Hosting;
 
 namespace Basket.Test.Api;
 
@@ -16,11 +20,10 @@ public class BasketApiFactory : WebApplicationFactory<BasketProgram>
     {
         builder.ConfigureServices(services =>
         {
+            // Remove production services
             List<ServiceDescriptor> descriptorsToRemove = services
                 .Where(d => d.ServiceType.FullName != null &&
-                            (
-                                // d.ServiceType == typeof(DbContextOptions<BasketDbContext>) ||
-                             d.ServiceType == typeof(BasketDbContext) ||
+                            (d.ServiceType == typeof(BasketDbContext) ||
                              d.ServiceType == typeof(IBasketDbContext) ||
                              d.ServiceType.FullName.Contains(nameof(BasketDbContext)) ||
                              d.ServiceType.FullName.Contains(nameof(IBasketDbContext)) ||
@@ -32,6 +35,7 @@ public class BasketApiFactory : WebApplicationFactory<BasketProgram>
             foreach (ServiceDescriptor descriptor in descriptorsToRemove)
                 services.Remove(descriptor);
 
+            // Configure test MongoDB
             MongoDbRunner? runner = MongoDbRunner.Start();
             
             services.AddSingleton<IMongoClient>(sp => new MongoClient(runner.ConnectionString));
@@ -43,6 +47,11 @@ public class BasketApiFactory : WebApplicationFactory<BasketProgram>
             });
 
             services.AddScoped<IBasketRepository, BasketRepository>();
+
+            // Configure test logging to avoid Serilog issues
+            services.RemoveAll<ILoggerFactory>();
+            services.TryAddSingleton<DiagnosticContext>();
+            services.AddLogging(loggingBuilder => loggingBuilder.AddConsole().SetMinimumLevel(LogLevel.Warning));
         });
     }
 }

@@ -1,4 +1,8 @@
 using Merchant.Api;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Extensions.Hosting;
 
 namespace Merchant.Test.Api;
 
@@ -8,6 +12,7 @@ public class MerchantApiFactory : WebApplicationFactory<MerchantProgram>
     {
         builder.ConfigureServices(services =>
         {
+            // Remove production database services
             List<ServiceDescriptor> descriptorsToRemove = services
                 .Where(d => d.ServiceType.FullName != null &&
                             (d.ServiceType == typeof(DbContextOptions<MerchantDbContext>) ||
@@ -22,10 +27,16 @@ public class MerchantApiFactory : WebApplicationFactory<MerchantProgram>
             foreach (ServiceDescriptor descriptor in descriptorsToRemove)
                 services.Remove(descriptor);
 
+            // Configure test database
             services.AddDbContext<MerchantDbContext>(options =>
                 options.UseInMemoryDatabase("InMemoryDbForTesting"));
 
             services.AddScoped<IMerchantDbContext, MerchantDbContext>();
+
+            // Configure test logging to avoid Serilog issues
+            services.RemoveAll<ILoggerFactory>();
+            services.TryAddSingleton<DiagnosticContext>();
+            services.AddLogging(loggingBuilder => loggingBuilder.AddConsole().SetMinimumLevel(LogLevel.Warning));
         });
     }
 }

@@ -11,6 +11,16 @@ public class ApplicationLogger(ILogger logger, ICorrelationIdService correlation
     {
     }
 
+    public IDisposable? BeginScope<TState>(TState state) where TState : notnull => logger.BeginScope(state);
+
+    public bool IsEnabled(LogLevel logLevel) => logger.IsEnabled(logLevel);
+
+    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+        Func<TState, Exception?, string> formatter) where TState : notnull
+    {
+        logger.Log(logLevel, eventId, state, exception, formatter);
+    }
+
     public void LogTrace(string message, params object[] args) =>
         LogTrace(correlationIdService.GetCorrelationId(), message, args);
 
