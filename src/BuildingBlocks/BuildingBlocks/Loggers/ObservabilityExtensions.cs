@@ -8,13 +8,70 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Events;
-using Serilog.Formatting.Compact;
+using Serilog.Formatting;
 using BuildingBlocks.Loggers.Enrichers;
 using BuildingBlocks.Services.Correlation;
 using Serilog.Sinks.Grafana.Loki;
 using Prometheus;
+using System.Text;
 
 namespace BuildingBlocks.Loggers;
+
+public class LokiJsonFormatter : ITextFormatter
+{
+    public void Format(LogEvent logEvent, TextWriter output)
+    {
+        StringBuilder json = new StringBuilder();
+        json.Append("{");
+
+        json.Append($"\"timestamp\":\"{logEvent.Timestamp:yyyy-MM-ddTHH:mm:ss.fffZ}\",");
+
+        json.Append($"\"level\":\"{logEvent.Level}\",");
+
+        string renderedMessage = logEvent.RenderMessage();
+        json.Append($"\"message\":\"{EscapeJson(renderedMessage)}\",");
+
+        json.Append("\"properties\":{");
+        int propertyCount = 0;
+        foreach (KeyValuePair<string, LogEventPropertyValue> property in logEvent.Properties)
+        {
+            if (propertyCount > 0) json.Append(",");
+            json.Append($"\"{property.Key}\":");
+
+            if (property.Value is ScalarValue scalarValue)
+            {
+                json.Append($"\"{EscapeJson(scalarValue.Value?.ToString() ?? "null")}\"");
+            }
+            else
+            {
+                json.Append($"\"{EscapeJson(property.Value.ToString())}\"");
+            }
+
+            propertyCount++;
+        }
+
+        json.Append("}");
+
+        if (logEvent.Exception != null)
+        {
+            json.Append($",\"exception\":\"{EscapeJson(logEvent.Exception.ToString())}\"");
+        }
+
+        json.Append("}");
+        output.Write(json.ToString());
+    }
+
+    private static string EscapeJson(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return text;
+
+        return text.Replace("\\", "\\\\")
+            .Replace("\"", "\\\"")
+            .Replace("\n", "\\n")
+            .Replace("\r", "\\r")
+            .Replace("\t", "\\t");
+    }
+}
 
 public static class ObservabilityExtensions
 {
@@ -28,7 +85,6 @@ public static class ObservabilityExtensions
         configuration.GetSection("Observability").Bind(opts);
         configure?.Invoke(opts);
 
-        // Ensure service name is set to prevent unknown_services in Loki
         opts.ServiceName ??= "UnknownService";
 
         ResourceBuilder resourceBuilder = ResourceBuilder.CreateDefault()
@@ -86,17 +142,22 @@ public static class ObservabilityExtensions
         if (opts.EnableSerilogConsole)
         {
             loggerConfig.WriteTo.Console(
-                outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{ServiceName}] [CorrelationId: {CorrelationId}] {Message:lj} {Properties:j}{NewLine}{Exception}",
+                outputTemplate:
+                "[{Timestamp:HH:mm:ss} {Level:u3}] [{ServiceName}] [CorrelationId: {CorrelationId}] {Message:lj} {Properties:j}{NewLine}{Exception}",
                 restrictedToMinimumLevel: LogEventLevel.Information
             );
         }
-        
+
         if (opts.EnableLoki && !string.IsNullOrWhiteSpace(opts.LokiUrl))
         {
             var lokiLabels = new List<LokiLabel>
             {
                 new() { Key = "service", Value = opts.ServiceName },
-                new() { Key = "environment", Value = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production" },
+                new()
+                {
+                    Key = "environment",
+                    Value = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"
+                },
                 new() { Key = "version", Value = opts.ServiceVersion ?? "1.0.0" }
             };
 
@@ -104,7 +165,7 @@ public static class ObservabilityExtensions
                 uri: opts.LokiUrl,
                 labels: lokiLabels,
                 restrictedToMinimumLevel: LogEventLevel.Information,
-                textFormatter: new CompactJsonFormatter()
+                textFormatter: new LokiJsonFormatter()
             );
         }
 
@@ -127,13 +188,14 @@ public static class ObservabilityExtensions
         app.UseSerilogRequestLogging();
 
         // Add Prometheus metrics endpoint if enabled
-        var observabilityOptions = new ObservabilityOptions();
+        ObservabilityOptions observabilityOptions = new ObservabilityOptions();
         app.Configuration.GetSection("Observability").Bind(observabilityOptions);
-        if (observabilityOptions.EnablePrometheusExporter)
-        {
-            app.UseHttpMetrics();
-            app.MapMetrics();
-        }
+
+        if (!observabilityOptions.EnablePrometheusExporter)
+            return app;
+
+        app.UseHttpMetrics();
+        app.MapMetrics();
 
         return app;
     }
