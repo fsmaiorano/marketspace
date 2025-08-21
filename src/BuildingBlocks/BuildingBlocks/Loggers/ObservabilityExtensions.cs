@@ -28,10 +28,11 @@ public static class ObservabilityExtensions
         configuration.GetSection("Observability").Bind(opts);
         configure?.Invoke(opts);
 
+        // Ensure service name is set to prevent unknown_services in Loki
         opts.ServiceName ??= "UnknownService";
 
         ResourceBuilder resourceBuilder = ResourceBuilder.CreateDefault()
-            .AddService(opts.ServiceName, serviceVersion: opts.ServiceVersion)
+            .AddService(opts.ServiceName!, serviceVersion: opts.ServiceVersion)
             .AddTelemetrySdk()
             .AddEnvironmentVariableDetector();
 
@@ -68,20 +69,44 @@ public static class ObservabilityExtensions
         }
 
         LoggerConfiguration loggerConfig = new LoggerConfiguration()
+            .MinimumLevel.Information() // Set minimum level to Information to remove Trace logs
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .MinimumLevel.Override("System", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
             .Enrich.FromLogContext()
             .Enrich.With(new ActivityEnricher())
             .Enrich.WithEnvironmentName()
-            .Enrich.WithMachineName();
+            .Enrich.WithMachineName()
+            .Enrich.WithProperty("ServiceName", opts.ServiceName)
+            .Enrich.WithProperty("ServiceVersion", opts.ServiceVersion ?? "1.0.0");
 
-        loggerConfig.ReadFrom.Configuration(configuration);
+        // Don't read from configuration to avoid conflicts - we'll configure everything here
+        // loggerConfig.ReadFrom.Configuration(configuration);
 
         if (opts.EnableSerilogConsole)
-            loggerConfig.WriteTo.Console(new CompactJsonFormatter());
+        {
+            loggerConfig.WriteTo.Console(
+                outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{ServiceName}] [CorrelationId: {CorrelationId}] {Message:lj} {Properties:j}{NewLine}{Exception}",
+                restrictedToMinimumLevel: LogEventLevel.Information
+            );
+        }
         
         if (opts.EnableLoki && !string.IsNullOrWhiteSpace(opts.LokiUrl))
-            loggerConfig.WriteTo.GrafanaLoki(opts.LokiUrl!);
+        {
+            var lokiLabels = new List<LokiLabel>
+            {
+                new() { Key = "service", Value = opts.ServiceName },
+                new() { Key = "environment", Value = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production" },
+                new() { Key = "version", Value = opts.ServiceVersion ?? "1.0.0" }
+            };
+
+            loggerConfig.WriteTo.GrafanaLoki(
+                uri: opts.LokiUrl,
+                labels: lokiLabels,
+                restrictedToMinimumLevel: LogEventLevel.Information,
+                textFormatter: new CompactJsonFormatter()
+            );
+        }
 
         Log.Logger = loggerConfig.CreateLogger();
 
