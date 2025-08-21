@@ -1,4 +1,5 @@
 using BuildingBlocks.Exceptions;
+using BuildingBlocks.Middlewares;
 using Merchant.Api.Application;
 using Merchant.Api.Endpoints;
 using Merchant.Api.Infrastructure;
@@ -34,6 +35,7 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty;
 });
 
+app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseExceptionHandler(options => { });
 
 CreateMerchantEndpoint.MapEndpoint(app);

@@ -2,6 +2,7 @@ using Basket.Api.Application;
 using Basket.Api.Endpoints;
 using Basket.Api.Infrastructure;
 using BuildingBlocks.Exceptions;
+using BuildingBlocks.Middlewares;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +33,7 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty;
 });
 
+app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseExceptionHandler(options => { });
 
 CreateBasketEndpoint.MapEndpoint(app);

@@ -1,4 +1,5 @@
 using BuildingBlocks.Exceptions;
+using BuildingBlocks.Middlewares;
 using Catalog.Api.Application;
 using Catalog.Api.Endpoints;
 using Catalog.Api.Infrastructure;
@@ -34,6 +35,7 @@ app.UseSwaggerUI(options =>
     options.RoutePrefix = string.Empty;
 });
 
+app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseExceptionHandler(options => { });
 
 CreateCatalogEndpoint.MapEndpoint(app);
