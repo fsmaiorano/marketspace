@@ -52,7 +52,7 @@ for (int i = 0; i < createMerchantCounter; i++)
 // Create catalog
 for (int i = 0; i < createdMerchants.Count; i++)
 {
-    await Task.Run(async () =>
+    try
     {
         CatalogEntity catalog = CatalogBuilder.CreateCatalogFaker().Generate();
         catalog.CreatedBy = "seed";
@@ -71,7 +71,12 @@ for (int i = 0; i < createdMerchants.Count; i++)
         catalogEntity.Id = CatalogId.Of(Guid.NewGuid());
         catalogDbContext.Catalogs.Add(catalogEntity);
         catalogDbContext.SaveChanges();
-    });
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Error creating catalog for merchant " + createdMerchants.ElementAt(i).Name + ": " +
+                          ex.Message);
+    }
 }
 
 // Create basket
@@ -86,4 +91,3 @@ for (int i = 0; i < createdMerchants.Count; i++)
     createdShoppingCarts.Add(shoppingCart);
     shoppingCartCollection.InsertMany(createdShoppingCarts);
 }
-

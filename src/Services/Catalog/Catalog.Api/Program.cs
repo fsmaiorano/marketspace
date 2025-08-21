@@ -5,6 +5,7 @@ using Catalog.Api.Application;
 using Catalog.Api.Endpoints;
 using Catalog.Api.Infrastructure;
 using Catalog.Api.Infrastructure.Data.Extensions;
+using Serilog.Extensions.Hosting;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -15,8 +16,14 @@ builder.Services
     .AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
-builder.Services.AddApplicationLogger();
+builder.Services.AddApplicationLogger()
+    .AddObservability(builder.Configuration, options =>
+    {
+        options.ServiceName = "Catalog.Api";
+        options.ServiceVersion = "1.0.0";
+    });
 
+builder.Services.AddSingleton<DiagnosticContext>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -38,6 +45,7 @@ app.UseSwaggerUI(options =>
 });
 
 app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseObservability();
 app.UseExceptionHandler(options => { });
 
 CreateCatalogEndpoint.MapEndpoint(app);

@@ -4,9 +4,13 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Minio;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Serilog;
+using Serilog.Extensions.Hosting;
 
 namespace Catalog.Test.Api;
 
@@ -32,6 +36,7 @@ public class CatalogApiFactory : WebApplicationFactory<CatalogProgram>, IAsyncLi
     {
         builder.ConfigureServices(services =>
         {
+            // Remove production services
             List<ServiceDescriptor> descriptorsToRemove = services
                 .Where(d => d.ServiceType.FullName != null &&
                             (d.ServiceType == typeof(DbContextOptions<CatalogDbContext>) ||
@@ -48,31 +53,35 @@ public class CatalogApiFactory : WebApplicationFactory<CatalogProgram>, IAsyncLi
             foreach (ServiceDescriptor descriptor in descriptorsToRemove)
                 services.Remove(descriptor);
 
+            // Configure test database
             services.AddDbContext<CatalogDbContext>(options =>
                 options.UseInMemoryDatabase("InMemoryDbForTesting"));
 
             services.AddScoped<ICatalogDbContext, CatalogDbContext>();
 
-            services.AddSingleton<IMinioClient>(_ =>
-            {
-                if (string.IsNullOrEmpty(MinioEndpoint))
-                    throw new InvalidOperationException(
-                        "MinIO container not initialized. Make sure to call InitializeAsync() first.");
-
-                return new MinioClient()
+            // Configure test MinIO client
+            services.AddSingleton<IMinioClient>(provider =>
+                new MinioClient()
                     .WithEndpoint(MinioEndpoint)
                     .WithCredentials(AccessKey, SecretKey)
-                    .Build();
-            });
+                    .Build());
+
+            // Configure test logging to avoid Serilog issues
+            services.RemoveAll<ILoggerFactory>();
+            // Do NOT remove DiagnosticContext; instead, ensure it is registered
+            services.TryAddSingleton<DiagnosticContext>();
+            services.AddLogging(loggingBuilder => loggingBuilder.AddConsole().SetMinimumLevel(LogLevel.Warning));
         });
     }
 
     public async Task InitializeAsync()
     {
         await _minioContainer.StartAsync();
-        ushort port = _minioContainer.GetMappedPublicPort(9000);
-        MinioEndpoint = $"localhost:{port}";
+        MinioEndpoint = $"{_minioContainer.Hostname}:{_minioContainer.GetMappedPublicPort(9000)}";
     }
 
-    public new async Task DisposeAsync() => await _minioContainer.DisposeAsync();
+    public async Task DisposeAsync()
+    {
+        await _minioContainer.DisposeAsync();
+    }
 }
