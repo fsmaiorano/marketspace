@@ -205,6 +205,34 @@ services:
       #   - ${HOME}/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
       - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
       - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
+        
+  backendforfrontend.api:
+    container_name: merchantapi
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ConnectionStrings__Database=Server=merchantdb;Port=5436;Database=MerchantDb;User Id=postgres;Password=postgres;;Include Error Detail=true;
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+    restart: unless-stopped
+    depends_on:
+      merchant.api:
+        condition: service_started 
+      catalog.api:
+        condition: service_started
+      basket.api:
+        condition: service_started
+      order.api:
+        condition: service_started
+    ports:
+      - "5001:8080"
+      - "5051:8081"
+    volumes:
+      #   - ${HOME}/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
+      #   - ${HOME}/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
+      - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
+      - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
   
   #  gatewayapi:
   #    container_name: gatewayapi
