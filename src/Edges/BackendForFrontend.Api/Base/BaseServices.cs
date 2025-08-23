@@ -1,7 +1,6 @@
 using BuildingBlocks.Http;
-using System.Net.Http;
 
-namespace BackendForFrontend.Api;
+namespace BackendForFrontend.Api.Base;
 
 public class BaseService(HttpClient httpClient) : HttpHelper(httpClient)
 {

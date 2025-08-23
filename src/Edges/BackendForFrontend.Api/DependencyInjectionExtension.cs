@@ -23,19 +23,17 @@ public static class DependencyInjectionExtension
 
     private static void AddUseCases(IServiceCollection services)
     {
-        
     }
 
     private static void AddServices(IServiceCollection services, IConfiguration configuration)
     {
-        string? userManagementApiUrl = configuration["ApiSettings:UserManagementApiUrl"];
+        string? merchantUrl = configuration["Services:MerchantService:BaseUrl"];
         services.AddHttpClient<IMerchantService, MerchantService>(client =>
             {
-                client.BaseAddress = new Uri(userManagementApiUrl ?? throw new InvalidOperationException());
+                client.BaseAddress = new Uri(merchantUrl ?? throw new InvalidOperationException());
             })
             .AddHttpMessageHandler(() =>
                 new LoggingHandler(services.BuildServiceProvider().GetRequiredService<ILogger<LoggingHandler>>()));
-        // .SetHandlerLifetime(TimeSpan.FromMinutes(5));
     }
 
     public class LoggingHandler(ILogger<LoggingHandler> logger) : DelegatingHandler

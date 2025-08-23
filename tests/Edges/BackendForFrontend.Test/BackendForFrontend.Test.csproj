@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Bogus" Version="35.6.3" />
+        <PackageReference Include="coverlet.collector" Version="6.0.2"/>
+        <PackageReference Include="FluentAssertions" Version="7.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.8" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.8" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1"/>
+        <PackageReference Include="Mongo2Go" Version="4.1.0" />
+        <PackageReference Include="Moq" Version="4.20.72" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+        <PackageReference Include="Testcontainers" Version="4.6.0" />
+        <PackageReference Include="Testcontainers.Minio" Version="4.6.0" />
+        <PackageReference Include="xunit" Version="2.9.2"/>
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="Xunit"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\src\Edges\BackendForFrontend.Api\BackendForFrontend.Api.csproj" />
+      <ProjectReference Include="..\..\..\src\Services\Basket\Basket.Api\Basket.Api.csproj" />
+      <ProjectReference Include="..\..\..\src\Services\Catalog\Catalog.Api\Catalog.Api.csproj" />
+      <ProjectReference Include="..\..\..\src\Services\Merchant\Merchant.Api\Merchant.Api.csproj" />
+      <ProjectReference Include="..\..\..\src\Services\Order\Order.Api\Order.Api.csproj" />
+      <ProjectReference Include="..\..\Builders\Builder\Builder.csproj" />
+      <ProjectReference Include="..\..\Services\Basket\Basket.Test\Basket.Test.csproj" />
+      <ProjectReference Include="..\..\Services\Catalog\Catalog.Test\Catalog.Test.csproj" />
+      <ProjectReference Include="..\..\Services\Merchant\Merchant.Test\Merchant.Test.csproj" />
+      <ProjectReference Include="..\..\Services\Order\Order.Test\Order.Test.csproj" />
+    </ItemGroup>
+
+</Project>

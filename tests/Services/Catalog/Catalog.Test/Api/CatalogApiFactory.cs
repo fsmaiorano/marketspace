@@ -36,7 +36,6 @@ public class CatalogApiFactory : WebApplicationFactory<CatalogProgram>, IAsyncLi
     {
         builder.ConfigureServices(services =>
         {
-            // Remove production services
             List<ServiceDescriptor> descriptorsToRemove = services
                 .Where(d => d.ServiceType.FullName != null &&
                             (d.ServiceType == typeof(DbContextOptions<CatalogDbContext>) ||
@@ -53,7 +52,6 @@ public class CatalogApiFactory : WebApplicationFactory<CatalogProgram>, IAsyncLi
             foreach (ServiceDescriptor descriptor in descriptorsToRemove)
                 services.Remove(descriptor);
 
-            // Configure test database
             services.AddDbContext<CatalogDbContext>(options =>
                 options.UseInMemoryDatabase("InMemoryDbForTesting"));
 
@@ -66,9 +64,7 @@ public class CatalogApiFactory : WebApplicationFactory<CatalogProgram>, IAsyncLi
                     .WithCredentials(AccessKey, SecretKey)
                     .Build());
 
-            // Configure test logging to avoid Serilog issues
             services.RemoveAll<ILoggerFactory>();
-            // Do NOT remove DiagnosticContext; instead, ensure it is registered
             services.TryAddSingleton<DiagnosticContext>();
             services.AddLogging(loggingBuilder => loggingBuilder.AddConsole().SetMinimumLevel(LogLevel.Warning));
         });
