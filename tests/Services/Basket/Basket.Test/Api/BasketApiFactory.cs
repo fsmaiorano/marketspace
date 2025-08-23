@@ -53,6 +53,3 @@ public class BasketApiFactory : WebApplicationFactory<BasketProgram>
     }
 }
 
-public interface IBasketDbContext
-{
-}

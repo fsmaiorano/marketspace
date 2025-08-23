@@ -1,4 +1,6 @@
 using BackendForFrontend.Api;
+using BackendForFrontend.Api.Merchant;
+using BackendForFrontend.Api.Merchant.Endpoints;
 using BuildingBlocks.Exceptions;
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
@@ -7,21 +9,22 @@ using Serilog.Extensions.Hosting;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.Services .AddApplication(builder.Configuration);
+builder.Services.AddApplication(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddOpenApi();
 builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddMerchantServices(builder.Configuration);
+
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 builder.Services
     .AddObservability(builder.Configuration, options =>
     {
-        options.ServiceName = "Merchant.Api";
+        options.ServiceName = "BackendForFrontend.Api";
         options.ServiceVersion = "1.0.0";
     });
-
 
 builder.Host.UseSerilog();
 builder.Services.AddSingleton<DiagnosticContext>();
@@ -48,5 +51,11 @@ app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseObservability();
 app.UseExceptionHandler(options => { });
 
+MerchantEndpoint.MapEndpoint(app);
 
 app.Run();
+
+namespace BackendForFrontend.Api
+{
+    public partial class BackendForFrontendProgram;
+}
