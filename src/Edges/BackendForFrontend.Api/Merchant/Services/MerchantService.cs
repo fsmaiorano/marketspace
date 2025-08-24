@@ -14,6 +14,8 @@ public class MerchantService(ILogger<MerchantService> logger, HttpClient httpCli
 
     public async Task<CreateMerchantResponse> CreateMerchantAsync(CreateMerchantRequest request)
     {
+        logger.LogInformation("Creating merchant with request: {@Request}", request);
+        
         HttpResponseMessage response = await DoPost($"{BaseUrl}/merchant", request);
         CreateMerchantResponse? content = await response.Content.ReadFromJsonAsync<CreateMerchantResponse>();
 
@@ -33,6 +35,8 @@ public class MerchantService(ILogger<MerchantService> logger, HttpClient httpCli
 
     public async Task<UpdateMerchantResponse> UpdateMerchantAsync(UpdateMerchantRequest request)
     {
+        logger.LogInformation("Updating merchant with request: {@Request}", request);
+        
         HttpResponseMessage response = await DoPut($"{BaseUrl}/merchant/{request.MerchantId}", request);
         UpdateMerchantResponse? content = await response.Content.ReadFromJsonAsync<UpdateMerchantResponse>();
 
@@ -52,6 +56,8 @@ public class MerchantService(ILogger<MerchantService> logger, HttpClient httpCli
 
     public async Task<DeleteMerchantResponse> DeleteMerchantAsync(Guid merchantId)
     {
+        logger.LogInformation("Deleting merchant with ID: {MerchantId}", merchantId);
+        
         HttpResponseMessage response = await DoDelete($"{BaseUrl}/merchant/{merchantId}");
         DeleteMerchantResponse? content = await response.Content.ReadFromJsonAsync<DeleteMerchantResponse>();
 
@@ -71,6 +77,8 @@ public class MerchantService(ILogger<MerchantService> logger, HttpClient httpCli
 
     public async Task<GetMerchantByIdResponse> GetMerchantByIdAsync(Guid merchantId)
     {
+        logger.LogInformation("Retrieving merchant with ID: {MerchantId}", merchantId);
+        
         HttpResponseMessage response = await DoGet($"{BaseUrl}/merchant/{merchantId}");
         GetMerchantByIdResponse? content = await response.Content.ReadFromJsonAsync<GetMerchantByIdResponse>();
 
