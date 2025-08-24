@@ -1,4 +1,5 @@
 using BackendForFrontend.Api;
+using BackendForFrontend.Api.Merchant.Contracts;
 using Basket.Api.Infrastructure.Data;
 using Basket.Test.Api;
 using Catalog.Api.Infrastructure.Data;
@@ -44,7 +45,6 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
             .WithCommand("server", "/data", "--console-address", ":9001")
             .Build();
 
-        // Create the MerchantApiFactory and client early so it's available during service registration
         _merchantApiFactory = new MerchantApiFactory();
         _merchantApiClient = _merchantApiFactory.CreateClient();
     }
@@ -59,9 +59,12 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
                              d.ServiceType == typeof(IBasketDbContext) ||
                              d.ServiceType == typeof(MerchantDbContext) ||
                              d.ServiceType == typeof(IMerchantDbContext) ||
-                             d.ServiceType == typeof(DbContextOptions<OrderDbContext>) ||
                              d.ServiceType == typeof(OrderDbContext) ||
-                             d.ServiceType == typeof(IOrderDbContext) ||
+                             d.ServiceType == typeof(CatalogDbContext) ||
+                             d.ServiceType == typeof(ICatalogDbContext) ||
+                             d.ServiceType == typeof(MinioClient) ||
+                             d.ServiceType == typeof(IMinioClient) ||
+                             d.ServiceType == typeof(HttpClient) ||
                              d.ServiceType.FullName.Contains(nameof(OrderDbContext)) ||
                              d.ServiceType.FullName.Contains(nameof(IOrderDbContext)) ||
                              d.ServiceType.FullName.Contains(nameof(MerchantDbContext)) ||
@@ -69,35 +72,30 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
                              d.ServiceType.FullName.Contains(nameof(BasketDbContext)) ||
                              d.ServiceType.FullName.Contains(nameof(IBasketDbContext)) ||
                              d.ServiceType.FullName.Contains(nameof(IMongoClient)) ||
-                             d.ServiceType == typeof(DbContextOptions<CatalogDbContext>) ||
-                             d.ServiceType == typeof(CatalogDbContext) ||
-                             d.ServiceType == typeof(ICatalogDbContext) ||
-                             d.ServiceType == typeof(MinioClient) ||
-                             d.ServiceType == typeof(IMinioClient) ||
                              d.ServiceType.FullName.Contains(nameof(CatalogDbContext)) ||
                              d.ServiceType.FullName.Contains(nameof(ICatalogDbContext)) ||
                              d.ServiceType.FullName.Contains("EntityFramework") ||
-                             d.ServiceType.FullName.Contains("Npgsql")))
+                             d.ServiceType.FullName.Contains("Npgsql")) ||
+                            d.ServiceKey?.ToString() == nameof(MerchantService) ||
+                            d.ServiceKey?.ToString() == nameof(IMerchantService)
+
+                    // d.ServiceKey?.ToString() == nameof(IOrderService) ||
+                    // d.ServiceKey?.ToString() == nameof(OrdertService) ||
+                    //
+                    // d.ServiceKey?.ToString() == nameof(ICatalogService) ||
+                    // d.ServiceKey?.ToString() == nameof(ICatalogService) ||
+                    //
+                    // d.ServiceKey?.ToString() == nameof(IBasketService) ||
+                    // d.ServiceKey?.ToString() == nameof(IBasketService) 
+                )
                 .ToList();
 
             foreach (ServiceDescriptor descriptor in descriptorsToRemove)
                 services.Remove(descriptor);
 
-            // Remove existing HttpClient and MerchantService registrations
-            var merchantHttpClientDescriptors = services
-                .Where(d => d.ServiceType == typeof(HttpClient) &&
-                            d.ServiceKey?.ToString()?.Contains("MerchantService") == true)
-                .ToList();
-
-            foreach (var descriptor in merchantHttpClientDescriptors)
-                services.Remove(descriptor);
-
-            var merchantServiceDescriptors = services
-                .Where(d => d.ServiceType == typeof(IMerchantService))
-                .ToList();
-
-            foreach (var descriptor in merchantServiceDescriptors)
-                services.Remove(descriptor);
+            services.RemoveAll<ILoggerFactory>();
+            services.TryAddSingleton<DiagnosticContext>();
+            services.AddLogging(loggingBuilder => loggingBuilder.AddConsole().SetMinimumLevel(LogLevel.Warning));
 
             MongoDbRunner? runner = MongoDbRunner.Start();
 
@@ -118,10 +116,6 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
             services.AddScoped<BasketApiFactory>();
             services.AddScoped<OrderApiFactory>();
             services.AddScoped<CatalogApiFactory>();
-
-            services.RemoveAll<ILoggerFactory>();
-            services.TryAddSingleton<DiagnosticContext>();
-            services.AddLogging(loggingBuilder => loggingBuilder.AddConsole().SetMinimumLevel(LogLevel.Warning));
 
             services.AddScoped<IMerchantService>(provider =>
             {

@@ -1,4 +1,4 @@
-using BackendForFrontend.Api.Merchant.UseCases;
+using BackendForFrontend.Api.Merchant.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using BuildingBlocks;
 
