@@ -1,3 +1,4 @@
+using BackendForFrontend.Api.Merchant.Contracts;
 using BackendForFrontend.Api.Merchant.Services;
 using BackendForFrontend.Api.Merchant.UseCases;
 
