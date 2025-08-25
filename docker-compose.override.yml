@@ -207,12 +207,15 @@ services:
       - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
         
   backendforfrontend.api:
-    container_name: merchantapi
+    container_name: backendforfrontendpi
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
-      - ConnectionStrings__Database=Server=merchantdb;Port=5436;Database=MerchantDb;User Id=postgres;Password=postgres;;Include Error Detail=true;
+      - Services__MerchantService__BaseUrl=https://merchantapi:8081
+      - Services__CatalogService__BaseUrl=https://catalogapi:8081
+      - Services__BasketService__BaseUrl=https://basketapi:8081
+      - Services__OrderService__BaseUrl=https://orderapi:8081
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=password
     restart: unless-stopped
