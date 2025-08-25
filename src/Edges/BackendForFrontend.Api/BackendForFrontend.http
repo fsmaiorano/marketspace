@@ -1,6 +1,102 @@
 @BackendForFrontend_HostAddress = http://localhost:5025
 
-GET {{BackendForFrontend_HostAddress}}/weatherforecast/
+### Health Check
+GET {{BackendForFrontend_HostAddress}}/swagger
 Accept: application/json
 
-###
+### Create Merchant
+POST {{BackendForFrontend_HostAddress}}/api/merchant
+Content-Type: application/json
+
+{
+  "name": "Test Merchant",
+  "description": "A test merchant for BFF",
+  "address": "123 Main St, City, State",
+  "phoneNumber": "555-1234",
+  "email": "test@merchant.com"
+}
+
+### Get Merchant by ID
+GET {{BackendForFrontend_HostAddress}}/api/merchant/{{$guid}}
+Accept: application/json
+
+### Create Basket
+POST {{BackendForFrontend_HostAddress}}/api/basket
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "items": [
+    {
+      "quantity": 2,
+      "price": 29.99,
+      "productId": "{{$guid}}",
+      "productName": "Test Product"
+    }
+  ]
+}
+
+### Get Basket
+GET {{BackendForFrontend_HostAddress}}/api/basket/testuser
+Accept: application/json
+
+### Create Catalog Item
+POST {{BackendForFrontend_HostAddress}}/api/catalog
+Content-Type: application/json
+
+{
+  "name": "Test Product",
+  "description": "A test product for catalog",
+  "price": 29.99,
+  "category": "Electronics",
+  "summary": "Test product summary",
+  "imageFile": "test-product.jpg"
+}
+
+### Get Catalog List
+GET {{BackendForFrontend_HostAddress}}/api/catalog
+Accept: application/json
+
+### Create Order
+POST {{BackendForFrontend_HostAddress}}/api/order
+Content-Type: application/json
+
+{
+  "customerId": "{{$guid}}",
+  "shippingAddress": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "emailAddress": "john.doe@email.com",
+    "addressLine": "123 Main St",
+    "country": "USA",
+    "state": "CA",
+    "zipCode": "12345"
+  },
+  "billingAddress": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "emailAddress": "john.doe@email.com",
+    "addressLine": "123 Main St",
+    "country": "USA",
+    "state": "CA",
+    "zipCode": "12345"
+  },
+  "payment": {
+    "cardName": "John Doe",
+    "cardNumber": "1234567890123456",
+    "expiration": "12/25",
+    "cvv": "123",
+    "paymentMethod": 1
+  },
+  "items": [
+    {
+      "productId": "{{$guid}}",
+      "quantity": 2,
+      "price": 29.99
+    }
+  ]
+}
+
+### Get Customer Dashboard (Aggregation Example)
+GET {{BackendForFrontend_HostAddress}}/api/dashboard/{{$guid}}
+Accept: application/json
