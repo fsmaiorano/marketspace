@@ -14,7 +14,7 @@ public class MerchantUseCase(ILogger<MerchantUseCase> logger, IMerchantService s
 
     public async Task<UpdateMerchantResponse> UpdateMerchantAsync(UpdateMerchantRequest request)
     {
-        logger.LogInformation("Updating merchant with ID: {MerchantId}", request.MerchantId);
+        logger.LogInformation("Updating merchant with ID: {MerchantId}", request.Id);
         return await service.UpdateMerchantAsync(request);
     }
 

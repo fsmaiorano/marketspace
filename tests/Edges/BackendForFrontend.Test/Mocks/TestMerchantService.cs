@@ -49,7 +49,7 @@ public class TestMerchantService(HttpClient httpClient, ILogger<TestMerchantServ
     {
         try
         {
-            HttpResponseMessage response = httpClient.PutAsJsonAsync($"/merchant/{request.MerchantId}", request).Result;
+            HttpResponseMessage response = httpClient.PutAsJsonAsync($"/merchant", request).Result;
 
             if (response.IsSuccessStatusCode)
             {
