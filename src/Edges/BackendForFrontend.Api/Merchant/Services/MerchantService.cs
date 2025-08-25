@@ -37,7 +37,7 @@ public class MerchantService(ILogger<MerchantService> logger, HttpClient httpCli
     {
         logger.LogInformation("Updating merchant with request: {@Request}", request);
         
-        HttpResponseMessage response = await DoPut($"{BaseUrl}/merchant/{request.MerchantId}", request);
+        HttpResponseMessage response = await DoPut($"{BaseUrl}/merchant/{request.Id}", request);
         UpdateMerchantResponse? content = await response.Content.ReadFromJsonAsync<UpdateMerchantResponse>();
 
         if (response.IsSuccessStatusCode && content is not null)
