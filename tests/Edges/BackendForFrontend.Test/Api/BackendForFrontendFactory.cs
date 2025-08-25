@@ -1,5 +1,8 @@
 using BackendForFrontend.Api;
 using BackendForFrontend.Api.Merchant.Contracts;
+using BackendForFrontend.Api.Basket.Contracts;
+using BackendForFrontend.Api.Catalog.Contracts;
+using BackendForFrontend.Api.Order.Contracts;
 using Basket.Api.Infrastructure.Data;
 using Basket.Test.Api;
 using Catalog.Api.Infrastructure.Data;
@@ -121,6 +124,24 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
             {
                 ILogger<TestMerchantService> logger = provider.GetRequiredService<ILogger<TestMerchantService>>();
                 return new TestMerchantService(_merchantApiClient, logger);
+            });
+
+            services.AddScoped<IBasketService>(provider =>
+            {
+                ILogger<TestBasketService> logger = provider.GetRequiredService<ILogger<TestBasketService>>();
+                return new TestBasketService(null!, logger);
+            });
+
+            services.AddScoped<ICatalogService>(provider =>
+            {
+                ILogger<TestCatalogService> logger = provider.GetRequiredService<ILogger<TestCatalogService>>();
+                return new TestCatalogService(null!, logger);
+            });
+
+            services.AddScoped<IOrderService>(provider =>
+            {
+                ILogger<TestOrderService> logger = provider.GetRequiredService<ILogger<TestOrderService>>();
+                return new TestOrderService(null!, logger);
             });
         });
     }
