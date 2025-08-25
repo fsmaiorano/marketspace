@@ -1,6 +1,14 @@
 using BackendForFrontend.Api;
 using BackendForFrontend.Api.Merchant;
 using BackendForFrontend.Api.Merchant.Endpoints;
+using BackendForFrontend.Api.Basket;
+using BackendForFrontend.Api.Basket.Endpoints;
+using BackendForFrontend.Api.Catalog;
+using BackendForFrontend.Api.Catalog.Endpoints;
+using BackendForFrontend.Api.Order;
+using BackendForFrontend.Api.Order.Endpoints;
+using BackendForFrontend.Api.Aggregations;
+using BackendForFrontend.Api.Aggregations.Endpoints;
 using BuildingBlocks.Exceptions;
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
@@ -17,6 +25,10 @@ builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddMerchantServices(builder.Configuration);
+builder.Services.AddBasketServices(builder.Configuration);
+builder.Services.AddCatalogServices(builder.Configuration);
+builder.Services.AddOrderServices(builder.Configuration);
+builder.Services.AddAggregationServices(builder.Configuration);
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 builder.Services
@@ -52,6 +64,10 @@ app.UseObservability();
 app.UseExceptionHandler(options => { });
 
 MerchantEndpoint.MapEndpoint(app);
+BasketEndpoint.MapEndpoint(app);
+CatalogEndpoint.MapEndpoint(app);
+OrderEndpoint.MapEndpoint(app);
+AggregationEndpoint.MapEndpoint(app);
 
 app.Run();
 
