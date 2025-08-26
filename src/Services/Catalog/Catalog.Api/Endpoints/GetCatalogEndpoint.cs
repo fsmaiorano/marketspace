@@ -13,7 +13,7 @@ public static class GetCatalogEndpoint
                 async ([AsParameters] PaginationRequest pagination, [FromServices] IGetCatalogHandler handler) =>
                 {
                     GetCatalogQuery query = new(pagination);
-                    Result<PaginatedResult<GetCatalogResult>> result = await handler.HandleAsync(query);
+                    Result<GetCatalogResult> result = await handler.HandleAsync(query);
                     return result.IsSuccess
                         ? Results.Ok(result)
                         : Results.NotFound(result.Error);

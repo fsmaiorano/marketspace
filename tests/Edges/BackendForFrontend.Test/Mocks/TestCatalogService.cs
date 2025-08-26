@@ -42,6 +42,41 @@ public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogServic
         return Task.FromResult(response);
     }
 
+    public Task<GetCatalogListResponse> GetCatalogListAsync(int pageIndex, int pageSize)
+    {
+        logger.LogInformation("Mock: Retrieving catalog list with pageIndex: {PageIndex}, pageSize: {PageSize}", pageIndex, pageSize);
+
+        GetCatalogListResponse response = new GetCatalogListResponse
+        {
+            Items =
+            [
+                new CatalogItemDto
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Test Product 1",
+                    Description = "Test product 1 description",
+                    Price = 99.99m,
+                    Category = "Test Category",
+                    Summary = "Test product 1 summary",
+                    ImageFile = "test-image1.jpg"
+                },
+
+                new CatalogItemDto
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Test Product 2",
+                    Description = "Test product 2 description",
+                    Price = 149.99m,
+                    Category = "Test Category",
+                    Summary = "Test product 2 summary",
+                    ImageFile = "test-image2.jpg"
+                }
+            ]
+        };
+
+        return Task.FromResult(response);
+    }
+
     public Task<UpdateCatalogResponse> UpdateCatalogAsync(UpdateCatalogRequest request)
     {
         logger.LogInformation("Mock: Updating catalog with ID: {CatalogId}", request.Id);

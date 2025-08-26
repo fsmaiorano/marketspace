@@ -2,16 +2,6 @@ namespace BackendForFrontend.Api.Catalog.Dtos;
 
 public class GetCatalogListResponse
 {
-    public List<CatalogItemDto> Items { get; set; } = new();
+    public List<CatalogItemDto> Items { get; set; } = [];
 }
 
-public class CatalogItemDto
-{
-    public Guid Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public decimal Price { get; set; }
-    public string Category { get; set; } = string.Empty;
-    public string Summary { get; set; } = string.Empty;
-    public string ImageFile { get; set; } = string.Empty;
-}

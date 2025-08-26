@@ -51,6 +51,27 @@ public class CatalogService(ILogger<CatalogService> logger, HttpClient httpClien
             throw new HttpRequestException($"Error retrieving catalog: {errorMessage}");
         }
     }
+    
+    public async Task<GetCatalogListResponse> GetCatalogListAsync(int pageIndex, int pageSize) 
+    {
+        logger.LogInformation("Retrieving catalog list with pageIndex: {PageIndex}, pageSize: {PageSize}", pageIndex, pageSize);
+        
+        HttpResponseMessage response = await DoGet($"{BaseUrl}/catalog?pageIndex={pageIndex}&pageSize={pageSize}");
+        GetCatalogListResponse? content = await response.Content.ReadFromJsonAsync<GetCatalogListResponse>();
+
+        if (response.IsSuccessStatusCode && content is not null)
+        {
+            logger.LogInformation("Catalog list retrieved successfully with {Count} items", content.Items.Count);
+            return content;
+        }
+        else
+        {
+            logger.LogError("Failed to retrieve catalog list. Status code: {StatusCode}, Response: {@Response}",
+                response.StatusCode, response.Content);
+            string errorMessage = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Error retrieving catalog list: {errorMessage}");
+        }
+    }
 
     public async Task<UpdateCatalogResponse> UpdateCatalogAsync(UpdateCatalogRequest request)
     {
