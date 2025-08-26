@@ -6,7 +6,7 @@ namespace WebApp.Services;
 /// Example of another SSE service implementation for Order processing
 /// Demonstrates how the generic SSE architecture can be used for different domains
 /// </summary>
-public class OrderSSEService : SSEServiceBase<OrderParameters, OrderResult>
+public class OrderSSEService : SSEServiceBase<OrderRequest, OrderResult>
 {
     public OrderSSEService(ILogger<OrderSSEService> logger) : base(logger)
     {
@@ -154,7 +154,7 @@ public class OrderSSEService : SSEServiceBase<OrderParameters, OrderResult>
 }
 
 // Data models for order operations
-public class OrderParameters
+public class OrderRequest
 {
     public List<OrderItemRequest> Items { get; set; } = new();
     public string? PaymentMethodId { get; set; }

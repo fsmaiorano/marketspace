@@ -185,6 +185,7 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/generic-sse-client.js" asp-append-version="true"></script>
     <script src="~/js/home/home.js" asp-append-version="true"></script>
     <script>
         let currentOperationId = null;
@@ -217,7 +218,7 @@
                 logToConsole('🚀 Starting catalog operation...');
                 showOperationCard('Full Catalog Load');
                 
-                const response = await window.HomeModule.catalog('catalog', { 
+                const response = await window.HomeModule.loadCatalog({ 
                     page: 1, 
                     pageSize: 50,
                     includeOutOfStock: true 
@@ -235,8 +236,7 @@
                 logToConsole('🔍 Starting search operation...');
                 showOperationCard('Product Search');
                 
-                const response = await window.HomeModule.catalog('search', { 
-                    query: 'electronics',
+                const response = await window.HomeModule.searchProducts('electronics', { 
                     sortBy: 'relevance',
                     maxResults: 15
                 });
@@ -253,7 +253,7 @@
                 logToConsole('🎯 Starting filter operation...');
                 showOperationCard('Apply Filters');
                 
-                const response = await window.HomeModule.catalog('filter', { 
+                const response = await window.HomeModule.filterProducts({ 
                     category: 'Electronics',
                     priceRange: { min: 20, max: 200 },
                     inStockOnly: true
@@ -308,13 +308,13 @@
             const totalCountEl = document.getElementById('total-count');
             const loadTimeEl = document.getElementById('load-time');
             
-            if (operationData.Result && operationData.Result.items) {
-                const items = operationData.Result.items;
+            if (operationData.Result && operationData.Result.Items) {
+                const items = operationData.Result.Items;
                 
                 // Show summary
                 totalCountEl.textContent = items.length;
-                loadTimeEl.textContent = operationData.Result.loadTime ? 
-                    new Date(operationData.Result.loadTime).toLocaleTimeString() : 
+                loadTimeEl.textContent = operationData.Result.LoadTime ? 
+                    new Date(operationData.Result.LoadTime).toLocaleTimeString() : 
                     'Just now';
                 summaryContainer.style.display = 'block';
                 
@@ -324,15 +324,15 @@
                 items.forEach((item, index) => {
                     setTimeout(() => {
                         const productCard = document.createElement('div');
-                        productCard.className = `product-card ${!item.inStock ? 'out-of-stock' : ''}`;
+                        productCard.className = `product-card ${!item.InStock ? 'out-of-stock' : ''}`;
                         productCard.innerHTML = `
-                            <h6>${item.name}</h6>
-                            <p class="price">$${item.price}</p>
-                            <p class="category">${item.category}</p>
-                            <p class="stock-status">${item.inStock ? '✅ In Stock' : '❌ Out of Stock'}</p>
+                            <h6>${item.Name}</h6>
+                            <p class="price">$${item.Price}</p>
+                            <p class="category">${item.Category}</p>
+                            <p class="stock-status">${item.InStock ? '✅ In Stock' : '❌ Out of Stock'}</p>
                         `;
                         resultsContainer.appendChild(productCard);
-                    }, index * 50); // Stagger animations
+                    }, index * 50);
                 });
                 
                 logToConsole(`📦 Displayed ${items.length} items in catalog`);
@@ -373,8 +373,8 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            logToConsole('🎉 SSE Catalog Demo ready!');
-            logToConsole('💡 Tip: Open browser dev tools to see SSE network requests');
+            logToConsole('🎉 Generic SSE Catalog Demo ready!');
+            logToConsole('💡 Using new generic SSE client architecture');
         });
     </script>
 }

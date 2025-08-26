@@ -1,7 +1,3 @@
-/**
- * Generic SSE Client for any controller that implements SSEControllerBase
- * Provides reusable SSE functionality across different domains
- */
 class GenericSSEClient {
     constructor() {
         this.activeConnections = new Map();
@@ -29,7 +25,7 @@ class GenericSSEClient {
             });
 
             const result = await response.json();
-            
+
             if (result.success) {
                 // Start SSE monitoring
                 this.connectSSE(controllerPath, result.operationId, callbacks);
@@ -49,7 +45,7 @@ class GenericSSEClient {
     connectSSE(controllerPath, operationId, callbacks = {}) {
         const sseUrl = `/${controllerPath}/stream/${operationId}`;
         const eventSource = new EventSource(sseUrl);
-        
+
         this.activeConnections.set(operationId, eventSource);
 
         eventSource.addEventListener('status', (event) => {
@@ -58,7 +54,7 @@ class GenericSSEClient {
                 if (callbacks.onStatusUpdate) {
                     callbacks.onStatusUpdate(operationId, data);
                 }
-                this.dispatchCustomEvent('sseStatusUpdate', { operationId, data, controllerPath });
+                this.dispatchCustomEvent('sseStatusUpdate', {operationId, data, controllerPath});
             } catch (error) {
                 console.error('Error parsing SSE status:', error);
             }
@@ -70,8 +66,8 @@ class GenericSSEClient {
                 if (callbacks.onComplete) {
                     callbacks.onComplete(operationId, data);
                 }
-                this.dispatchCustomEvent('sseComplete', { operationId, data, controllerPath });
-                
+                this.dispatchCustomEvent('sseComplete', {operationId, data, controllerPath});
+
                 eventSource.close();
                 this.activeConnections.delete(operationId);
             } catch (error) {
@@ -84,8 +80,8 @@ class GenericSSEClient {
             if (callbacks.onError) {
                 callbacks.onError(operationId, 'Connection error');
             }
-            this.dispatchCustomEvent('sseError', { operationId, error: 'Connection error', controllerPath });
-            
+            this.dispatchCustomEvent('sseError', {operationId, error: 'Connection error', controllerPath});
+
             eventSource.close();
             this.activeConnections.delete(operationId);
         });
@@ -98,32 +94,6 @@ class GenericSSEClient {
                 this.activeConnections.delete(operationId);
             }
         }, 300000); // 5 minutes timeout
-    }
-
-    /**
-     * Get operation status via polling (alternative to SSE)
-     */
-    async getOperationStatus(controllerPath, operationId) {
-        try {
-            const response = await fetch(`/${controllerPath}/status/${operationId}`);
-            return await response.json();
-        } catch (error) {
-            console.error('Failed to get operation status:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Get all active operations for a controller
-     */
-    async getActiveOperations(controllerPath) {
-        try {
-            const response = await fetch(`/${controllerPath}/operations/active`);
-            return await response.json();
-        } catch (error) {
-            console.error('Failed to get active operations:', error);
-            throw error;
-        }
     }
 
     /**
@@ -150,65 +120,14 @@ class GenericSSEClient {
      * Dispatch custom events for external listeners
      */
     dispatchCustomEvent(eventType, detail) {
-        document.dispatchEvent(new CustomEvent(eventType, { detail }));
+        document.dispatchEvent(new CustomEvent(eventType, {detail}));
     }
 }
 
-// Domain-specific helper classes
-class CatalogSSEClient extends GenericSSEClient {
-    async loadCatalog(parameters = {}) {
-        return this.startOperation('api/catalog', 'catalog', parameters);
-    }
-
-    async searchProducts(query, options = {}) {
-        const parameters = {
-            query,
-            maxResults: options.maxResults || 50,
-            sortBy: options.sortBy || 'relevance',
-            category: options.category
-        };
-        return this.startOperation('api/catalog', 'search', parameters);
-    }
-
-    async filterProducts(filters = {}) {
-        return this.startOperation('api/catalog', 'filter', filters);
-    }
-}
-
-class OrderSSEClient extends GenericSSEClient {
-    async createOrder(items, shippingAddress) {
-        const parameters = {
-            items,
-            shippingAddress
-        };
-        return this.startOperation('api/order', 'create-order', parameters);
-    }
-
-    async processPayment(orderId, paymentMethodId, amount) {
-        const parameters = {
-            orderId,
-            paymentMethodId,
-            amount
-        };
-        return this.startOperation('api/order', 'process-payment', parameters);
-    }
-
-    async fulfillOrder(orderId, shippingAddress) {
-        const parameters = {
-            orderId,
-            shippingAddress
-        };
-        return this.startOperation('api/order', 'fulfillment', parameters);
-    }
-}
-
-// Initialize global instances
-window.GenericSSEClient = GenericSSEClient;
-window.CatalogSSE = new CatalogSSEClient();
-window.OrderSSE = new OrderSSEClient();
+// Single global instance - no more complex domain-specific classes
+window.SSEClient = new GenericSSEClient();
 
 // Global cleanup on page unload
 window.addEventListener('beforeunload', () => {
-    window.CatalogSSE.cleanup();
-    window.OrderSSE.cleanup();
+    window.SSEClient.cleanup();
 });

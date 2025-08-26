@@ -10,7 +10,7 @@ namespace WebApp.Controllers;
 /// </summary>
 [Route("api/[controller]")]
 [ApiController]
-public class CatalogController : SSEControllerBase<CatalogSSEService, CatalogParameters, CatalogResult>
+public class CatalogController : SSEControllerBase<CatalogSSEService, CatalogRequest, CatalogResult>
 {
     public CatalogController(CatalogSSEService catalogService, ILogger<CatalogController> logger) 
         : base(catalogService, logger)
@@ -23,7 +23,7 @@ public class CatalogController : SSEControllerBase<CatalogSSEService, CatalogPar
     [HttpPost("load")]
     public async Task<IActionResult> LoadCatalog([FromBody] CatalogLoadRequest request)
     {
-        var parameters = new CatalogParameters
+        var parameters = new CatalogRequest
         {
             Page = request.Page,
             PageSize = request.PageSize,
@@ -31,7 +31,7 @@ public class CatalogController : SSEControllerBase<CatalogSSEService, CatalogPar
             Category = request.Category
         };
 
-        var operationRequest = new OperationRequest<CatalogParameters>
+        var operationRequest = new OperationRequest<CatalogRequest>
         {
             OperationType = "catalog",
             Parameters = parameters
@@ -46,7 +46,7 @@ public class CatalogController : SSEControllerBase<CatalogSSEService, CatalogPar
     [HttpPost("search")]
     public async Task<IActionResult> SearchProducts([FromBody] SearchRequest request)
     {
-        var parameters = new CatalogParameters
+        var parameters = new CatalogRequest
         {
             Query = request.Query,
             MaxResults = request.MaxResults,
@@ -54,7 +54,7 @@ public class CatalogController : SSEControllerBase<CatalogSSEService, CatalogPar
             Category = request.Category
         };
 
-        var operationRequest = new OperationRequest<CatalogParameters>
+        var operationRequest = new OperationRequest<CatalogRequest>
         {
             OperationType = "search",
             Parameters = parameters
@@ -69,7 +69,7 @@ public class CatalogController : SSEControllerBase<CatalogSSEService, CatalogPar
     [HttpPost("filter")]
     public async Task<IActionResult> FilterProducts([FromBody] FilterRequest request)
     {
-        var parameters = new CatalogParameters
+        var parameters = new CatalogRequest
         {
             Category = request.Category,
             PriceRange = request.PriceRange,
@@ -77,7 +77,7 @@ public class CatalogController : SSEControllerBase<CatalogSSEService, CatalogPar
             PageSize = request.PageSize
         };
 
-        var operationRequest = new OperationRequest<CatalogParameters>
+        var operationRequest = new OperationRequest<CatalogRequest>
         {
             OperationType = "filter",
             Parameters = parameters
