@@ -1,5 +1,6 @@
 using Builder;
 using BuildingBlocks;
+using Catalog.Api.Application.Catalog.GetCatalog;
 using Catalog.Api.Application.Catalog.GetCatalogById;
 using Catalog.Api.Domain.Entities;
 using Catalog.Api.Domain.ValueObjects;
@@ -16,7 +17,7 @@ public class GetCatalogEndpointTest(CatalogApiFactory factory) : IClassFixture<C
     private readonly HttpClient _client = factory.CreateClient();
     private readonly Mock<IGetCatalogByIdHandler> _mockHandler = new();
     private readonly CatalogApiFactory _factory = factory;
-    
+
     [Fact]
     public async Task Can_Get_Catalog_By_Id_Endpoint()
     {
@@ -24,20 +25,20 @@ public class GetCatalogEndpointTest(CatalogApiFactory factory) : IClassFixture<C
         CatalogDbContext dbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
 
         const int createCatalogCount = 5;
-        for(int i = 0; i < createCatalogCount; i++)
+        for (int i = 0; i < createCatalogCount; i++)
         {
             CatalogEntity? catalog = CatalogBuilder.CreateCatalogFaker().Generate();
             catalog.Id = CatalogId.Of(Guid.NewGuid());
             dbContext.Catalogs.Add(catalog);
         }
-        
+
         await dbContext.SaveChangesAsync();
 
         HttpRequestMessage request = new(HttpMethod.Get, $"/catalog?PageIndex=1&PageSize=10");
         HttpResponseMessage response = await _client.SendAsync(request);
         response.EnsureSuccessStatusCode();
-        Result<GetCatalogByIdResult>? responseResult =
-            await response.Content.ReadFromJsonAsync<Result<GetCatalogByIdResult>>();
+        Result<GetCatalogResult>? responseResult =
+            await response.Content.ReadFromJsonAsync<Result<GetCatalogResult>>();
         responseResult?.Data.Should().NotBeNull();
     }
 }

@@ -1,9 +1,12 @@
+using System.Text.Json.Serialization;
+
 namespace Catalog.Api.Domain.ValueObjects;
 
 public record CatalogId
 {
     public Guid Value { get; init; }
 
+    [JsonConstructor]
     private CatalogId(Guid value) => Value = value;
 
     public static CatalogId Of(Guid value)
