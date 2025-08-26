@@ -13,4 +13,7 @@ public class GetCatalogByIdResult
     
     [JsonPropertyName("categories")]
     public IReadOnlyList<string> Categories { get; init; } = [];
+    public Guid MerchantId { get; init; } = Guid.Empty;
+    public DateTimeOffset CreatedAt { get; init; }
+    public DateTimeOffset? UpdatedAt { get; init; }
 }

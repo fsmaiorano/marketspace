@@ -9,5 +9,4 @@ public interface ICatalogService
     Task<GetCatalogListResponse> GetCatalogListAsync(int pageIndex, int pageSize);
     Task<UpdateCatalogResponse> UpdateCatalogAsync(UpdateCatalogRequest request);
     Task<DeleteCatalogResponse> DeleteCatalogAsync(Guid catalogId);
-    Task<GetCatalogListResponse> GetCatalogListAsync();
 }

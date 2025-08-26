@@ -34,9 +34,11 @@ public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogServic
             Name = "Test Product",
             Description = "Test product description",
             Price = 99.99m,
-            Category = "Test Category",
-            Summary = "Test product summary",
-            ImageFile = "test-image.jpg"
+            Categories = ["Test Category"],
+            ImageUrl = "test-image.jpg",
+            MerchantId = Guid.NewGuid(),
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
 
         return Task.FromResult(response);
@@ -44,7 +46,8 @@ public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogServic
 
     public Task<GetCatalogListResponse> GetCatalogListAsync(int pageIndex, int pageSize)
     {
-        logger.LogInformation("Mock: Retrieving catalog list with pageIndex: {PageIndex}, pageSize: {PageSize}", pageIndex, pageSize);
+        logger.LogInformation("Mock: Retrieving catalog list with pageIndex: {PageIndex}, pageSize: {PageSize}",
+            pageIndex, pageSize);
 
         GetCatalogListResponse response = new GetCatalogListResponse
         {
@@ -56,9 +59,11 @@ public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogServic
                     Name = "Test Product 1",
                     Description = "Test product 1 description",
                     Price = 99.99m,
-                    Category = "Test Category",
-                    Summary = "Test product 1 summary",
-                    ImageFile = "test-image1.jpg"
+                    Categories = ["Test Category"],
+                    ImageUrl = "test-image.jpg",
+                    MerchantId = Guid.NewGuid(),
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 },
 
                 new CatalogItemDto
@@ -67,9 +72,11 @@ public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogServic
                     Name = "Test Product 2",
                     Description = "Test product 2 description",
                     Price = 149.99m,
-                    Category = "Test Category",
-                    Summary = "Test product 2 summary",
-                    ImageFile = "test-image2.jpg"
+                    Categories = ["Test Category"],
+                    ImageUrl = "test-image.jpg",
+                    MerchantId = Guid.NewGuid(),
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 }
             ]
         };
@@ -99,7 +106,7 @@ public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogServic
     {
         logger.LogInformation("Mock: Deleting catalog with ID: {CatalogId}", catalogId);
 
-        DeleteCatalogResponse response = new DeleteCatalogResponse { IsDeleted = true };
+        DeleteCatalogResponse response = new DeleteCatalogResponse { IsSuccess = true };
 
         return Task.FromResult(response);
     }
@@ -118,9 +125,11 @@ public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogServic
                     Name = "Test Product 1",
                     Description = "Test product 1 description",
                     Price = 99.99m,
-                    Category = "Test Category",
-                    Summary = "Test product 1 summary",
-                    ImageFile = "test-image1.jpg"
+                    Categories = ["Test Category"],
+                    ImageUrl = "test-image.jpg",
+                    MerchantId = Guid.NewGuid(),
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 },
 
                 new CatalogItemDto
@@ -129,9 +138,11 @@ public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogServic
                     Name = "Test Product 2",
                     Description = "Test product 2 description",
                     Price = 149.99m,
-                    Category = "Test Category",
-                    Summary = "Test product 2 summary",
-                    ImageFile = "test-image2.jpg"
+                    Categories = ["Test Category"],
+                    ImageUrl = "test-image.jpg",
+                    MerchantId = Guid.NewGuid(),
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 }
             ]
         };

@@ -2,5 +2,5 @@ namespace BackendForFrontend.Api.Catalog.Dtos;
 
 public class DeleteCatalogResponse
 {
-    public bool IsDeleted { get; set; }
+    public bool IsSuccess { get; set; }
 }
