@@ -108,3 +108,9 @@ volumes:
   grafana_data:
       
   
+  webapp:
+    image: webapp
+    build:
+      context: .
+      dockerfile: src/Uis/WebApp/Dockerfile
+
