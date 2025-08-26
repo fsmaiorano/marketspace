@@ -4,26 +4,15 @@ using WebApp.Services;
 
 namespace WebApp.Controllers;
 
-/// <summary>
-/// Catalog controller demonstrating the new generic SSE architecture
-/// Inherits from SSEControllerBase to get all SSE functionality automatically
-/// </summary>
 [Route("api/[controller]")]
 [ApiController]
-public class CatalogController : SSEControllerBase<CatalogSSEService, CatalogRequest, CatalogResult>
+public class CatalogController(CatalogSSEService catalogService, ILogger<CatalogController> logger)
+    : SSEControllerBase<CatalogSSEService, CatalogRequest, CatalogResult>(catalogService, logger)
 {
-    public CatalogController(CatalogSSEService catalogService, ILogger<CatalogController> logger) 
-        : base(catalogService, logger)
-    {
-    }
-
-    /// <summary>
-    /// Catalog-specific endpoint with typed parameters
-    /// </summary>
     [HttpPost("load")]
     public async Task<IActionResult> LoadCatalog([FromBody] CatalogLoadRequest request)
     {
-        var parameters = new CatalogRequest
+        CatalogRequest parameters = new CatalogRequest
         {
             Page = request.Page,
             PageSize = request.PageSize,
@@ -31,7 +20,7 @@ public class CatalogController : SSEControllerBase<CatalogSSEService, CatalogReq
             Category = request.Category
         };
 
-        var operationRequest = new OperationRequest<CatalogRequest>
+        OperationRequest<CatalogRequest> operationRequest = new OperationRequest<CatalogRequest>
         {
             OperationType = "catalog",
             Parameters = parameters
@@ -46,7 +35,7 @@ public class CatalogController : SSEControllerBase<CatalogSSEService, CatalogReq
     [HttpPost("search")]
     public async Task<IActionResult> SearchProducts([FromBody] SearchRequest request)
     {
-        var parameters = new CatalogRequest
+        CatalogRequest parameters = new CatalogRequest
         {
             Query = request.Query,
             MaxResults = request.MaxResults,
@@ -54,7 +43,7 @@ public class CatalogController : SSEControllerBase<CatalogSSEService, CatalogReq
             Category = request.Category
         };
 
-        var operationRequest = new OperationRequest<CatalogRequest>
+        OperationRequest<CatalogRequest> operationRequest = new OperationRequest<CatalogRequest>
         {
             OperationType = "search",
             Parameters = parameters
@@ -69,7 +58,7 @@ public class CatalogController : SSEControllerBase<CatalogSSEService, CatalogReq
     [HttpPost("filter")]
     public async Task<IActionResult> FilterProducts([FromBody] FilterRequest request)
     {
-        var parameters = new CatalogRequest
+        CatalogRequest parameters = new CatalogRequest
         {
             Category = request.Category,
             PriceRange = request.PriceRange,
@@ -77,7 +66,7 @@ public class CatalogController : SSEControllerBase<CatalogSSEService, CatalogReq
             PageSize = request.PageSize
         };
 
-        var operationRequest = new OperationRequest<CatalogRequest>
+        OperationRequest<CatalogRequest> operationRequest = new OperationRequest<CatalogRequest>
         {
             OperationType = "filter",
             Parameters = parameters
