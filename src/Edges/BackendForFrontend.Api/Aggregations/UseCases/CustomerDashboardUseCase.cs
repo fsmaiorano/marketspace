@@ -64,13 +64,10 @@ public class CustomerDashboardUseCase(
                 {
                     try
                     {
-                        var catalog = await catalogService.GetCatalogListAsync();
+                        var catalog = await catalogService.GetCatalogListAsync(1, 10);
                         return catalog.Items.Take(3).Select(item => new RecommendedProduct
                         {
-                            Id = item.Id,
-                            Name = item.Name,
-                            Price = item.Price,
-                            ImageFile = item.ImageFile
+                            Id = item.Id, Name = item.Name, Price = item.Price, ImageFile = item.ImageUrl
                         }).ToList();
                     }
                     catch (Exception ex)

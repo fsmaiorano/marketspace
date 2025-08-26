@@ -34,10 +34,4 @@ public class CatalogUseCase(ILogger<CatalogUseCase> logger, ICatalogService serv
         logger.LogInformation("Deleting catalog with ID: {CatalogId}", catalogId);
         return await service.DeleteCatalogAsync(catalogId);
     }
-
-    public async Task<GetCatalogListResponse> GetCatalogListAsync()
-    {
-        logger.LogInformation("Retrieving catalog list");
-        return await service.GetCatalogListAsync();
-    }
 }
