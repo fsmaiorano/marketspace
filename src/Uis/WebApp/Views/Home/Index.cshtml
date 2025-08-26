@@ -1,0 +1,52 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/home/home.css" asp-append-version="true" />
+}
+
+<div class="home-container">
+    <!-- Hero Section -->
+    <section class="home-hero">
+        <h1 class="home-hero__title">Welcome to MarketSpace</h1>
+        <p class="home-hero__subtitle">Your premier destination for online commerce</p>
+        <a href="#features" class="home-hero__cta">Explore Features</a>
+    </section>
+
+    <!-- Loading Spinner -->
+    <div class="home-loading">
+        <div class="home-loading__spinner"></div>
+        <p>Loading amazing content...</p>
+    </div>
+
+    <!-- Features Section -->
+    <section class="home-features" id="features">
+        <div class="home-features__card" data-reveal>
+            <div class="home-features__icon">🛍️</div>
+            <h3 class="home-features__title">Easy Shopping</h3>
+            <p class="home-features__description">Browse and purchase products with our intuitive interface designed for the best user experience.</p>
+        </div>
+        
+        <div class="home-features__card" data-reveal>
+            <div class="home-features__icon">🚚</div>
+            <h3 class="home-features__title">Fast Delivery</h3>
+            <p class="home-features__description">Get your orders delivered quickly with our efficient logistics network and real-time tracking.</p>
+        </div>
+        
+        <div class="home-features__card" data-reveal>
+            <div class="home-features__icon">🔒</div>
+            <h3 class="home-features__title">Secure Payments</h3>
+            <p class="home-features__description">Shop with confidence using our secure payment system with multiple payment options.</p>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="home-stats" data-reveal>
+        <!-- This will be populated by JavaScript -->
+    </section>
+</div>
+
+@section Scripts {
+    <script src="~/js/home/home.js" asp-append-version="true"></script>
+}
