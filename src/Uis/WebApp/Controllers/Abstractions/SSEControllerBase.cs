@@ -30,7 +30,7 @@ public abstract class SSEControllerBase<TService, TRequest, TResult> : Controlle
     {
         try
         {
-            var operationId = await SSEService.StartOperationAsync(request.OperationType, request.Parameters);
+            string operationId = await SSEService.StartOperationAsync(request.OperationType, request.Parameters);
 
             return Json(new
             {
@@ -62,8 +62,8 @@ public abstract class SSEControllerBase<TService, TRequest, TResult> : Controlle
     [HttpGet("status/{operationId}")]
     public virtual IActionResult GetOperationStatus(string operationId)
     {
-        var operation = SSEService.GetOperationStatus(operationId);
-        
+        OperationStatus<TResult>? operation = SSEService.GetOperationStatus(operationId);
+
         if (operation == null)
         {
             return NotFound(new { message = "Operation not found" });

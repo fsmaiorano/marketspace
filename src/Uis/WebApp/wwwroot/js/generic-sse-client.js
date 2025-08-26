@@ -7,10 +7,10 @@ class GenericSSEClient {
      * Start an operation and monitor it via SSE
      * @param {string} controllerPath - API path (e.g., 'api/catalog', 'api/order')
      * @param {string} operationType - Type of operation
-     * @param {object} parameters - Operation parameters
+     * @param {object} data - Operation data
      * @param {object} callbacks - Event callbacks
      */
-    async startOperation(controllerPath, operationType, parameters, callbacks = {}) {
+    async startOperation(controllerPath, operationType, data, callbacks = {}) {
         try {
             // Start the operation
             const response = await fetch(`/${controllerPath}/start-operation`, {
@@ -20,7 +20,7 @@ class GenericSSEClient {
                 },
                 body: JSON.stringify({
                     operationType,
-                    parameters
+                    data: data
                 })
             });
 
