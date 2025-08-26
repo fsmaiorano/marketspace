@@ -12,5 +12,5 @@ public class GetCatalogByIdResult
     public decimal Price { get; init; } = 0.0m;
     
     [JsonPropertyName("categories")]
-    public IReadOnlyList<string> Categories { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Categories { get; init; } = [];
 }
