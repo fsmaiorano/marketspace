@@ -1,7 +1,13 @@
+using WebApp.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Register SSE services - demonstrates how multiple services can coexist
+builder.Services.AddSingleton<CatalogSSEService>();
+builder.Services.AddSingleton<OrderSSEService>();
 
 var app = builder.Build();
 
@@ -24,6 +30,5 @@ app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-
 
 app.Run();
