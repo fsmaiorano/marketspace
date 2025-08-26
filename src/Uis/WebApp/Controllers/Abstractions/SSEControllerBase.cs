@@ -8,10 +8,10 @@ namespace WebApp.Controllers.Abstractions;
 /// Provides common SSE endpoints that can be used by any controller
 /// </summary>
 /// <typeparam name="TService">The SSE service type</typeparam>
-/// <typeparam name="TParameters">Type of operation parameters</typeparam>
+/// <typeparam name="TRequest">Type of operation request</typeparam>
 /// <typeparam name="TResult">Type of operation result</typeparam>
-public abstract class SSEControllerBase<TService, TParameters, TResult> : Controller
-    where TService : SSEServiceBase<TParameters, TResult>
+public abstract class SSEControllerBase<TService, TRequest, TResult> : Controller
+    where TService : SSEServiceBase<TRequest, TResult>
 {
     protected readonly TService SSEService;
     protected readonly ILogger Logger;
@@ -26,7 +26,7 @@ public abstract class SSEControllerBase<TService, TParameters, TResult> : Contro
     /// Generic endpoint to start any SSE operation
     /// </summary>
     [HttpPost("start-operation")]
-    public virtual async Task<IActionResult> StartOperation([FromBody] OperationRequest<TParameters> request)
+    public virtual async Task<IActionResult> StartOperation([FromBody] OperationRequest<TRequest> request)
     {
         try
         {

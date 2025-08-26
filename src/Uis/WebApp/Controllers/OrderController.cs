@@ -10,7 +10,7 @@ namespace WebApp.Controllers;
 /// </summary>
 [Route("api/[controller]")]
 [ApiController]
-public class OrderController : SSEControllerBase<OrderSSEService, OrderParameters, OrderResult>
+public class OrderController : SSEControllerBase<OrderSSEService, OrderRequest, OrderResult>
 {
     public OrderController(OrderSSEService orderService, ILogger<OrderController> logger) 
         : base(orderService, logger)
@@ -23,13 +23,13 @@ public class OrderController : SSEControllerBase<OrderSSEService, OrderParameter
     [HttpPost("create")]
     public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest request)
     {
-        var parameters = new OrderParameters
+        var parameters = new OrderRequest
         {
             Items = request.Items,
             ShippingAddress = request.ShippingAddress
         };
 
-        var operationRequest = new OperationRequest<OrderParameters>
+        var operationRequest = new OperationRequest<OrderRequest>
         {
             OperationType = "create-order",
             Parameters = parameters
@@ -44,14 +44,14 @@ public class OrderController : SSEControllerBase<OrderSSEService, OrderParameter
     [HttpPost("process-payment")]
     public async Task<IActionResult> ProcessPayment([FromBody] PaymentRequest request)
     {
-        var parameters = new OrderParameters
+        var parameters = new OrderRequest
         {
             OrderId = request.OrderId,
             PaymentMethodId = request.PaymentMethodId,
             Amount = request.Amount
         };
 
-        var operationRequest = new OperationRequest<OrderParameters>
+        var operationRequest = new OperationRequest<OrderRequest>
         {
             OperationType = "process-payment",
             Parameters = parameters
@@ -66,13 +66,13 @@ public class OrderController : SSEControllerBase<OrderSSEService, OrderParameter
     [HttpPost("fulfill")]
     public async Task<IActionResult> FulfillOrder([FromBody] FulfillmentRequest request)
     {
-        var parameters = new OrderParameters
+        var parameters = new OrderRequest
         {
             OrderId = request.OrderId,
             ShippingAddress = request.ShippingAddress
         };
 
-        var operationRequest = new OperationRequest<OrderParameters>
+        var operationRequest = new OperationRequest<OrderRequest>
         {
             OperationType = "fulfillment",
             Parameters = parameters

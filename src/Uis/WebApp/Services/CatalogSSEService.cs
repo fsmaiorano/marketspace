@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using WebApp.Services.Abstractions;
 
 namespace WebApp.Services;
@@ -7,12 +6,9 @@ namespace WebApp.Services;
 /// Catalog-specific SSE service implementation
 /// Handles catalog operations like loading products, searching, and filtering
 /// </summary>
-public class CatalogSSEService : SSEServiceBase<CatalogParameters, CatalogResult>
+public class CatalogSSEService(ILogger<CatalogSSEService> logger)
+    : SSEServiceBase<CatalogRequest, CatalogResult>(logger)
 {
-    public CatalogSSEService(ILogger<CatalogSSEService> logger) : base(logger)
-    {
-    }
-
     protected override async Task ExecuteOperationAsync(OperationStatus<CatalogResult> operation)
     {
         try
@@ -191,7 +187,7 @@ public class CatalogSSEService : SSEServiceBase<CatalogParameters, CatalogResult
 }
 
 // Data models for catalog operations
-public class CatalogParameters
+public class CatalogRequest
 {
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 50;
