@@ -1,6 +1,7 @@
 using BackendForFrontend.Api.Base;
 using BackendForFrontend.Api.Basket.Contracts;
 using BackendForFrontend.Api.Basket.Dtos;
+using BuildingBlocks;
 
 namespace BackendForFrontend.Api.Basket.Services;
 
@@ -10,12 +11,12 @@ public class BasketService(ILogger<BasketService> logger, HttpClient httpClient,
     private string BaseUrl => configuration["Services:BasketService:BaseUrl"] ??
                               throw new ArgumentNullException($"BasketService BaseUrl is not configured");
 
-    public async Task<CreateBasketResponse> CreateBasketAsync(CreateBasketRequest request)
+    public async Task<Result<CreateBasketResponse>> CreateBasketAsync(CreateBasketRequest request)
     {
         logger.LogInformation("Creating basket for user: {Username}", request.Username);
         
         HttpResponseMessage response = await DoPost($"{BaseUrl}/basket", request);
-        CreateBasketResponse? content = await response.Content.ReadFromJsonAsync<CreateBasketResponse>();
+        Result<CreateBasketResponse>? content = await response.Content.ReadFromJsonAsync<Result<CreateBasketResponse>>();
 
         if (response.IsSuccessStatusCode && content is not null)
         {
@@ -31,12 +32,12 @@ public class BasketService(ILogger<BasketService> logger, HttpClient httpClient,
         }
     }
 
-    public async Task<GetBasketResponse> GetBasketByIdAsync(string username)
+    public async Task<Result<GetBasketResponse>> GetBasketByIdAsync(string username)
     {
         logger.LogInformation("Retrieving basket for user: {Username}", username);
         
         HttpResponseMessage response = await DoGet($"{BaseUrl}/basket/{username}");
-        GetBasketResponse? content = await response.Content.ReadFromJsonAsync<GetBasketResponse>();
+        Result<GetBasketResponse>? content = await response.Content.ReadFromJsonAsync<Result<GetBasketResponse>>();
 
         if (response.IsSuccessStatusCode && content is not null)
         {
@@ -52,12 +53,12 @@ public class BasketService(ILogger<BasketService> logger, HttpClient httpClient,
         }
     }
 
-    public async Task<DeleteBasketResponse> DeleteBasketAsync(string username)
+    public async Task<Result<DeleteBasketResponse>> DeleteBasketAsync(string username)
     {
         logger.LogInformation("Deleting basket for user: {Username}", username);
         
         HttpResponseMessage response = await DoDelete($"{BaseUrl}/basket/{username}");
-        DeleteBasketResponse? content = await response.Content.ReadFromJsonAsync<DeleteBasketResponse>();
+        Result<DeleteBasketResponse>? content = await response.Content.ReadFromJsonAsync<Result<DeleteBasketResponse>>();
 
         if (response.IsSuccessStatusCode && content is not null)
         {
@@ -73,12 +74,12 @@ public class BasketService(ILogger<BasketService> logger, HttpClient httpClient,
         }
     }
 
-    public async Task<CheckoutBasketResponse> CheckoutBasketAsync(CheckoutBasketRequest request)
+    public async Task<Result<CheckoutBasketResponse>> CheckoutBasketAsync(CheckoutBasketRequest request)
     {
         logger.LogInformation("Checking out basket for user: {Username}", request.Username);
         
         HttpResponseMessage response = await DoPost($"{BaseUrl}/basket/checkout", request);
-        CheckoutBasketResponse? content = await response.Content.ReadFromJsonAsync<CheckoutBasketResponse>();
+        Result<CheckoutBasketResponse>? content = await response.Content.ReadFromJsonAsync<Result<CheckoutBasketResponse>>();
 
         if (response.IsSuccessStatusCode && content is not null)
         {

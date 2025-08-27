@@ -12,7 +12,7 @@ namespace BackendForFrontend.Test.Mocks;
 
 public class TestBasketService(HttpClient httpClient, ILogger<TestBasketService> logger) : IBasketService
 {
-    public async Task<CreateBasketResponse> CreateBasketAsync(CreateBasketRequest request)
+    public async Task<Result<CreateBasketResponse>> CreateBasketAsync(CreateBasketRequest request)
     {
         try
         {
@@ -25,10 +25,18 @@ public class TestBasketService(HttpClient httpClient, ILogger<TestBasketService>
 
                 if (resultWrapper is { IsSuccess: true, Data: not null })
                 {
-                    CreateBasketResponse basketResponse = new CreateBasketResponse
-                    {
-                        Username = request.Username, Items = request.Items
-                    };
+                    Result<CreateBasketResponse> basketResponse
+                        = Result<CreateBasketResponse>.Success(new CreateBasketResponse
+                        {
+                            Username = resultWrapper.Data.ShoppingCart.Username,
+                            Items = resultWrapper.Data.ShoppingCart.Items.Select(item => new BasketItemDto
+                            {
+                                ProductId = item.ProductId,
+                                ProductName = item.ProductName,
+                                Quantity = item.Quantity,
+                                Price = item.Price,
+                            }).ToList()
+                        });
 
                     logger.LogInformation("Basket created successfully: {@Basket}", basketResponse);
                     return basketResponse;
@@ -46,7 +54,7 @@ public class TestBasketService(HttpClient httpClient, ILogger<TestBasketService>
         }
     }
 
-    public async Task<GetBasketResponse> GetBasketByIdAsync(string username)
+    public async Task<Result<GetBasketResponse>> GetBasketByIdAsync(string username)
     {
         try
         {
@@ -59,7 +67,7 @@ public class TestBasketService(HttpClient httpClient, ILogger<TestBasketService>
 
                 if (resultWrapper is { IsSuccess: true, Data: not null })
                 {
-                    GetBasketResponse basketResponse = new GetBasketResponse
+                    Result<GetBasketResponse> basketResponse = Result<GetBasketResponse>.Success(new GetBasketResponse
                     {
                         Username = resultWrapper.Data.ShoppingCart.Username,
                         Items = resultWrapper.Data.ShoppingCart.Items.Select(item => new BasketItemDto
@@ -69,7 +77,7 @@ public class TestBasketService(HttpClient httpClient, ILogger<TestBasketService>
                             Quantity = item.Quantity,
                             Price = item.Price,
                         }).ToList()
-                    };
+                    });
 
                     logger.LogInformation("Basket retrieved successfully: {@Basket}", basketResponse);
                     return basketResponse;
@@ -87,7 +95,7 @@ public class TestBasketService(HttpClient httpClient, ILogger<TestBasketService>
         }
     }
 
-    public async Task<DeleteBasketResponse> DeleteBasketAsync(string username)
+    public async Task<Result<DeleteBasketResponse>> DeleteBasketAsync(string username)
     {
         try
         {
@@ -99,7 +107,7 @@ public class TestBasketService(HttpClient httpClient, ILogger<TestBasketService>
             if (response.IsSuccessStatusCode)
             {
                 logger.LogInformation("Basket deleted successfully for user: {Username}", username);
-                return new DeleteBasketResponse { IsSuccess = true };
+                return Result<DeleteBasketResponse>.Success(new DeleteBasketResponse { IsSuccess = true });
             }
 
             logger.LogError("Failed to delete basket. Status code: {StatusCode}", response.StatusCode);
@@ -113,18 +121,18 @@ public class TestBasketService(HttpClient httpClient, ILogger<TestBasketService>
         }
     }
 
-    public async Task<CheckoutBasketResponse> CheckoutBasketAsync(CheckoutBasketRequest request)
+    public async Task<Result<CheckoutBasketResponse>> CheckoutBasketAsync(CheckoutBasketRequest request)
     {
         try
         {
             HttpResponseMessage response = await httpClient.PostAsJsonAsync("/basket/checkout", request);
-            
+
             if (response.IsSuccessStatusCode)
             {
                 logger.LogInformation("Basket checkout initiated successfully for user: {Username}", request.Username);
-                return new CheckoutBasketResponse { IsSuccess = true };
+                return Result<CheckoutBasketResponse>.Success(new CheckoutBasketResponse { IsSuccess = true });
             }
-            
+
             logger.LogError("Failed to checkout basket. Status code: {StatusCode}", response.StatusCode);
             string errorMessage = await response.Content.ReadAsStringAsync();
             throw new HttpRequestException($"Error checking out basket: {errorMessage}");

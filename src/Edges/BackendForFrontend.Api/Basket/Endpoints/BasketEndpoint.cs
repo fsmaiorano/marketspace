@@ -12,8 +12,10 @@ public static class BasketEndpoint
         app.MapPost("/api/basket",
                 async ([FromBody] CreateBasketRequest request, [FromServices] IBasketUseCase usecase) =>
                 {
-                    CreateBasketResponse result = await usecase.CreateBasketAsync(request);
-                    return Results.Ok(Result<CreateBasketResponse>.Success(result));
+                    Result<CreateBasketResponse> result = await usecase.CreateBasketAsync(request);
+                    return result.IsSuccess
+                        ? Results.Ok(result)
+                        : Results.NotFound(result.Error);
                 })
             .WithName("CreateBasket")
             .WithTags("Basket")
@@ -24,8 +26,10 @@ public static class BasketEndpoint
         app.MapGet("/api/basket/{username}",
                 async ([FromRoute] string username, [FromServices] IBasketUseCase usecase) =>
                 {
-                    GetBasketResponse result = await usecase.GetBasketByIdAsync(username);
-                    return Results.Ok(Result<GetBasketResponse>.Success(result));
+                    Result<GetBasketResponse> result = await usecase.GetBasketByIdAsync(username);
+                    return result.IsSuccess
+                        ? Results.Ok(result)
+                        : Results.NotFound(result.Error);
                 })
             .WithName("GetBasketByUsername")
             .WithTags("Basket")
@@ -36,8 +40,10 @@ public static class BasketEndpoint
         app.MapDelete("/api/basket/{username}",
                 async ([FromRoute] string username, [FromServices] IBasketUseCase usecase) =>
                 {
-                    DeleteBasketResponse result = await usecase.DeleteBasketAsync(username);
-                    return Results.Ok(Result<DeleteBasketResponse>.Success(result));
+                    Result<DeleteBasketResponse> result = await usecase.DeleteBasketAsync(username);
+                    return result.IsSuccess
+                        ? Results.Ok(result)
+                        : Results.NotFound(result.Error);
                 })
             .WithName("DeleteBasket")
             .WithTags("Basket")
@@ -48,8 +54,10 @@ public static class BasketEndpoint
         app.MapPost("/api/basket/checkout",
                 async ([FromBody] CheckoutBasketRequest request, [FromServices] IBasketUseCase usecase) =>
                 {
-                    CheckoutBasketResponse result = await usecase.CheckoutBasketAsync(request);
-                    return Results.Ok(Result<CheckoutBasketResponse>.Success(result));
+                    Result<CheckoutBasketResponse> result = await usecase.CheckoutBasketAsync(request);
+                    return result.IsSuccess
+                        ? Results.Ok(result)
+                        : Results.NotFound(result.Error);
                 })
             .WithName("CheckoutBasket")
             .WithTags("Basket")
