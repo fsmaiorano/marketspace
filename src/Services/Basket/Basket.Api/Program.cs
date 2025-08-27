@@ -46,7 +46,6 @@ app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseObservability();
 app.UseExceptionHandler(options => { });
 
-// Map all basket endpoints
 CreateBasketEndpoint.MapEndpoint(app);
 GetBasketByIdEndpoint.MapEndpoint(app);
 DeleteBasketEndpoint.MapEndpoint(app);
