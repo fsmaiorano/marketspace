@@ -1,16 +1,17 @@
 using BackendForFrontend.Api.Order.Contracts;
 using BackendForFrontend.Api.Order.Dtos;
+using BuildingBlocks;
 using Microsoft.Extensions.Logging;
 
 namespace BackendForFrontend.Test.Mocks;
 
 public class TestOrderService(HttpClient httpClient, ILogger<TestOrderService> logger) : IOrderService
 {
-    public Task<CreateOrderResponse> CreateOrderAsync(CreateOrderRequest request)
+    public async Task<Result<CreateOrderResponse>> CreateOrderAsync(CreateOrderRequest request)
     {
         logger.LogInformation("Mock: Creating order for customer: {CustomerId}", request.CustomerId);
-        
-        var response = new CreateOrderResponse
+
+        Result<CreateOrderResponse> response = Result<CreateOrderResponse>.Success(new CreateOrderResponse
         {
             Id = Guid.NewGuid(),
             CustomerId = request.CustomerId,
@@ -21,16 +22,16 @@ public class TestOrderService(HttpClient httpClient, ILogger<TestOrderService> l
             Status = 1, // Created
             Items = request.Items,
             TotalAmount = request.Items.Sum(i => i.Price * i.Quantity)
-        };
+        });
 
-        return Task.FromResult(response);
+        return response;
     }
 
-    public Task<GetOrderResponse> GetOrderByIdAsync(Guid orderId)
+    public async Task<Result<GetOrderResponse>> GetOrderByIdAsync(Guid orderId)
     {
         logger.LogInformation("Mock: Retrieving order with ID: {OrderId}", orderId);
-        
-        var response = new GetOrderResponse
+
+        Result<GetOrderResponse> response = Result<GetOrderResponse>.Success(new GetOrderResponse
         {
             Id = orderId,
             CustomerId = Guid.NewGuid(),
@@ -41,51 +42,41 @@ public class TestOrderService(HttpClient httpClient, ILogger<TestOrderService> l
             Status = 1,
             Items = new List<OrderItemDto>(),
             TotalAmount = 100.00m
-        };
+        });
 
-        return Task.FromResult(response);
+        return response;
     }
 
-    public Task<UpdateOrderResponse> UpdateOrderAsync(UpdateOrderRequest request)
+    public async Task<Result<UpdateOrderResponse>> UpdateOrderAsync(UpdateOrderRequest request)
     {
         logger.LogInformation("Mock: Updating order with ID: {OrderId}", request.Id);
-        
-        var response = new UpdateOrderResponse
-        {
-            Id = request.Id,
-            CustomerId = request.CustomerId,
-            OrderName = $"Updated-Order-{DateTime.Now:yyyyMMddHHmmss}",
-            ShippingAddress = request.ShippingAddress,
-            BillingAddress = request.BillingAddress,
-            Payment = request.Payment,
-            Status = request.Status,
-            Items = request.Items,
-            TotalAmount = request.TotalAmount
-        };
 
-        return Task.FromResult(response);
+        Result<UpdateOrderResponse> response = Result<UpdateOrderResponse>.Success(new UpdateOrderResponse
+        {
+            Id = request.Id, Status = request.Status
+        });
+
+        return response;
     }
 
-    public Task<DeleteOrderResponse> DeleteOrderAsync(Guid orderId)
+    public async Task<Result<DeleteOrderResponse>> DeleteOrderAsync(Guid orderId)
     {
         logger.LogInformation("Mock: Deleting order with ID: {OrderId}", orderId);
-        
-        var response = new DeleteOrderResponse
-        {
-            IsDeleted = true
-        };
 
-        return Task.FromResult(response);
+        Result<DeleteOrderResponse> response =
+            Result<DeleteOrderResponse>.Success(new DeleteOrderResponse { IsDeleted = true });
+
+        return response;
     }
 
-    public Task<GetOrderListResponse> GetOrdersByCustomerIdAsync(Guid customerId)
+    public async Task<Result<GetOrderListResponse>> GetOrdersByCustomerIdAsync(Guid customerId)
     {
         logger.LogInformation("Mock: Retrieving orders for customer: {CustomerId}", customerId);
-        
-        var response = new GetOrderListResponse
+
+        Result<GetOrderListResponse> response = Result<GetOrderListResponse>.Success(new GetOrderListResponse
         {
-            Orders = new List<OrderSummaryDto>
-            {
+            Orders =
+            [
                 new OrderSummaryDto
                 {
                     Id = Guid.NewGuid(),
@@ -95,6 +86,7 @@ public class TestOrderService(HttpClient httpClient, ILogger<TestOrderService> l
                     TotalAmount = 100.00m,
                     CreatedAt = DateTime.Now.AddDays(-1)
                 },
+
                 new OrderSummaryDto
                 {
                     Id = Guid.NewGuid(),
@@ -104,9 +96,9 @@ public class TestOrderService(HttpClient httpClient, ILogger<TestOrderService> l
                     TotalAmount = 200.00m,
                     CreatedAt = DateTime.Now.AddDays(-2)
                 }
-            }
-        };
+            ]
+        });
 
-        return Task.FromResult(response);
+        return response;
     }
 }

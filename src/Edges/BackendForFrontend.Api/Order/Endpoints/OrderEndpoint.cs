@@ -12,8 +12,8 @@ public static class OrderEndpoint
         app.MapPost("/api/order",
                 async ([FromBody] CreateOrderRequest request, [FromServices] IOrderUseCase usecase) =>
                 {
-                    CreateOrderResponse result = await usecase.CreateOrderAsync(request);
-                    return Results.Ok(Result<CreateOrderResponse>.Success(result));
+                    Result<CreateOrderResponse> result = await usecase.CreateOrderAsync(request);
+                    return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
                 })
             .WithName("CreateOrder")
             .WithTags("Order")
@@ -24,8 +24,8 @@ public static class OrderEndpoint
         app.MapGet("/api/order/{orderId:guid}",
                 async ([FromRoute] Guid orderId, [FromServices] IOrderUseCase usecase) =>
                 {
-                    GetOrderResponse result = await usecase.GetOrderByIdAsync(orderId);
-                    return Results.Ok(Result<GetOrderResponse>.Success(result));
+                    Result<GetOrderResponse> result = await usecase.GetOrderByIdAsync(orderId);
+                    return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
                 })
             .WithName("GetOrderById")
             .WithTags("Order")
@@ -36,8 +36,8 @@ public static class OrderEndpoint
         app.MapGet("/api/order/customer/{customerId:guid}",
                 async ([FromRoute] Guid customerId, [FromServices] IOrderUseCase usecase) =>
                 {
-                    GetOrderListResponse result = await usecase.GetOrdersByCustomerIdAsync(customerId);
-                    return Results.Ok(Result<GetOrderListResponse>.Success(result));
+                    Result<GetOrderListResponse> result = await usecase.GetOrdersByCustomerIdAsync(customerId);
+                    return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
                 })
             .WithName("GetOrdersByCustomerId")
             .WithTags("Order")
@@ -46,11 +46,12 @@ public static class OrderEndpoint
             .Produces(StatusCodes.Status500InternalServerError);
 
         app.MapPut("/api/order/{orderId:guid}",
-                async ([FromRoute] Guid orderId, [FromBody] UpdateOrderRequest request, [FromServices] IOrderUseCase usecase) =>
+                async ([FromRoute] Guid orderId, [FromBody] UpdateOrderRequest request,
+                    [FromServices] IOrderUseCase usecase) =>
                 {
                     request.Id = orderId;
-                    UpdateOrderResponse result = await usecase.UpdateOrderAsync(request);
-                    return Results.Ok(Result<UpdateOrderResponse>.Success(result));
+                    Result<UpdateOrderResponse> result = await usecase.UpdateOrderAsync(request);
+                    return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
                 })
             .WithName("UpdateOrder")
             .WithTags("Order")
@@ -61,8 +62,8 @@ public static class OrderEndpoint
         app.MapDelete("/api/order/{orderId:guid}",
                 async ([FromRoute] Guid orderId, [FromServices] IOrderUseCase usecase) =>
                 {
-                    DeleteOrderResponse result = await usecase.DeleteOrderAsync(orderId);
-                    return Results.Ok(Result<DeleteOrderResponse>.Success(result));
+                    Result<DeleteOrderResponse> result = await usecase.DeleteOrderAsync(orderId);
+                    return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
                 })
             .WithName("DeleteOrder")
             .WithTags("Order")

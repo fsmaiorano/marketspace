@@ -1,6 +1,7 @@
 using BackendForFrontend.Api.Base;
 using BackendForFrontend.Api.Order.Contracts;
 using BackendForFrontend.Api.Order.Dtos;
+using BuildingBlocks;
 
 namespace BackendForFrontend.Api.Order.Services;
 
@@ -10,7 +11,7 @@ public class OrderService(ILogger<OrderService> logger, HttpClient httpClient, I
     private string BaseUrl => configuration["Services:OrderService:BaseUrl"] ??
                               throw new ArgumentNullException($"OrderService BaseUrl is not configured");
 
-    public async Task<CreateOrderResponse> CreateOrderAsync(CreateOrderRequest request)
+    public async Task<Result<CreateOrderResponse>> CreateOrderAsync(CreateOrderRequest request)
     {
         logger.LogInformation("Creating order for customer: {CustomerId}", request.CustomerId);
         
@@ -20,7 +21,7 @@ public class OrderService(ILogger<OrderService> logger, HttpClient httpClient, I
         if (response.IsSuccessStatusCode && content is not null)
         {
             logger.LogInformation("Order created successfully: {@Order}", content);
-            return content;
+            return Result<CreateOrderResponse>.Success(content);
         }
         else
         {
@@ -31,12 +32,12 @@ public class OrderService(ILogger<OrderService> logger, HttpClient httpClient, I
         }
     }
 
-    public async Task<GetOrderResponse> GetOrderByIdAsync(Guid orderId)
+    public async Task<Result<GetOrderResponse>> GetOrderByIdAsync(Guid orderId)
     {
         logger.LogInformation("Retrieving order with ID: {OrderId}", orderId);
         
         HttpResponseMessage response = await DoGet($"{BaseUrl}/order/{orderId}");
-        GetOrderResponse? content = await response.Content.ReadFromJsonAsync<GetOrderResponse>();
+        Result<GetOrderResponse>? content = await response.Content.ReadFromJsonAsync<Result<GetOrderResponse>>();
 
         if (response.IsSuccessStatusCode && content is not null)
         {
@@ -52,12 +53,12 @@ public class OrderService(ILogger<OrderService> logger, HttpClient httpClient, I
         }
     }
 
-    public async Task<UpdateOrderResponse> UpdateOrderAsync(UpdateOrderRequest request)
+    public async Task<Result<UpdateOrderResponse>> UpdateOrderAsync(UpdateOrderRequest request)
     {
         logger.LogInformation("Updating order with ID: {OrderId}", request.Id);
         
         HttpResponseMessage response = await DoPut($"{BaseUrl}/order", request);
-        UpdateOrderResponse? content = await response.Content.ReadFromJsonAsync<UpdateOrderResponse>();
+        Result<UpdateOrderResponse>? content = await response.Content.ReadFromJsonAsync<Result<UpdateOrderResponse>>();
 
         if (response.IsSuccessStatusCode && content is not null)
         {
@@ -73,12 +74,12 @@ public class OrderService(ILogger<OrderService> logger, HttpClient httpClient, I
         }
     }
 
-    public async Task<DeleteOrderResponse> DeleteOrderAsync(Guid orderId)
+    public async Task<Result<DeleteOrderResponse>> DeleteOrderAsync(Guid orderId)
     {
         logger.LogInformation("Deleting order with ID: {OrderId}", orderId);
         
         HttpResponseMessage response = await DoDelete($"{BaseUrl}/order/{orderId}");
-        DeleteOrderResponse? content = await response.Content.ReadFromJsonAsync<DeleteOrderResponse>();
+        Result<DeleteOrderResponse>? content = await response.Content.ReadFromJsonAsync<Result<DeleteOrderResponse>>();
 
         if (response.IsSuccessStatusCode && content is not null)
         {
@@ -94,17 +95,17 @@ public class OrderService(ILogger<OrderService> logger, HttpClient httpClient, I
         }
     }
 
-    public async Task<GetOrderListResponse> GetOrdersByCustomerIdAsync(Guid customerId)
+    public async Task<Result<GetOrderListResponse>> GetOrdersByCustomerIdAsync(Guid customerId)
     {
         logger.LogInformation("Retrieving orders for customer: {CustomerId}", customerId);
         
         HttpResponseMessage response = await DoGet($"{BaseUrl}/order/customer/{customerId}");
-        GetOrderListResponse? content = await response.Content.ReadFromJsonAsync<GetOrderListResponse>();
+        Result<GetOrderListResponse>? content = await response.Content.ReadFromJsonAsync<Result<GetOrderListResponse>>();
 
         if (response.IsSuccessStatusCode && content is not null)
         {
             logger.LogInformation("Orders retrieved successfully for customer: {CustomerId} with {Count} orders", 
-                customerId, content.Orders.Count);
+                customerId, content.Data?.Orders.Count);
             return content;
         }
         else
