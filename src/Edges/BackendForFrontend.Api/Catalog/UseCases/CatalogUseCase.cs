@@ -16,6 +16,12 @@ public class CatalogUseCase(ILogger<CatalogUseCase> logger, ICatalogService serv
         logger.LogInformation("Retrieving catalog with ID: {CatalogId}", catalogId);
         return await service.GetCatalogByIdAsync(catalogId);
     }
+    
+    public async Task<GetCatalogListResponse> GetCatalogListAsync(int pageIndex, int pageSize) 
+    {
+        logger.LogInformation("Retrieving catalog list with pageIndex: {PageIndex}, pageSize: {PageSize}", pageIndex, pageSize);
+        return await service.GetCatalogListAsync(pageIndex, pageSize);
+    }
 
     public async Task<UpdateCatalogResponse> UpdateCatalogAsync(UpdateCatalogRequest request)
     {
@@ -27,11 +33,5 @@ public class CatalogUseCase(ILogger<CatalogUseCase> logger, ICatalogService serv
     {
         logger.LogInformation("Deleting catalog with ID: {CatalogId}", catalogId);
         return await service.DeleteCatalogAsync(catalogId);
-    }
-
-    public async Task<GetCatalogListResponse> GetCatalogListAsync()
-    {
-        logger.LogInformation("Retrieving catalog list");
-        return await service.GetCatalogListAsync();
     }
 }

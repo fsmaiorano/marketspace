@@ -22,7 +22,7 @@ public class TestMerchantService(HttpClient httpClient, ILogger<TestMerchantServ
             {
                 Result<CreateMerchantResult>? resultWrapper =
                     await response.Content.ReadFromJsonAsync<Result<CreateMerchantResult>>();
-                if (resultWrapper?.IsSuccess == true && resultWrapper.Data != null)
+                if (resultWrapper is { IsSuccess: true, Data: not null })
                 {
                     CreateMerchantResponse merchantResponse = new CreateMerchantResponse
                     {

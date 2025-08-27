@@ -5,31 +5,18 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Minio;
-using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Containers;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Serilog;
 using Serilog.Extensions.Hosting;
+using BuildingBlocks.Storage.Minio;
+using Catalog.Test.Mocks;
 
 namespace Catalog.Test.Api;
 
 public class CatalogApiFactory : WebApplicationFactory<CatalogProgram>, IAsyncLifetime
 {
-    private readonly IContainer _minioContainer;
-    public string MinioEndpoint { get; private set; } = string.Empty;
-    public string AccessKey => "admin";
-    public string SecretKey => "admin123";
-
     public CatalogApiFactory()
     {
-        _minioContainer = new ContainerBuilder()
-            .WithImage("minio/minio:latest")
-            .WithEnvironment("MINIO_ROOT_USER", AccessKey)
-            .WithEnvironment("MINIO_ROOT_PASSWORD", SecretKey)
-            .WithPortBinding(9000, true)
-            .WithCommand("server", "/data", "--console-address", ":9001")
-            .Build();
+        // No longer need Minio container since we're using a mock
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -41,12 +28,14 @@ public class CatalogApiFactory : WebApplicationFactory<CatalogProgram>, IAsyncLi
                             (d.ServiceType == typeof(DbContextOptions<CatalogDbContext>) ||
                              d.ServiceType == typeof(CatalogDbContext) ||
                              d.ServiceType == typeof(ICatalogDbContext) ||
-                             d.ServiceType == typeof(MinioClient) ||
-                             d.ServiceType == typeof(IMinioClient) ||
+                             // d.ServiceType == typeof(MinioClient) ||
+                             // d.ServiceType == typeof(IMinioClient) ||
+                             d.ServiceType == typeof(IMinioBucket) ||
                              d.ServiceType.FullName.Contains(nameof(CatalogDbContext)) ||
                              d.ServiceType.FullName.Contains(nameof(ICatalogDbContext)) ||
                              d.ServiceType.FullName.Contains("EntityFramework") ||
-                             d.ServiceType.FullName.Contains("Npgsql")))
+                             d.ServiceType.FullName.Contains("Npgsql") ||
+                             d.ServiceType.FullName.Contains("Minio")))
                 .ToList();
 
             foreach (ServiceDescriptor descriptor in descriptorsToRemove)
@@ -57,12 +46,8 @@ public class CatalogApiFactory : WebApplicationFactory<CatalogProgram>, IAsyncLi
 
             services.AddScoped<ICatalogDbContext, CatalogDbContext>();
 
-            // Configure test MinIO client
-            services.AddSingleton<IMinioClient>(provider =>
-                new MinioClient()
-                    .WithEndpoint(MinioEndpoint)
-                    .WithCredentials(AccessKey, SecretKey)
-                    .Build());
+            // Use mock Minio bucket instead of real container
+            services.Replace(ServiceDescriptor.Scoped<IMinioBucket, MockMinioBucket>());
 
             services.RemoveAll<ILoggerFactory>();
             services.TryAddSingleton<DiagnosticContext>();
@@ -72,12 +57,13 @@ public class CatalogApiFactory : WebApplicationFactory<CatalogProgram>, IAsyncLi
 
     public async Task InitializeAsync()
     {
-        await _minioContainer.StartAsync();
-        MinioEndpoint = $"{_minioContainer.Hostname}:{_minioContainer.GetMappedPublicPort(9000)}";
+        // No longer need to start Minio container
+        await Task.CompletedTask;
     }
 
     public async Task DisposeAsync()
     {
-        await _minioContainer.DisposeAsync();
+        // No longer need to dispose Minio container
+        await base.DisposeAsync();
     }
 }

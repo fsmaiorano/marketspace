@@ -28,6 +28,13 @@ public class MinioBucket : IMinioBucket
 
         try
         {
+            if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out Uri? uri) ||
+                (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            {
+                Console.WriteLine($"Invalid URL provided: {imageUrl}");
+                return (string.Empty, string.Empty);
+            }
+
             using HttpClient httpClient = CreateHttpClient();
             string contentType;
 
@@ -67,7 +74,7 @@ public class MinioBucket : IMinioBucket
                 .WithContentType(contentType));
 
             Console.WriteLine($"Image '{objectName}' successfully uploaded to bucket '{BucketName}'!");
-            
+
 
             string? objectUrl = await GetImageAsync(objectName);
             return (objectName, objectUrl)!;
@@ -139,7 +146,14 @@ public class MinioBucket : IMinioBucket
 
     private static HttpClient CreateHttpClient()
     {
-        return new HttpClient();
+        HttpClientHandler handler = new HttpClientHandler();
+
+        handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true;
+
+        HttpClient client = new HttpClient(handler);
+        client.Timeout = TimeSpan.FromSeconds(30);
+
+        return client;
     }
 
     private static string GetExtensionFromContentType(string contentType)

@@ -54,6 +54,7 @@ CreateCatalogEndpoint.MapEndpoint(app);
 UpdateCatalogEndpoint.MapEndpoint(app);
 DeleteCatalogEndpoint.MapEndpoint(app);
 GetCatalogByIdEndpoint.MapEndpoint(app);
+GetCatalogEndpoint.MapEndpoint(app);
 
 app.Run();
 

@@ -1,3 +1,4 @@
+using BuildingBlocks.Pagination;
 using Catalog.Api.Domain.Entities;
 using Catalog.Api.Domain.Repositories;
 using Catalog.Api.Domain.ValueObjects;
@@ -29,7 +30,7 @@ public class CatalogRepository(ICatalogDbContext dbContext) : ICatalogRepository
             catalog.Description,
             catalog.ImageUrl,
             catalog.Price);
-        
+
         return await dbContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -52,5 +53,21 @@ public class CatalogRepository(ICatalogDbContext dbContext) : ICatalogRepository
 
         return await dbContext.Catalogs.AsNoTracking()
             .FirstOrDefaultAsync(m => m.Id.Equals(id), cancellationToken);
+    }
+
+    public async Task<PaginatedResult<CatalogEntity>> GetPaginatedListAsync(PaginationRequest pagination,
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<CatalogEntity> query = dbContext.Catalogs.AsNoTracking();
+
+        int totalItems = await query.CountAsync(cancellationToken);
+        List<CatalogEntity> items = await query
+            .AsNoTracking()
+            .Skip((pagination.PageIndex - 1) * pagination.PageSize)
+            .Take(pagination.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return new PaginatedResult<CatalogEntity>(count: totalItems, pageIndex: pagination.PageIndex,
+            pageSize: pagination.PageSize, data: items);
     }
 }
