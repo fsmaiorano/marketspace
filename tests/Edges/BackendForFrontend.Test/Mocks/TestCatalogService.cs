@@ -14,7 +14,7 @@ namespace BackendForFrontend.Test.Mocks;
 
 public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogService> logger) : ICatalogService
 {
-    public async Task<CreateCatalogResponse> CreateCatalogAsync(CreateCatalogRequest request)
+    public async Task<Result<CreateCatalogResponse>> CreateCatalogAsync(CreateCatalogRequest request)
     {
         try
         {
@@ -27,18 +27,19 @@ public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogServic
 
                 if (resultWrapper is { IsSuccess: true, Data: not null })
                 {
-                    CreateCatalogResponse catalogResponse = new CreateCatalogResponse
-                    {
-                        Id = resultWrapper.Data.CatalogId,
-                        Name = request.Name,
-                        Description = request.Description,
-                        Price = request.Price,
-                        Categories = request.Categories,
-                        ImageUrl = request.ImageUrl,
-                        MerchantId = request.MerchantId
-                    };
-
+                    Result<CreateCatalogResponse> catalogResponse = Result<CreateCatalogResponse>.Success(
+                        new CreateCatalogResponse
+                        {
+                            Id = resultWrapper.Data.CatalogId,
+                            Name = request.Name,
+                            Description = request.Description,
+                            Price = request.Price,
+                            Categories = request.Categories,
+                            ImageUrl = request.ImageUrl,
+                            MerchantId = request.MerchantId
+                        });
                     logger.LogInformation("Catalog created successfully: {@Catalog}", catalogResponse);
+
                     return catalogResponse;
                 }
             }
@@ -54,7 +55,7 @@ public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogServic
         }
     }
 
-    public async Task<GetCatalogResponse> GetCatalogByIdAsync(Guid catalogId)
+    public async Task<Result<GetCatalogResponse>> GetCatalogByIdAsync(Guid catalogId)
     {
         try
         {
@@ -68,18 +69,19 @@ public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogServic
                 if (resultWrapper is { IsSuccess: true, Data: not null })
                 {
                     GetCatalogByIdResult catalogData = resultWrapper.Data;
-                    GetCatalogResponse catalogResponse = new GetCatalogResponse
-                    {
-                        Id = catalogData.Id,
-                        Name = catalogData.Name,
-                        Description = catalogData.Description,
-                        Price = catalogData.Price,
-                        Categories = catalogData.Categories.ToList(),
-                        ImageUrl = catalogData.ImageUrl,
-                        MerchantId = catalogData.MerchantId,
-                        CreatedAt = catalogData.CreatedAt,
-                        UpdatedAt = catalogData.UpdatedAt
-                    };
+                    Result<GetCatalogResponse> catalogResponse = Result<GetCatalogResponse>.Success(
+                        new GetCatalogResponse
+                        {
+                            Id = catalogData.Id,
+                            Name = catalogData.Name,
+                            Description = catalogData.Description,
+                            Price = catalogData.Price,
+                            Categories = catalogData.Categories.ToList(),
+                            ImageUrl = catalogData.ImageUrl,
+                            MerchantId = catalogData.MerchantId,
+                            CreatedAt = catalogData.CreatedAt,
+                            UpdatedAt = catalogData.UpdatedAt
+                        });
 
                     logger.LogInformation("Catalog retrieved successfully: {@Catalog}", catalogResponse);
                     return catalogResponse;
@@ -97,7 +99,7 @@ public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogServic
         }
     }
 
-    public async Task<GetCatalogListResponse> GetCatalogListAsync(int pageIndex, int pageSize)
+    public async Task<Result<GetCatalogListResponse>> GetCatalogListAsync(int pageIndex, int pageSize)
     {
         try
         {
@@ -111,24 +113,25 @@ public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogServic
 
                 if (resultWrapper is { IsSuccess: true, Data: not null })
                 {
-                    GetCatalogListResponse catalogListResponse = new GetCatalogListResponse
-                    {
-                        PageIndex = resultWrapper.Data.PageIndex,
-                        PageSize = resultWrapper.Data.PageSize,
-                        Count = resultWrapper.Data.Count,
-                        Products = resultWrapper.Data.Products.Select(item => new CatalogItemDto
+                    Result<GetCatalogListResponse> catalogListResponse = Result<GetCatalogListResponse>.Success(
+                        new GetCatalogListResponse
                         {
-                            Id = item.Id,
-                            Name = item.Name,
-                            Description = item.Description,
-                            Price = item.Price,
-                            Categories = item.Categories.ToList(),
-                            ImageUrl = item.ImageUrl,
-                            MerchantId = item.MerchantId,
-                            CreatedAt = item.CreatedAt,
-                            UpdatedAt = item.UpdatedAt
-                        }).ToList()
-                    };
+                            PageIndex = pageIndex,
+                            PageSize = pageSize,
+                            Count = resultWrapper.Data.Count,
+                            Products = resultWrapper.Data.Products.Select(item => new CatalogItemDto
+                            {
+                                Id = item.Id,
+                                Name = item.Name,
+                                Description = item.Description,
+                                Price = item.Price,
+                                Categories = item.Categories.ToList(),
+                                ImageUrl = item.ImageUrl,
+                                MerchantId = item.MerchantId,
+                                CreatedAt = item.CreatedAt,
+                                UpdatedAt = item.UpdatedAt
+                            }).ToList()
+                        });
 
                     logger.LogInformation("Catalog list retrieved successfully: {@CatalogList}", catalogListResponse);
                     return catalogListResponse;
@@ -146,7 +149,7 @@ public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogServic
         }
     }
 
-    public async Task<UpdateCatalogResponse> UpdateCatalogAsync(UpdateCatalogRequest request)
+    public async Task<Result<UpdateCatalogResponse>> UpdateCatalogAsync(UpdateCatalogRequest request)
     {
         try
         {
@@ -159,16 +162,17 @@ public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogServic
 
                 if (resultWrapper is { IsSuccess: true, Data: not null })
                 {
-                    UpdateCatalogResponse catalogResponse = new UpdateCatalogResponse
-                    {
-                        Id = request.Id,
-                        Name = request.Name,
-                        Description = request.Description,
-                        Price = request.Price,
-                        Categories = request.Categories,
-                        ImageUrl = request.ImageUrl,
-                        MerchantId = request.MerchantId
-                    };
+                    Result<UpdateCatalogResponse> catalogResponse = Result<UpdateCatalogResponse>.Success(
+                        new UpdateCatalogResponse
+                        {
+                            Id = request.Id,
+                            Name = request.Name,
+                            Description = request.Description,
+                            Price = request.Price,
+                            Categories = request.Categories,
+                            ImageUrl = request.ImageUrl,
+                            MerchantId = request.MerchantId
+                        });
 
                     logger.LogInformation("Catalog updated successfully: {@Catalog}", catalogResponse);
                     return catalogResponse;
@@ -187,7 +191,7 @@ public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogServic
     }
 
 
-    public async Task<DeleteCatalogResponse> DeleteCatalogAsync(Guid catalogId)
+    public async Task<Result<DeleteCatalogResponse>> DeleteCatalogAsync(Guid catalogId)
     {
         try
         {
@@ -203,10 +207,8 @@ public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogServic
 
                 if (resultWrapper is { IsSuccess: true, Data: not null })
                 {
-                    DeleteCatalogResponse catalogResponse = new DeleteCatalogResponse
-                    {
-                        IsSuccess = resultWrapper.IsSuccess
-                    };
+                    Result<DeleteCatalogResponse> catalogResponse = Result<DeleteCatalogResponse>.Success(
+                        new DeleteCatalogResponse { IsSuccess = resultWrapper.IsSuccess });
 
                     logger.LogInformation("Catalog deleted successfully: {@Catalog}", catalogResponse);
                     return catalogResponse;
