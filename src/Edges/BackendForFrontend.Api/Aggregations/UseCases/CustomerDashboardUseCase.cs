@@ -29,9 +29,9 @@ public class CustomerDashboardUseCase(
                         var basket = await basketService.GetBasketByIdAsync(customerId.ToString());
                         return new CustomerBasketSummary
                         {
-                            Username = basket.Username,
-                            ItemCount = basket.Items.Count,
-                            TotalValue = basket.Items.Sum(item => item.Price * item.Quantity)
+                            Username = basket.Data.Username,
+                            ItemCount = basket.Data.Items.Count,
+                            TotalValue = basket.Data.Items.Sum(item => item.Price * item.Quantity)
                         };
                     }
                     catch (Exception ex)
