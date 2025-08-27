@@ -1,12 +1,13 @@
 using BackendForFrontend.Api.Order.Dtos;
+using BuildingBlocks;
 
 namespace BackendForFrontend.Api.Order.Contracts;
 
 public interface IOrderService
 {
-    Task<CreateOrderResponse> CreateOrderAsync(CreateOrderRequest request);
-    Task<GetOrderResponse> GetOrderByIdAsync(Guid orderId);
-    Task<UpdateOrderResponse> UpdateOrderAsync(UpdateOrderRequest request);
-    Task<DeleteOrderResponse> DeleteOrderAsync(Guid orderId);
-    Task<GetOrderListResponse> GetOrdersByCustomerIdAsync(Guid customerId);
+    Task<Result<CreateOrderResponse>> CreateOrderAsync(CreateOrderRequest request);
+    Task<Result<GetOrderResponse>> GetOrderByIdAsync(Guid orderId);
+    Task<Result<UpdateOrderResponse>> UpdateOrderAsync(UpdateOrderRequest request);
+    Task<Result<DeleteOrderResponse>> DeleteOrderAsync(Guid orderId);
+    Task<Result<GetOrderListResponse>> GetOrdersByCustomerIdAsync(Guid customerId);
 }

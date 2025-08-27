@@ -45,7 +45,7 @@ public class CustomerDashboardUseCase(
                     try
                     {
                         var orders = await orderService.GetOrdersByCustomerIdAsync(customerId);
-                        return orders.Orders.Take(5).Select(order => new CustomerOrderSummary
+                        return orders.Data?.Orders.Take(5).Select(order => new CustomerOrderSummary
                         {
                             Id = order.Id,
                             OrderName = order.OrderName,
