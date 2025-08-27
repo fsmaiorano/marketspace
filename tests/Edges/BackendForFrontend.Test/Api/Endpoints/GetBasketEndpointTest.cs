@@ -1,4 +1,5 @@
 using BackendForFrontend.Api.Basket.Dtos;
+using Builder;
 using BuildingBlocks;
 using FluentAssertions;
 using System.Net.Http.Json;
@@ -12,7 +13,14 @@ public class GetBasketEndpointTest(BackendForFrontendFactory factory) : HttpFixt
     [Fact]
     public async Task Returns_Ok_When_Basket_Is_Retrieved_Successfully()
     {
-        string username = "testuser";
+        CreateBasketRequest createRequest = BackendForFrontendBuilder.CreateBasketRequestFaker();
+        
+        HttpResponseMessage createResponse = await _client.PostAsJsonAsync("/api/basket", createRequest);
+        createResponse.EnsureSuccessStatusCode();
+        
+        Result<CreateBasketResponse>? createResult = await createResponse.Content.ReadFromJsonAsync<Result<CreateBasketResponse>>();
+        createResult?.IsSuccess.Should().BeTrue();
+        string username = createResult!.Data!.Username;
         
         HttpResponseMessage response = await _client.GetAsync($"/api/basket/{username}");
         response.EnsureSuccessStatusCode();

@@ -6,7 +6,9 @@ public class GetCatalogResponse
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public decimal Price { get; set; }
-    public string Category { get; set; } = string.Empty;
-    public string Summary { get; set; } = string.Empty;
-    public string ImageFile { get; set; } = string.Empty;
+    public List<string> Categories { get; set; } = [];
+    public string ImageUrl { get; set; } = string.Empty;
+    public Guid MerchantId { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset? UpdatedAt { get; set; }
 }

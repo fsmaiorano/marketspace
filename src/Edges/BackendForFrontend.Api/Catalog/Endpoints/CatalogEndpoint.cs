@@ -2,6 +2,7 @@ using BackendForFrontend.Api.Catalog.Contracts;
 using BackendForFrontend.Api.Catalog.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using BuildingBlocks;
+using BuildingBlocks.Pagination;
 
 namespace BackendForFrontend.Api.Catalog.Endpoints;
 
@@ -34,19 +35,20 @@ public static class CatalogEndpoint
             .Produces(StatusCodes.Status500InternalServerError);
 
         app.MapGet("/api/catalog",
-                async ([FromServices] ICatalogUseCase usecase) =>
+                async ([AsParameters] PaginationRequest pagination, [FromServices] ICatalogUseCase usecase) =>
                 {
-                    GetCatalogListResponse result = await usecase.GetCatalogListAsync();
+                    GetCatalogListResponse result =
+                        await usecase.GetCatalogListAsync(pagination.PageIndex, pagination.PageSize);
                     return Results.Ok(Result<GetCatalogListResponse>.Success(result));
                 })
-            .WithName("GetCatalogList")
+            .WithName("GetCatalog")
             .WithTags("Catalog")
-            .Produces(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status400BadRequest)
+            .Produces<string>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status500InternalServerError);
 
         app.MapPut("/api/catalog/{catalogId:guid}",
-                async ([FromRoute] Guid catalogId, [FromBody] UpdateCatalogRequest request, [FromServices] ICatalogUseCase usecase) =>
+                async ([FromRoute] Guid catalogId, [FromBody] UpdateCatalogRequest request,
+                    [FromServices] ICatalogUseCase usecase) =>
                 {
                     request.Id = catalogId;
                     UpdateCatalogResponse result = await usecase.UpdateCatalogAsync(request);
