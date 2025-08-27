@@ -1,9 +1,6 @@
-using WebApp.Services;
-
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddSingleton<CatalogSSEService>();
 
 WebApplication app = builder.Build();
 
