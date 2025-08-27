@@ -26,8 +26,7 @@ public class BackendForFrontendBuilder
     {
         return new Faker<CreateBasketRequest>().CustomInstantiator(f => new CreateBasketRequest
         {
-            Username = f.Internet.UserName(),
-            Items = CreateBasketItemFaker().Generate(f.Random.Int(1, 3))
+            Username = f.Internet.UserName(), Items = CreateBasketItemFaker().Generate(f.Random.Int(1, 3))
         });
     }
 
@@ -69,10 +68,10 @@ public class BackendForFrontendBuilder
         {
             Name = f.Commerce.ProductName(),
             Description = f.Commerce.ProductDescription(),
-            Price = f.Random.Decimal(10, 1000),
-            Category = f.Commerce.Categories(1)[0],
-            Summary = f.Lorem.Sentence(),
-            ImageFile = f.System.FileName("jpg")
+            Price = Math.Round(f.Random.Decimal(100, 1000), 2),
+            Categories = f.Commerce.Categories(1).ToList(),
+            ImageUrl = "https://via.placeholder.com/300x300.jpg", // Use a reliable placeholder service
+            MerchantId = f.Random.Guid()
         });
     }
 
@@ -83,10 +82,10 @@ public class BackendForFrontendBuilder
             Id = f.Random.Guid(),
             Name = f.Commerce.ProductName(),
             Description = f.Commerce.ProductDescription(),
-            Price = f.Random.Decimal(10, 1000),
-            Category = f.Commerce.Categories(1)[0],
-            Summary = f.Lorem.Sentence(),
-            ImageFile = f.System.FileName("jpg")
+            Price = Math.Round(f.Random.Decimal(100, 1000), 2),
+            Categories = f.Commerce.Categories(1).ToList(),
+            ImageUrl = "https://via.placeholder.com/300x300.jpg", // Use a reliable placeholder service
+            MerchantId = f.Random.Guid()
         });
     }
 
@@ -148,9 +147,7 @@ public class BackendForFrontendBuilder
     {
         return new Faker<OrderItemDto>().CustomInstantiator(f => new OrderItemDto
         {
-            ProductId = f.Random.Guid(),
-            Quantity = f.Random.Int(1, 5),
-            Price = f.Random.Decimal(10, 100)
+            ProductId = f.Random.Guid(), Quantity = f.Random.Int(1, 5), Price = f.Random.Decimal(10, 100)
         });
     }
 }
