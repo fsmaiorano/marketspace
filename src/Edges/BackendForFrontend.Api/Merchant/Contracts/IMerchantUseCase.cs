@@ -1,11 +1,12 @@
 using BackendForFrontend.Api.Merchant.Dtos;
+using BuildingBlocks;
 
 namespace BackendForFrontend.Api.Merchant.Contracts;
 
 public interface IMerchantUseCase
 {
-    Task<CreateMerchantResponse> CreateMerchantAsync(CreateMerchantRequest request);
-    Task<UpdateMerchantResponse> UpdateMerchantAsync(UpdateMerchantRequest request);
-    Task<DeleteMerchantResponse> DeleteMerchantAsync(Guid merchantId);
-    Task<GetMerchantByIdResponse> GetMerchantByIdAsync(Guid merchantId);
+    Task<Result<CreateMerchantResponse>> CreateMerchantAsync(CreateMerchantRequest request);
+    Task<Result<UpdateMerchantResponse>> UpdateMerchantAsync(UpdateMerchantRequest request);
+    Task<Result<DeleteMerchantResponse>> DeleteMerchantAsync(Guid merchantId);
+    Task<Result<GetMerchantByIdResponse>> GetMerchantByIdAsync(Guid merchantId);
 }
