@@ -12,7 +12,7 @@ namespace BackendForFrontend.Test.Mocks;
 
 public class TestMerchantService(HttpClient httpClient, ILogger<TestMerchantService> logger) : IMerchantService
 {
-    public async Task<CreateMerchantResponse> CreateMerchantAsync(CreateMerchantRequest request)
+    public async Task<Result<CreateMerchantResponse>> CreateMerchantAsync(CreateMerchantRequest request)
     {
         try
         {
@@ -24,10 +24,11 @@ public class TestMerchantService(HttpClient httpClient, ILogger<TestMerchantServ
                     await response.Content.ReadFromJsonAsync<Result<CreateMerchantResult>>();
                 if (resultWrapper is { IsSuccess: true, Data: not null })
                 {
-                    CreateMerchantResponse merchantResponse = new CreateMerchantResponse
-                    {
-                        MerchantId = resultWrapper.Data.MerchantId
-                    };
+                    Result<CreateMerchantResponse> merchantResponse =
+                        Result<CreateMerchantResponse>.Success(new CreateMerchantResponse
+                        {
+                            MerchantId = resultWrapper.Data.MerchantId
+                        });
 
                     logger.LogInformation("Merchant created successfully: {@Merchant}", merchantResponse);
                     return merchantResponse;
@@ -45,26 +46,27 @@ public class TestMerchantService(HttpClient httpClient, ILogger<TestMerchantServ
         }
     }
 
-    public Task<UpdateMerchantResponse> UpdateMerchantAsync(UpdateMerchantRequest request)
+    public async Task<Result<UpdateMerchantResponse>> UpdateMerchantAsync(UpdateMerchantRequest request)
     {
         try
         {
-            HttpResponseMessage response = httpClient.PutAsJsonAsync($"/merchant", request).Result;
+            HttpResponseMessage response = await httpClient.PutAsJsonAsync($"/merchant", request);
 
             if (response.IsSuccessStatusCode)
             {
-                Result<UpdateMerchantResult>? resultWrapper =
-                    response.Content.ReadFromJsonAsync<Result<UpdateMerchantResult>>().Result;
+                Result<UpdateMerchantResult>? resultWrapper = await
+                    response.Content.ReadFromJsonAsync<Result<UpdateMerchantResult>>();
 
                 if (resultWrapper is { IsSuccess: true, Data: not null })
                 {
-                    UpdateMerchantResponse merchantResponse = new UpdateMerchantResponse
-                    {
-                        IsSuccess = resultWrapper.IsSuccess
-                    };
+                    Result<UpdateMerchantResponse> merchantResponse =
+                        Result<UpdateMerchantResponse>.Success(new UpdateMerchantResponse
+                        {
+                            IsSuccess = resultWrapper.IsSuccess
+                        });
 
                     logger.LogInformation("Merchant updated successfully: {@Merchant}", merchantResponse);
-                    return Task.FromResult(merchantResponse);
+                    return merchantResponse;
                 }
             }
 
@@ -79,26 +81,27 @@ public class TestMerchantService(HttpClient httpClient, ILogger<TestMerchantServ
         }
     }
 
-    public Task<DeleteMerchantResponse> DeleteMerchantAsync(Guid merchantId)
+    public async Task<Result<DeleteMerchantResponse>> DeleteMerchantAsync(Guid merchantId)
     {
         try
         {
-            HttpResponseMessage response = httpClient.DeleteAsync($"/merchant/{merchantId}").Result;
+            HttpResponseMessage response = await httpClient.DeleteAsync($"/merchant/{merchantId}");
 
             if (response.IsSuccessStatusCode)
             {
-                Result<DeleteMerchantResult>? resultWrapper =
-                    response.Content.ReadFromJsonAsync<Result<DeleteMerchantResult>>().Result;
+                Result<DeleteMerchantResult>? resultWrapper = await
+                    response.Content.ReadFromJsonAsync<Result<DeleteMerchantResult>>();
 
                 if (resultWrapper is { IsSuccess: true, Data: not null })
                 {
-                    DeleteMerchantResponse merchantResponse = new DeleteMerchantResponse
-                    {
-                        IsSuccess = resultWrapper.IsSuccess
-                    };
+                    Result<DeleteMerchantResponse> merchantResponse =
+                        Result<DeleteMerchantResponse>.Success(new DeleteMerchantResponse
+                        {
+                            IsSuccess = resultWrapper.IsSuccess
+                        });
 
                     logger.LogInformation("Merchant deleted successfully: {@Merchant}", merchantResponse);
-                    return Task.FromResult(merchantResponse);
+                    return merchantResponse;
                 }
             }
 
@@ -113,28 +116,29 @@ public class TestMerchantService(HttpClient httpClient, ILogger<TestMerchantServ
         }
     }
 
-    public Task<GetMerchantByIdResponse> GetMerchantByIdAsync(Guid merchantId)
+    public async Task<Result<GetMerchantByIdResponse>> GetMerchantByIdAsync(Guid merchantId)
     {
         try
         {
-            HttpResponseMessage response = httpClient.GetAsync($"/merchant/{merchantId}").Result;
+            HttpResponseMessage response = await httpClient.GetAsync($"/merchant/{merchantId}");
 
             if (response.IsSuccessStatusCode)
             {
-                Result<GetMerchantByIdResult>? resultWrapper =
-                    response.Content.ReadFromJsonAsync<Result<GetMerchantByIdResult>>().Result;
+                Result<GetMerchantByIdResult>? resultWrapper = await
+                    response.Content.ReadFromJsonAsync<Result<GetMerchantByIdResult>>();
 
                 if (resultWrapper is { IsSuccess: true, Data: not null })
                 {
-                    GetMerchantByIdResponse merchantResponse = new GetMerchantByIdResponse
-                    {
-                        MerchantId = resultWrapper.Data.Id,
-                        Name = resultWrapper.Data.Name,
-                        Address = resultWrapper.Data.Address
-                    };
+                    Result<GetMerchantByIdResponse> merchantResponse =
+                        Result<GetMerchantByIdResponse>.Success(new GetMerchantByIdResponse
+                        {
+                            MerchantId = resultWrapper.Data.Id,
+                            Name = resultWrapper.Data.Name,
+                            Address = resultWrapper.Data.Address
+                        });
 
                     logger.LogInformation("Merchant retrieved successfully: {@Merchant}", merchantResponse);
-                    return Task.FromResult(merchantResponse);
+                    return merchantResponse;
                 }
             }
 

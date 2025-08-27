@@ -12,8 +12,8 @@ public static class MerchantEndpoint
         app.MapPost("/api/merchant",
                 async ([FromBody] Dtos.CreateMerchantRequest request, [FromServices] IMerchantUseCase usecase) =>
                 {
-                    CreateMerchantResponse result = await usecase.CreateMerchantAsync(request);
-                    return Results.Ok(Result<Dtos.CreateMerchantResponse>.Success(result));
+                    Result<CreateMerchantResponse> result = await usecase.CreateMerchantAsync(request);
+                    return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
                 })
             .WithName("CreateMerchant")
             .WithTags("Merchant")
@@ -24,8 +24,8 @@ public static class MerchantEndpoint
         app.MapGet("/api/merchant/{merchantId:guid}",
                 async ([FromRoute] Guid merchantId, [FromServices] IMerchantUseCase usecase) =>
                 {
-                    GetMerchantByIdResponse result = await usecase.GetMerchantByIdAsync(merchantId);
-                    return Results.Ok(Result<Dtos.GetMerchantByIdResponse>.Success(result));
+                    Result<GetMerchantByIdResponse> result = await usecase.GetMerchantByIdAsync(merchantId);
+                    return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
                 })
             .WithName("GetMerchantById")
             .WithTags("Merchant")
@@ -38,8 +38,8 @@ public static class MerchantEndpoint
                     [FromServices] IMerchantUseCase usecase) =>
                 {
                     request.Id = merchantId;
-                    UpdateMerchantResponse result = await usecase.UpdateMerchantAsync(request);
-                    return Results.Ok(Result<Dtos.UpdateMerchantResponse>.Success(result));
+                    Result<UpdateMerchantResponse> result = await usecase.UpdateMerchantAsync(request);
+                    return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
                 })
             .WithName("UpdateMerchant")
             .WithTags("Merchant")
@@ -50,8 +50,8 @@ public static class MerchantEndpoint
         app.MapDelete("/api/merchant/{merchantId:guid}",
                 async ([FromRoute] Guid merchantId, [FromServices] IMerchantUseCase usecase) =>
                 {
-                    await usecase.DeleteMerchantAsync(merchantId);
-                    return Results.Ok();
+                    Result<DeleteMerchantResponse> result = await usecase.DeleteMerchantAsync(merchantId);
+                    return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
                 })
             .WithName("DeleteMerchant")
             .WithTags("Merchant")

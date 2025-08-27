@@ -1,6 +1,7 @@
 using BackendForFrontend.Api.Base;
 using BackendForFrontend.Api.Merchant.Contracts;
 using BackendForFrontend.Api.Merchant.Dtos;
+using BuildingBlocks;
 using Microsoft.Extensions.Logging;
 using System.Net.Http;
 
@@ -12,12 +13,13 @@ public class MerchantService(ILogger<MerchantService> logger, HttpClient httpCli
     private string BaseUrl => configuration["Services:MerchantService:BaseUrl"] ??
                               throw new ArgumentNullException($"MerchantService BaseUrl is not configured");
 
-    public async Task<CreateMerchantResponse> CreateMerchantAsync(CreateMerchantRequest request)
+    public async Task<Result<CreateMerchantResponse>> CreateMerchantAsync(CreateMerchantRequest request)
     {
         logger.LogInformation("Creating merchant with request: {@Request}", request);
-        
+
         HttpResponseMessage response = await DoPost($"{BaseUrl}/merchant", request);
-        CreateMerchantResponse? content = await response.Content.ReadFromJsonAsync<CreateMerchantResponse>();
+        Result<CreateMerchantResponse>? content =
+            await response.Content.ReadFromJsonAsync<Result<CreateMerchantResponse>>();
 
         if (response.IsSuccessStatusCode && content is not null)
         {
@@ -29,16 +31,17 @@ public class MerchantService(ILogger<MerchantService> logger, HttpClient httpCli
             logger.LogError("Failed to create merchant. Status code: {StatusCode}, Response: {@Response}",
                 response.StatusCode, response.Content);
             string errorMessage = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Error creating merchant: {errorMessage}");
+            throw new HttpRequestException($"Error updating merchant: {errorMessage}");
         }
     }
 
-    public async Task<UpdateMerchantResponse> UpdateMerchantAsync(UpdateMerchantRequest request)
+    public async Task<Result<UpdateMerchantResponse>> UpdateMerchantAsync(UpdateMerchantRequest request)
     {
         logger.LogInformation("Updating merchant with request: {@Request}", request);
-        
+
         HttpResponseMessage response = await DoPut($"{BaseUrl}/merchant/{request.Id}", request);
-        UpdateMerchantResponse? content = await response.Content.ReadFromJsonAsync<UpdateMerchantResponse>();
+        Result<UpdateMerchantResponse>? content =
+            await response.Content.ReadFromJsonAsync<Result<UpdateMerchantResponse>>();
 
         if (response.IsSuccessStatusCode && content is not null)
         {
@@ -54,12 +57,13 @@ public class MerchantService(ILogger<MerchantService> logger, HttpClient httpCli
         }
     }
 
-    public async Task<DeleteMerchantResponse> DeleteMerchantAsync(Guid merchantId)
+    public async Task<Result<DeleteMerchantResponse>> DeleteMerchantAsync(Guid merchantId)
     {
         logger.LogInformation("Deleting merchant with ID: {MerchantId}", merchantId);
-        
+
         HttpResponseMessage response = await DoDelete($"{BaseUrl}/merchant/{merchantId}");
-        DeleteMerchantResponse? content = await response.Content.ReadFromJsonAsync<DeleteMerchantResponse>();
+        Result<DeleteMerchantResponse>? content =
+            await response.Content.ReadFromJsonAsync<Result<DeleteMerchantResponse>>();
 
         if (response.IsSuccessStatusCode && content is not null)
         {
@@ -75,12 +79,13 @@ public class MerchantService(ILogger<MerchantService> logger, HttpClient httpCli
         }
     }
 
-    public async Task<GetMerchantByIdResponse> GetMerchantByIdAsync(Guid merchantId)
+    public async Task<Result<GetMerchantByIdResponse>> GetMerchantByIdAsync(Guid merchantId)
     {
         logger.LogInformation("Retrieving merchant with ID: {MerchantId}", merchantId);
-        
+
         HttpResponseMessage response = await DoGet($"{BaseUrl}/merchant/{merchantId}");
-        GetMerchantByIdResponse? content = await response.Content.ReadFromJsonAsync<GetMerchantByIdResponse>();
+        Result<GetMerchantByIdResponse>? content =
+            await response.Content.ReadFromJsonAsync<Result<GetMerchantByIdResponse>>();
 
         if (response.IsSuccessStatusCode && content is not null)
         {
