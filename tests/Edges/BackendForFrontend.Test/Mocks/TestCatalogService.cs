@@ -1,5 +1,6 @@
 using BackendForFrontend.Api.Catalog.Contracts;
 using BackendForFrontend.Api.Catalog.Dtos;
+using Builder;
 using BuildingBlocks;
 using Catalog.Api.Application.Catalog.CreateCatalog;
 using Catalog.Api.Application.Catalog.DeleteCatalog;
@@ -146,7 +147,7 @@ public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogServic
     {
         try
         {
-            HttpResponseMessage response = await httpClient.PutAsJsonAsync($"/catalog/{request.Id}", request);
+            HttpResponseMessage response = await httpClient.PutAsJsonAsync($"/catalog", request);
 
             if (response.IsSuccessStatusCode)
             {
@@ -187,7 +188,10 @@ public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogServic
     {
         try
         {
-            HttpResponseMessage response = await httpClient.DeleteAsync($"/catalog/{catalogId}");
+            DeleteCatalogCommand command = CatalogBuilder.CreateDeleteCatalogCommandFaker(catalogId).Generate();
+            HttpRequestMessage request = new(HttpMethod.Delete, "/catalog") { Content = JsonContent.Create(command) };
+
+            HttpResponseMessage response = await httpClient.SendAsync(request);
 
             if (response.IsSuccessStatusCode)
             {

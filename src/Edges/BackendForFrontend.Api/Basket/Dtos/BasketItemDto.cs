@@ -1,6 +1,6 @@
-namespace Basket.Api.Application.Dto;
+namespace BackendForFrontend.Api.Basket.Dtos;
 
-public class ShoppingCartItemDto
+public class BasketItemDto
 {
     public int Quantity { get; set; }
     public decimal Price { get; set; }

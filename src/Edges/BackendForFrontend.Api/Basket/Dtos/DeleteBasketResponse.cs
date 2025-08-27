@@ -2,5 +2,5 @@ namespace BackendForFrontend.Api.Basket.Dtos;
 
 public class DeleteBasketResponse
 {
-    public bool IsDeleted { get; set; }
+    public bool IsSuccess { get; set; }
 }
