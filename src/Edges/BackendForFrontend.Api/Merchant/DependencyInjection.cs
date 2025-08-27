@@ -10,10 +10,7 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddScoped<IMerchantUseCase, MerchantUseCase>();
-        
-        // Register HttpClient for MerchantService
         services.AddHttpClient<IMerchantService, MerchantService>();
-        
         return services;
     }
 }

@@ -113,12 +113,15 @@ public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogServic
                 {
                     GetCatalogListResponse catalogListResponse = new GetCatalogListResponse
                     {
-                        Items = resultWrapper.Data.Products.Select(item => new CatalogItemDto
+                        PageIndex = resultWrapper.Data.PageIndex,
+                        PageSize = resultWrapper.Data.PageSize,
+                        Count = resultWrapper.Data.Count,
+                        Products = resultWrapper.Data.Products.Select(item => new CatalogItemDto
                         {
-                            Id = item.Id.Value,
+                            Id = item.Id,
                             Name = item.Name,
                             Description = item.Description,
-                            Price = item.Price.Value,
+                            Price = item.Price,
                             Categories = item.Categories.ToList(),
                             ImageUrl = item.ImageUrl,
                             MerchantId = item.MerchantId,
