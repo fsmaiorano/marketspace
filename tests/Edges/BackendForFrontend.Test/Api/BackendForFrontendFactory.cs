@@ -1,7 +1,9 @@
 using BackendForFrontend.Api;
 using BackendForFrontend.Api.Merchant.Contracts;
 using BackendForFrontend.Api.Basket.Contracts;
+using BackendForFrontend.Api.Basket.Services;
 using BackendForFrontend.Api.Catalog.Contracts;
+using BackendForFrontend.Api.Catalog.Services;
 using BackendForFrontend.Api.Order.Contracts;
 using Basket.Api.Infrastructure.Data;
 using Basket.Test.Api;
@@ -12,7 +14,6 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Minio;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using Merchant.Api.Infrastructure.Data;
@@ -23,33 +24,34 @@ using Order.Api.Infrastructure.Data;
 using Order.Test.Api;
 using Serilog.Extensions.Hosting;
 using BackendForFrontend.Api.Merchant.Services;
+using BackendForFrontend.Api.Order.Services;
 using Merchant.Test.Api;
 using BackendForFrontend.Test.Mocks;
+using BuildingBlocks.Storage.Minio;
+using Minio;
 
 namespace BackendForFrontend.Test.Api;
 
 public class BackendForFrontendFactory : WebApplicationFactory<BackendForFrontendProgram>, IAsyncLifetime
 {
-    private readonly IContainer _minioContainer;
-    private readonly MerchantApiFactory _merchantApiFactory;
     private HttpClient _merchantApiClient;
-
-    public string MinioEndpoint { get; private set; } = string.Empty;
-    public string AccessKey => "admin";
-    public string SecretKey => "admin123";
+    private HttpClient _orderApiClient;
+    private HttpClient _basketApiClient;
+    private HttpClient _catalogApiClient;
 
     public BackendForFrontendFactory()
     {
-        _minioContainer = new ContainerBuilder()
-            .WithImage("minio/minio:latest")
-            .WithEnvironment("MINIO_ROOT_USER", AccessKey)
-            .WithEnvironment("MINIO_ROOT_PASSWORD", SecretKey)
-            .WithPortBinding(9000, true)
-            .WithCommand("server", "/data", "--console-address", ":9001")
-            .Build();
+        MerchantApiFactory merchantApiFactory = new();
+        _merchantApiClient = merchantApiFactory.CreateClient();
 
-        _merchantApiFactory = new MerchantApiFactory();
-        _merchantApiClient = _merchantApiFactory.CreateClient();
+        OrderApiFactory orderApiFactory = new();
+        _orderApiClient = orderApiFactory.CreateClient();
+
+        BasketApiFactory basketApiFactory = new();
+        _basketApiClient = basketApiFactory.CreateClient();
+
+        CatalogApiFactory catalogApiFactory = new();
+        _catalogApiClient = catalogApiFactory.CreateClient();
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -67,6 +69,7 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
                              d.ServiceType == typeof(ICatalogDbContext) ||
                              d.ServiceType == typeof(MinioClient) ||
                              d.ServiceType == typeof(IMinioClient) ||
+                             d.ServiceType == typeof(IMinioBucket) ||
                              d.ServiceType == typeof(HttpClient) ||
                              d.ServiceType.FullName.Contains(nameof(OrderDbContext)) ||
                              d.ServiceType.FullName.Contains(nameof(IOrderDbContext)) ||
@@ -78,18 +81,16 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
                              d.ServiceType.FullName.Contains(nameof(CatalogDbContext)) ||
                              d.ServiceType.FullName.Contains(nameof(ICatalogDbContext)) ||
                              d.ServiceType.FullName.Contains("EntityFramework") ||
-                             d.ServiceType.FullName.Contains("Npgsql")) ||
+                             d.ServiceType.FullName.Contains("Npgsql") ||
+                             d.ServiceType.FullName.Contains("Minio")) ||
                             d.ServiceKey?.ToString() == nameof(MerchantService) ||
-                            d.ServiceKey?.ToString() == nameof(IMerchantService)
-
-                    // d.ServiceKey?.ToString() == nameof(IOrderService) ||
-                    // d.ServiceKey?.ToString() == nameof(OrdertService) ||
-                    //
-                    // d.ServiceKey?.ToString() == nameof(ICatalogService) ||
-                    // d.ServiceKey?.ToString() == nameof(ICatalogService) ||
-                    //
-                    // d.ServiceKey?.ToString() == nameof(IBasketService) ||
-                    // d.ServiceKey?.ToString() == nameof(IBasketService) 
+                            d.ServiceKey?.ToString() == nameof(IMerchantService) ||
+                            d.ServiceKey?.ToString() == nameof(IOrderService) ||
+                            d.ServiceKey?.ToString() == nameof(OrderService) ||
+                            d.ServiceKey?.ToString() == nameof(ICatalogService) ||
+                            d.ServiceKey?.ToString() == nameof(CatalogService) ||
+                            d.ServiceKey?.ToString() == nameof(IBasketService) ||
+                            d.ServiceKey?.ToString() == nameof(BasketService)
                 )
                 .ToList();
 
@@ -116,6 +117,11 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
             services.AddDbContext<OrderDbContext>(options =>
                 options.UseInMemoryDatabase("InMemoryDbForTesting"));
 
+            services.AddDbContext<CatalogDbContext>(options =>
+                options.UseInMemoryDatabase("InMemoryDbForTesting"));
+
+            services.Replace(ServiceDescriptor.Scoped<IMinioBucket, MockMinioBucket>());
+
             services.AddScoped<BasketApiFactory>();
             services.AddScoped<OrderApiFactory>();
             services.AddScoped<CatalogApiFactory>();
@@ -129,34 +135,31 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
             services.AddScoped<IBasketService>(provider =>
             {
                 ILogger<TestBasketService> logger = provider.GetRequiredService<ILogger<TestBasketService>>();
-                return new TestBasketService(null!, logger);
+                return new TestBasketService(_basketApiClient!, logger);
             });
 
             services.AddScoped<ICatalogService>(provider =>
             {
                 ILogger<TestCatalogService> logger = provider.GetRequiredService<ILogger<TestCatalogService>>();
-                return new TestCatalogService(null!, logger);
+                return new TestCatalogService(_catalogApiClient, logger);
             });
 
             services.AddScoped<IOrderService>(provider =>
             {
                 ILogger<TestOrderService> logger = provider.GetRequiredService<ILogger<TestOrderService>>();
-                return new TestOrderService(null!, logger);
+                return new TestOrderService(_orderApiClient, logger);
             });
         });
     }
 
     public async Task InitializeAsync()
     {
-        await _minioContainer.StartAsync();
-        MinioEndpoint = $"{_minioContainer.Hostname}:{_minioContainer.GetMappedPublicPort(9000)}";
+        // Minio container is no longer used, so nothing to initialize
     }
 
     public new async Task DisposeAsync()
     {
-        await _minioContainer.DisposeAsync();
-        _merchantApiClient?.Dispose();
-        await _merchantApiFactory.DisposeAsync();
+        // Minio container is no longer used, so nothing to dispose
         await base.DisposeAsync();
     }
 }

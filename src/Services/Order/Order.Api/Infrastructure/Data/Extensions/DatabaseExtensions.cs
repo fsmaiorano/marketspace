@@ -17,8 +17,16 @@ public static class DatabaseExtensions
             {
                 try
                 {
-                    await context.Database.MigrateAsync();
-                    Console.WriteLine("Database migration completed successfully.");
+                    // Only run migrations if using a relational database provider
+                    if (context.Database.IsRelational())
+                    {
+                        await context.Database.MigrateAsync();
+                        Console.WriteLine("Database migration completed successfully.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Using non-relational database provider - skipping migrations.");
+                    }
                 }
                 catch (Exception ex)
                 {
