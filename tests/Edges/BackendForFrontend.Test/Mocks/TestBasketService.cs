@@ -1,7 +1,9 @@
 using BackendForFrontend.Api.Basket.Contracts;
 using BackendForFrontend.Api.Basket.Dtos;
 using Basket.Api.Application.Basket.CreateBasket;
+using Basket.Api.Application.Basket.DeleteBasket;
 using Basket.Api.Application.Basket.GetBasketById;
+using Builder;
 using BuildingBlocks;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
@@ -89,7 +91,10 @@ public class TestBasketService(HttpClient httpClient, ILogger<TestBasketService>
     {
         try
         {
-            HttpResponseMessage response = await httpClient.DeleteAsync($"/basket/{username}");
+            DeleteBasketCommand command = BasketBuilder.CreateDeleteBasketCommandFaker(username).Generate();
+            HttpRequestMessage request = new(HttpMethod.Delete, "/basket") { Content = JsonContent.Create(command) };
+
+            HttpResponseMessage response = await httpClient.SendAsync(request);
 
             if (response.IsSuccessStatusCode)
             {
