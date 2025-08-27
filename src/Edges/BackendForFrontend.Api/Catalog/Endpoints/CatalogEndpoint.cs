@@ -13,8 +13,10 @@ public static class CatalogEndpoint
         app.MapPost("/api/catalog",
                 async ([FromBody] CreateCatalogRequest request, [FromServices] ICatalogUseCase usecase) =>
                 {
-                    CreateCatalogResponse result = await usecase.CreateCatalogAsync(request);
-                    return Results.Ok(Result<CreateCatalogResponse>.Success(result));
+                    Result<CreateCatalogResponse> result = await usecase.CreateCatalogAsync(request);
+                    return result.IsSuccess
+                        ? Results.Ok(result)
+                        : Results.BadRequest(result.Error);
                 })
             .WithName("CreateCatalog")
             .WithTags("Catalog")
@@ -25,8 +27,10 @@ public static class CatalogEndpoint
         app.MapGet("/api/catalog/{catalogId:guid}",
                 async ([FromRoute] Guid catalogId, [FromServices] ICatalogUseCase usecase) =>
                 {
-                    GetCatalogResponse result = await usecase.GetCatalogByIdAsync(catalogId);
-                    return Results.Ok(Result<GetCatalogResponse>.Success(result));
+                    Result<GetCatalogResponse> result = await usecase.GetCatalogByIdAsync(catalogId);
+                    return result.IsSuccess
+                        ? Results.Ok(result)
+                        : Results.BadRequest(result.Error);
                 })
             .WithName("GetCatalogById")
             .WithTags("Catalog")
@@ -37,9 +41,11 @@ public static class CatalogEndpoint
         app.MapGet("/api/catalog",
                 async ([AsParameters] PaginationRequest pagination, [FromServices] ICatalogUseCase usecase) =>
                 {
-                    GetCatalogListResponse result =
+                    Result<GetCatalogListResponse> result =
                         await usecase.GetCatalogListAsync(pagination.PageIndex, pagination.PageSize);
-                    return Results.Ok(Result<GetCatalogListResponse>.Success(result));
+                    return result.IsSuccess
+                        ? Results.Ok(result)
+                        : Results.BadRequest(result.Error);
                 })
             .WithName("GetCatalog")
             .WithTags("Catalog")
@@ -51,8 +57,10 @@ public static class CatalogEndpoint
                     [FromServices] ICatalogUseCase usecase) =>
                 {
                     request.Id = catalogId;
-                    UpdateCatalogResponse result = await usecase.UpdateCatalogAsync(request);
-                    return Results.Ok(Result<UpdateCatalogResponse>.Success(result));
+                    Result<UpdateCatalogResponse> result = await usecase.UpdateCatalogAsync(request);
+                    return result.IsSuccess
+                        ? Results.Ok(result)
+                        : Results.BadRequest(result.Error);
                 })
             .WithName("UpdateCatalog")
             .WithTags("Catalog")
@@ -63,8 +71,10 @@ public static class CatalogEndpoint
         app.MapDelete("/api/catalog/{catalogId:guid}",
                 async ([FromRoute] Guid catalogId, [FromServices] ICatalogUseCase usecase) =>
                 {
-                    DeleteCatalogResponse result = await usecase.DeleteCatalogAsync(catalogId);
-                    return Results.Ok(Result<DeleteCatalogResponse>.Success(result));
+                    Result<DeleteCatalogResponse> result = await usecase.DeleteCatalogAsync(catalogId);
+                    return result.IsSuccess
+                        ? Results.Ok(result)
+                        : Results.BadRequest(result.Error);
                 })
             .WithName("DeleteCatalog")
             .WithTags("Catalog")
