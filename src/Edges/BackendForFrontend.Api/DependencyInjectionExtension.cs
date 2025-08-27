@@ -73,7 +73,7 @@ public static class DependencyInjectionExtension
             {
                 logger.LogInformation("Sending request to {Url}", request.RequestUri);
 
-                var response = await base.SendAsync(request, cancellationToken);
+                HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
                 logger.LogInformation("Received response with status code {StatusCode}", response.StatusCode);
                 return response;
             }

@@ -1,6 +1,14 @@
+using WebApp.Services;
+
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+
+string? bffUrl = builder.Configuration["Services:BackendForFrontendService:BaseUrl"];
+builder.Services.AddHttpClient<IMarketSpaceService, MarketSpaceService>(client =>
+{
+    client.BaseAddress = new Uri(bffUrl ?? throw new InvalidOperationException());
+});
 
 WebApplication app = builder.Build();
 

@@ -1,6 +1,7 @@
 using BackendForFrontend.Api.Base;
 using BackendForFrontend.Api.Catalog.Contracts;
 using BackendForFrontend.Api.Catalog.Dtos;
+using BuildingBlocks;
 
 namespace BackendForFrontend.Api.Catalog.Services;
 
@@ -13,7 +14,7 @@ public class CatalogService(ILogger<CatalogService> logger, HttpClient httpClien
     public async Task<CreateCatalogResponse> CreateCatalogAsync(CreateCatalogRequest request)
     {
         logger.LogInformation("Creating catalog with name: {Name}", request.Name);
-        
+
         HttpResponseMessage response = await DoPost($"{BaseUrl}/catalog", request);
         CreateCatalogResponse? content = await response.Content.ReadFromJsonAsync<CreateCatalogResponse>();
 
@@ -34,7 +35,7 @@ public class CatalogService(ILogger<CatalogService> logger, HttpClient httpClien
     public async Task<GetCatalogResponse> GetCatalogByIdAsync(Guid catalogId)
     {
         logger.LogInformation("Retrieving catalog with ID: {CatalogId}", catalogId);
-        
+
         HttpResponseMessage response = await DoGet($"{BaseUrl}/catalog/{catalogId}");
         GetCatalogResponse? content = await response.Content.ReadFromJsonAsync<GetCatalogResponse>();
 
@@ -51,18 +52,18 @@ public class CatalogService(ILogger<CatalogService> logger, HttpClient httpClien
             throw new HttpRequestException($"Error retrieving catalog: {errorMessage}");
         }
     }
-    
-    public async Task<GetCatalogListResponse> GetCatalogListAsync(int pageIndex, int pageSize) 
+
+    public async Task<GetCatalogListResponse> GetCatalogListAsync(int pageIndex, int pageSize)
     {
         logger.LogInformation("Retrieving catalog list with pageIndex: {PageIndex}, pageSize: {PageSize}", pageIndex, pageSize);
-        
+
         HttpResponseMessage response = await DoGet($"{BaseUrl}/catalog?pageIndex={pageIndex}&pageSize={pageSize}");
-        GetCatalogListResponse? content = await response.Content.ReadFromJsonAsync<GetCatalogListResponse>();
+        Result<GetCatalogListResponse>? content = await response.Content.ReadFromJsonAsync<Result<GetCatalogListResponse>>();
 
         if (response.IsSuccessStatusCode && content is not null)
         {
-            logger.LogInformation("Catalog list retrieved successfully with {Count} items", content.Items.Count);
-            return content;
+            logger.LogInformation("Catalog list retrieved successfully with {Count} items", content.Data?.Products.Count);
+            return content.Data!;
         }
         else
         {
@@ -76,7 +77,7 @@ public class CatalogService(ILogger<CatalogService> logger, HttpClient httpClien
     public async Task<UpdateCatalogResponse> UpdateCatalogAsync(UpdateCatalogRequest request)
     {
         logger.LogInformation("Updating catalog with ID: {CatalogId}", request.Id);
-        
+
         HttpResponseMessage response = await DoPut($"{BaseUrl}/catalog", request);
         UpdateCatalogResponse? content = await response.Content.ReadFromJsonAsync<UpdateCatalogResponse>();
 
@@ -97,7 +98,7 @@ public class CatalogService(ILogger<CatalogService> logger, HttpClient httpClien
     public async Task<DeleteCatalogResponse> DeleteCatalogAsync(Guid catalogId)
     {
         logger.LogInformation("Deleting catalog with ID: {CatalogId}", catalogId);
-        
+
         HttpResponseMessage response = await DoDelete($"{BaseUrl}/catalog/{catalogId}");
         DeleteCatalogResponse? content = await response.Content.ReadFromJsonAsync<DeleteCatalogResponse>();
 
@@ -118,13 +119,13 @@ public class CatalogService(ILogger<CatalogService> logger, HttpClient httpClien
     public async Task<GetCatalogListResponse> GetCatalogListAsync()
     {
         logger.LogInformation("Retrieving catalog list");
-        
+
         HttpResponseMessage response = await DoGet($"{BaseUrl}/catalog");
         GetCatalogListResponse? content = await response.Content.ReadFromJsonAsync<GetCatalogListResponse>();
 
         if (response.IsSuccessStatusCode && content is not null)
         {
-            logger.LogInformation("Catalog list retrieved successfully with {Count} items", content.Items.Count);
+            logger.LogInformation("Catalog list retrieved successfully with {Count} items", content.Products.Count);
             return content;
         }
         else
