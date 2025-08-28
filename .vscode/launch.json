@@ -1,0 +1,169 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Merchant.Api",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-merchant-api",
+      "program": "${workspaceFolder}/src/Services/Merchant/Merchant.Api/bin/Debug/net9.0/Merchant.Api.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/Services/Merchant/Merchant.Api",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "https://localhost:5055;http://localhost:5005"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/Views"
+      }
+    },
+    {
+      "name": "Catalog.Api",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-catalog-api",
+      "program": "${workspaceFolder}/src/Services/Catalog/Catalog.Api/bin/Debug/net9.0/Catalog.Api.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/Services/Catalog/Catalog.Api",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "https://localhost:5050;http://localhost:5000"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/Views"
+      }
+    },
+    {
+      "name": "Basket.Api",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-basket-api",
+      "program": "${workspaceFolder}/src/Services/Basket/Basket.Api/bin/Debug/net9.0/Basket.Api.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/Services/Basket/Basket.Api",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "https://localhost:5053;http://localhost:5003"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/Views"
+      }
+    },
+    {
+      "name": "Order.Api",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-order-api",
+      "program": "${workspaceFolder}/src/Services/Order/Order.Api/bin/Debug/net9.0/Order.Api.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/Services/Order/Order.Api",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "https://localhost:5054;http://localhost:5004"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/Views"
+      }
+    },
+    {
+      "name": "BackendForFrontend.Api",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-bff-api",
+      "program": "${workspaceFolder}/src/Edges/BackendForFrontend.Api/bin/Debug/net9.0/BackendForFrontend.Api.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/Edges/BackendForFrontend.Api",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "https://localhost:4041;http://localhost:4001"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/Views"
+      }
+    },
+    {
+      "name": "WebApp",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-webapp",
+      "program": "${workspaceFolder}/src/Uis/WebApp/bin/Debug/net9.0/WebApp.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/Uis/WebApp",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "https://localhost:3041;http://localhost:3001"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/Views"
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Launch All Services",
+      "configurations": [
+        "Merchant.Api",
+        "Catalog.Api",
+        "Basket.Api",
+        "Order.Api"
+      ],
+      "stopAll": true,
+      "preLaunchTask": "build-all-services"
+    },
+    {
+      "name": "Launch Full Stack",
+      "configurations": [
+        "Merchant.Api",
+        "Catalog.Api",
+        "Basket.Api",
+        "Order.Api",
+        "BackendForFrontend.Api",
+        "WebApp"
+      ],
+      "stopAll": true,
+      "preLaunchTask": "build-all-projects"
+    },
+    {
+      "name": "Launch Backend Services",
+      "configurations": [
+        "Merchant.Api",
+        "Catalog.Api",
+        "Basket.Api",
+        "Order.Api",
+        "BackendForFrontend.Api"
+      ],
+      "stopAll": true,
+      "preLaunchTask": "build-backend-services"
+    }
+  ]
+}

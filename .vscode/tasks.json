@@ -1,0 +1,379 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build-merchant-api",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/Services/Merchant/Merchant.Api/Merchant.Api.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    },
+    {
+      "label": "build-catalog-api",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/Services/Catalog/Catalog.Api/Catalog.Api.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    },
+    {
+      "label": "build-basket-api",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/Services/Basket/Basket.Api/Basket.Api.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    },
+    {
+      "label": "build-order-api",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/Services/Order/Order.Api/Order.Api.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    },
+    {
+      "label": "build-bff-api",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/Edges/BackendForFrontend.Api/BackendForFrontend.Api.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    },
+    {
+      "label": "build-webapp",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/Uis/WebApp/WebApp.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    },
+    {
+      "label": "build-all-services",
+      "dependsOrder": "parallel",
+      "dependsOn": [
+        "build-merchant-api",
+        "build-catalog-api",
+        "build-basket-api",
+        "build-order-api"
+      ],
+      "group": "build"
+    },
+    {
+      "label": "build-backend-services",
+      "dependsOrder": "parallel",
+      "dependsOn": [
+        "build-merchant-api",
+        "build-catalog-api",
+        "build-basket-api",
+        "build-order-api",
+        "build-bff-api"
+      ],
+      "group": "build"
+    },
+    {
+      "label": "build-all-projects",
+      "dependsOrder": "parallel",
+      "dependsOn": [
+        "build-merchant-api",
+        "build-catalog-api",
+        "build-basket-api",
+        "build-order-api",
+        "build-bff-api",
+        "build-webapp"
+      ],
+      "group": "build"
+    },
+    {
+      "label": "build-solution",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/MarketSpace.sln",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "clean-solution",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "clean",
+        "${workspaceFolder}/MarketSpace.sln"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    },
+    {
+      "label": "restore-solution",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "restore",
+        "${workspaceFolder}/MarketSpace.sln"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    },
+    {
+      "label": "watch-merchant-api",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "watch",
+        "run",
+        "--project",
+        "${workspaceFolder}/src/Services/Merchant/Merchant.Api/Merchant.Api.csproj"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/src/Services/Merchant/Merchant.Api",
+        "env": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "ASPNETCORE_URLS": "https://localhost:5055;http://localhost:5005"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": [
+        {
+          "pattern": [
+            {
+              "regexp": "\\G",
+              "file": 1,
+              "location": 2,
+              "message": 3
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "^\\s*Attempting to restart process",
+            "endsPattern": "^\\s*Application started\\. Press Ctrl\\+C to shut down\\."
+          }
+        }
+      ],
+      "group": "build"
+    },
+    {
+      "label": "watch-catalog-api",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "watch",
+        "run",
+        "--project",
+        "${workspaceFolder}/src/Services/Catalog/Catalog.Api/Catalog.Api.csproj"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/src/Services/Catalog/Catalog.Api",
+        "env": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "ASPNETCORE_URLS": "https://localhost:5050;http://localhost:5000"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": [
+        {
+          "pattern": [
+            {
+              "regexp": "\\G",
+              "file": 1,
+              "location": 2,
+              "message": 3
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "^\\s*Attempting to restart process",
+            "endsPattern": "^\\s*Application started\\. Press Ctrl\\+C to shut down\\."
+          }
+        }
+      ],
+      "group": "build"
+    },
+    {
+      "label": "watch-basket-api",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "watch",
+        "run",
+        "--project",
+        "${workspaceFolder}/src/Services/Basket/Basket.Api/Basket.Api.csproj"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/src/Services/Basket/Basket.Api",
+        "env": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "ASPNETCORE_URLS": "https://localhost:5053;http://localhost:5003"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": [
+        {
+          "pattern": [
+            {
+              "regexp": "\\G",
+              "file": 1,
+              "location": 2,
+              "message": 3
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "^\\s*Attempting to restart process",
+            "endsPattern": "^\\s*Application started\\. Press Ctrl\\+C to shut down\\."
+          }
+        }
+      ],
+      "group": "build"
+    },
+    {
+      "label": "watch-order-api",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "watch",
+        "run",
+        "--project",
+        "${workspaceFolder}/src/Services/Order/Order.Api/Order.Api.csproj"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/src/Services/Order/Order.Api",
+        "env": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "ASPNETCORE_URLS": "https://localhost:5054;http://localhost:5004"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": [
+        {
+          "pattern": [
+            {
+              "regexp": "\\G",
+              "file": 1,
+              "location": 2,
+              "message": 3
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "^\\s*Attempting to restart process",
+            "endsPattern": "^\\s*Application started\\. Press Ctrl\\+C to shut down\\."
+          }
+        }
+      ],
+      "group": "build"
+    },
+    {
+      "label": "watch-bff-api",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "watch",
+        "run",
+        "--project",
+        "${workspaceFolder}/src/Edges/BackendForFrontend.Api/BackendForFrontend.Api.csproj"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/src/Edges/BackendForFrontend.Api",
+        "env": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "ASPNETCORE_URLS": "https://localhost:4041;http://localhost:4001"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": [
+        {
+          "pattern": [
+            {
+              "regexp": "\\G",
+              "file": 1,
+              "location": 2,
+              "message": 3
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "^\\s*Attempting to restart process",
+            "endsPattern": "^\\s*Application started\\. Press Ctrl\\+C to shut down\\."
+          }
+        }
+      ],
+      "group": "build"
+    },
+    {
+      "label": "watch-webapp",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "watch",
+        "run",
+        "--project",
+        "${workspaceFolder}/src/Uis/WebApp/WebApp.csproj"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/src/Uis/WebApp",
+        "env": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "ASPNETCORE_URLS": "https://localhost:3041;http://localhost:3001"
+        }
+      },
+      "isBackground": true,
+      "problemMatcher": [
+        {
+          "pattern": [
+            {
+              "regexp": "\\G",
+              "file": 1,
+              "location": 2,
+              "message": 3
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "^\\s*Attempting to restart process",
+            "endsPattern": "^\\s*Application started\\. Press Ctrl\\+C to shut down\\."
+          }
+        }
+      ],
+      "group": "build"
+    }
+  ]
+}
