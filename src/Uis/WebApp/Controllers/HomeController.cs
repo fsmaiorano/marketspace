@@ -27,7 +27,6 @@ public class HomeController(IMarketSpaceService service, ILogger<HomeController>
         }
     }
 
-
     public IActionResult Privacy()
     {
         return View();
