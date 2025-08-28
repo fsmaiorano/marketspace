@@ -1,16 +1,30 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using WebApp.Models;
+using WebApp.Dtos;
+using WebApp.Services;
 
 namespace WebApp.Controllers;
 
-public class HomeController(ILogger<HomeController> logger) : Controller
+public class HomeController(IMarketSpaceService service, ILogger<HomeController> logger) : Controller
 {
-    private readonly ILogger<HomeController> _logger = logger;
-
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View();
+        try
+        {
+            logger.LogInformation("Fetching products for home page");
+            GetCatalogResponse products = await service.GetProductsAsync();
+            return View(products);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error occurred while fetching products for home page");
+            GetCatalogResponse emptyResponse = new GetCatalogResponse
+            {
+                Products = [], Count = 0, PageIndex = 0, PageSize = 0
+            };
+            return View(emptyResponse);
+        }
     }
 
     public IActionResult Privacy()
