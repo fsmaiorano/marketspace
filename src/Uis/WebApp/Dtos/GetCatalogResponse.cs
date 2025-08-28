@@ -1,6 +1,8 @@
-namespace BackendForFrontend.Api.Catalog.Dtos;
+using System;
 
-public class GetCatalogListResponse
+namespace WebApp.Dtos;
+
+public class GetCatalogResponse
 {
     public int PageIndex { get; set; }
     public int PageSize { get; set; }

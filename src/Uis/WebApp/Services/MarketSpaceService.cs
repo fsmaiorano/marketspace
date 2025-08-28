@@ -1,9 +1,12 @@
+using BuildingBlocks;
+using WebApp.Dtos;
+
 namespace WebApp.Services;
 
 public class MarketSpaceService(ILogger<MarketSpaceService> logger, HttpClient httpClient)
     : IMarketSpaceService
 {
-    public async Task<List<string>> GetProductsAsync()
+    public async Task<GetCatalogResponse> GetProductsAsync()
     {
         try
         {
@@ -12,15 +15,20 @@ public class MarketSpaceService(ILogger<MarketSpaceService> logger, HttpClient h
             HttpResponseMessage response = await httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
-            string content = await response.Content.ReadAsStringAsync();
-            List<string> products = System.Text.Json.JsonSerializer.Deserialize<List<string>>(content) ?? new List<string>();
+            Result<GetCatalogResponse>? result = await response.Content.ReadFromJsonAsync<Result<GetCatalogResponse>>();
 
-            return products;
+            return result?.Data ?? new GetCatalogResponse
+            {
+                Products = []
+            };
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error fetching products from MarketSpaceService");
-            return new List<string>();
+            return new GetCatalogResponse
+            {
+                Products = []
+            };
         }
     }
 }

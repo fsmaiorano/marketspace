@@ -1,6 +1,8 @@
+using WebApp.Dtos;
+
 namespace WebApp.Services;
 
 public interface IMarketSpaceService
 {
-    Task<List<string>> GetProductsAsync();
+    Task<GetCatalogResponse> GetProductsAsync();
 }

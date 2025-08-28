@@ -70,4 +70,8 @@
       <Folder Include="wwwroot\lib\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="../../BuildingBlocks/BuildingBlocks/BuildingBlocks.csproj" />
+    </ItemGroup>
+
 </Project>
