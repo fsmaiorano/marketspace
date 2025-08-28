@@ -119,7 +119,7 @@ public class TestCatalogService(HttpClient httpClient, ILogger<TestCatalogServic
                             PageIndex = pageIndex,
                             PageSize = pageSize,
                             Count = resultWrapper.Data.Count,
-                            Products = resultWrapper.Data.Products.Select(item => new CatalogItemDto
+                            Products = resultWrapper.Data.Products.Select(item => new CatalogDto
                             {
                                 Id = item.Id,
                                 Name = item.Name,
