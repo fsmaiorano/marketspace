@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# MarketSpace - Run All Services in Mode
+# MarketSpace - Run All Services in Watch Mode
 # This script starts all backend services and BFF in development mode
 
 echo "🚀 Starting MarketSpace Services..."
@@ -24,7 +24,7 @@ echo "   • BFF API:       https://localhost:4041/index.html"
 echo ""
 echo "🛑 To stop all services, run: ./scripts/stop-all-services.sh"e Development Environment - HTTPS Only"
 echo "=================================================="
-echo "Starting all services in mode..."
+echo "Starting all services in watch mode..."
 echo ""
 echo "Services will be available at:"
 echo "   • Merchant API:  https://localhost:5055"
@@ -109,11 +109,8 @@ start_service() {
     (
         cd "$project_path" || exit 1
         export ASPNETCORE_ENVIRONMENT=Development
-        # echo "🚀 Launching: dotnet run --urls https://localhost:$https_port in $project_path"
-        # dotnet run --urls "https://localhost:$https_port" 2>&1 | sed "s/^/[$service_name] /"
-
-        echo "🚀 Launching: dotnet  run --urls https://localhost:$https_port in $project_path"
-        dotnet  run --urls "https://localhost:$https_port" 2>&1 | sed "s/^/[$service_name] /"
+        echo "🚀 Launching: dotnet watch run --urls https://localhost:$https_port in $project_path"
+        dotnet watch run --urls "https://localhost:$https_port" 2>&1 | sed "s/^/[$service_name] /"
     ) &
     
     local pid=$!
@@ -129,9 +126,9 @@ start_service() {
 # Clean up any existing PID file
 rm -f /tmp/marketspace_pids.txt
 
-# Step 1: Kill all existing dotnet processes
-echo "🧹 Step 1: Stopping all dotnet processes..."
-pkill -f "dotnet" 2>/dev/null && echo "✅ Stopped dotnet processes" || echo "ℹ️  No dotnet processes found"
+# Step 1: Kill all existing dotnet watch processes
+echo "🧹 Step 1: Stopping all dotnet watch processes..."
+pkill -f "dotnet watch" 2>/dev/null && echo "✅ Stopped dotnet watch processes" || echo "ℹ️  No dotnet watch processes found"
 sleep 2
 
 # Step 2: Kill processes on MarketSpace ports
@@ -241,8 +238,8 @@ cleanup() {
         rm -f /tmp/marketspace_pids.txt
     fi
     
-    # Kill any remaining dotnet processes
-    pkill -f "dotnet" 2>/dev/null || true
+    # Kill any remaining dotnet watch processes
+    pkill -f "dotnet watch" 2>/dev/null || true
     
     echo "✅ All services stopped"
     exit 0
