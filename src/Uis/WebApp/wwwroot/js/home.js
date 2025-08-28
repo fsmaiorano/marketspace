@@ -1,59 +1,37 @@
-@{
-    ViewData["Title"] = "Scroll Infinito - Exemplo";
-}
-
-<div class="container mt-4">
-    <h2>Lista de Produtos com Scroll Infinito</h2>
-    <p class="text-muted">Este exemplo demonstra as melhores práticas para scroll infinito em ASP.NET Core</p>
-    
-    <!-- Container para os produtos -->
-    <div id="products-container" class="row">
-        <!-- Os produtos serão carregados aqui dinamicamente -->
-    </div>
-    
-    <!-- Indicador de carregamento -->
-    <div id="loading-indicator" class="text-center my-4" style="display: none;">
-        <div class="spinner-border" role="status">
-            <span class="visually-hidden">Carregando...</span>
-        </div>
-        <p class="mt-2">Carregando mais produtos...</p>
-    </div>
-    
-    <!-- Mensagem quando não há mais produtos -->
-    <div id="no-more-products" class="text-center my-4" style="display: none;">
-        <p class="text-muted">Não há mais produtos para carregar.</p>
-    </div>
-</div>
-
-<script>
-// Implementação do scroll infinito com as melhores práticas
-class InfiniteScrollManager {
-    constructor() {
-        this.currentPage = 1;
-        this.pageSize = 20;
+class Home {
+    constructor(initialData) {
+        this.currentPage = (initialData?.pageIndex || 1) + 1;
+        this.pageSize = initialData?.pageSize || 20;
+        this.totalCount = initialData?.count || 0;
         this.isLoading = false;
-        this.hasMoreProducts = true;
+        this.hasMoreProducts = this.calculateHasMore();
         this.abortController = null;
         
         this.container = document.getElementById('products-container');
         this.loadingIndicator = document.getElementById('loading-indicator');
         this.noMoreProducts = document.getElementById('no-more-products');
+        this.countInfo = document.getElementById('current-count');
         
         this.init();
     }
     
+    calculateHasMore() {
+        const currentCount = this.container?.children?.length || 0;
+        return currentCount < this.totalCount;
+    }
+    
     init() {
-        // Carrega a primeira página
-        this.loadProducts();
+        if (!this.hasMoreProducts) {
+            this.showNoMoreProducts();
+            return;
+        }
         
-        // Configura o listener para scroll infinito
         this.setupScrollListener();
     }
     
     setupScrollListener() {
         let scrollTimeout;
         
-        // Usa throttling para otimizar performance
         window.addEventListener('scroll', () => {
             if (scrollTimeout) {
                 clearTimeout(scrollTimeout);
@@ -61,13 +39,12 @@ class InfiniteScrollManager {
             
             scrollTimeout = setTimeout(() => {
                 this.handleScroll();
-            }, 100); // Debounce de 100ms
+            }, 100);
         });
     }
     
     handleScroll() {
-        // Verifica se está próximo do final da página
-        const threshold = 200; // pixels antes do final
+        const threshold = 200;
         const scrollPosition = window.innerHeight + window.scrollY;
         const documentHeight = document.documentElement.offsetHeight;
         
@@ -77,7 +54,6 @@ class InfiniteScrollManager {
     }
     
     async loadProducts() {
-        // Previne múltiplas requisições simultâneas
         if (this.isLoading || !this.hasMoreProducts) {
             return;
         }
@@ -86,33 +62,30 @@ class InfiniteScrollManager {
         this.showLoading();
         
         try {
-            // Cancela requisição anterior se ainda estiver pendente
             if (this.abortController) {
                 this.abortController.abort();
             }
             
-            // Cria novo AbortController para cancelamento
             this.abortController = new AbortController();
             
             const response = await fetch(
                 `/api/products?page=${this.currentPage}&pageSize=${this.pageSize}`,
                 {
                     signal: this.abortController.signal,
-                    headers: {
-                        'Accept': 'application/json'
-                    }
+                    headers: { 'Accept': 'application/json' }
                 }
             );
             
             if (response.status === 204) {
-                // Não há mais produtos
                 this.hasMoreProducts = false;
                 this.showNoMoreProducts();
                 return;
             }
             
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                console.error(`HTTP error! status: ${response.status}`);
+                this.showError();
+                return;
             }
             
             const data = await response.json();
@@ -120,9 +93,10 @@ class InfiniteScrollManager {
             if (data.products && data.products.length > 0) {
                 this.renderProducts(data.products);
                 this.currentPage++;
+                this.updateCount(data.products.length);
                 
-                // Verifica se há mais produtos baseado no total
-                if (this.currentPage * this.pageSize >= data.count) {
+                const currentTotal = this.container.children.length;
+                if (currentTotal >= this.totalCount) {
                     this.hasMoreProducts = false;
                     this.showNoMoreProducts();
                 }
@@ -146,7 +120,6 @@ class InfiniteScrollManager {
     }
     
     renderProducts(products) {
-        // Renderiza os produtos de forma eficiente
         const fragment = document.createDocumentFragment();
         
         products.forEach(product => {
@@ -158,22 +131,34 @@ class InfiniteScrollManager {
     }
     
     createProductElement(product) {
-        const col = document.createElement('div');
-        col.className = 'col-md-4 col-sm-6 mb-4';
+        const div = document.createElement('div');
+        div.className = 'product-item';
         
-        col.innerHTML = `
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">${this.escapeHtml(product.name || 'Produto')}</h5>
-                    <p class="card-text">${this.escapeHtml(product.description || 'Descrição não disponível')}</p>
-                    <p class="card-text">
-                        <strong>Preço: R$ ${(product.price || 0).toFixed(2)}</strong>
-                    </p>
+        div.innerHTML = `
+            ${product.imageUrl ? 
+                `<img src="${this.escapeHtml(product.imageUrl)}" alt="${this.escapeHtml(product.name)}"/>` : 
+                '<div>No Image</div>'
+            }
+            <div>
+                <h3>${this.escapeHtml(product.name || 'Produto')}</h3>
+                <p>${this.escapeHtml(product.description || 'Descrição não disponível')}</p>
+                <div>
+                    ${(product.categories || []).map(cat => `<span>${this.escapeHtml(cat)}</span>`).join('')}
                 </div>
+                <div>$${(product.price || 0).toFixed(2)}</div>
+                <button data-product-id="${product.id}">
+                    Add to Cart
+                </button>
             </div>
         `;
         
-        return col;
+        return div;
+    }
+    
+    updateCount(newProductsCount) {
+        if (this.countInfo) {
+            this.countInfo.textContent = (parseInt(this.countInfo.textContent) + newProductsCount).toString();
+        }
     }
     
     escapeHtml(text) {
@@ -183,28 +168,34 @@ class InfiniteScrollManager {
     }
     
     showLoading() {
-        this.loadingIndicator.style.display = 'block';
+        if (this.loadingIndicator) {
+            this.loadingIndicator.style.display = 'block';
+        }
     }
     
     hideLoading() {
-        this.loadingIndicator.style.display = 'none';
+        if (this.loadingIndicator) {
+            this.loadingIndicator.style.display = 'none';
+        }
     }
     
     showNoMoreProducts() {
-        this.noMoreProducts.style.display = 'block';
+        if (this.noMoreProducts) {
+            this.noMoreProducts.style.display = 'block';
+        }
     }
     
     showError() {
-        // Em caso de erro, mostra uma mensagem simples
         const errorElement = document.createElement('div');
-        errorElement.className = 'alert alert-danger text-center';
+        errorElement.className = 'alert alert-danger text-center my-3';
         errorElement.textContent = 'Erro ao carregar produtos. Tente recarregar a página.';
-        this.container.appendChild(errorElement);
+        this.container.parentElement.appendChild(errorElement);
     }
 }
 
-// Inicializa o scroll infinito quando a página carrega
 document.addEventListener('DOMContentLoaded', () => {
-    new InfiniteScrollManager();
+    if (window.homeInitialData) {
+        new Home(window.homeInitialData);
+    }
 });
-</script>
+

@@ -12,8 +12,8 @@ public class HomeController(IMarketSpaceService service, ILogger<HomeController>
     {
         try
         {
-            logger.LogInformation("Fetching products for home page");
-            GetCatalogResponse products = await service.GetProductsAsync();
+            logger.LogInformation("Fetching initial products for home page");
+            GetCatalogResponse products = await service.GetProductsAsync(1, 20);
             return View(products);
         }
         catch (Exception ex)
@@ -21,19 +21,12 @@ public class HomeController(IMarketSpaceService service, ILogger<HomeController>
             logger.LogError(ex, "Error occurred while fetching products for home page");
             GetCatalogResponse emptyResponse = new GetCatalogResponse
             {
-                Products = [], Count = 0, PageIndex = 0, PageSize = 0
+                Products = [], Count = 0, PageIndex = 1, PageSize = 20
             };
             return View(emptyResponse);
         }
     }
 
-    /// <summary>
-    /// Página dedicada para demonstrar scroll infinito
-    /// </summary>
-    public IActionResult InfiniteScroll()
-    {
-        return View();
-    }
 
     public IActionResult Privacy()
     {

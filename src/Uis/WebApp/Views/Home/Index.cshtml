@@ -8,13 +8,13 @@
 }
 
 <section class="home-container">
-    @if (Model?.Products?.Any() == true)
+    @if (Model.Products?.Any() == true)
     {
         <div>
             <div id="products-container">
                 @foreach (var product in Model.Products)
                 {
-                    <div>
+                    <div class="product-item">
                         @if (!string.IsNullOrEmpty(product.ImageUrl))
                         {
                             <img src="@product.ImageUrl" alt="@product.Name"/>
@@ -23,41 +23,60 @@
                         {
                             <div>No Image</div>
                         }
-                    </div>
-                    <div>
-                        <h3>@product.Name</h3>
-                        <p>@product.Description</p>
                         <div>
-                            @foreach (var category in product.Categories)
-                            {
-                                <span>@category</span>
-                            }
+                            <h3>@product.Name</h3>
+                            <p>@product.Description</p>
+                            <div>
+                                @foreach (var category in product.Categories)
+                                {
+                                    <span>@category</span>
+                                }
+                            </div>
+                            <div>$@product.Price.ToString("F2")</div>
+                            <button data-product-id="@product.Id">
+                                Add to Cart
+                            </button>
                         </div>
-                        <div>$@product.Price.ToString("F2")</div>
-                        <button data-product-id="@product.Id">
-                            Add to Cart
-                        </button>
                     </div>
                 }
             </div>
 
+            <!-- Indicador de carregamento -->
+            <div id="loading-indicator" class="text-center my-4" style="display: none;">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading more products...</p>
+            </div>
+
+            <!-- Mensagem quando não há mais produtos -->
+            <div id="no-more-products" class="text-center my-4" style="display: none;">
+                <p class="text-muted">All products loaded.</p>
+            </div>
+
             @if (Model.Count > Model.Products.Count)
             {
-                <div>
-                    <p>Showing @Model.Products.Count of @Model.Count products</p>
+                <div id="product-count-info">
+                    <p>Showing <span id="current-count">@Model.Products.Count</span> of @Model.Count products</p>
                 </div>
             }
         </div>
     }
     else
     {
-        <div>
-            <h2>No Products Available</h2>
-            <p>We're working on adding new products. Please check back later!</p>
+        <div class="text-center my-5">
+            <p>No products</p>
         </div>
     }
 </section>
 
 @section Scripts {
-    <script src="~/js/home/home.js" asp-append-version="true"></script>
+    <script>
+        window.homeInitialData = {
+            pageIndex: @(Model?.PageIndex ?? 1),
+            pageSize: @(Model?.PageSize ?? 20),
+            count: @(Model?.Count ?? 0)
+        };
+    </script>
+    <script src="~/js/home.js" asp-append-version="true"></script>
 }
