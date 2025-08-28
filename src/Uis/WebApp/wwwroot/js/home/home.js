@@ -72,21 +72,21 @@
             });
         },
 
-        getCatalog: function () {
-            fetch('/catalog/getProducts')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Products:', data);
-                })
-                .catch(error => {
-                    console.error('There was a problem with the fetch operation:', error);
-                });
-        }
+        // getCatalog: function () {
+        //     fetch('/catalog/getProducts')
+        //         .then(response => {
+        //             if (!response.ok) {
+        //                 throw new Error('Network response was not ok');
+        //             }
+        //             return response.json();
+        //         })
+        //         .then(data => {
+        //             console.log('Products:', data);
+        //         })
+        //         .catch(error => {
+        //             console.error('There was a problem with the fetch operation:', error);
+        //         });
+        // }
     };
 
     if (document.readyState === 'loading') {
