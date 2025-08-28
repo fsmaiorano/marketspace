@@ -1,4 +1,5 @@
 using BuildingBlocks;
+using BuildingBlocks.Storage.Minio;
 using Catalog.Api.Domain.Entities;
 using Catalog.Api.Domain.Repositories;
 using Catalog.Api.Domain.ValueObjects;
@@ -6,7 +7,10 @@ using System.Collections.ObjectModel;
 
 namespace Catalog.Api.Application.Catalog.GetCatalogById;
 
-public class GetCatalogByIdHandler(ICatalogRepository repository, ILogger<GetCatalogByIdHandler> logger)
+public class GetCatalogByIdHandler(
+    ICatalogRepository repository,
+    ILogger<GetCatalogByIdHandler> logger,
+    IMinioBucket minioBucket)
     : IGetCatalogByIdHandler
 {
     public async Task<Result<GetCatalogByIdResult>> HandleAsync(GetCatalogByIdQuery query)
@@ -19,6 +23,9 @@ public class GetCatalogByIdHandler(ICatalogRepository repository, ILogger<GetCat
 
             if (catalog is null)
                 return Result<GetCatalogByIdResult>.Failure($"Catalog with ID {query.Id} not found.");
+            
+            var x = await minioBucket.GetImageAsync(catalog.ImageUrl);
+            var y = await minioBucket.GetImageToDownload(catalog.ImageUrl);
 
             GetCatalogByIdResult result = new GetCatalogByIdResult
             {
