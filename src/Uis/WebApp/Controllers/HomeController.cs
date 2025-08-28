@@ -27,6 +27,14 @@ public class HomeController(IMarketSpaceService service, ILogger<HomeController>
         }
     }
 
+    /// <summary>
+    /// Página dedicada para demonstrar scroll infinito
+    /// </summary>
+    public IActionResult InfiniteScroll()
+    {
+        return View();
+    }
+
     public IActionResult Privacy()
     {
         return View();
