@@ -4,9 +4,8 @@ using WebApp.Services;
 
 namespace WebApp.Controllers;
 
-[ApiController]
 [Route("api/[controller]")]
-public class ProductsController(IMarketSpaceService service, ILogger<ProductsController> logger) : ControllerBase
+public class ProductsController(IMarketSpaceService service, ILogger<ProductsController> logger) : Controller
 {
     [HttpGet]
     public async Task<ActionResult<GetCatalogResponse>> GetProducts(
@@ -17,7 +16,7 @@ public class ProductsController(IMarketSpaceService service, ILogger<ProductsCon
         try
         {
             if (page < 1) page = 1;
-            if (pageSize < 1 || pageSize > 100) pageSize = 20;
+            if (pageSize is < 1 or > 100) pageSize = 20;
 
             logger.LogInformation("Fetching products - Page: {Page}, PageSize: {PageSize}", page, pageSize);
 
@@ -40,5 +39,11 @@ public class ProductsController(IMarketSpaceService service, ILogger<ProductsCon
             logger.LogError(ex, "Error fetching products for page {Page}", page);
             return StatusCode(500, "Internal server error");
         }
+    }
+
+    [HttpPost]
+    public IActionResult Item(string product)
+    {
+        return ViewComponent("ProductItem", new { product });
     }
 }
