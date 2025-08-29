@@ -122,9 +122,9 @@
             const container = document.getElementById('products-container');
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = htmlContent;
-            
+
             const newProducts = tempDiv.querySelectorAll('.product');
-            
+
             while (tempDiv.firstChild) {
                 container.appendChild(tempDiv.firstChild);
             }
@@ -193,11 +193,22 @@
             button.textContent = 'Adding...';
             button.disabled = true;
 
-            this.addToCart(productId)
-                .then(() => {
+            fetch(`/api/Cart/CartHandler?productId=${encodeURIComponent(productId)}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    debugger;
                     button.textContent = 'Added!';
                     button.style.backgroundColor = '#28a745';
-
                     setTimeout(() => {
                         button.textContent = originalText;
                         button.style.backgroundColor = '';
@@ -208,13 +219,35 @@
                     console.error('Error adding to cart:', error);
                     button.textContent = 'Error';
                     button.style.backgroundColor = '#dc3545';
-
                     setTimeout(() => {
                         button.textContent = originalText;
                         button.style.backgroundColor = '';
                         button.disabled = false;
                     }, 2000);
                 });
+
+            // this.addToCart(productId)
+            //     .then(() => {
+            //         button.textContent = 'Added!';
+            //         button.style.backgroundColor = '#28a745';
+            //
+            //         setTimeout(() => {
+            //             button.textContent = originalText;
+            //             button.style.backgroundColor = '';
+            //             button.disabled = false;
+            //         }, 2000);
+            //     })
+            //     .catch(error => {
+            //         console.error('Error adding to cart:', error);
+            //         button.textContent = 'Error';
+            //         button.style.backgroundColor = '#dc3545';
+            //
+            //         setTimeout(() => {
+            //             button.textContent = originalText;
+            //             button.style.backgroundColor = '';
+            //             button.disabled = false;
+            //         }, 2000);
+            //     });
         },
 
         addToCart: function (productId) {
