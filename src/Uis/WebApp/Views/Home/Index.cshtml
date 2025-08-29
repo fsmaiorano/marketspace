@@ -10,60 +10,64 @@
 <section class="home-container">
     @if (Model.Products?.Any() == true)
     {
-        <div>
-            <div id="products-container">
+        <div class="products">
+            <div id="products-container" class="products__container">
                 @foreach (var product in Model.Products)
                 {
-                    <div class="product-item">
-                        @if (!string.IsNullOrEmpty(product.ImageUrl))
-                        {
-                            <img src="@product.ImageUrl" alt="@product.Name"/>
-                        }
-                        else
-                        {
-                            <div>No Image</div>
-                        }
-                        <div>
-                            <h3>@product.Name</h3>
-                            <p>@product.Description</p>
-                            <div>
+                    <div class="product">
+                        <div class="product__image-container">
+                            @if (!string.IsNullOrEmpty(product.ImageUrl))
+                            {
+                                <img src="@product.ImageUrl" alt="@product.Name" class="product__image"/>
+                            }
+                            else
+                            {
+                                <div class="product__no-image">No Image</div>
+                            }
+                        </div>
+                        <div class="product__content">
+                            <h3 class="product__title">@product.Name</h3>
+                            <p class="product__description">@product.Description</p>
+                            <div class="product__categories">
                                 @foreach (var category in product.Categories)
                                 {
-                                    <span>@category</span>
+                                    <span class="product__category">@category</span>
                                 }
                             </div>
-                            <div>$@product.Price.ToString("F2")</div>
-                            <button data-product-id="@product.Id" class="add-to-cart-btn">
-                                Add to Cart
-                            </button>
+                            <div class="product__footer">
+                                <div class="product__price">$@product.Price.ToString("F2")</div>
+                                <button data-product-id="@product.Id" class="product__add-button add-to-cart-btn">
+                                    Add to Cart
+                                </button>
+                            </div>
                         </div>
                     </div>
                 }
             </div>
 
-            <div id="loading-indicator" class="text-center my-4" style="display: none;">
-                <div class="spinner-border" role="status">
+            <div id="loading-indicator" class="loading-indicator" style="display: none;">
+                <div class="spinner-border loading-indicator__spinner" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
-                <p class="mt-2">Loading more products...</p>
+                <p class="loading-indicator__text">Loading more products...</p>
             </div>
 
-            <div id="no-more-products" class="text-center my-4" style="display: none;">
-                <p class="text-muted">All products loaded.</p>
+            <div id="no-more-products" class="no-more-products" style="display: none;">
+                <p class="no-more-products__text">All products loaded.</p>
             </div>
 
             @if (Model.Count > Model.Products.Count)
             {
-                <div id="product-count-info">
-                    <p>Showing <span id="current-count">@Model.Products.Count</span> of @Model.Count products</p>
+                <div id="product-count-info" class="product-count-info">
+                    <p class="product-count-info__text">Showing <span id="current-count" class="product-count-info__current">@Model.Products.Count</span> of @Model.Count products</p>
                 </div>
             }
         </div>
     }
     else
     {
-        <div class="text-center my-5">
-            <p>No products</p>
+        <div class="empty-state">
+            <p class="empty-state__text">No products available</p>
         </div>
     }
 </section>
