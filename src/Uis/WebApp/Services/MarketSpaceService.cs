@@ -42,4 +42,24 @@ public class MarketSpaceService(ILogger<MarketSpaceService> logger, HttpClient h
             };
         }
     }
+    
+    public async Task<CatalogDto?> GetProductByIdAsync(int id, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            HttpRequestMessage request = new(HttpMethod.Get, $"/api/catalog/{id}");
+
+            using HttpResponseMessage response = await httpClient.SendAsync(request, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            Result<CatalogDto>? result = await response.Content.ReadFromJsonAsync<Result<CatalogDto>>(cancellationToken: cancellationToken);
+
+            return result?.Data;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error fetching product by ID from MarketSpaceService");
+            return null;
+        }
+    }
 }

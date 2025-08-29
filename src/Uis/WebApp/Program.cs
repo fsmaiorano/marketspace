@@ -10,6 +10,14 @@ builder.Services.AddHttpClient<IMarketSpaceService, MarketSpaceService>(client =
     client.BaseAddress = new Uri(bffUrl ?? throw new InvalidOperationException());
 });
 
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy("CorsPolicy", policy =>
+    {
+      
+    });
+});
+
 WebApplication app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -20,6 +28,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseCors("CorsPolicy");
 
 app.UseAuthorization();
 
