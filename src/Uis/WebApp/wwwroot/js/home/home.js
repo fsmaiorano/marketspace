@@ -70,7 +70,7 @@
                 this.abortController = new AbortController();
 
                 const response = await fetch(
-                    `/api/products/partial?page=${this.currentPage}&pageSize=${this.pageSize}`,
+                    `/api/Product/partial?page=${this.currentPage}&pageSize=${this.pageSize}`,
                     {
                         signal: this.abortController.signal,
                         headers: {'Accept': 'text/html'}

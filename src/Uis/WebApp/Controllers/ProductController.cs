@@ -6,7 +6,7 @@ using WebApp.ViewComponents;
 namespace WebApp.Controllers;
 
 [Route("api/[controller]")]
-public class ProductsController(IMarketSpaceService service, ILogger<ProductsController> logger) : Controller
+public class ProductController(IMarketSpaceService service, ILogger<ProductController> logger) : Controller
 {
     [HttpGet]
     public async Task<ActionResult<GetCatalogResponse>> GetProducts(
