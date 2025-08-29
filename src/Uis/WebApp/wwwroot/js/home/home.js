@@ -123,18 +123,14 @@
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = htmlContent;
             
-            // Contar os novos produtos para atualizar o contador
             const newProducts = tempDiv.querySelectorAll('.product');
             
-            // Adicionar os novos produtos ao container
             while (tempDiv.firstChild) {
                 container.appendChild(tempDiv.firstChild);
             }
 
-            // Atualizar o contador
             this.updateCount(newProducts.length);
 
-            // Re-bind dos eventos para os novos elementos
             this.bindEvents();
         },
 
