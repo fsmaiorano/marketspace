@@ -41,9 +41,37 @@ public class ProductsController(IMarketSpaceService service, ILogger<ProductsCon
         }
     }
 
-    [HttpPost]
-    public IActionResult Item(string product)
+    [HttpGet("partial")]
+    public async Task<IActionResult> GetProductsPartial(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
     {
-        return ViewComponent("ProductItem", new { product });
+        try
+        {
+            if (page < 1) page = 1;
+            if (pageSize is < 1 or > 100) pageSize = 20;
+
+            logger.LogInformation("Fetching products partial - Page: {Page}, PageSize: {PageSize}", page, pageSize);
+
+            GetCatalogResponse response = await service.GetProductsAsync(page, pageSize, cancellationToken);
+
+            if (response.Products.Count == 0 && page > 1)
+            {
+                return NoContent();
+            }
+
+            return PartialView("_ProductList", response.Products);
+        }
+        catch (OperationCanceledException)
+        {
+            logger.LogInformation("Request canceled for page {Page}", page);
+            return BadRequest("Request was canceled");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error fetching products partial for page {Page}", page);
+            return StatusCode(500, "Internal server error");
+        }
     }
 }

@@ -70,10 +70,10 @@
                 this.abortController = new AbortController();
 
                 const response = await fetch(
-                    `/api/products?page=${this.currentPage}&pageSize=${this.pageSize}`,
+                    `/api/products/partial?page=${this.currentPage}&pageSize=${this.pageSize}`,
                     {
                         signal: this.abortController.signal,
-                        headers: {'Accept': 'application/json'}
+                        headers: {'Accept': 'text/html'}
                     }
                 );
 
@@ -89,12 +89,11 @@
                     return;
                 }
 
-                const data = await response.json();
+                const htmlContent = await response.text();
 
-                if (data.products && data.products.length > 0) {
-                    this.renderProducts(data.products);
+                if (htmlContent && htmlContent.trim().length > 0) {
+                    this.renderProductsFromHtml(htmlContent);
                     this.currentPage++;
-                    this.updateCount(data.products.length);
 
                     const container = document.getElementById('products-container');
                     if (container.children.length >= this.totalCount) {
@@ -119,47 +118,24 @@
             }
         },
 
-        renderProducts: function (products) {
+        renderProductsFromHtml: function (htmlContent) {
             const container = document.getElementById('products-container');
-            const fragment = document.createDocumentFragment();
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            
+            // Contar os novos produtos para atualizar o contador
+            const newProducts = tempDiv.querySelectorAll('.product');
+            
+            // Adicionar os novos produtos ao container
+            while (tempDiv.firstChild) {
+                container.appendChild(tempDiv.firstChild);
+            }
 
-            products.forEach(product => {
-                const productElement = this.createProductElement(product);
-                fragment.appendChild(productElement);
-            });
+            // Atualizar o contador
+            this.updateCount(newProducts.length);
 
-            container.appendChild(fragment);
-
+            // Re-bind dos eventos para os novos elementos
             this.bindEvents();
-        },
-
-        createProductElement: function (product) {
-            const div = document.createElement('div');
-            div.className = 'product';
-
-            div.innerHTML = `
-                <div class="product__image-container">
-                    ${product.imageUrl ? 
-                        `<img src="${this.escapeHtml(product.imageUrl)}" alt="${this.escapeHtml(product.name)}" class="product__image"/>` : 
-                        '<div class="product__no-image">No Image</div>'
-                    }
-                </div>
-                <div class="product__content">
-                    <h3 class="product__title">${this.escapeHtml(product.name || 'Product')}</h3>
-                    <p class="product__description">${this.escapeHtml(product.description || 'Description not available')}</p>
-                    <div class="product__categories">
-                        ${(product.categories || []).map(cat => `<span class="product__category">${this.escapeHtml(cat)}</span>`).join('')}
-                    </div>
-                    <div class="product__footer">
-                        <div class="product__price">$${(product.price || 0).toFixed(2)}</div>
-                        <button class="product__add-button add-to-cart-btn" data-product-id="${product.id}">
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            return div;
         },
 
         updateCount: function (newProductsCount) {

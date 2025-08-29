@@ -1,0 +1,6 @@
+@model List<WebApp.Dtos.CatalogDto>
+
+@foreach (var product in Model)
+{
+    @await Component.InvokeAsync("ProductItem", new { product })
+}
