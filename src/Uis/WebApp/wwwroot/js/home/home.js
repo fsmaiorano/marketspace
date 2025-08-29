@@ -225,43 +225,7 @@
                         button.disabled = false;
                     }, 2000);
                 });
-
-            // this.addToCart(productId)
-            //     .then(() => {
-            //         button.textContent = 'Added!';
-            //         button.style.backgroundColor = '#28a745';
-            //
-            //         setTimeout(() => {
-            //             button.textContent = originalText;
-            //             button.style.backgroundColor = '';
-            //             button.disabled = false;
-            //         }, 2000);
-            //     })
-            //     .catch(error => {
-            //         console.error('Error adding to cart:', error);
-            //         button.textContent = 'Error';
-            //         button.style.backgroundColor = '#dc3545';
-            //
-            //         setTimeout(() => {
-            //             button.textContent = originalText;
-            //             button.style.backgroundColor = '';
-            //             button.disabled = false;
-            //         }, 2000);
-            //     });
         },
-
-        addToCart: function (productId) {
-            return new Promise((resolve, reject) => {
-                setTimeout(() => {
-                    if (Math.random() > 0.1) {
-                        console.log(`Product ${productId} added to cart`);
-                        resolve();
-                    } else {
-                        reject(new Error('Failed to add to cart'));
-                    }
-                }, 1000);
-            });
-        }
     };
 
     if (document.readyState === 'loading') {
