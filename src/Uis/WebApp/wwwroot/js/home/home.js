@@ -135,23 +135,27 @@
 
         createProductElement: function (product) {
             const div = document.createElement('div');
-            div.className = 'product-item';
+            div.className = 'product';
             
             div.innerHTML = `
-                ${product.imageUrl ? 
-                    `<img src="${this.escapeHtml(product.imageUrl)}" alt="${this.escapeHtml(product.name)}"/>` : 
-                    '<div>No Image</div>'
-                }
-                <div>
-                    <h3>${this.escapeHtml(product.name || 'Produto')}</h3>
-                    <p>${this.escapeHtml(product.description || 'Descrição não disponível')}</p>
-                    <div>
-                        ${(product.categories || []).map(cat => `<span>${this.escapeHtml(cat)}</span>`).join('')}
+                <div class="product__image-container">
+                    ${product.imageUrl ? 
+                        `<img src="${this.escapeHtml(product.imageUrl)}" alt="${this.escapeHtml(product.name)}" class="product__image"/>` : 
+                        '<div class="product__no-image">No Image</div>'
+                    }
+                </div>
+                <div class="product__content">
+                    <h3 class="product__title">${this.escapeHtml(product.name || 'Product')}</h3>
+                    <p class="product__description">${this.escapeHtml(product.description || 'Description not available')}</p>
+                    <div class="product__categories">
+                        ${(product.categories || []).map(cat => `<span class="product__category">${this.escapeHtml(cat)}</span>`).join('')}
                     </div>
-                    <div>$${(product.price || 0).toFixed(2)}</div>
-                    <button class="add-to-cart-btn" data-product-id="${product.id}">
-                        Add to Cart
-                    </button>
+                    <div class="product__footer">
+                        <div class="product__price">$${(product.price || 0).toFixed(2)}</div>
+                        <button class="product__add-button add-to-cart-btn" data-product-id="${product.id}">
+                            Add to Cart
+                        </button>
+                    </div>
                 </div>
             `;
             
