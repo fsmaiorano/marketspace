@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using WebApp.Dtos;
 using WebApp.Services;
+using WebApp.ViewComponents;
 
 namespace WebApp.Controllers;
 
@@ -61,7 +62,7 @@ public class ProductsController(IMarketSpaceService service, ILogger<ProductsCon
                 return NoContent();
             }
 
-            return PartialView("_ProductList", response.Products);
+            return ViewComponent(typeof(ProductListViewComponent), response.Products);
         }
         catch (OperationCanceledException)
         {
