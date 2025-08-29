@@ -4,6 +4,7 @@ namespace WebApp.Dtos;
 
 public class CatalogDto
 {
+    public int Index { get; set; }
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public List<string> Categories { get; set; } = [];

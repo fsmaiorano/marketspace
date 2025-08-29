@@ -11,7 +11,7 @@
 
         init: function (initialData) {
             console.log('HomeModule initialized');
-            
+
             if (initialData) {
                 this.currentPage = (initialData.pageIndex || 1) + 1;
                 this.pageSize = initialData.pageSize || 20;
@@ -53,7 +53,7 @@
             const threshold = 200;
             const scrollPosition = window.innerHeight + window.scrollY;
             const documentHeight = document.documentElement.offsetHeight;
-            
+
             if (scrollPosition >= documentHeight - threshold) {
                 this.loadProducts();
             }
@@ -61,41 +61,41 @@
 
         async loadProducts() {
             if (this.isLoading || !this.hasMoreProducts) return;
-            
+
             this.isLoading = true;
             this.showLoading();
-            
+
             try {
                 if (this.abortController) this.abortController.abort();
                 this.abortController = new AbortController();
-                
+
                 const response = await fetch(
                     `/api/products?page=${this.currentPage}&pageSize=${this.pageSize}`,
                     {
                         signal: this.abortController.signal,
-                        headers: { 'Accept': 'application/json' }
+                        headers: {'Accept': 'application/json'}
                     }
                 );
-                
+
                 if (response.status === 204) {
                     this.hasMoreProducts = false;
                     this.showNoMoreProducts();
                     return;
                 }
-                
+
                 if (!response.ok) {
                     console.error(`HTTP error! status: ${response.status}`);
                     this.showError();
                     return;
                 }
-                
+
                 const data = await response.json();
-                
+
                 if (data.products && data.products.length > 0) {
                     this.renderProducts(data.products);
                     this.currentPage++;
                     this.updateCount(data.products.length);
-                    
+
                     const container = document.getElementById('products-container');
                     if (container.children.length >= this.totalCount) {
                         this.hasMoreProducts = false;
@@ -105,7 +105,7 @@
                     this.hasMoreProducts = false;
                     this.showNoMoreProducts();
                 }
-                
+
             } catch (error) {
                 if (error.name === 'AbortError') {
                     console.log('Request was aborted');
@@ -122,21 +122,21 @@
         renderProducts: function (products) {
             const container = document.getElementById('products-container');
             const fragment = document.createDocumentFragment();
-            
+
             products.forEach(product => {
                 const productElement = this.createProductElement(product);
                 fragment.appendChild(productElement);
             });
-            
+
             container.appendChild(fragment);
-            
+
             this.bindEvents();
         },
 
         createProductElement: function (product) {
             const div = document.createElement('div');
             div.className = 'product';
-            
+
             div.innerHTML = `
                 <div class="product__image-container">
                     ${product.imageUrl ? 
@@ -158,7 +158,7 @@
                     </div>
                 </div>
             `;
-            
+
             return div;
         },
 
@@ -209,9 +209,9 @@
         handleAddToCart: function (event) {
             const button = event.target;
             const productId = button.getAttribute('data-product-id');
-            
+
             console.log(`Add to Cart clicked for product ID: ${productId}`);
-            
+
             if (!productId) {
                 console.error('Product ID not found');
                 return;
@@ -225,7 +225,7 @@
                 .then(() => {
                     button.textContent = 'Added!';
                     button.style.backgroundColor = '#28a745';
-                    
+
                     setTimeout(() => {
                         button.textContent = originalText;
                         button.style.backgroundColor = '';
@@ -236,7 +236,7 @@
                     console.error('Error adding to cart:', error);
                     button.textContent = 'Error';
                     button.style.backgroundColor = '#dc3545';
-                    
+
                     setTimeout(() => {
                         button.textContent = originalText;
                         button.style.backgroundColor = '';
