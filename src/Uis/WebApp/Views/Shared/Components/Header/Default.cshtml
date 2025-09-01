@@ -1,5 +1,5 @@
 <style>
-    .header-container {
+    .header {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -10,17 +10,47 @@
         width: 100%;
         box-sizing: border-box;
     }
+
+    .header__cart {
+        position: relative;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .header__cart-count {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background-color: #fff;
+        color: #dc3545;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+        min-width: 20px;
+    }
+
+    .header__cart-count--hidden {
+        display: none;
+    }
 </style>
 
-<div class="header-container">
+<div class="header">
     <p>MarketSpace</p>
-    <div>
-        <span class=""></span>
-        <i data-feather="shopping-cart"></i>
+    <div class="header__cart" onclick="toggleCart()">
+        <div style="position: relative;">
+            <i data-feather="shopping-cart"></i>
+            <span id="cart-count" class="header__cart-count header__cart-count--hidden">0</span>
+        </div>
     </div>
 </div>
 
 @section Scripts {
+    <script src="~/js/cart/cart-module.js"></script>
 }
-
-

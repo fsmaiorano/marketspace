@@ -141,12 +141,6 @@
             }
         },
 
-        // escapeHtml: function (text) {
-        //     const div = document.createElement('div');
-        //     div.textContent = text;
-        //     return div.innerHTML;
-        // },
-
         showLoading: function () {
             const indicator = document.getElementById('loading-indicator');
             if (indicator) indicator.style.display = 'block';
@@ -207,6 +201,10 @@
                 })
                 .then(data => {
                     debugger;
+                    if (window.CartModule) {
+                        window.CartModule.updateCartCount();
+                    }
+
                     button.textContent = 'Added!';
                     button.style.backgroundColor = '#28a745';
                     setTimeout(() => {
