@@ -141,11 +141,11 @@
             }
         },
 
-        escapeHtml: function (text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        },
+        // escapeHtml: function (text) {
+        //     const div = document.createElement('div');
+        //     div.textContent = text;
+        //     return div.innerHTML;
+        // },
 
         showLoading: function () {
             const indicator = document.getElementById('loading-indicator');
