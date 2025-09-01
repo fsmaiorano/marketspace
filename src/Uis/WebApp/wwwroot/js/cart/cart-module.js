@@ -9,14 +9,15 @@
 
         getCartItemCount: function () {
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
-            return cart.reduce((total, item) => total + item.quantity, 0);
+            // return cart.reduce((total, item) => total + item.quantity, 0);
+            return 3;
         },
 
         updateCartCount: function () {
             debugger;
             const count = CartModule.getCartItemCount();
             const cartCountElement = document.getElementById('cart-count');
-
+            
             if (cartCountElement) {
                 if (count > 0) {
                     cartCountElement.textContent = count;
