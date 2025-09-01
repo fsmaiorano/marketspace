@@ -70,4 +70,10 @@
       <ProjectReference Include="../../BuildingBlocks/BuildingBlocks/BuildingBlocks.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="wwwroot\css\views\" />
+      <Folder Include="wwwroot\js\viewcomponents\" />
+      <Folder Include="wwwroot\js\views\" />
+    </ItemGroup>
+
 </Project>
