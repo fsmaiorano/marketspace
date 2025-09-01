@@ -1,11 +1,9 @@
-/* Home Block */
 .home-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem;
 }
 
-/* Products Block */
 .products {
     width: 100%;
 }
@@ -17,7 +15,6 @@
     margin-bottom: 2rem;
 }
 
-/* Product Item Block */
 .product {
     background: #fff;
     border-radius: 12px;
@@ -229,3 +226,4 @@
         width: 100%;
     }
 }
+
