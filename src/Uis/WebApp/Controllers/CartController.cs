@@ -16,6 +16,8 @@ public class CartController(IMarketSpaceService service, ILogger<CartController>
         {
             Username = "mock", Items = []
         };
+        
+        //TODO - need call cartcontroller service and return all cart content of the user
 
         var response = new { Success = true, Message = "Product added to cart", ProductId = productId };
 
