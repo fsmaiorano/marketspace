@@ -4,7 +4,6 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>@ViewData["Title"] - WebApp</title>
-    <script type="importmap"></script>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -22,6 +21,8 @@
 @*         &copy; 2025 - WebApp - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a> *@
 @*     </div> *@
 @* </footer> *@
+<script src="~/lib/feather-icons.js" asp-append-version="true"></script>
+<script>feather.replace();</script>
 <script src="~/js/site.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>
