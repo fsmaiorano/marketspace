@@ -86,7 +86,7 @@ public class MarketSpaceService(ILogger<MarketSpaceService> logger, HttpClient h
 
             using HttpResponseMessage response = await httpClient.SendAsync(request, cancellationToken);
             if (response is { IsSuccessStatusCode: false, StatusCode: System.Net.HttpStatusCode.NotFound })
-                return new GetBasketResponse() { Cart = new ShoppingCartDto() { Username = username, Items = [] } };
+                return new GetBasketResponse() { ShoppingCart = new ShoppingCartDto() { Username = username, Items = [] } };
 
             Result<GetBasketResponse>? result =
                 await response.Content.ReadFromJsonAsync<Result<GetBasketResponse>>(
@@ -97,7 +97,7 @@ public class MarketSpaceService(ILogger<MarketSpaceService> logger, HttpClient h
         catch (Exception ex)
         {
             logger.LogError(ex, "Error fetching basket by username from MarketSpaceService");
-            return new GetBasketResponse() { Cart = new ShoppingCartDto() { Username = username, Items = [] } };
+            return new GetBasketResponse() { ShoppingCart = new ShoppingCartDto() { Username = username, Items = [] } };
         }
     }
 }
