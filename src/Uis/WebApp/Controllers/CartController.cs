@@ -8,19 +8,14 @@ namespace WebApp.Controllers;
 public class CartController(IMarketSpaceService service, ILogger<CartController> logger) : Controller
 {
     [HttpPost("CartHandler")]
-    public IActionResult CartHandler(string productId)
+    public async Task<IActionResult> CartHandler(string productId)
     {
         logger.LogInformation("Adding product {ProductId} to cart", productId);
 
-        CreateOrUpdateBasketRequest createBasketRequest = new()
-        {
-            Username = "mock", Items = []
-        };
-        
-        //TODO - need call cartcontroller service and return all cart content of the user
+        CreateOrUpdateBasketRequest createBasketRequest = new() { Username = "mock", Items = [] };
 
-        var response = new { Success = true, Message = "Product added to cart", ProductId = productId };
-
+        GetBasketResponse response = await service.GetBasketByUsernameAsync("fsmaiorano") ??
+                                     new GetBasketResponse { Username = "fsmaiorano", Items = [] };
         return Json(response);
     }
 }

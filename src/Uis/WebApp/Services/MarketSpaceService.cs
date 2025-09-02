@@ -77,7 +77,7 @@ public class MarketSpaceService(ILogger<MarketSpaceService> logger, HttpClient h
         }
     }
 
-    public async Task<GetBasketResponse?>? GetBasketByUsernameAsync(string username,
+    public async Task<GetBasketResponse?> GetBasketByUsernameAsync(string username,
         CancellationToken cancellationToken = default)
     {
         try
@@ -91,7 +91,7 @@ public class MarketSpaceService(ILogger<MarketSpaceService> logger, HttpClient h
                 await response.Content.ReadFromJsonAsync<Result<GetBasketResponse>>(
                     cancellationToken: cancellationToken);
 
-            return result?.Data;
+            return result?.Data ?? new GetBasketResponse() { Username = username, Items = [] };
         }
         catch (Exception ex)
         {
