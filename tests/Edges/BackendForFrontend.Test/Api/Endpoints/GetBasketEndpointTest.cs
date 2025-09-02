@@ -28,4 +28,14 @@ public class GetBasketEndpointTest(BackendForFrontendFactory factory) : HttpFixt
         Result<GetBasketResponse>? result = await response.Content.ReadFromJsonAsync<Result<GetBasketResponse>>();
         result?.IsSuccess.Should().BeTrue();
     }
+    
+    [Fact]
+    public async Task Returns_Ok_When_Basket_Is_Retrieved_Empty_Successfully()
+    {
+        HttpResponseMessage response = await _client.GetAsync($"/api/basket/nonexistentuser");
+        response.EnsureSuccessStatusCode();
+        
+        Result<GetBasketResponse>? result = await response.Content.ReadFromJsonAsync<Result<GetBasketResponse>>();
+        result?.IsSuccess.Should().BeTrue();
+    }
 }

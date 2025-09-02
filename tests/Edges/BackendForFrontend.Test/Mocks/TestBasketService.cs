@@ -3,6 +3,7 @@ using BackendForFrontend.Api.Basket.Dtos;
 using Basket.Api.Application.Basket.CreateBasket;
 using Basket.Api.Application.Basket.DeleteBasket;
 using Basket.Api.Application.Basket.GetBasketById;
+using Basket.Api.Application.Dto;
 using Builder;
 using BuildingBlocks;
 using Microsoft.Extensions.Logging;
@@ -69,14 +70,17 @@ public class TestBasketService(HttpClient httpClient, ILogger<TestBasketService>
                 {
                     Result<GetBasketResponse> basketResponse = Result<GetBasketResponse>.Success(new GetBasketResponse
                     {
-                        Username = resultWrapper.Data.ShoppingCart.Username,
-                        Items = resultWrapper.Data.ShoppingCart.Items.Select(item => new BasketItemDto
+                        ShoppingCart = new CartDto
                         {
-                            ProductId = item.ProductId,
-                            ProductName = item.ProductName,
-                            Quantity = item.Quantity,
-                            Price = item.Price,
-                        }).ToList()
+                            Username = resultWrapper.Data.ShoppingCart.Username,
+                            Items = resultWrapper.Data.ShoppingCart.Items.Select(item => new BasketItemDto
+                            {
+                                ProductId = item.ProductId,
+                                ProductName = item.ProductName,
+                                Quantity = item.Quantity,
+                                Price = item.Price,
+                            }).ToList()
+                        }
                     });
 
                     logger.LogInformation("Basket retrieved successfully: {@Basket}", basketResponse);

@@ -37,6 +37,7 @@ public class BasketService(ILogger<BasketService> logger, HttpClient httpClient,
         logger.LogInformation("Retrieving basket for user: {Username}", username);
         
         HttpResponseMessage response = await DoGet($"{BaseUrl}/basket/{username}");
+
         Result<GetBasketResponse>? content = await response.Content.ReadFromJsonAsync<Result<GetBasketResponse>>();
 
         if (response.IsSuccessStatusCode && content is not null)

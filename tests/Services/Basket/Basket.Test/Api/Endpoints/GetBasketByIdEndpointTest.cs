@@ -3,7 +3,6 @@ using BuildingBlocks;
 using Basket.Api.Application.Basket.GetBasketById;
 using Basket.Api.Application.Dto;
 using Basket.Api.Domain.Entities;
-using Basket.Api.Infrastructure.Data;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
@@ -79,8 +78,13 @@ public class GetBasketByIdEndpointTest(BasketApiFactory factory) : IClassFixture
         HttpRequestMessage request = new(HttpMethod.Get, $"/basket/{shoppingCart.Username}");
         HttpResponseMessage response = await _client.SendAsync(request);
         response.EnsureSuccessStatusCode();
+        
         Result<GetBasketByIdResult>? responseResult =
             await response.Content.ReadFromJsonAsync<Result<GetBasketByIdResult>>();
-        responseResult?.Data.Should().NotBeNull();
+        
+        responseResult.Should().NotBeNull();
+        responseResult!.Data.Should().NotBeNull();
+        responseResult!.Data?.ShoppingCart.Should().NotBeNull();
+        responseResult!.Data?.ShoppingCart.Username.Should().Be(shoppingCart.Username);
     }
 }
