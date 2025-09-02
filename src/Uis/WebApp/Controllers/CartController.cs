@@ -14,7 +14,7 @@ public class CartController(IMarketSpaceService service, ILogger<CartController>
 
         CreateOrUpdateBasketRequest createBasketRequest = new() { Username = "mock", Items = [] };
 
-        GetBasketResponse response = await service.GetBasketByUsernameAsync("fsmaiorano");
+        GetBasketResponse? response = await service.GetBasketByUsernameAsync("fsmaiorano");
         return Json(response);
     }
 }

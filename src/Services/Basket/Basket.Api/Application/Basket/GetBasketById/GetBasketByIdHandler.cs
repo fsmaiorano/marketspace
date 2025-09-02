@@ -15,7 +15,11 @@ public class GetBasketByIdHandler(IBasketRepository repository, ILogger<GetBaske
             ShoppingCartEntity? shoppingCart = await repository.GetCartAsync(query.Username);
 
             if (shoppingCart is null)
-                return Result<GetBasketByIdResult>.Failure($"Basket with username {query.Username} not found.");
+            {
+                ShoppingCartDto emptyDto = new() { Username = query.Username, Items = [] };
+                GetBasketByIdResult emptyResult = new(emptyDto);
+                return Result<GetBasketByIdResult>.Success(emptyResult);
+            }
 
             ShoppingCartDto cartDto = new()
             {
