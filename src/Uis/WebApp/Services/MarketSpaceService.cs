@@ -77,7 +77,7 @@ public class MarketSpaceService(ILogger<MarketSpaceService> logger, HttpClient h
         }
     }
 
-    public async Task<GetBasketResponse?> GetBasketByUsernameAsync(string username,
+    public async Task<GetBasketResponse> GetBasketByUsernameAsync(string username,
         CancellationToken cancellationToken = default)
     {
         try
