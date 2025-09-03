@@ -8,6 +8,7 @@
         },
 
         getCartItemCount: function () {
+            debugger;
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             // return cart.reduce((total, item) => total + item.quantity, 0);
             return 3;
@@ -30,6 +31,7 @@
 
         addToCart: function (productId, quantity = 1) {
             try {
+                debugger;
                 const cart = JSON.parse(localStorage.getItem('cart')) || [];
                 const existingItem = cart.find(item => item.productId === productId);
 

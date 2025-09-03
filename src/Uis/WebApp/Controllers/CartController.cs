@@ -11,10 +11,15 @@ public class CartController(IMarketSpaceService service, ILogger<CartController>
     public async Task<IActionResult> CartHandler(string productId)
     {
         logger.LogInformation("Adding product {ProductId} to cart", productId);
+        GetBasketResponse? storedCart = await service.GetBasketByUsernameAsync("fsmaiorano");
+        return Json(storedCart);
+    }
 
-        CreateOrUpdateBasketRequest createBasketRequest = new() { Username = "mock", Items = [] };
-
-        GetBasketResponse? response = await service.GetBasketByUsernameAsync("fsmaiorano");
-        return Json(response);
+    [HttpGet("GetCart")]
+    public async Task<IActionResult> GetCart()
+    {
+        logger.LogInformation("Getting cart for user");
+        GetBasketResponse? storedCart = await service.GetBasketByUsernameAsync("fsmaiorano");
+        return Json(storedCart);
     }
 }
