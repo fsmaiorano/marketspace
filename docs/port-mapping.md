@@ -1,4 +1,4 @@
-****| Microservices | Local Env   | Docker Env  | Docker Inside |
+| Microservices | Local Env   | Docker Env  | Docker Inside |
 |---------------|-------------|-------------|---------------|
 | Catalog       | 5000 - 5050 | 6000 - 6060 | 8080 - 8081   |
 | Basket        | 5001 - 5051 | 6001 - 6061 | 8080 - 8081   |
