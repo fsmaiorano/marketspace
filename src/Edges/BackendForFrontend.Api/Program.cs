@@ -43,6 +43,17 @@ builder.Services.AddSingleton<DiagnosticContext>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy("CorsPolicy", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -62,6 +73,7 @@ app.UseSwaggerUI(options =>
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseObservability();
 app.UseExceptionHandler(options => { });
+app.UseCors("CorsPolicy");
 
 MerchantEndpoint.MapEndpoint(app);
 BasketEndpoint.MapEndpoint(app);
