@@ -1,5 +1,5 @@
 <section>
   @for (item of catalog; track item.id) {
-  <p>{{ item.name }}</p>
+  <app-card [catalog]="item"></app-card>
   }
 </section>
