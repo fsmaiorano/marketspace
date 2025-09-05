@@ -1,5 +1,10 @@
-<section>
-  @for (item of catalog; track item.id) {
-  <app-card [catalog]="item"></app-card>
-  }
+<section class="dashboard">
+  <div class="dashboard__container">
+    <h1 class="dashboard__title">Product Catalog</h1>
+    <div class="dashboard__grid">
+      @for (item of catalog; track item.id) {
+      <app-card [catalog]="item"></app-card>
+      }
+    </div>
+  </div>
 </section>
