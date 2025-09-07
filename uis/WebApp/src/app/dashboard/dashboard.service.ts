@@ -14,9 +14,9 @@ export class DashboardService {
 
   constructor(private http: HttpClient) {}
 
-  getCatalog(): Observable<Result<GetCatalogResult>> {
+  getCatalog(pageIndex: number = 1, pageSize: number = 10): Observable<Result<GetCatalogResult>> {
     return this.http.get<Result<GetCatalogResult>>(
-      `${this.apiUrl}/api/catalog?pageIndex=1&pageSize=10`
+      `${this.apiUrl}/api/catalog?pageIndex=${pageIndex}&pageSize=${pageSize}`
     );
   }
 }
