@@ -20,7 +20,7 @@ public class GetBasketEndpointTest(BackendForFrontendFactory factory) : HttpFixt
         
         Result<CreateBasketResponse>? createResult = await createResponse.Content.ReadFromJsonAsync<Result<CreateBasketResponse>>();
         createResult?.IsSuccess.Should().BeTrue();
-        string username = createResult!.Data!.Username;
+        string username = createResult!.Data!.ShoppingCart.Username;
         
         HttpResponseMessage response = await _client.GetAsync($"/api/basket/{username}");
         response.EnsureSuccessStatusCode();

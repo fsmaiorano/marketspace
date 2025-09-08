@@ -17,7 +17,10 @@ public sealed class CreateBasketHandler(IBasketRepository repository, ILogger<Cr
                 Username = command.Username,
                 Items = command.Items.Select(item => new ShoppingCartItemEntity
                 {
-                    Quantity = item.Quantity, Price = item.Price,
+                    ProductName = item.ProductName,
+                    ProductId = item.ProductId,
+                    Quantity = item.Quantity, 
+                    Price = item.Price,
                 }).ToList(),
             };
 
@@ -30,7 +33,10 @@ public sealed class CreateBasketHandler(IBasketRepository repository, ILogger<Cr
                 Username = result.Username,
                 Items = result.Items.Select(item => new ShoppingCartItemDto
                 {
-                    Quantity = item.Quantity, Price = item.Price
+                    ProductId = item.ProductId,
+                    ProductName = item.ProductName,
+                    Quantity = item.Quantity, 
+                    Price = item.Price
                 }).ToList()
             };
 

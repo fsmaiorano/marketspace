@@ -19,7 +19,7 @@ public class CreateBasketEndpointTest(BackendForFrontendFactory factory) : HttpF
         response.EnsureSuccessStatusCode();
         
         Result<CreateBasketResponse>? result = await response.Content.ReadFromJsonAsync<Result<CreateBasketResponse>>();
-        result?.Data?.Username.Should().NotBeNullOrEmpty();
+        result?.Data?.ShoppingCart.Username.Should().NotBeNullOrEmpty();
         result?.IsSuccess.Should().BeTrue();
     }
 }
