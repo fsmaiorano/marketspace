@@ -10,7 +10,7 @@
 
     <div class="dashboard__grid" (scroll)="onScroll($event)">
       @for (item of catalog; track item.id) {
-      <app-card [catalog]="item"></app-card>
+      <app-card [catalog]="item" (addToCart)="onAddToCart($event)"></app-card>
       }
     </div>
 

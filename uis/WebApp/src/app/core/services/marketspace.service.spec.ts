@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import {MarketSpaceService} from './marketspace.service';
 
 
-describe(MarketSpaceService, () => {
+describe("MarketSpaceService", () => {
   let service: MarketSpaceService;
 
   beforeEach(() => {
