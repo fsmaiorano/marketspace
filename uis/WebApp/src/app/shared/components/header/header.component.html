@@ -4,7 +4,13 @@
   </div>
   <div class="header__spacer"></div>
   <div class="header__actions">
-    <button mat-icon-button class="header__action-button" aria-label="Shopping Cart">
+    <button
+      mat-icon-button
+      class="header__action-button"
+      aria-label="Shopping Cart"
+      [matBadge]="cartStore.totalQuantity()"
+      [matBadgeHidden]="cartStore.isEmpty()"
+      matBadgeColor="accent">
       <mat-icon>shopping_cart</mat-icon>
     </button>
   </div>

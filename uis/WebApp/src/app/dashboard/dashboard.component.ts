@@ -2,6 +2,7 @@ import {Component, OnInit, OnDestroy, HostListener} from '@angular/core';
 import {SharedModule} from '../shared/shared.module';
 import {MaterialModule} from '../shared/material.module';
 import {MarketSpaceService} from '../core/services/marketspace.service';
+import {MarketspaceStoreService} from '../core/store/marketspace.store.service';
 import {BehaviorSubject, Subject} from 'rxjs';
 import {takeUntil, switchMap, map, tap} from 'rxjs/operators';
 import {Catalog} from '@app/shared/models/catalog';
@@ -23,7 +24,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   isLoading$ = new BehaviorSubject<boolean>(false);
   hasMoreData$ = new BehaviorSubject<boolean>(true);
 
-  constructor(private marketspaceService: MarketSpaceService) {
+  constructor(
+    private marketspaceService: MarketSpaceService,
+    private cartStore: MarketspaceStoreService
+  ) {
   }
 
   ngOnInit() {
@@ -100,6 +104,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   onAddToCart(catalog: Catalog): void {
-    console.log('Adding to cart:', catalog);
+    debugger;
+    this.cartStore.addToCart(catalog);
+    console.log('Item added to cart. Total items:', this.cartStore.totalQuantity());
   }
 }
