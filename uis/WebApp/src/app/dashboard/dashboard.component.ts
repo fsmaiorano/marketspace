@@ -1,10 +1,10 @@
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
-import { SharedModule } from '../shared/shared.module';
-import { MaterialModule } from '../shared/material.module';
-import { DashboardService } from './dashboard.service';
-import { CatalogDto } from '@app/shared/models/catalogdto';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { takeUntil, switchMap, map, tap } from 'rxjs/operators';
+import {Component, OnInit, OnDestroy, HostListener} from '@angular/core';
+import {SharedModule} from '../shared/shared.module';
+import {MaterialModule} from '../shared/material.module';
+import {MarketSpaceService} from '../core/services/marketspace.service';
+import {BehaviorSubject, Subject} from 'rxjs';
+import {takeUntil, switchMap, map, tap} from 'rxjs/operators';
+import {Catalog} from '@app/shared/models/catalog';
 
 @Component({
   selector: 'app-dashboard',
@@ -19,11 +19,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private totalCount = 0;
   private isLoadingMore = false;
 
-  catalog$ = new BehaviorSubject<CatalogDto[]>([]);
+  catalog$ = new BehaviorSubject<Catalog[]>([]);
   isLoading$ = new BehaviorSubject<boolean>(false);
   hasMoreData$ = new BehaviorSubject<boolean>(true);
 
-  constructor(private dashboardService: DashboardService) {}
+  constructor(private marketspaceService: MarketSpaceService) {
+  }
 
   ngOnInit() {
     this.loadInitialData();
@@ -41,13 +42,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.pageIndex$
       .pipe(
         takeUntil(this.destroy$),
-        switchMap((pageIndex) => this.dashboardService.getCatalog(pageIndex, this.pageSize)),
+        switchMap((pageIndex) => this.marketspaceService.getCatalog(pageIndex, this.pageSize)),
         tap((result) => {
           if (result.data) {
             this.totalCount = result.data.count;
             this.hasMoreData$.next(
               result.data.products.length === this.pageSize &&
-                this.pageIndex$.value * this.pageSize < this.totalCount
+              this.pageIndex$.value * this.pageSize < this.totalCount
             );
           }
         }),
@@ -94,7 +95,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.pageIndex$.next(nextPage);
   }
 
-  get catalog(): CatalogDto[] {
+  get catalog(): Catalog[] {
     return this.catalog$.value;
   }
 }

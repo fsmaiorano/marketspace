@@ -1,4 +1,4 @@
-export interface CatalogDto {
+export interface Catalog {
   id: string;
   name: string;
   categories: string[];
