@@ -5,13 +5,13 @@ import {Result} from '@app/shared/models/result';
 import {environment} from '@environments/environment';
 import {Observable, switchMap} from 'rxjs';
 import {CartHandlerRequest} from '@app/shared/models/cart-handler-request';
+import {CartHandlerResponse} from '@app/shared/models/cart-handler-response';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MarketSpaceService {
   readonly apiUrl: string = environment.apiUrl;
-  readonly production: boolean = environment.production;
 
   constructor(private http: HttpClient) {
   }
@@ -22,9 +22,7 @@ export class MarketSpaceService {
     );
   }
 
-  cartHandler(request: CartHandlerRequest): Observable<Result<string>> {
-    const response = this.http.post<Result<string>>(`${this.apiUrl}/api/basket`, request);
-    debugger;
-    return response;
+  cartHandler(request: CartHandlerRequest): Observable<Result<CartHandlerResponse>> {
+    return this.http.post<Result<CartHandlerResponse>>(`${this.apiUrl}/api/basket`, request);
   }
 }

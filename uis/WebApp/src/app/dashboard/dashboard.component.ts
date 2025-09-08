@@ -7,6 +7,8 @@ import {BehaviorSubject, Subject} from 'rxjs';
 import {takeUntil, switchMap, map, tap} from 'rxjs/operators';
 import {Catalog} from '@app/shared/models/catalog';
 import {CatalogItem} from '@app/shared/models/catalog-item';
+import {CartHandlerResponse} from '@app/shared/models/cart-handler-response';
+import {Result} from '@app/shared/models/result';
 
 @Component({
   selector: 'app-dashboard',
@@ -108,7 +110,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.cartStore.addToCart(catalog);
     const cart: CatalogItem[] = this.cartStore.cartItems();
     this.marketspaceService.cartHandler({username: "fsmaiorano", items: cart}).subscribe({
-      next: (result) => {
+      next: (result: Result<CartHandlerResponse>) => {
         if (result.isSuccess) {
           console.log('Item added to cart. Total items:', this.cartStore.totalQuantity());
         } else {
