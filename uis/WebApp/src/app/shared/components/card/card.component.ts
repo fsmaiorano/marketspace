@@ -1,7 +1,7 @@
 import { MatCardModule } from '@angular/material/card';
 import { Component, Input } from '@angular/core';
-import { CatalogDto } from '@app/shared/models/catalogdto';
 import { MatButtonModule } from '@angular/material/button';
+import {Catalog} from '@app/shared/models/catalog';
 
 @Component({
   selector: 'app-card',
@@ -11,7 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
   standalone: true,
 })
 export class CardComponent {
-  @Input() catalog: CatalogDto | null = null;
+  @Input() catalog: Catalog | null = null;
 
   constructor() {}
 }
