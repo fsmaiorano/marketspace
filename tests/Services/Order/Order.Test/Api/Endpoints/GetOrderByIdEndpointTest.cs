@@ -20,11 +20,11 @@ public class GetOrderByIdEndpointTest(OrderApiFactory factory) : IClassFixture<O
     [Fact]
     public async Task Returns_Ok_When_Order_Exists()
     {
-        Guid orderId = Guid.NewGuid();
+        Guid orderId = Guid.CreateVersion7();
         GetOrderByIdQuery query = new GetOrderByIdQuery(orderId);
         GetOrderByIdResult result = new GetOrderByIdResult
         {
-            Id = Guid.NewGuid(),
+            Id = Guid.CreateVersion7(),
             Name = "Test Order",
             Description = "This is a test order",
             ImageUrl = "http://example.com/image.jpg",
@@ -45,7 +45,7 @@ public class GetOrderByIdEndpointTest(OrderApiFactory factory) : IClassFixture<O
     [Fact]
     public async Task Returns_NotFound_When_Order_Does_Not_Exist()
     {
-        Guid orderId = Guid.NewGuid();
+        Guid orderId = Guid.CreateVersion7();
         GetOrderByIdQuery query = new GetOrderByIdQuery(orderId);
         Result<GetOrderByIdResult> result =
             Result<GetOrderByIdResult>.Failure($"Order with ID {query.Id} not found.");
@@ -62,7 +62,7 @@ public class GetOrderByIdEndpointTest(OrderApiFactory factory) : IClassFixture<O
     [Fact]
     public async Task Throws_Exception_When_Handler_Throws()
     {
-        GetOrderByIdQuery query = new GetOrderByIdQuery(Guid.NewGuid());
+        GetOrderByIdQuery query = new GetOrderByIdQuery(Guid.CreateVersion7());
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<GetOrderByIdQuery>()))
             .ThrowsAsync(new Exception("Unexpected error"));
@@ -80,7 +80,7 @@ public class GetOrderByIdEndpointTest(OrderApiFactory factory) : IClassFixture<O
 
         OrderEntity? order = OrderBuilder.CreateOrderFaker().Generate();
 
-        order.Id = OrderId.Of(Guid.NewGuid());
+        order.Id = OrderId.Of(Guid.CreateVersion7());
 
         dbContext.Orders.Add(order);
         await dbContext.SaveChangesAsync();

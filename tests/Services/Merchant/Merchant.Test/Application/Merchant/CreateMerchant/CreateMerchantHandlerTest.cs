@@ -13,7 +13,7 @@ public class CreateMerchantHandlerTest
             .Setup(r => r.AddAsync(It.IsAny<MerchantEntity>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((MerchantEntity m, CancellationToken _) =>
             {
-                m.Id = MerchantId.Of(Guid.NewGuid());
+                m.Id = MerchantId.Of(Guid.CreateVersion7());
                 return 1;
             });
 

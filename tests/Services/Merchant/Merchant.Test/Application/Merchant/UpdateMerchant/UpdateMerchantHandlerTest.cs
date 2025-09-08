@@ -9,7 +9,7 @@ public class UpdateMerchantHandlerTest
         Mock<IMerchantRepository> repositoryMock = new();
         Mock<ILogger<UpdateMerchantHandler>> loggerMock = new();
 
-        MerchantId merchantId = MerchantId.Of(Guid.NewGuid());
+        MerchantId merchantId = MerchantId.Of(Guid.CreateVersion7());
 
         repositoryMock.Setup(r => r.UpdateAsync(It.IsAny<MerchantEntity>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(1);

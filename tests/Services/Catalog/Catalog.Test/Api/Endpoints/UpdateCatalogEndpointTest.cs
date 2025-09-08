@@ -20,7 +20,7 @@ public class UpdateCatalogEndpointTest(CatalogApiFactory factory) : IClassFixtur
     [Fact]
     public async Task Returns_Failure_When_Catalog_Not_Found()
     {
-        Guid catalogId = Guid.NewGuid();
+        Guid catalogId = Guid.CreateVersion7();
 
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<UpdateCatalogCommand>()))
@@ -37,7 +37,7 @@ public class UpdateCatalogEndpointTest(CatalogApiFactory factory) : IClassFixtur
     [Fact]
     public async Task Returns_Failure_When_Exception_Occurs()
     {
-        Guid catalogId = Guid.NewGuid();
+        Guid catalogId = Guid.CreateVersion7();
 
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<UpdateCatalogCommand>()))
@@ -53,7 +53,7 @@ public class UpdateCatalogEndpointTest(CatalogApiFactory factory) : IClassFixtur
     [Fact]
     public async Task Returns_Success_When_Catalog_Updated()
     {
-        Guid catalogId = Guid.NewGuid();
+        Guid catalogId = Guid.CreateVersion7();
 
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<UpdateCatalogCommand>()))
@@ -75,7 +75,7 @@ public class UpdateCatalogEndpointTest(CatalogApiFactory factory) : IClassFixtur
 
         CatalogEntity? catalog = CatalogBuilder.CreateCatalogFaker().Generate();
 
-        catalog.Id = CatalogId.Of(Guid.NewGuid());
+        catalog.Id = CatalogId.Of(Guid.CreateVersion7());
 
         dbContext.Catalogs.Add(catalog);
         await dbContext.SaveChangesAsync();

@@ -26,7 +26,7 @@ public class GetCatalogEndpointTest(BackendForFrontendFactory factory) : HttpFix
 
         CatalogEntity? catalog = CatalogBuilder.CreateCatalogFaker().Generate();
 
-        catalog.Id = CatalogId.Of(Guid.NewGuid());
+        catalog.Id = CatalogId.Of(Guid.CreateVersion7());
 
         dbContext.Catalogs.Add(catalog);
         await dbContext.SaveChangesAsync();

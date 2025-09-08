@@ -20,7 +20,7 @@ public class DeleteOrderEndpointTest(OrderApiFactory factory) : IClassFixture<Or
     [Fact]
     public async Task Returns_Ok_When_Order_Is_Deleted_Successfully()
     {
-        Guid orderId = Guid.NewGuid();
+        Guid orderId = Guid.CreateVersion7();
 
         DeleteOrderCommand command = OrderBuilder.CreateDeleteOrderCommandFaker().Generate();
         Result<DeleteOrderResult> result = Result<DeleteOrderResult>.Success(new DeleteOrderResult(true));
@@ -68,7 +68,7 @@ public class DeleteOrderEndpointTest(OrderApiFactory factory) : IClassFixture<Or
 
         OrderEntity? order = OrderBuilder.CreateOrderFaker().Generate();
         
-        order.Id = OrderId.Of(Guid.NewGuid());
+        order.Id = OrderId.Of(Guid.CreateVersion7());
 
         dbContext.Orders.Add(order);
         await dbContext.SaveChangesAsync();

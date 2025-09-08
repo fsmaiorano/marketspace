@@ -26,7 +26,7 @@ public class OrderItemEntity : Aggregate<OrderItemId>
 
         return new OrderItemEntity
         {
-            Id = OrderItemId.Of(Guid.NewGuid()),
+            Id = OrderItemId.Of(Guid.CreateVersion7()),
             OrderId = orderId,
             CatalogId = catalogId,
             Quantity = quantity,

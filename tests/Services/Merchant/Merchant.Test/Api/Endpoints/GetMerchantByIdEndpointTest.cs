@@ -13,7 +13,7 @@ public class GetMerchantByIdEndpointTest(MerchantApiFactory factory) : IClassFix
     [Fact]
     public async Task Returns_Ok_When_Merchant_Exists()
     {
-        Guid merchantId = Guid.NewGuid();
+        Guid merchantId = Guid.CreateVersion7();
         GetMerchantByIdQuery query = new GetMerchantByIdQuery(merchantId);
         GetMerchantByIdResult result = new GetMerchantByIdResult
         {
@@ -36,7 +36,7 @@ public class GetMerchantByIdEndpointTest(MerchantApiFactory factory) : IClassFix
     [Fact]
     public async Task Returns_NotFound_When_Merchant_Does_Not_Exist()
     {
-        Guid merchantId = Guid.NewGuid();
+        Guid merchantId = Guid.CreateVersion7();
         GetMerchantByIdQuery query = new GetMerchantByIdQuery(merchantId);
         Result<GetMerchantByIdResult> result =
             Result<GetMerchantByIdResult>.Failure($"Catalog with ID {query.Id} not found.");
@@ -53,7 +53,7 @@ public class GetMerchantByIdEndpointTest(MerchantApiFactory factory) : IClassFix
     [Fact]
     public async Task Throws_Exception_When_Handler_Throws()
     {
-        GetMerchantByIdQuery query = new GetMerchantByIdQuery(Guid.NewGuid());
+        GetMerchantByIdQuery query = new GetMerchantByIdQuery(Guid.CreateVersion7());
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<GetMerchantByIdQuery>()))
             .ThrowsAsync(new Exception("Unexpected error"));

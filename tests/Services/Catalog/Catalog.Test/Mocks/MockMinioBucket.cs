@@ -7,7 +7,7 @@ public class MockMinioBucket : IMinioBucket
     public Task<(string objectName, string objectUrl)> SendImageAsync(string imageUrl)
     {
         // For testing, just return a mock object name and URL
-        string objectName = $"catalog-test-{Guid.NewGuid()}.jpg";
+        string objectName = $"catalog-test-{Guid.CreateVersion7()}.jpg";
         string objectUrl = $"https://mock-minio-catalog.test/{objectName}";
         
         return Task.FromResult((objectName, objectUrl));

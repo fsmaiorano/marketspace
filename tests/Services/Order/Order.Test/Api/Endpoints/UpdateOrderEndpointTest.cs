@@ -21,7 +21,7 @@ public class UpdateOrderEndpointTest(OrderApiFactory factory) : IClassFixture<Or
     [Fact]
     public async Task Returns_Failure_When_Order_Not_Found()
     {
-        Guid orderId = Guid.NewGuid();
+        Guid orderId = Guid.CreateVersion7();
 
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<UpdateOrderCommand>()))
@@ -38,7 +38,7 @@ public class UpdateOrderEndpointTest(OrderApiFactory factory) : IClassFixture<Or
     [Fact]
     public async Task Returns_Failure_When_Exception_Occurs()
     {
-        Guid orderId = Guid.NewGuid();
+        Guid orderId = Guid.CreateVersion7();
 
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<UpdateOrderCommand>()))
@@ -54,7 +54,7 @@ public class UpdateOrderEndpointTest(OrderApiFactory factory) : IClassFixture<Or
     [Fact]
     public async Task Returns_Success_When_Order_Updated()
     {
-        Guid orderId = Guid.NewGuid();
+        Guid orderId = Guid.CreateVersion7();
 
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<UpdateOrderCommand>()))
@@ -76,7 +76,7 @@ public class UpdateOrderEndpointTest(OrderApiFactory factory) : IClassFixture<Or
 
         OrderEntity? order = OrderBuilder.CreateOrderFaker().Generate();
 
-        order.Id = OrderId.Of(Guid.NewGuid());
+        order.Id = OrderId.Of(Guid.CreateVersion7());
 
         dbContext.Orders.Add(order);
         await dbContext.SaveChangesAsync();

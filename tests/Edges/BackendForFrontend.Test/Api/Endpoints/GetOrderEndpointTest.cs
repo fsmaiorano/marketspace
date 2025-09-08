@@ -12,7 +12,7 @@ public class GetOrderEndpointTest(BackendForFrontendFactory factory) : HttpFixtu
     [Fact]
     public async Task Returns_Ok_When_Order_Is_Retrieved_Successfully()
     {
-        Guid orderId = Guid.NewGuid();
+        Guid orderId = Guid.CreateVersion7();
         
         HttpResponseMessage response = await _client.GetAsync($"/api/order/{orderId}");
         response.EnsureSuccessStatusCode();
@@ -24,7 +24,7 @@ public class GetOrderEndpointTest(BackendForFrontendFactory factory) : HttpFixtu
     [Fact]
     public async Task Returns_Ok_When_Orders_By_Customer_Are_Retrieved_Successfully()
     {
-        Guid customerId = Guid.NewGuid();
+        Guid customerId = Guid.CreateVersion7();
         
         HttpResponseMessage response = await _client.GetAsync($"/api/order/customer/{customerId}");
         response.EnsureSuccessStatusCode();

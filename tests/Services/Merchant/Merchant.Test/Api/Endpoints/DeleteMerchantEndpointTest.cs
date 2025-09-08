@@ -11,7 +11,7 @@ public class DeleteMerchantEndpointTest(MerchantApiFactory factory) : IClassFixt
     [Fact]
     public async Task Returns_Ok_When_Merchant_Is_Deleted_Successfully()
     {
-        Guid merchantId = Guid.NewGuid();
+        Guid merchantId = Guid.CreateVersion7();
 
         DeleteMerchantCommand command = MerchantBuilder.CreateDeleteMerchantCommandFaker().Generate();
         Result<DeleteMerchantResult> result = Result<DeleteMerchantResult>.Success(new DeleteMerchantResult(true));

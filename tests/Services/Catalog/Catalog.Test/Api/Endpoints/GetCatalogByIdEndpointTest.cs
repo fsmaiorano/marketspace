@@ -21,11 +21,11 @@ public class GetCatalogByIdEndpointTest(CatalogApiFactory factory) : IClassFixtu
     [Fact]
     public async Task Returns_Ok_When_Catalog_Exists()
     {
-        Guid merchantId = Guid.NewGuid();
+        Guid merchantId = Guid.CreateVersion7();
         GetCatalogByIdQuery query = new GetCatalogByIdQuery(merchantId);
         GetCatalogByIdResult result = new GetCatalogByIdResult
         {
-            Id = Guid.NewGuid(),
+            Id = Guid.CreateVersion7(),
             Name = "Test Catalog",
             Description = "This is a test catalog",
             ImageUrl = "http://example.com/image.jpg",
@@ -46,7 +46,7 @@ public class GetCatalogByIdEndpointTest(CatalogApiFactory factory) : IClassFixtu
     [Fact]
     public async Task Returns_NotFound_When_Catalog_Does_Not_Exist()
     {
-        Guid merchantId = Guid.NewGuid();
+        Guid merchantId = Guid.CreateVersion7();
         GetCatalogByIdQuery query = new GetCatalogByIdQuery(merchantId);
         Result<GetCatalogByIdResult> result =
             Result<GetCatalogByIdResult>.Failure($"Catalog with ID {query.Id} not found.");
@@ -63,7 +63,7 @@ public class GetCatalogByIdEndpointTest(CatalogApiFactory factory) : IClassFixtu
     [Fact]
     public async Task Throws_Exception_When_Handler_Throws()
     {
-        GetCatalogByIdQuery query = new GetCatalogByIdQuery(Guid.NewGuid());
+        GetCatalogByIdQuery query = new GetCatalogByIdQuery(Guid.CreateVersion7());
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<GetCatalogByIdQuery>()))
             .ThrowsAsync(new Exception("Unexpected error"));
@@ -81,7 +81,7 @@ public class GetCatalogByIdEndpointTest(CatalogApiFactory factory) : IClassFixtu
 
         CatalogEntity? catalog = CatalogBuilder.CreateCatalogFaker().Generate();
 
-        catalog.Id = CatalogId.Of(Guid.NewGuid());
+        catalog.Id = CatalogId.Of(Guid.CreateVersion7());
 
         dbContext.Catalogs.Add(catalog);
         await dbContext.SaveChangesAsync();

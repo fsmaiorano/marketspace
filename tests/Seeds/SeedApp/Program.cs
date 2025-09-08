@@ -68,7 +68,7 @@ for (int i = 0; i < createdMerchants.Count; i++)
             price: catalog.Price
         );
 
-        catalogEntity.Id = CatalogId.Of(Guid.NewGuid());
+        catalogEntity.Id = CatalogId.Of(Guid.CreateVersion7());
         catalogDbContext.Catalogs.Add(catalogEntity);
         catalogDbContext.SaveChanges();
     }

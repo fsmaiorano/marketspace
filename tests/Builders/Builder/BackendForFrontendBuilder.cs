@@ -36,7 +36,7 @@ public class BackendForFrontendBuilder
         {
             Quantity = f.Random.Int(1, 5),
             Price = f.Random.Decimal(10, 100),
-            ProductId = Guid.NewGuid().ToString(),
+            ProductId = Guid.CreateVersion7().ToString(),
             ProductName = f.Commerce.ProductName()
         });
     }

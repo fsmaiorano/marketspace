@@ -9,7 +9,7 @@ public class UpdateMerchantEndpointTest(MerchantApiFactory factory) : IClassFixt
     [Fact]
     public async Task Returns_Failure_When_Merchant_Not_Found()
     {
-        Guid merchantId = Guid.NewGuid();
+        Guid merchantId = Guid.CreateVersion7();
 
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<UpdateMerchantCommand>()))
@@ -26,7 +26,7 @@ public class UpdateMerchantEndpointTest(MerchantApiFactory factory) : IClassFixt
     [Fact]
     public async Task Returns_Failure_When_Exception_Occurs()
     {
-        Guid merchantId = Guid.NewGuid();
+        Guid merchantId = Guid.CreateVersion7();
 
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<UpdateMerchantCommand>()))
@@ -42,7 +42,7 @@ public class UpdateMerchantEndpointTest(MerchantApiFactory factory) : IClassFixt
     [Fact]
     public async Task Returns_Success_When_Merchant_Updated()
     {
-        Guid merchantId = Guid.NewGuid();
+        Guid merchantId = Guid.CreateVersion7();
 
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<UpdateMerchantCommand>()))

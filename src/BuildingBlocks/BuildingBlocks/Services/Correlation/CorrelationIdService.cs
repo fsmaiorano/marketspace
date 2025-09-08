@@ -22,5 +22,5 @@ public class CorrelationIdService(IHttpContextAccessor httpContextAccessor) : IC
             httpContextAccessor.HttpContext.Items["CorrelationId"] = correlationId;
     }
 
-    private static string GenerateNewCorrelationId() => Guid.NewGuid().ToString();
+    private static string GenerateNewCorrelationId() => Guid.CreateVersion7().ToString();
 }

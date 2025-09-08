@@ -8,7 +8,7 @@ public class CreateMerchantEndpointTest(MerchantApiFactory factory) : IClassFixt
     [Fact]
     public async Task Returns_Ok_When_Merchant_Is_Created_Successfully()
     {
-        Guid merchantId = Guid.NewGuid();
+        Guid merchantId = Guid.CreateVersion7();
 
         CreateMerchantCommand command = MerchantBuilder.CreateCreateMerchantCommandFaker().Generate();
         Result<CreateMerchantResult>

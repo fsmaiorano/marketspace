@@ -15,7 +15,7 @@ public class CreateOrderEndpointTest(OrderApiFactory factory) : IClassFixture<Or
     [Fact]
     public async Task Returns_Ok_When_Order_Is_Created_Successfully()
     {
-        Guid orderId = Guid.NewGuid();
+        Guid orderId = Guid.CreateVersion7();
 
         CreateOrderCommand command = OrderBuilder.CreateCreateOrderCommandFaker().Generate();
         Result<CreateOrderResult>
@@ -59,7 +59,7 @@ public class CreateOrderEndpointTest(OrderApiFactory factory) : IClassFixture<Or
     [Fact]
     public async Task Can_Create_Order_Endpoint()
     {
-        CreateOrderCommand command = OrderBuilder.CreateCreateOrderCommandFaker(customerId: Guid.NewGuid()).Generate();
+        CreateOrderCommand command = OrderBuilder.CreateCreateOrderCommandFaker(customerId: Guid.CreateVersion7()).Generate();
         
         HttpResponseMessage response = await _client.PostAsJsonAsync("/order", command);
         response.EnsureSuccessStatusCode();

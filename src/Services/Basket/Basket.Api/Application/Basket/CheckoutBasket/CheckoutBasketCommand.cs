@@ -4,7 +4,7 @@ public class CheckoutBasketCommand
 {
     // Basket
     public string UserName { get; set; } = null!;
-    public Guid CustomerId { get; set; } = Guid.NewGuid();
+    public Guid CustomerId { get; set; } = Guid.CreateVersion7();
     public decimal TotalPrice { get; set; } = 0.0m;
 
     // Shipping and BillingAddress
