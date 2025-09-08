@@ -10,7 +10,7 @@ public class MerchantRepository(IMerchantDbContext dbContext) : IMerchantReposit
     public async Task<int> AddAsync(MerchantEntity merchant, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(merchant, nameof(merchant));
-        merchant.Id = MerchantId.Of(Guid.NewGuid());
+        merchant.Id = MerchantId.Of(Guid.CreateVersion7());
         await dbContext.Merchants.AddAsync(merchant, cancellationToken);
         return await dbContext.SaveChangesAsync(cancellationToken);
     }

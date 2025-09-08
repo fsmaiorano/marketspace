@@ -6,7 +6,7 @@ public class MockMinioBucket : IMinioBucket
 {
     public Task<(string objectName, string objectUrl)> SendImageAsync(string imageUrl)
     {
-        string objectName = $"test-{Guid.NewGuid()}.jpg";
+        string objectName = $"test-{Guid.CreateVersion7()}.jpg";
         string objectUrl = $"https://mock-minio.test/{objectName}";
         
         return Task.FromResult((objectName, objectUrl));

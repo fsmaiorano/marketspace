@@ -28,7 +28,7 @@ public class GetCatalogEndpointTest(CatalogApiFactory factory) : IClassFixture<C
         for (int i = 0; i < createCatalogCount; i++)
         {
             CatalogEntity? catalog = CatalogBuilder.CreateCatalogFaker().Generate();
-            catalog.Id = CatalogId.Of(Guid.NewGuid());
+            catalog.Id = CatalogId.Of(Guid.CreateVersion7());
             dbContext.Catalogs.Add(catalog);
         }
 

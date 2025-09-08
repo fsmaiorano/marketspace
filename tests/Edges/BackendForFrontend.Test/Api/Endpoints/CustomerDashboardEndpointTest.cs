@@ -12,7 +12,7 @@ public class CustomerDashboardEndpointTest(BackendForFrontendFactory factory) : 
     [Fact]
     public async Task Returns_Ok_When_Customer_Dashboard_Is_Retrieved_Successfully()
     {
-        Guid customerId = Guid.NewGuid();
+        Guid customerId = Guid.CreateVersion7();
         
         HttpResponseMessage response = await _client.GetAsync($"/api/dashboard/{customerId}");
         response.EnsureSuccessStatusCode();

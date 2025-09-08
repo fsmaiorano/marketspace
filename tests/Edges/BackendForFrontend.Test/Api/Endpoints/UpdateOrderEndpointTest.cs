@@ -13,7 +13,7 @@ public class UpdateOrderEndpointTest(BackendForFrontendFactory factory) : HttpFi
     [Fact]
     public async Task Returns_Ok_When_Order_Is_Updated_Successfully()
     {
-        Guid orderId = Guid.NewGuid();
+        Guid orderId = Guid.CreateVersion7();
         UpdateOrderRequest request = BackendForFrontendBuilder.CreateUpdateOrderRequestFaker();
         request.Id = orderId;
         

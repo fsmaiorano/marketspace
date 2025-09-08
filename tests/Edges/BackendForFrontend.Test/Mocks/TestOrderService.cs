@@ -13,7 +13,7 @@ public class TestOrderService(HttpClient httpClient, ILogger<TestOrderService> l
 
         Result<CreateOrderResponse> response = Result<CreateOrderResponse>.Success(new CreateOrderResponse
         {
-            Id = Guid.NewGuid(),
+            Id = Guid.CreateVersion7(),
             CustomerId = request.CustomerId,
             OrderName = $"Order-{DateTime.Now:yyyyMMddHHmmss}",
             ShippingAddress = request.ShippingAddress,
@@ -34,7 +34,7 @@ public class TestOrderService(HttpClient httpClient, ILogger<TestOrderService> l
         Result<GetOrderResponse> response = Result<GetOrderResponse>.Success(new GetOrderResponse
         {
             Id = orderId,
-            CustomerId = Guid.NewGuid(),
+            CustomerId = Guid.CreateVersion7(),
             OrderName = $"Order-{DateTime.Now:yyyyMMddHHmmss}",
             ShippingAddress = new AddressDto { FirstName = "Test", LastName = "User" },
             BillingAddress = new AddressDto { FirstName = "Test", LastName = "User" },
@@ -79,7 +79,7 @@ public class TestOrderService(HttpClient httpClient, ILogger<TestOrderService> l
             [
                 new OrderSummaryDto
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.CreateVersion7(),
                     CustomerId = customerId,
                     OrderName = "Test Order 1",
                     Status = 1,
@@ -89,7 +89,7 @@ public class TestOrderService(HttpClient httpClient, ILogger<TestOrderService> l
 
                 new OrderSummaryDto
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.CreateVersion7(),
                     CustomerId = customerId,
                     OrderName = "Test Order 2",
                     Status = 2,

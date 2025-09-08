@@ -25,7 +25,7 @@ public class UpdateCatalogEndpointTest(BackendForFrontendFactory factory) : Http
 
         CatalogEntity? catalog = CatalogBuilder.CreateCatalogFaker().Generate();
 
-        catalog.Id = CatalogId.Of(Guid.NewGuid());
+        catalog.Id = CatalogId.Of(Guid.CreateVersion7());
 
         dbContext.Catalogs.Add(catalog);
         await dbContext.SaveChangesAsync();
@@ -38,7 +38,7 @@ public class UpdateCatalogEndpointTest(BackendForFrontendFactory factory) : Http
             ImageUrl = "http://example.com/updated-image.jpg",
             Categories = catalog.Categories,
             Price = 49.99m,
-            MerchantId = Guid.NewGuid()
+            MerchantId = Guid.CreateVersion7()
         };
 
         HttpResponseMessage response = await _client.PutAsJsonAsync($"/api/catalog/{command.Id}", command);

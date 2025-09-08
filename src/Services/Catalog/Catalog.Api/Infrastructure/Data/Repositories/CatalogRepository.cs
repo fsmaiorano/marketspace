@@ -11,7 +11,7 @@ public class CatalogRepository(ICatalogDbContext dbContext) : ICatalogRepository
     public async Task<int> AddAsync(CatalogEntity catalog, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(catalog, nameof(catalog));
-        catalog.Id = CatalogId.Of(Guid.NewGuid());
+        catalog.Id = CatalogId.Of(Guid.CreateVersion7());
         await dbContext.Catalogs.AddAsync(catalog, cancellationToken);
         return await dbContext.SaveChangesAsync(cancellationToken);
     }

@@ -20,7 +20,7 @@ public class DeleteBasketEndpointTest(BasketApiFactory factory) : IClassFixture<
     [Fact]
     public async Task Returns_Ok_When_Basket_Is_Deleted_Successfully()
     {
-        Guid catalogId = Guid.NewGuid();
+        Guid catalogId = Guid.CreateVersion7();
 
         DeleteBasketCommand command = BasketBuilder.CreateDeleteBasketCommandFaker().Generate();
         Result<DeleteBasketResult> result = Result<DeleteBasketResult>.Success(new DeleteBasketResult(true));

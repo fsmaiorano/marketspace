@@ -56,7 +56,7 @@ public class MinioBucket : IMinioBucket
             if (string.IsNullOrEmpty(fileExtension))
                 fileExtension = GetExtensionFromContentType(contentType);
 
-            string objectName = $"{Guid.NewGuid()}{fileExtension}";
+            string objectName = $"{Guid.CreateVersion7()}{fileExtension}";
 
             using HttpResponseMessage response = await httpClient.GetAsync(imageUrl);
             response.EnsureSuccessStatusCode();

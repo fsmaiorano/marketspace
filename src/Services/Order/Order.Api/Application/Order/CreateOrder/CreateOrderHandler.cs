@@ -16,7 +16,7 @@ public sealed class CreateOrderHandler(
     {
         try
         {
-            OrderId orderId = OrderId.Of(Guid.NewGuid());
+            OrderId orderId = OrderId.Of(Guid.CreateVersion7());
             Address shippingAddress = command.ShippingAddress.ToAddress();
             Address billingAddress = command.BillingAddress.ToAddress();
             Payment payment = command.Payment.ToPayment();

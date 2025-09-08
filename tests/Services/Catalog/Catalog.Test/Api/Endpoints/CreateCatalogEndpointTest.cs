@@ -15,7 +15,7 @@ public class CreateCatalogEndpointTest(CatalogApiFactory factory) : IClassFixtur
     [Fact]
     public async Task Returns_Ok_When_Catalog_Is_Created_Successfully()
     {
-        Guid merchantId = Guid.NewGuid();
+        Guid merchantId = Guid.CreateVersion7();
 
         CreateCatalogCommand command = CatalogBuilder.CreateCreateCatalogCommandFaker().Generate();
         Result<CreateCatalogResult>

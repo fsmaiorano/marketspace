@@ -12,7 +12,7 @@ public class DeleteOrderEndpointTest(BackendForFrontendFactory factory) : HttpFi
     [Fact]
     public async Task Returns_Ok_When_Order_Is_Deleted_Successfully()
     {
-        Guid orderId = Guid.NewGuid();
+        Guid orderId = Guid.CreateVersion7();
         
         HttpResponseMessage response = await _client.DeleteAsync($"/api/order/{orderId}");
         response.EnsureSuccessStatusCode();
