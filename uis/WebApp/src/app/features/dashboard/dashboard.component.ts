@@ -1,14 +1,14 @@
 import {Component, OnInit, OnDestroy, HostListener} from '@angular/core';
-import {SharedModule} from '../shared/shared.module';
-import {MaterialModule} from '../shared/material.module';
-import {MarketSpaceService} from '../core/services/marketspace.service';
-import {MarketspaceStoreService} from '../core/store/marketspace.store.service';
 import {BehaviorSubject, Subject} from 'rxjs';
 import {takeUntil, switchMap, map, tap} from 'rxjs/operators';
 import {Catalog} from '@app/shared/models/catalog';
 import {CatalogItem} from '@app/shared/models/catalog-item';
 import {CartHandlerResponse} from '@app/shared/models/cart-handler-response';
 import {Result} from '@app/shared/models/result';
+import {MaterialModule} from '@app/shared/material.module';
+import {SharedModule} from '@app/shared/shared.module';
+import {MarketSpaceService} from '@app/core/services/marketspace.service';
+import {MarketspaceStoreService} from '@app/core/store/marketspace.store.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -112,7 +112,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.marketspaceService.cartHandler({username: "fsmaiorano", items: cart}).subscribe({
       next: (result: Result<CartHandlerResponse>) => {
         if (result.isSuccess) {
-          console.log('Item added to cart. Total items:', this.cartStore.totalQuantity());
+          console.log('Cart updated successfully:', result.data);
         } else {
           console.error('Failed to update cart:', result?.error);
         }
