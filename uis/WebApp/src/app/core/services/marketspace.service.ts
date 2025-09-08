@@ -4,6 +4,7 @@ import {GetCatalogResult} from '@app/shared/models/get-catalog-result';
 import {Result} from '@app/shared/models/result';
 import {environment} from '@environments/environment';
 import {Observable, switchMap} from 'rxjs';
+import {CartHandlerRequest} from '@app/shared/models/cart-handler-request';
 
 @Injectable({
   providedIn: 'root',
@@ -21,8 +22,9 @@ export class MarketSpaceService {
     );
   }
 
-  // cartHandler(): Observable<Result<string>> {
-  //   debugger;
-  //   return this.http.post<Result<string>>(`${this.apiUrl}/api/cart`, {productId, quantity});
-  // }
+  cartHandler(request: CartHandlerRequest): Observable<Result<string>> {
+    const response = this.http.post<Result<string>>(`${this.apiUrl}/api/basket`, request);
+    debugger;
+    return response;
+  }
 }

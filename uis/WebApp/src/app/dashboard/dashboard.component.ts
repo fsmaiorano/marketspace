@@ -6,6 +6,7 @@ import {MarketspaceStoreService} from '../core/store/marketspace.store.service';
 import {BehaviorSubject, Subject} from 'rxjs';
 import {takeUntil, switchMap, map, tap} from 'rxjs/operators';
 import {Catalog} from '@app/shared/models/catalog';
+import {CatalogItem} from '@app/shared/models/catalog-item';
 
 @Component({
   selector: 'app-dashboard',
@@ -103,9 +104,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return this.catalog$.value;
   }
 
-  onAddToCart(catalog: Catalog): void {
-    debugger;
+  async onAddToCart(catalog: Catalog): Promise<void> {
     this.cartStore.addToCart(catalog);
-    console.log('Item added to cart. Total items:', this.cartStore.totalQuantity());
+    const cart: CatalogItem[] = this.cartStore.cartItems();
+    this.marketspaceService.cartHandler({username: "fsmaiorano", items: cart}).subscribe({
+      next: (result) => {
+        if (result.isSuccess) {
+          console.log('Item added to cart. Total items:', this.cartStore.totalQuantity());
+        } else {
+          console.error('Failed to update cart:', result?.error);
+        }
+      },
+      error: (error) => {
+        console.error('Error updating cart:', error);
+      }
+    });
   }
 }

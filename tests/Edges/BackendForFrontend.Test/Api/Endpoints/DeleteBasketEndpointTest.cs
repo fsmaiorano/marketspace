@@ -20,7 +20,7 @@ public class DeleteBasketEndpointTest(BackendForFrontendFactory factory) : HttpF
         
         Result<CreateBasketResponse>? createResult = await createResponse.Content.ReadFromJsonAsync<Result<CreateBasketResponse>>();
         createResult?.IsSuccess.Should().BeTrue();
-        string username = createResult!.Data!.Username;
+        string username = createResult!.Data!.ShoppingCart.Username;
 
         HttpResponseMessage response = await _client.DeleteAsync($"/api/basket/{username}");
         response.EnsureSuccessStatusCode();

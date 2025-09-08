@@ -4,6 +4,8 @@ namespace Basket.Api.Domain.Entities;
 
 public class ShoppingCartItemEntity
 {
+    [BsonElement("productId")]
+    public string ProductId { get; set; } = null!;
     [BsonElement("quantity")]
     public int Quantity { get; set; }
     

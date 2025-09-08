@@ -29,14 +29,17 @@ public class TestBasketService(HttpClient httpClient, ILogger<TestBasketService>
                     Result<CreateBasketResponse> basketResponse
                         = Result<CreateBasketResponse>.Success(new CreateBasketResponse
                         {
-                            Username = resultWrapper.Data.ShoppingCart.Username,
-                            Items = resultWrapper.Data.ShoppingCart.Items.Select(item => new BasketItemDto
+                            ShoppingCart = new CartDto()
                             {
-                                ProductId = item.ProductId,
-                                ProductName = item.ProductName,
-                                Quantity = item.Quantity,
-                                Price = item.Price,
-                            }).ToList()
+                                Username = resultWrapper.Data.ShoppingCart.Username,
+                                Items = resultWrapper.Data.ShoppingCart.Items.Select(item => new BasketItemDto
+                                {
+                                    ProductId = item.ProductId,
+                                    ProductName = item.ProductName,
+                                    Quantity = item.Quantity,
+                                    Price = item.Price,
+                                }).ToList()
+                            }
                         });
 
                     logger.LogInformation("Basket created successfully: {@Basket}", basketResponse);
