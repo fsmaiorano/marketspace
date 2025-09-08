@@ -98,4 +98,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   get catalog(): Catalog[] {
     return this.catalog$.value;
   }
+
+  onAddToCart(catalog: Catalog): void {
+    console.log('Adding to cart:', catalog);
+  }
 }
