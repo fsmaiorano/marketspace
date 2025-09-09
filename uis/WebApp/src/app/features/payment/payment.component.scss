@@ -1,0 +1,261 @@
+// Payment Block
+.payment {
+  display: flex;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  // Payment Card Element
+  &__card {
+    flex: 2;
+    min-width: 0;
+
+    // Card Header Element
+    &-header {
+      margin-bottom: 24px;
+
+      &-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 24px;
+      }
+
+      &-subtitle {
+        margin-top: 8px;
+        color: rgba(0, 0, 0, 0.6);
+      }
+    }
+  }
+
+  // Summary Card Element
+  &__summary {
+    flex: 1;
+    max-width: 300px;
+    height: fit-content;
+    position: sticky;
+    top: 24px;
+
+    @media (max-width: 768px) {
+      max-width: none;
+      position: static;
+    }
+
+    // Summary Item Element
+    &-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+
+      // Total Modifier
+      &--total {
+        padding-top: 16px;
+        font-size: 18px;
+      }
+    }
+  }
+
+  // Divider Element
+  &__divider {
+    margin: 24px 0;
+  }
+}
+
+// Step Form Block
+.step-form {
+  padding: 24px 0;
+
+  // Form Title Element
+  &__title {
+    margin: 0 0 24px 0;
+    color: rgba(0, 0, 0, 0.87);
+    font-weight: 500;
+  }
+
+  // Form Row Element
+  &__row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    @media (max-width: 600px) {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  // Form Field Element
+  &__field {
+    // Full Width Modifier
+    &--full {
+      flex: 1;
+      width: 100%;
+    }
+
+    // Half Width Modifier
+    &--half {
+      flex: 1;
+      min-width: 0;
+
+      @media (max-width: 600px) {
+        flex: none;
+        width: 100%;
+      }
+    }
+
+    // Quarter Width Modifier
+    &--quarter {
+      flex: 0.5;
+      min-width: 120px;
+
+      @media (max-width: 600px) {
+        flex: none;
+        width: 100%;
+      }
+    }
+
+    // CVV Input Modifier
+    &--cvv {
+      input {
+        font-family: monospace;
+        letter-spacing: 1px;
+      }
+    }
+
+    // Invalid State Modifier
+    &--invalid {
+      .mat-mdc-text-field-wrapper {
+        border-color: #f44336;
+      }
+    }
+
+    // Valid State Modifier
+    &--valid {
+      .mat-mdc-text-field-wrapper {
+        border-color: #4caf50;
+      }
+    }
+  }
+
+  // Form Actions Element
+  &__actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+
+    @media (max-width: 600px) {
+      flex-direction: column;
+      gap: 12px;
+    }
+  }
+
+  // Form Button Element
+  &__button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 120px;
+
+    @media (max-width: 600px) {
+      width: 100%;
+      justify-content: center;
+    }
+
+    // Disabled Button Modifier
+    &--disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    // Loading Button Modifier
+    &--loading {
+      opacity: 0.8;
+      pointer-events: none;
+    }
+  }
+}
+
+// Material Angular Components BEM Style
+.mat-stepper {
+  // Stepper Line Element
+  &__line {
+    border-top-color: rgba(0, 0, 0, 0.12);
+  }
+
+  // Stepper Header Element
+  &__header {
+    .mat-step-icon {
+      background-color: rgba(0, 0, 0, 0.54);
+
+      // Selected Icon Modifier
+      &--selected {
+        background-color: #1976d2;
+      }
+    }
+
+    .mat-step-label {
+      font-weight: 500;
+    }
+  }
+}
+
+// Material Form Field BEM Style
+.mat-form-field {
+  // Form Field Subscript Element
+  &__subscript {
+    margin-top: 4px;
+  }
+
+  // Form Field Error Element
+  &__error {
+    font-size: 12px;
+  }
+
+  // Form Field Invalid Modifier
+  &--invalid {
+    .mat-mdc-text-field-wrapper {
+      border-color: #f44336;
+    }
+  }
+
+  // Form Field Valid Modifier
+  &--valid {
+    .mat-mdc-text-field-wrapper {
+      border-color: #4caf50;
+    }
+  }
+}
+
+// Responsive breakpoints following BEM
+@media (max-width: 480px) {
+  .payment {
+    padding: 12px;
+
+    &__card {
+      mat-card-content {
+        padding: 16px;
+      }
+    }
+  }
+
+  .step-form {
+    padding: 16px 0;
+
+    &__title {
+      font-size: 18px;
+    }
+  }
+}

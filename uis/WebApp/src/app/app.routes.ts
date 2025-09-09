@@ -16,4 +16,9 @@ export const routes: Routes = [
     loadComponent: () =>
       import('@app/features/checkout/checkout.component').then((m) => m.CheckoutComponent),
   },
+  {
+    path: 'payment',
+    loadComponent: () =>
+      import('@app/features/payment/payment.component').then((m) => m.PaymentComponent),
+  },
 ];
