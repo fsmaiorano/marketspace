@@ -1,24 +1,23 @@
 import { MatCardModule } from '@angular/material/card';
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import {Catalog} from '@app/shared/models/catalog';
+import { Catalog } from '@app/shared/models/catalog';
 
 @Component({
   selector: 'app-card',
   imports: [MatCardModule, MatButtonModule],
   templateUrl: './card.component.html',
   styleUrl: './card.component.scss',
-  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CardComponent {
-  @Input() catalog: Catalog | null = null;
-  @Output() addToCart = new EventEmitter<Catalog>();
-
-  constructor() {}
+  catalog = input<Catalog | null>(null);
+  addToCart = output<Catalog>();
 
   onAddToCart(): void {
-    if (this.catalog) {
-      this.addToCart.emit(this.catalog);
+    const catalogValue = this.catalog();
+    if (catalogValue) {
+      this.addToCart.emit(catalogValue);
     }
   }
 }
