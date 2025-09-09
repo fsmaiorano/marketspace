@@ -1,14 +1,14 @@
-import {Injectable, computed, signal} from '@angular/core';
-import {Catalog} from '@app/shared/models/catalog';
-import {MarketSpaceService} from '@app/core/services/marketspace.service';
-import {CatalogItem} from '@app/shared/models/catalog-item';
+import { Injectable, computed, signal } from '@angular/core';
+import { Catalog } from '@app/shared/models/catalog';
+import { MarketSpaceService } from '@app/core/services/marketspace.service';
+import { CatalogItem } from '@app/shared/models/catalog-item';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MarketspaceStoreService {
-  constructor(private marketspaceService: MarketSpaceService) {
-  }
+  constructor(private marketspaceService: MarketSpaceService) {}
+  private _username = signal<string>('fsmaiorano');
 
   private _cartItems = signal<CatalogItem[]>([]);
 
@@ -19,22 +19,26 @@ export class MarketspaceStoreService {
   );
 
   totalPrice = computed(() =>
-    this._cartItems().reduce((total, item) => total + (item.price * item.quantity), 0)
+    this._cartItems().reduce((total, item) => total + item.price * item.quantity, 0)
   );
 
   itemCount = computed(() => this._cartItems().length);
 
   isEmpty = computed(() => this._cartItems().length === 0);
 
+  getUsername() {
+    return this._username.asReadonly();
+  }
+
   addToCart(catalog: Catalog, quantity: number = 1): void {
     const currentItems = this._cartItems();
-    const existingItemIndex = currentItems.findIndex(item => item.productId === catalog.id);
+    const existingItemIndex = currentItems.findIndex((item) => item.productId === catalog.id);
 
     if (existingItemIndex >= 0) {
       const updatedItems = [...currentItems];
       updatedItems[existingItemIndex] = {
         ...updatedItems[existingItemIndex],
-        quantity: updatedItems[existingItemIndex].quantity + quantity
+        quantity: updatedItems[existingItemIndex].quantity + quantity,
       };
       this._cartItems.set(updatedItems);
     } else {
@@ -49,7 +53,7 @@ export class MarketspaceStoreService {
   }
 
   removeFromCart(catalogId: string): void {
-    const filteredItems = this._cartItems().filter(item => item.productId !== catalogId);
+    const filteredItems = this._cartItems().filter((item) => item.productId !== catalogId);
     this._cartItems.set(filteredItems);
   }
 
@@ -60,13 +64,13 @@ export class MarketspaceStoreService {
     }
 
     const currentItems = this._cartItems();
-    const itemIndex = currentItems.findIndex(item => item.productId === catalogId);
+    const itemIndex = currentItems.findIndex((item) => item.productId === catalogId);
 
     if (itemIndex >= 0) {
       const updatedItems = [...currentItems];
       updatedItems[itemIndex] = {
         ...updatedItems[itemIndex],
-        quantity
+        quantity,
       };
       this._cartItems.set(updatedItems);
     }
@@ -74,7 +78,7 @@ export class MarketspaceStoreService {
 
   decreaseQuantity(catalogId: string): void {
     const currentItems = this._cartItems();
-    const item = currentItems.find(item => item.productId === catalogId);
+    const item = currentItems.find((item) => item.productId === catalogId);
 
     if (item) {
       this.updateQuantity(catalogId, item.quantity - 1);
@@ -83,7 +87,7 @@ export class MarketspaceStoreService {
 
   increaseQuantity(catalogId: string): void {
     const currentItems = this._cartItems();
-    const item = currentItems.find(item => item.productId === catalogId);
+    const item = currentItems.find((item) => item.productId === catalogId);
 
     if (item) {
       this.updateQuantity(catalogId, item.quantity + 1);
@@ -99,11 +103,11 @@ export class MarketspaceStoreService {
   }
 
   getCartItem(catalogId: string): CatalogItem | undefined {
-    return this._cartItems().find(item => item.productId === catalogId);
+    return this._cartItems().find((item) => item.productId === catalogId);
   }
 
   isInCart(catalogId: string): boolean {
-    return this._cartItems().some(item => item.productId === catalogId);
+    return this._cartItems().some((item) => item.productId === catalogId);
   }
 
   getItemQuantity(catalogId: string): number {
@@ -111,7 +115,7 @@ export class MarketspaceStoreService {
     return item ? item.quantity : 0;
   }
 
-  getCartTotal() : number {
+  getCartTotal(): number {
     return this.totalPrice();
   }
 }

@@ -10,8 +10,11 @@ import { MaterialModule } from '@app/shared/material.module';
 import { CatalogItem } from '@app/shared/models/catalog-item';
 import { ShoppingCart } from '@app/shared/models/shopping-cart';
 import { MarketspaceStoreService } from '@app/core/store/marketspace.store.service';
-import {Router} from '@angular/router';
-import {DecimalPipe} from '@angular/common';
+import { Router } from '@angular/router';
+import { DecimalPipe } from '@angular/common';
+import { MarketSpaceService } from '@app/core/services/marketspace.service';
+import { Result } from '@app/shared/models/result';
+import { CartHandlerResponse } from '@app/shared/models/cart-handler-response';
 
 @Component({
   selector: 'app-checkout',
@@ -23,6 +26,7 @@ import {DecimalPipe} from '@angular/common';
 export class CheckoutComponent implements OnInit {
   private router = inject(Router);
   private cartStore = inject(MarketspaceStoreService);
+  private marketSpaceService = inject(MarketSpaceService);
 
   cart = signal<ShoppingCart>({
     username: '',
@@ -30,6 +34,7 @@ export class CheckoutComponent implements OnInit {
     totalPrice: 0,
   });
 
+  username = computed(() => this.cart().username);
   cartItems = computed(() => this.cart().items);
   totalPrice = computed(() => this.cart().totalPrice);
   isEmpty = computed(() => this.cart().items.length === 0);
@@ -41,13 +46,15 @@ export class CheckoutComponent implements OnInit {
   private loadCartData() {
     const items = this.cartStore.getCartItems();
     const total = this.cartStore.getCartTotal();
-    const username = 'fsmaiorano';
+    const username = this.cartStore.getUsername();
 
     this.cart.set({
-      username: username,
+      username: username(),
       items: items,
       totalPrice: total,
     });
+
+    this.updateCart(username(), items);
   }
 
   increaseQuantity(item: CatalogItem) {
@@ -79,5 +86,20 @@ export class CheckoutComponent implements OnInit {
 
   trackByProductId(index: number, item: CatalogItem): string {
     return item.productId ?? '0';
+  }
+
+  updateCart(username: string, cartItems: CatalogItem[]) {
+    this.marketSpaceService.cartHandler({ username: username, items: cartItems }).subscribe({
+      next: (result: Result<CartHandlerResponse>) => {
+        if (result.isSuccess) {
+          console.log('Cart updated successfully:', result.data);
+        } else {
+          console.error('Failed to update cart:', result?.error);
+        }
+      },
+      error: (error: any) => {
+        console.error('Error updating cart:', error);
+      },
+    });
   }
 }
