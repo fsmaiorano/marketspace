@@ -78,6 +78,7 @@ export class CheckoutComponent implements OnInit {
 
   proceedToPayment() {
     console.log('Proceeding to payment with cart:', this.cart());
+    this.router.navigate(['/payment']);
   }
 
   async continueShopping() {
