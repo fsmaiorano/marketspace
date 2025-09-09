@@ -3,69 +3,69 @@
     <mat-card-content>
       <!-- Empty cart message -->
       @if (isEmpty()) {
-        <div class="empty-cart">
-          <mat-icon class="empty-cart-icon">shopping_cart</mat-icon>
-          <h3>Your cart is empty</h3>
-          <p>Add some products to get started!</p>
-          <button mat-raised-button color="primary" (click)="continueShopping()">
-            Continue Shopping
-          </button>
-        </div>
+      <div class="empty-cart">
+        <mat-icon class="empty-cart-icon">shopping_cart</mat-icon>
+        <h3>Your cart is empty</h3>
+        <p>Add some products to get started!</p>
+        <button mat-raised-button color="primary" (click)="continueShopping()">
+          Continue Shopping
+        </button>
+      </div>
       }
 
       <!-- Cart items -->
       @if (!isEmpty()) {
-        <div class="cart-items">
-          @for (item of cartItems(); track trackByProductId($index, item)) {
-            <mat-card class="cart-item-card">
-              <div class="cart-item">
-                <!-- Product image placeholder -->
-                <div class="product-image">
-                  <mat-icon>inventory_2</mat-icon>
-                </div>
+      <div class="cart-items">
+        @for (item of cartItems(); track trackByProductId($index, item)) {
+        <mat-card class="cart-item-card">
+          <div class="cart-item">
+            <!-- Product image placeholder -->
+            <div class="product-image">
+              <mat-icon>inventory_2</mat-icon>
+            </div>
 
-                <!-- Product details -->
-                <div class="product-details">
-                  <h4 class="product-name">{{ item.productName }}</h4>
-                  <p class="product-price">${{ item.price | number:'1.2-2' }}</p>
-                </div>
+            <!-- Product details -->
+            <div class="product-details">
+              <h4 class="product-name">{{ item.productName }}</h4>
+              <p class="product-price">${{ item.price | number : '1.2-2' }}</p>
+            </div>
 
-                <!-- Quantity controls -->
-                <div class="quantity-controls">
-                  <button
-                    mat-icon-button
-                    (click)="decreaseQuantity(item)"
-                    [disabled]="item.quantity <= 1"
-                    class="quantity-btn"
-                  >
-                    <mat-icon>remove</mat-icon>
-                  </button>
-                  <span class="quantity-display">{{ item.quantity }}</span>
-                  <button mat-icon-button (click)="increaseQuantity(item)" class="quantity-btn">
-                    <mat-icon>add</mat-icon>
-                  </button>
-                </div>
+            <!-- Quantity controls -->
+            <div class="quantity-controls">
+              <button
+                mat-icon-button
+                (click)="decreaseQuantity(item)"
+                [disabled]="item.quantity <= 1"
+                class="quantity-btn"
+              >
+                <mat-icon>remove</mat-icon>
+              </button>
+              <span class="quantity-display">{{ item.quantity }}</span>
+              <button mat-icon-button (click)="increaseQuantity(item)" class="quantity-btn">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
 
-                <!-- Item total -->
-                <div class="item-total">
-                  <p class="total-price">${{ getItemTotal(item) }}</p>
-                </div>
+            <!-- Item total -->
+            <div class="item-total">
+              <p class="total-price">${{ getItemTotal(item) | number : '1.2-2' }}</p>
+            </div>
 
-                <!-- Remove button -->
-                <div class="remove-item">
-                  <button
-                    mat-icon-button
-                    color="warn"
-                    (click)="removeItem(item)"
-                    matTooltip="Remove item"
-                  >
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </div>
-              </div>
-            </mat-card>
-          }
-        </div>
+            <!-- Remove button -->
+            <div class="remove-item">
+              <button
+                mat-icon-button
+                color="warn"
+                (click)="removeItem(item)"
+                matTooltip="Remove item"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        </mat-card>
+        }
+      </div>
       }
 
       <mat-divider></mat-divider>
@@ -74,7 +74,7 @@
       <div class="cart-summary">
         <div class="summary-row">
           <span class="summary-label">Subtotal:</span>
-          <span class="summary-value">${{ totalPrice() | number:'1.2-2'}}</span>
+          <span class="summary-value">${{ totalPrice() | number : '1.2-2' }}</span>
         </div>
         <div class="summary-row">
           <span class="summary-label">Shipping:</span>
@@ -82,12 +82,12 @@
         </div>
         <div class="summary-row">
           <span class="summary-label">Tax:</span>
-          <span class="summary-value">${{ totalPrice() | number:'1.2-2' }}</span>
+          <span class="summary-value">${{ totalPrice() | number : '1.2-2' }}</span>
         </div>
         <mat-divider></mat-divider>
         <div class="summary-row total-row">
           <span class="summary-label">Total:</span>
-          <span class="summary-value total-amount">${{ totalPrice() | number:'1.2-2' }}</span>
+          <span class="summary-value total-amount">${{ totalPrice() | number : '1.2-2' }}</span>
         </div>
       </div>
 
