@@ -10,6 +10,7 @@ import { MaterialModule } from '@app/shared/material.module';
 import { CatalogItem } from '@app/shared/models/catalog-item';
 import { ShoppingCart } from '@app/shared/models/shopping-cart';
 import { MarketspaceStoreService } from '@app/core/store/marketspace.store.service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-checkout',
@@ -19,6 +20,7 @@ import { MarketspaceStoreService } from '@app/core/store/marketspace.store.servi
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CheckoutComponent implements OnInit {
+  private router = inject(Router);
   private cartStore = inject(MarketspaceStoreService);
 
   cart = signal<ShoppingCart>({
@@ -70,8 +72,8 @@ export class CheckoutComponent implements OnInit {
     console.log('Proceeding to payment with cart:', this.cart());
   }
 
-  continueShopping() {
-    console.log('Continue shopping');
+  async continueShopping() {
+    await this.router.navigate(['/dashboard']);
   }
 
   trackByProductId(index: number, item: CatalogItem): string {
