@@ -11,11 +11,12 @@ import { CatalogItem } from '@app/shared/models/catalog-item';
 import { ShoppingCart } from '@app/shared/models/shopping-cart';
 import { MarketspaceStoreService } from '@app/core/store/marketspace.store.service';
 import {Router} from '@angular/router';
+import {DecimalPipe} from '@angular/common';
 
 @Component({
   selector: 'app-checkout',
   templateUrl: './checkout.component.html',
-  imports: [MaterialModule],
+  imports: [MaterialModule, DecimalPipe],
   styleUrls: ['./checkout.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
