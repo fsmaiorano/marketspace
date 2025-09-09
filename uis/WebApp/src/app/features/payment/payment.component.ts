@@ -1,4 +1,11 @@
-import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  computed,
+  ChangeDetectionStrategy,
+  ViewChild,
+} from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -6,7 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatStepperModule } from '@angular/material/stepper';
+import { MatStepperModule, MatStepper } from '@angular/material/stepper';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatDividerModule } from '@angular/material/divider';
 import { CommonModule } from '@angular/common';
@@ -34,8 +41,9 @@ import { CartCheckoutRequest } from '../../shared/models/cart-checkout-request';
 export class PaymentComponent {
   private readonly fb = inject(FormBuilder);
 
+  @ViewChild('stepper') stepper!: MatStepper;
+
   readonly isLoading = signal(false);
-  readonly currentStep = signal(0);
 
   readonly personalInfoForm: FormGroup;
   readonly shippingInfoForm: FormGroup;
@@ -108,15 +116,23 @@ export class PaymentComponent {
     });
   }
 
+  // Methods
   nextStep(): void {
-    if (this.currentStep() < 2) {
-      this.currentStep.set(this.currentStep() + 1);
+    if (this.stepper) {
+      this.stepper.next();
     }
   }
 
   previousStep(): void {
-    if (this.currentStep() > 0) {
-      this.currentStep.set(this.currentStep() - 1);
+    if (this.stepper) {
+      this.stepper.previous();
+    }
+  }
+
+  // Optional: Method to go to a specific step
+  goToStep(index: number): void {
+    if (this.stepper && index >= 0 && index < 3) {
+      this.stepper.selectedIndex = index;
     }
   }
 

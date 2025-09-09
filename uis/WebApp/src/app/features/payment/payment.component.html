@@ -11,7 +11,7 @@
     </mat-card-header>
 
     <mat-card-content>
-      <mat-stepper [selectedIndex]="currentStep()" orientation="horizontal" #stepper>
+      <mat-stepper orientation="horizontal" #stepper>
         <!-- Step 1: Personal Information -->
         <mat-step [stepControl]="personalInfoForm" label="Personal Info">
           <form [formGroup]="personalInfoForm" class="step-form">
