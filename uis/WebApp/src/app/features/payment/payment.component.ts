@@ -34,23 +34,19 @@ import { CartCheckoutRequest } from '../../shared/models/cart-checkout-request';
 export class PaymentComponent {
   private readonly fb = inject(FormBuilder);
 
-  // Signals for state management
   readonly isLoading = signal(false);
   readonly currentStep = signal(0);
 
-  // Form groups
   readonly personalInfoForm: FormGroup;
   readonly shippingInfoForm: FormGroup;
   readonly paymentInfoForm: FormGroup;
 
-  // Payment method options
   readonly paymentMethods = [
     { value: 1, label: 'Credit Card', icon: 'credit_card' },
     { value: 2, label: 'Debit Card', icon: 'payment' },
     { value: 3, label: 'PayPal', icon: 'account_balance_wallet' },
   ];
 
-  // Countries list (simplified)
   readonly countries = [
     'United States',
     'Canada',
@@ -62,7 +58,6 @@ export class PaymentComponent {
     'Japan',
   ];
 
-  // Computed properties
   readonly isFormValid = computed(() => {
     return (
       this.personalInfoForm?.valid && this.shippingInfoForm?.valid && this.paymentInfoForm?.valid
@@ -90,7 +85,6 @@ export class PaymentComponent {
   });
 
   constructor() {
-    // Initialize forms
     this.personalInfoForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
       firstName: ['', [Validators.required, Validators.minLength(2)]],
@@ -114,7 +108,6 @@ export class PaymentComponent {
     });
   }
 
-  // Methods
   nextStep(): void {
     if (this.currentStep() < 2) {
       this.currentStep.set(this.currentStep() + 1);
@@ -139,20 +132,16 @@ export class PaymentComponent {
       const request = this.checkoutRequest();
       console.log('Processing payment with request:', request);
 
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       console.log('Payment processed successfully');
-      // Here you would typically navigate to a success page or show a success message
     } catch (error) {
       console.error('Payment processing failed:', error);
-      // Handle error - show error message to user
     } finally {
       this.isLoading.set(false);
     }
   }
 
-  // Utility methods for form validation
   getErrorMessage(formGroup: FormGroup, fieldName: string): string {
     const field = formGroup.get(fieldName);
     if (field?.hasError('required')) {
