@@ -15,7 +15,7 @@ import {Router} from '@angular/router';
 })
 export class HeaderComponent {
   private router = inject(Router);
-  private cartStore = inject(MarketspaceStoreService);
+  public cartStore = inject(MarketspaceStoreService);
 
   async goToCheckout() {
     await this.router.navigate(['/checkout']);
