@@ -2,23 +2,27 @@
   <div class="dashboard__container">
     <!-- <h1 class="dashboard__title">Product Catalog</h1> -->
 
-    @if (isLoading$ | async) {
+    @if (isLoading()) {
     <div class="dashboard__loading">
       <p>Loading products...</p>
     </div>
     }
 
-    <div class="dashboard__grid" (scroll)="onScroll($event)">
-      @for (item of catalog; track item.id) {
+    <div class="dashboard__grid">
+      @for (item of catalog(); track item.id) {
       <app-card [catalog]="item" (addToCart)="onAddToCart($event)"></app-card>
       }
     </div>
 
-    @if ((isLoading$ | async) === false && (hasMoreData$ | async) === false && catalog.length > 0) {
+    @if (isLoadingMore()) {
+    <div class="dashboard__loading-more">
+      <p>Loading more products...</p>
+    </div>
+    } @if (!isLoading() && !hasMoreData() && catalog().length > 0) {
     <div class="dashboard__end-message">
       <p>You've reached the end of the catalog.</p>
     </div>
-    } @if (catalog.length === 0 && (isLoading$ | async) === false) {
+    } @if (catalog().length === 0 && !isLoading()) {
     <div class="dashboard__empty">
       <p>No products found.</p>
     </div>

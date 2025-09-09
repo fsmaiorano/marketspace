@@ -1,6 +1,4 @@
 import { Routes } from '@angular/router';
-import { DashboardComponent } from '@app/features/dashboard/dashboard.component';
-import {CheckoutComponent} from '@app/features/checkout/checkout.component';
 
 export const routes: Routes = [
   {
@@ -10,10 +8,12 @@ export const routes: Routes = [
   },
   {
     path: 'dashboard',
-    component: DashboardComponent,
+    loadComponent: () =>
+      import('@app/features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
   },
   {
     path: 'checkout',
-    component: CheckoutComponent,
+    loadComponent: () =>
+      import('@app/features/checkout/checkout.component').then((m) => m.CheckoutComponent),
   },
 ];

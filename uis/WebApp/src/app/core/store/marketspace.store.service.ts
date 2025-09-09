@@ -94,6 +94,10 @@ export class MarketspaceStoreService {
     this._cartItems.set([]);
   }
 
+  getCartItems(): CatalogItem[] {
+    return this._cartItems();
+  }
+
   getCartItem(catalogId: string): CatalogItem | undefined {
     return this._cartItems().find(item => item.productId === catalogId);
   }
@@ -105,5 +109,9 @@ export class MarketspaceStoreService {
   getItemQuantity(catalogId: string): number {
     const item = this.getCartItem(catalogId);
     return item ? item.quantity : 0;
+  }
+
+  getCartTotal() : number {
+    return this.totalPrice();
   }
 }

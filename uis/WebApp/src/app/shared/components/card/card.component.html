@@ -1,13 +1,18 @@
 <mat-card class="card" appearance="outlined">
   <mat-card-header class="card__header">
     <div mat-card-avatar class="card__header-avatar"></div>
-    <mat-card-title class="card__header-title">{{ catalog?.name }}</mat-card-title>
-    <!-- <mat-card-subtitle class="card__header-subtitle">{{ catalog?.name }}</mat-card-subtitle> -->
+    <mat-card-title class="card__header-title">{{ catalog()?.name }}</mat-card-title>
+    <!-- <mat-card-subtitle class="card__header-subtitle">{{ catalog()?.name }}</mat-card-subtitle> -->
   </mat-card-header>
-  <img mat-card-image class="card__image" src="{{ catalog?.imageUrl }}" alt="{{ catalog?.name }}" />
+  <img
+    mat-card-image
+    class="card__image"
+    src="{{ catalog()?.imageUrl }}"
+    alt="{{ catalog()?.name }}"
+  />
   <mat-card-content class="card__content">
     <p class="card__description">
-      {{ catalog?.description }}
+      {{ catalog()?.description }}
     </p>
   </mat-card-content>
   <mat-card-actions class="card__actions">

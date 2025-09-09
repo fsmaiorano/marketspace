@@ -1,10 +1,11 @@
 <mat-toolbar class="header">
   <div class="header__logo">
-    <span class="header__title">MarketSpace</span>
+    <span class="header__title" (click)="goToDashboard()">MarketSpace</span>
   </div>
   <div class="header__spacer"></div>
   <div class="header__actions">
     <button
+      (click)="goToCheckout()"
       mat-icon-button
       class="header__action-button"
       aria-label="Shopping Cart"
