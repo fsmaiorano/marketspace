@@ -79,15 +79,15 @@ for (int i = 0; i < createdMerchants.Count; i++)
     }
 }
 
-// Create basket
-IMongoDatabase basketDb = basketMongoClient.GetDatabase("BasketDb");
-IMongoCollection<ShoppingCartEntity>
-    shoppingCartCollection = basketDb.GetCollection<ShoppingCartEntity>("ShoppingCart");
-
-for (int i = 0; i < createdMerchants.Count; i++)
-{
-    ShoppingCartEntity shoppingCart =
-        BasketBuilder.CreateShoppingCartFaker(username: createdMerchants.ElementAt(i).Name);
-    createdShoppingCarts.Add(shoppingCart);
-    shoppingCartCollection.InsertMany(createdShoppingCarts);
-}
+// // Create basket
+// IMongoDatabase basketDb = basketMongoClient.GetDatabase("BasketDb");
+// IMongoCollection<ShoppingCartEntity>
+//     shoppingCartCollection = basketDb.GetCollection<ShoppingCartEntity>("ShoppingCart");
+//
+// for (int i = 0; i < createdMerchants.Count; i++)
+// {
+//     ShoppingCartEntity shoppingCart =
+//         BasketBuilder.CreateShoppingCartFaker(username: createdMerchants.ElementAt(i).Name);
+//     createdShoppingCarts.Add(shoppingCart);
+//     shoppingCartCollection.InsertMany(createdShoppingCarts);
+// }
