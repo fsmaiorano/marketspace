@@ -5,9 +5,29 @@
         <mat-icon>payment</mat-icon>
         Checkout
       </mat-card-title>
-      <mat-card-subtitle class="payment__card-header-subtitle"
-        >Complete your purchase</mat-card-subtitle
-      >
+      <mat-card-subtitle class="payment__card-header-subtitle">
+        Complete your purchase
+        <button
+          mat-stroked-button
+          color="accent"
+          class="payment__test-button"
+          (click)="populateTestData()"
+          matTooltip="Fill forms with test data to see saved data functionality"
+        >
+          <mat-icon>science</mat-icon>
+          Load Test Data
+        </button>
+        <button
+          mat-stroked-button
+          color="warn"
+          class="payment__debug-button"
+          (click)="debugFormStatus()"
+          matTooltip="Debug form validation status"
+        >
+          <mat-icon>bug_report</mat-icon>
+          Debug Forms
+        </button>
+      </mat-card-subtitle>
     </mat-card-header>
 
     <mat-card-content>
@@ -15,35 +35,56 @@
         <!-- Step 1: Personal Information -->
         <mat-step [stepControl]="personalInfoForm" label="Personal Info">
           <form [formGroup]="personalInfoForm" class="step-form">
-            <h3 class="step-form__title">Personal Information</h3>
+            <div class="step-form__header">
+              <h3 class="step-form__title">Personal Information</h3>
+              @if (hasPersonalData()) {
+              <div class="step-form__data-indicator">
+                <mat-icon class="step-form__data-icon">check_circle</mat-icon>
+                <span class="step-form__data-text">Saved data loaded</span>
+                <button
+                  mat-icon-button
+                  type="button"
+                  class="step-form__clear-button"
+                  (click)="clearPersonalInfoForm()"
+                  matTooltip="Clear saved data"
+                >
+                  <mat-icon>clear</mat-icon>
+                </button>
+              </div>
+              }
+            </div>
 
             <div class="step-form__row">
               <mat-form-field appearance="outline" class="step-form__field step-form__field--full">
                 <mat-label>Username</mat-label>
                 <input matInput formControlName="username" placeholder="Enter your username" />
                 <mat-icon matSuffix>person</mat-icon>
-                @if (isFieldInvalid(personalInfoForm, 'username')) {
-                <mat-error>{{ getErrorMessage(personalInfoForm, 'username') }}</mat-error>
-                }
               </mat-form-field>
             </div>
+            @if (personalInfoForm.get('username')?.invalid) {
+            <div class="error-message">{{ getErrorMessage(personalInfoForm, 'username') }}</div>
+            }
 
             <div class="step-form__row">
-              <mat-form-field appearance="outline" class="step-form__field step-form__field--half">
-                <mat-label>First Name</mat-label>
-                <input matInput formControlName="firstName" placeholder="Enter first name" />
-                @if (isFieldInvalid(personalInfoForm, 'firstName')) {
-                <mat-error>{{ getErrorMessage(personalInfoForm, 'firstName') }}</mat-error>
+              <div class="step-form__field step-form__field--half">
+                <mat-form-field appearance="outline" class="step-form__field step-form__field--half">
+                  <mat-label>First Name</mat-label>
+                  <input matInput formControlName="firstName" placeholder="Enter first name" />
+                </mat-form-field>
+                @if (personalInfoForm.get('firstName')?.invalid) {
+                <div class="error-message">{{ getErrorMessage(personalInfoForm, 'firstName') }}</div>
                 }
-              </mat-form-field>
+              </div>
 
-              <mat-form-field appearance="outline" class="step-form__field step-form__field--half">
-                <mat-label>Last Name</mat-label>
-                <input matInput formControlName="lastName" placeholder="Enter last name" />
-                @if (isFieldInvalid(personalInfoForm, 'lastName')) {
-                <mat-error>{{ getErrorMessage(personalInfoForm, 'lastName') }}</mat-error>
+              <div class="step-form__field step-form__field--half">
+                <mat-form-field appearance="outline" class="step-form__field step-form__field--half">
+                  <mat-label>Last Name</mat-label>
+                  <input matInput formControlName="lastName" placeholder="Enter last name" />
+                </mat-form-field>
+                @if (personalInfoForm.get('lastName')?.invalid) {
+                <div class="error-message">{{ getErrorMessage(personalInfoForm, 'lastName') }}</div>
                 }
-              </mat-form-field>
+              </div>
             </div>
 
             <div class="step-form__row">
@@ -56,11 +97,11 @@
                   placeholder="Enter your email"
                 />
                 <mat-icon matSuffix>email</mat-icon>
-                @if (isFieldInvalid(personalInfoForm, 'emailAddress')) {
-                <mat-error>{{ getErrorMessage(personalInfoForm, 'emailAddress') }}</mat-error>
-                }
               </mat-form-field>
             </div>
+            @if (personalInfoForm.get('emailAddress')?.invalid) {
+            <div class="error-message">{{ getErrorMessage(personalInfoForm, 'emailAddress') }}</div>
+            }
 
             <div class="step-form__actions">
               <div></div>
@@ -83,7 +124,24 @@
         <!-- Step 2: Shipping Information -->
         <mat-step [stepControl]="shippingInfoForm" label="Shipping">
           <form [formGroup]="shippingInfoForm" class="step-form">
-            <h3 class="step-form__title">Shipping Information</h3>
+            <div class="step-form__header">
+              <h3 class="step-form__title">Shipping Information</h3>
+              @if (hasShippingData()) {
+              <div class="step-form__data-indicator">
+                <mat-icon class="step-form__data-icon">check_circle</mat-icon>
+                <span class="step-form__data-text">Saved data loaded</span>
+                <button
+                  mat-icon-button
+                  type="button"
+                  class="step-form__clear-button"
+                  (click)="clearShippingInfoForm()"
+                  matTooltip="Clear saved data"
+                >
+                  <mat-icon>clear</mat-icon>
+                </button>
+              </div>
+              }
+            </div>
 
             <div class="step-form__row">
               <mat-form-field appearance="outline" class="step-form__field step-form__field--full">
@@ -94,46 +152,52 @@
                   placeholder="Enter your full address"
                 />
                 <mat-icon matSuffix>home</mat-icon>
-                @if (isFieldInvalid(shippingInfoForm, 'addressLine')) {
-                <mat-error>{{ getErrorMessage(shippingInfoForm, 'addressLine') }}</mat-error>
-                }
               </mat-form-field>
             </div>
+            @if (shippingInfoForm.get('addressLine')?.invalid) {
+            <div class="error-message">{{ getErrorMessage(shippingInfoForm, 'addressLine') }}</div>
+            }
 
             <div class="step-form__row">
-              <mat-form-field appearance="outline" class="step-form__field step-form__field--half">
-                <mat-label>Country</mat-label>
-                <mat-select formControlName="country">
-                  @for (country of countries; track country) {
-                  <mat-option [value]="country">{{ country }}</mat-option>
-                  }
-                </mat-select>
-                @if (isFieldInvalid(shippingInfoForm, 'country')) {
-                <mat-error>{{ getErrorMessage(shippingInfoForm, 'country') }}</mat-error>
+              <div class="step-form__field step-form__field--half">
+                <mat-form-field appearance="outline" class="step-form__field step-form__field--half">
+                  <mat-label>Country</mat-label>
+                  <mat-select formControlName="country">
+                    @for (country of countries; track country) {
+                    <mat-option [value]="country">{{ country }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                @if (shippingInfoForm.get('country')?.invalid) {
+                <div class="error-message">{{ getErrorMessage(shippingInfoForm, 'country') }}</div>
                 }
-              </mat-form-field>
+              </div>
 
-              <mat-form-field
-                appearance="outline"
-                class="step-form__field step-form__field--quarter"
-              >
-                <mat-label>State</mat-label>
-                <input matInput formControlName="state" placeholder="State" />
-                @if (isFieldInvalid(shippingInfoForm, 'state')) {
-                <mat-error>{{ getErrorMessage(shippingInfoForm, 'state') }}</mat-error>
+              <div class="step-form__field step-form__field--quarter">
+                <mat-form-field
+                  appearance="outline"
+                  class="step-form__field step-form__field--quarter"
+                >
+                  <mat-label>State</mat-label>
+                  <input matInput formControlName="state" placeholder="State" />
+                </mat-form-field>
+                @if (shippingInfoForm.get('state')?.invalid) {
+                <div class="error-message">{{ getErrorMessage(shippingInfoForm, 'state') }}</div>
                 }
-              </mat-form-field>
+              </div>
 
-              <mat-form-field
-                appearance="outline"
-                class="step-form__field step-form__field--quarter"
-              >
-                <mat-label>ZIP Code</mat-label>
-                <input matInput formControlName="zipCode" placeholder="12345" />
-                @if (isFieldInvalid(shippingInfoForm, 'zipCode')) {
-                <mat-error>{{ getErrorMessage(shippingInfoForm, 'zipCode') }}</mat-error>
+              <div class="step-form__field step-form__field--quarter">
+                <mat-form-field
+                  appearance="outline"
+                  class="step-form__field step-form__field--quarter"
+                >
+                  <mat-label>ZIP Code</mat-label>
+                  <input matInput formControlName="zipCode" placeholder="12345" />
+                </mat-form-field>
+                @if (shippingInfoForm.get('zipCode')?.invalid) {
+                <div class="error-message">{{ getErrorMessage(shippingInfoForm, 'zipCode') }}</div>
                 }
-              </mat-form-field>
+              </div>
             </div>
 
             <div class="step-form__actions">
@@ -165,7 +229,24 @@
         <!-- Step 3: Payment Information -->
         <mat-step [stepControl]="paymentInfoForm" label="Payment">
           <form [formGroup]="paymentInfoForm" class="step-form">
-            <h3 class="step-form__title">Payment Information</h3>
+            <div class="step-form__header">
+              <h3 class="step-form__title">Payment Information</h3>
+              @if (hasPaymentData()) {
+              <div class="step-form__data-indicator">
+                <mat-icon class="step-form__data-icon">check_circle</mat-icon>
+                <span class="step-form__data-text">Saved data loaded</span>
+                <button
+                  mat-icon-button
+                  type="button"
+                  class="step-form__clear-button"
+                  (click)="clearPaymentInfoForm()"
+                  matTooltip="Clear saved data"
+                >
+                  <mat-icon>clear</mat-icon>
+                </button>
+              </div>
+              }
+            </div>
 
             <!-- Payment Method Selection -->
             <div class="step-form__row">
@@ -190,11 +271,11 @@
                 <mat-label>Name on Card</mat-label>
                 <input matInput formControlName="cardName" placeholder="Enter cardholder name" />
                 <mat-icon matSuffix>person</mat-icon>
-                @if (isFieldInvalid(paymentInfoForm, 'cardName')) {
-                <mat-error>{{ getErrorMessage(paymentInfoForm, 'cardName') }}</mat-error>
-                }
               </mat-form-field>
             </div>
+            @if (paymentInfoForm.get('cardName')?.invalid) {
+            <div class="error-message">{{ getErrorMessage(paymentInfoForm, 'cardName') }}</div>
+            }
 
             <div class="step-form__row">
               <mat-form-field appearance="outline" class="step-form__field step-form__field--full">
@@ -207,45 +288,49 @@
                   placeholder="1234567890123456"
                 />
                 <mat-icon matSuffix>credit_card</mat-icon>
-                @if (isFieldInvalid(paymentInfoForm, 'cardNumber')) {
-                <mat-error>{{ getErrorMessage(paymentInfoForm, 'cardNumber') }}</mat-error>
-                }
               </mat-form-field>
             </div>
+            @if (paymentInfoForm.get('cardNumber')?.invalid) {
+            <div class="error-message">{{ getErrorMessage(paymentInfoForm, 'cardNumber') }}</div>
+            }
 
             <div class="step-form__row">
-              <mat-form-field appearance="outline" class="step-form__field step-form__field--half">
-                <mat-label>Expiration (MM/YY)</mat-label>
-                <input
-                  matInput
-                  type="text"
-                  maxlength="5"
-                  formControlName="expiration"
-                  placeholder="12/25"
-                />
-                <mat-icon matSuffix>date_range</mat-icon>
-                @if (isFieldInvalid(paymentInfoForm, 'expiration')) {
-                <mat-error>{{ getErrorMessage(paymentInfoForm, 'expiration') }}</mat-error>
+              <div class="step-form__field step-form__field--half">
+                <mat-form-field appearance="outline" class="step-form__field step-form__field--half">
+                  <mat-label>Expiration (MM/YY)</mat-label>
+                  <input
+                    matInput
+                    type="text"
+                    maxlength="5"
+                    formControlName="expiration"
+                    placeholder="12/25"
+                  />
+                  <mat-icon matSuffix>date_range</mat-icon>
+                </mat-form-field>
+                @if (paymentInfoForm.get('expiration')?.invalid) {
+                <div class="error-message">{{ getErrorMessage(paymentInfoForm, 'expiration') }}</div>
                 }
-              </mat-form-field>
+              </div>
 
-              <mat-form-field
-                appearance="outline"
-                class="step-form__field step-form__field--half step-form__field--cvv"
-              >
-                <mat-label>CVV</mat-label>
-                <input
-                  matInput
-                  type="password"
-                  maxlength="4"
-                  formControlName="cvv"
-                  placeholder="123"
-                />
-                <mat-icon matSuffix>security</mat-icon>
-                @if (isFieldInvalid(paymentInfoForm, 'cvv')) {
-                <mat-error>{{ getErrorMessage(paymentInfoForm, 'cvv') }}</mat-error>
+              <div class="step-form__field step-form__field--half step-form__field--cvv">
+                <mat-form-field
+                  appearance="outline"
+                  class="step-form__field step-form__field--half step-form__field--cvv"
+                >
+                  <mat-label>CVV</mat-label>
+                  <input
+                    matInput
+                    type="password"
+                    maxlength="4"
+                    formControlName="cvv"
+                    placeholder="123"
+                  />
+                  <mat-icon matSuffix>security</mat-icon>
+                </mat-form-field>
+                @if (paymentInfoForm.get('cvv')?.invalid) {
+                <div class="error-message">{{ getErrorMessage(paymentInfoForm, 'cvv') }}</div>
                 }
-              </mat-form-field>
+              </div>
             </div>
 
             <div class="step-form__actions">
@@ -263,9 +348,9 @@
                 type="button"
                 color="primary"
                 class="step-form__button"
-                [class.step-form__button--disabled]="!isFormValid() || isLoading()"
+                [class.step-form__button--disabled]="!formsValidSignal() || isLoading()"
                 [class.step-form__button--loading]="isLoading()"
-                [disabled]="!isFormValid() || isLoading()"
+                [disabled]="!formsValidSignal() || isLoading()"
                 (click)="processPayment()"
               >
                 @if (isLoading()) {
