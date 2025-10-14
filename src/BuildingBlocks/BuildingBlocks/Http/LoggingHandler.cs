@@ -11,15 +11,8 @@ public class LoggingHandler(ILogger<LoggingHandler> logger) : DelegatingHandler
         {
             logger.LogInformation("Sending request to {Url}", request.RequestUri);
 
-            var response = await base.SendAsync(request, cancellationToken);
+            HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
             logger.LogInformation("Received response with status code {StatusCode}", response.StatusCode);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                logger.LogWarning("Request to {Url} failed with status code {StatusCode}", request.RequestUri,
-                    response.StatusCode);
-            }
-
             return response;
         }
         catch (Exception ex)

@@ -2,21 +2,29 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using Serilog.Context;
 using System.Diagnostics;
+using BuildingBlocks.Services.Correlation;
 
 namespace BuildingBlocks.Middlewares;
 
 public class CorrelationIdMiddleware(RequestDelegate next)
 {
     private const string CorrelationIdHeader = "X-Correlation-ID";
-    private const string CorrelationIdItemKey = "CorrelationId"; // unify with service expectation
 
-    public async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync(HttpContext context, ICorrelationIdService correlationIdService)
     {
-        if (!context.Request.Headers.TryGetValue(CorrelationIdHeader, out StringValues correlationId))
+        string correlationId;
+
+        if (!context.Request.Headers.TryGetValue(CorrelationIdHeader, out StringValues correlationIdHeader))
         {
             correlationId = Guid.CreateVersion7().ToString();
             context.Request.Headers[CorrelationIdHeader] = correlationId;
         }
+        else
+        {
+            correlationId = correlationIdHeader.ToString();
+        }
+
+        correlationIdService.SetCorrelationId(correlationId);
 
         context.Response.OnStarting(() =>
         {
@@ -24,20 +32,14 @@ public class CorrelationIdMiddleware(RequestDelegate next)
             return Task.CompletedTask;
         });
 
-        // Store under both the header key and simplified key for service retrieval
-        context.Items[CorrelationIdHeader] = correlationId;
-        context.Items[CorrelationIdItemKey] = correlationId.ToString();
-
-        // Propagate into current activity (trace) if present
-        var activity = Activity.Current;
+        Activity? activity = Activity.Current;
         if (activity != null)
         {
-            activity.SetTag("correlation.id", correlationId.ToString());
-            activity.AddBaggage("CorrelationId", correlationId.ToString());
+            activity.SetTag("correlation.id", correlationId);
+            activity.AddBaggage("CorrelationId", correlationId);
         }
 
-        // Push CorrelationId into Serilog LogContext for automatic enrichment
-        using (LogContext.PushProperty("CorrelationId", correlationId.ToString()))
+        using (LogContext.PushProperty("CorrelationId", correlationId))
         {
             await next(context);
         }

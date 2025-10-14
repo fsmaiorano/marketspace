@@ -11,7 +11,6 @@ public abstract class HttpHelper(HttpClient httpClient)
     {
         ChangeRequestCulture(httpClient, culture);
         AuthorizeRequest(httpClient, token);
-        AddCorrelationId(httpClient, Guid.CreateVersion7().ToString());
         return await httpClient.PostAsJsonAsync(method, request);
     }
 
@@ -19,7 +18,6 @@ public abstract class HttpHelper(HttpClient httpClient)
     {
         ChangeRequestCulture(httpClient, culture);
         AuthorizeRequest(httpClient, token);
-        AddCorrelationId(httpClient, Guid.CreateVersion7().ToString());
         return await httpClient.GetAsync(method);
     }
 
@@ -28,7 +26,6 @@ public abstract class HttpHelper(HttpClient httpClient)
     {
         ChangeRequestCulture(httpClient, culture);
         AuthorizeRequest(httpClient, token);
-        AddCorrelationId(httpClient, Guid.CreateVersion7().ToString());
         return await httpClient.PutAsJsonAsync(method, request);
     }
 
@@ -37,7 +34,6 @@ public abstract class HttpHelper(HttpClient httpClient)
     {
         ChangeRequestCulture(httpClient, culture);
         AuthorizeRequest(httpClient, token);
-        AddCorrelationId(httpClient, Guid.CreateVersion7().ToString());
         return await httpClient.PatchAsJsonAsync(method, request);
     }
 
@@ -45,7 +41,6 @@ public abstract class HttpHelper(HttpClient httpClient)
     {
         ChangeRequestCulture(httpClient, culture);
         AuthorizeRequest(httpClient, token);
-        AddCorrelationId(httpClient, Guid.CreateVersion7().ToString());
 
         httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -57,7 +52,6 @@ public abstract class HttpHelper(HttpClient httpClient)
     {
         ChangeRequestCulture(httpClient, culture);
         AuthorizeRequest(httpClient, token);
-        AddCorrelationId(httpClient, Guid.CreateVersion7().ToString());
 
         var multipartContent = new MultipartFormDataContent();
         var requestProperties = request.GetType().GetProperties().ToList();
@@ -102,13 +96,6 @@ public abstract class HttpHelper(HttpClient httpClient)
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
-    private static void AddCorrelationId(HttpClient client, string correlationId)
-    {
-        if (client.DefaultRequestHeaders.Contains("Correlation-Id"))
-            client.DefaultRequestHeaders.Remove("Correlation-Id");
-
-        client.DefaultRequestHeaders.Add("Correlation-Id", correlationId);
-    }
 
     private static void AddListToMultipartContent(MultipartFormDataContent multipartContent, string propertyName,
         IList list)
