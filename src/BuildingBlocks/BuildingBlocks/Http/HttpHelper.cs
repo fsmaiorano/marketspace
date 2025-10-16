@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Reflection;
 
 namespace BuildingBlocks.Http;
 
@@ -41,9 +42,7 @@ public abstract class HttpHelper(HttpClient httpClient)
     {
         ChangeRequestCulture(httpClient, culture);
         AuthorizeRequest(httpClient, token);
-
         httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
         return await httpClient.DeleteAsync(method);
     }
 
@@ -53,23 +52,18 @@ public abstract class HttpHelper(HttpClient httpClient)
         ChangeRequestCulture(httpClient, culture);
         AuthorizeRequest(httpClient, token);
 
-        var multipartContent = new MultipartFormDataContent();
-        var requestProperties = request.GetType().GetProperties().ToList();
+        MultipartFormDataContent multipartContent = new MultipartFormDataContent();
+        List<PropertyInfo> requestProperties = request.GetType().GetProperties().ToList();
 
-        foreach (var property in requestProperties)
+        foreach (PropertyInfo property in requestProperties)
         {
-            var propertyValue = property.GetValue(request);
+            object? propertyValue = property.GetValue(request);
             if (string.IsNullOrWhiteSpace(propertyValue?.ToString()))
                 continue;
-
             if (propertyValue is IList list)
-            {
                 AddListToMultipartContent(multipartContent, property.Name, list);
-            }
             else
-            {
                 multipartContent.Add(new StringContent(propertyValue.ToString()!), property.Name);
-            }
         }
 
         return await httpClient.PostAsync(method, multipartContent);
@@ -100,33 +94,26 @@ public abstract class HttpHelper(HttpClient httpClient)
     private static void AddListToMultipartContent(MultipartFormDataContent multipartContent, string propertyName,
         IList list)
     {
-        var itemType = list.GetType().GetGenericArguments().Single();
+        Type itemType = list.GetType().GetGenericArguments().Single();
 
         if (itemType.IsClass && itemType != typeof(string))
-        {
             AddClassListToMultipartContent(multipartContent, propertyName, list);
-        }
         else
-        {
-            foreach (var item in list)
-            {
+            foreach (object? item in list)
                 multipartContent.Add(new StringContent(item.ToString()!), propertyName);
-            }
-        }
     }
 
     private static void AddClassListToMultipartContent(MultipartFormDataContent multipartContent, string propertyName,
         IList list)
     {
-        var index = 0;
+        int index = 0;
 
-        foreach (var item in list)
+        foreach (object? item in list)
         {
-            var classPropertiesInfo = item.GetType().GetProperties().ToList();
-
-            foreach (var prop in classPropertiesInfo)
+            List<PropertyInfo> classPropertiesInfo = item.GetType().GetProperties().ToList();
+            foreach (PropertyInfo prop in classPropertiesInfo)
             {
-                var value = prop.GetValue(item, null);
+                object? value = prop.GetValue(item, null);
                 multipartContent.Add(new StringContent(value!.ToString()!), $"{propertyName}[{index}][{prop.Name}]");
             }
 

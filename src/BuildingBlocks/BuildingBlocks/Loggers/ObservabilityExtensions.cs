@@ -147,19 +147,20 @@ public static class ObservabilityExtensions
                 restrictedToMinimumLevel: LogEventLevel.Information
             );
         }
-
+        
         if (opts.EnableLoki && !string.IsNullOrWhiteSpace(opts.LokiUrl))
         {
-            var lokiLabels = new List<LokiLabel>
-            {
+            List<LokiLabel> lokiLabels =
+            [
                 new() { Key = "service", Value = opts.ServiceName },
                 new()
                 {
                     Key = "environment",
                     Value = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"
                 },
+
                 new() { Key = "version", Value = opts.ServiceVersion ?? "1.0.0" }
-            };
+            ];
 
             loggerConfig.WriteTo.GrafanaLoki(
                 uri: opts.LokiUrl,

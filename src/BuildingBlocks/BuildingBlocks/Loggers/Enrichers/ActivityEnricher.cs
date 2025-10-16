@@ -10,10 +10,8 @@ public sealed class ActivityEnricher : ILogEventEnricher
     {
         Activity? activity = Activity.Current;
         if (activity == null) return;
-
         if (activity.TraceId != default)
             logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty("TraceId", activity.TraceId.ToString()));
-
         if (activity.SpanId != default)
             logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty("SpanId", activity.SpanId.ToString()));
     }

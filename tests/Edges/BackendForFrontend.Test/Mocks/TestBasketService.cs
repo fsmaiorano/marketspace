@@ -3,7 +3,6 @@ using BackendForFrontend.Api.Basket.Dtos;
 using Basket.Api.Application.Basket.CreateBasket;
 using Basket.Api.Application.Basket.DeleteBasket;
 using Basket.Api.Application.Basket.GetBasketById;
-using Basket.Api.Application.Dto;
 using Builder;
 using BuildingBlocks;
 using Microsoft.Extensions.Logging;
