@@ -14,8 +14,6 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Containers;
 using Merchant.Api.Infrastructure.Data;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Mongo2Go;
@@ -28,6 +26,7 @@ using BackendForFrontend.Api.Order.Services;
 using Merchant.Test.Api;
 using BackendForFrontend.Test.Mocks;
 using BuildingBlocks.Storage.Minio;
+using BuildingBlocks.Loggers.Abstractions;
 using Minio;
 
 namespace BackendForFrontend.Test.Api;
@@ -128,26 +127,30 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
 
             services.AddScoped<IMerchantService>(provider =>
             {
-                ILogger<TestMerchantService> logger = provider.GetRequiredService<ILogger<TestMerchantService>>();
-                return new TestMerchantService(_merchantApiClient, logger);
+                IApplicationLogger<TestMerchantService> applicationLogger = provider.GetRequiredService<IApplicationLogger<TestMerchantService>>();
+                IBusinessLogger<TestMerchantService> businessLogger = provider.GetRequiredService<IBusinessLogger<TestMerchantService>>();
+                return new TestMerchantService(_merchantApiClient, applicationLogger, businessLogger);
             });
 
             services.AddScoped<IBasketService>(provider =>
             {
-                ILogger<TestBasketService> logger = provider.GetRequiredService<ILogger<TestBasketService>>();
-                return new TestBasketService(_basketApiClient!, logger);
+                IApplicationLogger<TestBasketService> applicationLogger = provider.GetRequiredService<IApplicationLogger<TestBasketService>>();
+                IBusinessLogger<TestBasketService> businessLogger = provider.GetRequiredService<IBusinessLogger<TestBasketService>>();
+                return new TestBasketService(_basketApiClient!, applicationLogger, businessLogger);
             });
 
             services.AddScoped<ICatalogService>(provider =>
             {
-                ILogger<TestCatalogService> logger = provider.GetRequiredService<ILogger<TestCatalogService>>();
-                return new TestCatalogService(_catalogApiClient, logger);
+                IApplicationLogger<TestCatalogService> applicationLogger = provider.GetRequiredService<IApplicationLogger<TestCatalogService>>();
+                IBusinessLogger<TestCatalogService> businessLogger = provider.GetRequiredService<IBusinessLogger<TestCatalogService>>();
+                return new TestCatalogService(_catalogApiClient, applicationLogger, businessLogger);
             });
 
             services.AddScoped<IOrderService>(provider =>
             {
-                ILogger<TestOrderService> logger = provider.GetRequiredService<ILogger<TestOrderService>>();
-                return new TestOrderService(_orderApiClient, logger);
+                IApplicationLogger<TestOrderService> applicationLogger = provider.GetRequiredService<IApplicationLogger<TestOrderService>>();
+                IBusinessLogger<TestOrderService> businessLogger = provider.GetRequiredService<IBusinessLogger<TestOrderService>>();
+                return new TestOrderService(_orderApiClient, applicationLogger, businessLogger);
             });
         });
     }

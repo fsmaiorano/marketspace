@@ -7,7 +7,8 @@ public class CreateMerchantHandlerTest
     {
         MerchantEntity? merchant = MerchantBuilder.CreateMerchantFaker("").Generate();
         Mock<IMerchantRepository> repositoryMock = new();
-        Mock<ILogger<CreateMerchantHandler>> loggerMock = new();
+        Mock<IApplicationLogger<CreateMerchantHandler>> applicationLoggerMock = new();
+        Mock<IBusinessLogger<CreateMerchantHandler>> businessLoggerMock = new();
 
         repositoryMock
             .Setup(r => r.AddAsync(It.IsAny<MerchantEntity>(), It.IsAny<CancellationToken>()))
@@ -17,7 +18,7 @@ public class CreateMerchantHandlerTest
                 return 1;
             });
 
-        CreateMerchantHandler handler = new CreateMerchantHandler(repositoryMock.Object, loggerMock.Object);
+        CreateMerchantHandler handler = new CreateMerchantHandler(repositoryMock.Object, applicationLoggerMock.Object, businessLoggerMock.Object);
 
         CreateMerchantCommand command = MerchantBuilder.CreateCreateMerchantCommandFaker().Generate();
 

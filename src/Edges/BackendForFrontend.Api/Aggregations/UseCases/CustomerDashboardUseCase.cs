@@ -3,18 +3,20 @@ using BackendForFrontend.Api.Aggregations.Dtos;
 using BackendForFrontend.Api.Basket.Contracts;
 using BackendForFrontend.Api.Order.Contracts;
 using BackendForFrontend.Api.Catalog.Contracts;
+using BuildingBlocks.Loggers.Abstractions;
 
 namespace BackendForFrontend.Api.Aggregations.UseCases;
 
 public class CustomerDashboardUseCase(
-    ILogger<CustomerDashboardUseCase> logger,
+    IApplicationLogger<CustomerDashboardUseCase> applicationLogger,
+    IBusinessLogger<CustomerDashboardUseCase> businessLogger,
     IBasketService basketService,
     IOrderService orderService,
     ICatalogService catalogService) : ICustomerDashboardUseCase
 {
     public async Task<CustomerDashboardResponse> GetCustomerDashboardAsync(Guid customerId)
     {
-        logger.LogInformation("Aggregating customer dashboard data for customer: {CustomerId}", customerId);
+        applicationLogger.LogInformation("Aggregating customer dashboard data for customer: {CustomerId}", customerId);
 
         try
         {
@@ -36,7 +38,7 @@ public class CustomerDashboardUseCase(
                     }
                     catch (Exception ex)
                     {
-                        logger.LogWarning(ex, "Failed to get basket for customer {CustomerId}", customerId);
+                        applicationLogger.LogWarning(ex, "Failed to get basket for customer {CustomerId}", customerId);
                         return new CustomerBasketSummary();
                     }
                 }),
@@ -56,7 +58,7 @@ public class CustomerDashboardUseCase(
                     }
                     catch (Exception ex)
                     {
-                        logger.LogWarning(ex, "Failed to get orders for customer {CustomerId}", customerId);
+                        applicationLogger.LogWarning(ex, "Failed to get orders for customer {CustomerId}", customerId);
                         return new List<CustomerOrderSummary>();
                     }
                 }),
@@ -72,7 +74,7 @@ public class CustomerDashboardUseCase(
                     }
                     catch (Exception ex)
                     {
-                        logger.LogWarning(ex, "Failed to get catalog recommendations");
+                        applicationLogger.LogWarning(ex, "Failed to get catalog recommendations");
                         return new List<RecommendedProduct>();
                     }
                 })
@@ -92,12 +94,12 @@ public class CustomerDashboardUseCase(
                 RecommendedProducts = await recommendationsTask
             };
 
-            logger.LogInformation("Successfully aggregated dashboard data for customer: {CustomerId}", customerId);
+            businessLogger.LogInformation("Successfully aggregated dashboard data for customer: {CustomerId}", customerId);
             return dashboard;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to aggregate dashboard data for customer: {CustomerId}", customerId);
+            applicationLogger.LogError(ex, "Failed to aggregate dashboard data for customer: {CustomerId}", customerId);
             throw;
         }
     }

@@ -1,0 +1,67 @@
+using BuildingBlocks.Loggers.Abstractions;
+using Microsoft.Extensions.Logging;
+
+namespace BuildingBlocks.Loggers;
+
+public class BusinessLogger<T>(ILogger<T> logger) : IBusinessLogger<T>
+{
+    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+    {
+        logger.Log(logLevel, eventId, state, exception, formatter);
+    }
+
+    public bool IsEnabled(LogLevel logLevel)
+    {
+        return logger.IsEnabled(logLevel);
+    }
+
+    public IDisposable? BeginScope<TState>(TState state) where TState : notnull
+    {
+        return logger.BeginScope(state);
+    }
+
+    public void LogTrace(string message, params object[] args)
+    {
+        logger.LogTrace(message, args);
+    }
+
+    public void LogDebug(string message, params object[] args)
+    {
+        logger.LogDebug(message, args);
+    }
+
+    public void LogInformation(string message, params object[] args)
+    {
+        logger.LogInformation(message, args);
+    }
+
+    public void LogWarning(string message, params object[] args)
+    {
+        logger.LogWarning(message, args);
+    }
+
+    public void LogWarning(Exception exception, string message, params object[] args)
+    {
+        logger.LogWarning(exception, message, args);
+    }
+
+    public void LogError(string message, params object[] args)
+    {
+        logger.LogError(message, args);
+    }
+
+    public void LogError(Exception exception, string message, params object[] args)
+    {
+        logger.LogError(exception, message, args);
+    }
+
+    public void LogCritical(string message, params object[] args)
+    {
+        logger.LogCritical(message, args);
+    }
+
+    public void LogCritical(Exception exception, string message, params object[] args)
+    {
+        logger.LogCritical(exception, message, args);
+    }
+}

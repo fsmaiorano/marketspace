@@ -1,4 +1,5 @@
 using BuildingBlocks;
+using BuildingBlocks.Loggers.Abstractions;
 using BuildingBlocks.Pagination;
 using BuildingBlocks.Storage.Minio;
 using Catalog.Api.Application.Dtos;
@@ -9,12 +10,13 @@ namespace Catalog.Api.Application.Catalog.GetCatalog;
 
 public class GetCatalogHandler(
     ICatalogRepository repository,
-    ILogger<GetCatalogHandler> logger,
+    IApplicationLogger<GetCatalogHandler> applicationLogger,
+    IBusinessLogger<GetCatalogHandler> businessLogger,
     IMinioBucket minioBucket) : IGetCatalogHandler
 {
     public async Task<Result<GetCatalogResult>> HandleAsync(GetCatalogQuery query)
     {
-        logger.LogInformation("Handling {Query} with {@Pagination}", nameof(GetCatalogQuery), query.Pagination);
+        applicationLogger.LogInformation("Handling {Query} with {@Pagination}", nameof(GetCatalogQuery), query.Pagination);
 
         PaginatedResult<CatalogEntity> products = await repository.GetPaginatedListAsync(query.Pagination);
 
