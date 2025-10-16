@@ -1,5 +1,6 @@
 using BuildingBlocks.Loggers.Abstractions;
 using Microsoft.Extensions.Logging;
+using Serilog.Context;
 
 namespace BuildingBlocks.Loggers;
 
@@ -7,7 +8,10 @@ public class BusinessLogger<T>(ILogger<T> logger) : IBusinessLogger<T>
 {
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
-        logger.Log(logLevel, eventId, state, exception, formatter);
+        using (LogContext.PushProperty("LogType", "business"))
+        {
+            logger.Log(logLevel, eventId, state, exception, formatter);
+        }
     }
 
     public bool IsEnabled(LogLevel logLevel)
@@ -22,46 +26,73 @@ public class BusinessLogger<T>(ILogger<T> logger) : IBusinessLogger<T>
 
     public void LogTrace(string message, params object[] args)
     {
-        logger.LogTrace(message, args);
+        using (LogContext.PushProperty("LogType", "business"))
+        {
+            logger.LogTrace(message, args);
+        }
     }
 
     public void LogDebug(string message, params object[] args)
     {
-        logger.LogDebug(message, args);
+        using (LogContext.PushProperty("LogType", "business"))
+        {
+            logger.LogDebug(message, args);
+        }
     }
 
     public void LogInformation(string message, params object[] args)
     {
-        logger.LogInformation(message, args);
+        using (LogContext.PushProperty("LogType", "business"))
+        {
+            logger.LogInformation(message, args);
+        }
     }
 
     public void LogWarning(string message, params object[] args)
     {
-        logger.LogWarning(message, args);
+        using (LogContext.PushProperty("LogType", "business"))
+        {
+            logger.LogWarning(message, args);
+        }
     }
 
     public void LogWarning(Exception exception, string message, params object[] args)
     {
-        logger.LogWarning(exception, message, args);
+        using (LogContext.PushProperty("LogType", "business"))
+        {
+            logger.LogWarning(exception, message, args);
+        }
     }
 
     public void LogError(string message, params object[] args)
     {
-        logger.LogError(message, args);
+        using (LogContext.PushProperty("LogType", "business"))
+        {
+            logger.LogError(message, args);
+        }
     }
 
     public void LogError(Exception exception, string message, params object[] args)
     {
-        logger.LogError(exception, message, args);
+        using (LogContext.PushProperty("LogType", "business"))
+        {
+            logger.LogError(exception, message, args);
+        }
     }
 
     public void LogCritical(string message, params object[] args)
     {
-        logger.LogCritical(message, args);
+        using (LogContext.PushProperty("LogType", "business"))
+        {
+            logger.LogCritical(message, args);
+        }
     }
 
     public void LogCritical(Exception exception, string message, params object[] args)
     {
-        logger.LogCritical(exception, message, args);
+        using (LogContext.PushProperty("LogType", "business"))
+        {
+            logger.LogCritical(exception, message, args);
+        }
     }
 }

@@ -1,27 +1,41 @@
 services:
   keycloakdb:
     image: postgres:latest
+    networks:
+      - marketspace
 
   catalogdb:
     image: postgres:latest
+    networks:
+      - marketspace
   
   minio:
     image: minio/minio:latest
+    networks:
+      - marketspace
   
   basketdb:
     image: postgres:latest
+    networks:
+      - marketspace
 
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.3
+    networks:
+      - marketspace
   
   #  distributedcache:
   #    image: redis:latest
   
   orderdb:
     image: postgres:latest
+    networks:
+      - marketspace
 
   merchantdb:
     image: postgres:latest
+    networks:
+      - marketspace
   #
   #  messagebroker:
   #    image: rabbitmq:management
@@ -33,6 +47,8 @@ services:
     build:
       context: .
       dockerfile: ./src/Services/Catalog/Catalog.Api/Dockerfile
+    networks:
+      - marketspace
   
   basket.api:
     image: ${DOCKER_REGISTRY-}basketapi
@@ -41,6 +57,8 @@ services:
     build:
       context: .
       dockerfile: ./src/Services/Basket/Basket.Api/Dockerfile
+    networks:
+      - marketspace
   
   #  discount.grpc:
   #    image: ${DOCKER_REGISTRY-}discountgrpc
@@ -53,18 +71,24 @@ services:
     build:
       context: .
       dockerfile: ./src/Services/Order/Order.Api/Dockerfile
+    networks:
+      - marketspace
 
   merchant.api:
     image: ${DOCKER_REGISTRY-}merchantapi
     build:
       context: .
       dockerfile: ./src/Services/Merchant/Merchant.Api/Dockerfile
+    networks:
+      - marketspace
       
   backendforfrontend.api:
     image: ${DOCKER_REGISTRY-}backendforfrontendapi
     build:
       context: .
       dockerfile: ./src/Edges/BackendForFrontend.Api/Dockerfile
+    networks:
+      - marketspace
   #  
   #  gatewayapi:
   #    image: ${DOCKER_REGISTRY-}gatewayapi
@@ -81,18 +105,32 @@ services:
 
   otelcollector:
     image: otel/opentelemetry-collector-contrib:latest
+    networks:
+      - marketspace
   
   prometheus:
     image: prom/prometheus:latest
+    networks:
+      - marketspace
 
   loki:
     image: grafana/loki:latest
+    networks:
+      - marketspace
 
   jaeger:
     image: jaegertracing/all-in-one:latest
+    networks:
+      - marketspace
     
   grafana:
       image: grafana/grafana:latest
+      networks:
+        - marketspace
+
+networks:
+  marketspace:
+    driver: bridge
 
 volumes:
   postgres_catalog:
