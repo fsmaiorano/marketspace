@@ -9,10 +9,12 @@ public class MinioBucket(IMinioClient minioClient) : IMinioBucket
 
     public async Task<(string objectName, string objectUrl)> SendImageAsync(string imageUrl)
     {
+        SemaphoreSlim semaphore = new(1);
         string fileExtension = Path.GetExtension(imageUrl);
 
         try
         {
+            await semaphore.WaitAsync();
             if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out Uri? uri) ||
                 (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
             {
@@ -68,6 +70,10 @@ public class MinioBucket(IMinioClient minioClient) : IMinioBucket
         {
             Console.WriteLine($"Error: {e.Message}");
             return (string.Empty, string.Empty);
+        }
+        finally
+        {
+            semaphore.Release();
         }
     }
 
