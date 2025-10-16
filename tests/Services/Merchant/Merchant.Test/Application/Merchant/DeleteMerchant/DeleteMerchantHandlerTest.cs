@@ -9,13 +9,14 @@ public class DeleteMerchantHandlerTest
     {
         MerchantEntity? merchant = MerchantBuilder.CreateMerchantFaker("").Generate();
         Mock<IMerchantRepository> repositoryMock = new();
-        Mock<ILogger<DeleteMerchantHandler>> loggerMock = new();
+        Mock<IApplicationLogger<DeleteMerchantHandler>> applicationLoggerMock = new();
+        Mock<IBusinessLogger<DeleteMerchantHandler>> businessLoggerMock = new();
 
         repositoryMock
             .Setup(r => r.RemoveAsync(It.IsAny<MerchantId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(1);
 
-        DeleteMerchantHandler handler = new DeleteMerchantHandler(repositoryMock.Object, loggerMock.Object);
+        DeleteMerchantHandler handler = new DeleteMerchantHandler(repositoryMock.Object, applicationLoggerMock.Object, businessLoggerMock.Object);
 
         DeleteMerchantCommand command = MerchantBuilder.CreateDeleteMerchantCommandFaker().Generate();
 

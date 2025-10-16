@@ -14,6 +14,7 @@ using BuildingBlocks.Services.Correlation;
 using Serilog.Sinks.Grafana.Loki;
 using Prometheus;
 using System.Text;
+using BuildingBlocks.Loggers.Abstractions;
 
 namespace BuildingBlocks.Loggers;
 
@@ -136,9 +137,6 @@ public static class ObservabilityExtensions
             .Enrich.WithProperty("ServiceName", opts.ServiceName)
             .Enrich.WithProperty("ServiceVersion", opts.ServiceVersion ?? "1.0.0");
 
-        // Don't read from configuration to avoid conflicts - we'll configure everything here
-        // loggerConfig.ReadFrom.Configuration(configuration);
-
         if (opts.EnableSerilogConsole)
         {
             loggerConfig.WriteTo.Console(
@@ -178,6 +176,9 @@ public static class ObservabilityExtensions
             builder.ClearProviders();
             builder.AddSerilog(dispose: true);
         });
+
+        services.AddScoped(typeof(IApplicationLogger<>), typeof(ApplicationLogger<>));
+        services.AddScoped(typeof(IBusinessLogger<>), typeof(BusinessLogger<>));
 
         return services;
     }

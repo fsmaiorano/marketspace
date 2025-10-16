@@ -17,3 +17,4 @@ global using BuildingBlocks.Exceptions;
 global using System.Net.Http.Json;
 global using Xunit;
 global using BuildingBlocks.Loggers;
+global using BuildingBlocks.Loggers.Abstractions;

@@ -1,16 +1,23 @@
+using BuildingBlocks;
+using BuildingBlocks.Loggers.Abstractions;
 using Merchant.Api.Domain.Entities;
 using Merchant.Api.Domain.Repositories;
 using Merchant.Api.Domain.ValueObjects;
 
 namespace Merchant.Api.Application.Merchant.UpdateMerchant;
 
-public sealed class UpdateMerchantHandler(IMerchantRepository repository, ILogger<UpdateMerchantHandler> logger)
+public sealed class UpdateMerchantHandler(
+    IMerchantRepository repository, 
+    IApplicationLogger<UpdateMerchantHandler> applicationLogger,
+    IBusinessLogger<UpdateMerchantHandler> businessLogger)
     : IUpdateMerchantHandler
 {
     public async Task<Result<UpdateMerchantResult>> HandleAsync(UpdateMerchantCommand command)
     {
         try
         {
+            applicationLogger.LogInformation("Processing update merchant request for: {MerchantId}", command.Id);
+            
             MerchantEntity merchantEntity = MerchantEntity.Create(
                 command.Name,
                 command.Description,
@@ -21,13 +28,16 @@ public sealed class UpdateMerchantHandler(IMerchantRepository repository, ILogge
             merchantEntity.Id = MerchantId.Of(command.Id);
 
             await repository.UpdateAsync(merchantEntity);
-            logger.LogInformation("Catalog updated successfully: {MerchantId}", command.Id);
+            
+            businessLogger.LogInformation("Merchant updated successfully. MerchantId: {MerchantId}, Name: {Name}", 
+                command.Id, 
+                command.Name);
 
             return Result<UpdateMerchantResult>.Success(new UpdateMerchantResult(true));
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while updating the merchant: {Command}", command);
+            applicationLogger.LogError(ex, "An error occurred while updating the merchant: {Command}", command);
             return Result<UpdateMerchantResult>.Failure("An error occurred while updating the merchant.");
         }
     }

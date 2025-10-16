@@ -1,4 +1,5 @@
 using BuildingBlocks;
+using BuildingBlocks.Loggers.Abstractions;
 using Order.Api.Domain.Entities;
 using Order.Api.Domain.Repositories;
 using Order.Api.Domain.ValueObjects;
@@ -8,7 +9,8 @@ namespace Order.Api.Application.Order.CreateOrder;
 
 public sealed class CreateOrderHandler(
     IOrderRepository repository,
-    ILogger<CreateOrderHandler> logger
+    IApplicationLogger<CreateOrderHandler> applicationLogger,
+    IBusinessLogger<CreateOrderHandler> businessLogger
 )
     : ICreateOrderHandler
 {
@@ -16,6 +18,8 @@ public sealed class CreateOrderHandler(
     {
         try
         {
+            applicationLogger.LogInformation("Processing create order request for customer: {CustomerId}", command.CustomerId);
+            
             OrderId orderId = OrderId.Of(Guid.CreateVersion7());
             Address shippingAddress = command.ShippingAddress.ToAddress();
             Address billingAddress = command.BillingAddress.ToAddress();
@@ -35,16 +39,21 @@ public sealed class CreateOrderHandler(
 
             if (result <= 0)
             {
-                logger.LogError("Failed to create order: {Command}", command);
+                applicationLogger.LogError("Failed to persist order to database for customer: {CustomerId}", command.CustomerId);
                 return Result<CreateOrderResult>.Failure("Failed to create order.");
             }
 
-            logger.LogInformation("Order created successfully: {OrderId}", orderEntity.Id);
+            businessLogger.LogInformation("Order created successfully. OrderId: {OrderId}, CustomerId: {CustomerId}, TotalAmount: {TotalAmount}, ItemCount: {ItemCount}", 
+                orderEntity.Id.Value, 
+                command.CustomerId, 
+                orderEntity.TotalAmount.Value, 
+                orderItems.Count);
+            
             return Result<CreateOrderResult>.Success(new CreateOrderResult(orderEntity.Id.Value));
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while creating the order: {Command}", command);
+            applicationLogger.LogError(ex, "An error occurred while creating the order for customer: {CustomerId}", command.CustomerId);
             return Result<CreateOrderResult>.Failure($"An error occurred while creating the order: {ex.Message}");
         }
     }

@@ -2,12 +2,15 @@ using BackendForFrontend.Api.Base;
 using BackendForFrontend.Api.Merchant.Contracts;
 using BackendForFrontend.Api.Merchant.Dtos;
 using BuildingBlocks;
-using Microsoft.Extensions.Logging;
-using System.Net.Http;
+using BuildingBlocks.Loggers.Abstractions;
 
 namespace BackendForFrontend.Api.Merchant.Services;
 
-public class MerchantService(ILogger<MerchantService> logger, HttpClient httpClient, IConfiguration configuration)
+public class MerchantService(
+    IApplicationLogger<MerchantService> applicationLogger,
+    IBusinessLogger<MerchantService> businessLogger,
+    HttpClient httpClient, 
+    IConfiguration configuration)
     : BaseService(httpClient), IMerchantService
 {
     private string BaseUrl => configuration["Services:MerchantService:BaseUrl"] ??
@@ -15,7 +18,7 @@ public class MerchantService(ILogger<MerchantService> logger, HttpClient httpCli
 
     public async Task<Result<CreateMerchantResponse>> CreateMerchantAsync(CreateMerchantRequest request)
     {
-        logger.LogInformation("Creating merchant with request: {@Request}", request);
+        applicationLogger.LogInformation("Creating merchant with request: {@Request}", request);
 
         HttpResponseMessage response = await DoPost($"{BaseUrl}/merchant", request);
         Result<CreateMerchantResponse>? content =
@@ -23,12 +26,12 @@ public class MerchantService(ILogger<MerchantService> logger, HttpClient httpCli
 
         if (response.IsSuccessStatusCode && content is not null)
         {
-            logger.LogInformation("Merchant created successfully: {@Merchant}", content);
+            businessLogger.LogInformation("Merchant created successfully: {@Merchant}", content);
             return content;
         }
         else
         {
-            logger.LogError("Failed to create merchant. Status code: {StatusCode}, Response: {@Response}",
+            applicationLogger.LogError("Failed to create merchant. Status code: {StatusCode}, Response: {@Response}",
                 response.StatusCode, response.Content);
             string errorMessage = await response.Content.ReadAsStringAsync();
             throw new HttpRequestException($"Error updating merchant: {errorMessage}");
@@ -37,7 +40,7 @@ public class MerchantService(ILogger<MerchantService> logger, HttpClient httpCli
 
     public async Task<Result<UpdateMerchantResponse>> UpdateMerchantAsync(UpdateMerchantRequest request)
     {
-        logger.LogInformation("Updating merchant with request: {@Request}", request);
+        applicationLogger.LogInformation("Updating merchant with request: {@Request}", request);
 
         HttpResponseMessage response = await DoPut($"{BaseUrl}/merchant/{request.Id}", request);
         Result<UpdateMerchantResponse>? content =
@@ -45,12 +48,12 @@ public class MerchantService(ILogger<MerchantService> logger, HttpClient httpCli
 
         if (response.IsSuccessStatusCode && content is not null)
         {
-            logger.LogInformation("Merchant updated successfully: {@Merchant}", content);
+            businessLogger.LogInformation("Merchant updated successfully: {@Merchant}", content);
             return content;
         }
         else
         {
-            logger.LogError("Failed to update merchant. Status code: {StatusCode}, Response: {@Response}",
+            applicationLogger.LogError("Failed to update merchant. Status code: {StatusCode}, Response: {@Response}",
                 response.StatusCode, response.Content);
             string errorMessage = await response.Content.ReadAsStringAsync();
             throw new HttpRequestException($"Error updating merchant: {errorMessage}");
@@ -59,7 +62,7 @@ public class MerchantService(ILogger<MerchantService> logger, HttpClient httpCli
 
     public async Task<Result<DeleteMerchantResponse>> DeleteMerchantAsync(Guid merchantId)
     {
-        logger.LogInformation("Deleting merchant with ID: {MerchantId}", merchantId);
+        applicationLogger.LogInformation("Deleting merchant with ID: {MerchantId}", merchantId);
 
         HttpResponseMessage response = await DoDelete($"{BaseUrl}/merchant/{merchantId}");
         Result<DeleteMerchantResponse>? content =
@@ -67,12 +70,12 @@ public class MerchantService(ILogger<MerchantService> logger, HttpClient httpCli
 
         if (response.IsSuccessStatusCode && content is not null)
         {
-            logger.LogInformation("Merchant deleted successfully: {@Merchant}", content);
+            businessLogger.LogInformation("Merchant deleted successfully: {@Merchant}", content);
             return content;
         }
         else
         {
-            logger.LogError("Failed to delete merchant. Status code: {StatusCode}, Response: {@Response}",
+            applicationLogger.LogError("Failed to delete merchant. Status code: {StatusCode}, Response: {@Response}",
                 response.StatusCode, response.Content);
             string errorMessage = await response.Content.ReadAsStringAsync();
             throw new HttpRequestException($"Error deleting merchant: {errorMessage}");
@@ -81,7 +84,7 @@ public class MerchantService(ILogger<MerchantService> logger, HttpClient httpCli
 
     public async Task<Result<GetMerchantByIdResponse>> GetMerchantByIdAsync(Guid merchantId)
     {
-        logger.LogInformation("Retrieving merchant with ID: {MerchantId}", merchantId);
+        applicationLogger.LogInformation("Retrieving merchant with ID: {MerchantId}", merchantId);
 
         HttpResponseMessage response = await DoGet($"{BaseUrl}/merchant/{merchantId}");
         Result<GetMerchantByIdResponse>? content =
@@ -89,12 +92,12 @@ public class MerchantService(ILogger<MerchantService> logger, HttpClient httpCli
 
         if (response.IsSuccessStatusCode && content is not null)
         {
-            logger.LogInformation("Merchant retrieved successfully: {@Merchant}", content);
+            applicationLogger.LogInformation("Merchant retrieved successfully: {@Merchant}", content);
             return content;
         }
         else
         {
-            logger.LogError("Failed to retrieve merchant. Status code: {StatusCode}, Response: {@Response}",
+            applicationLogger.LogError("Failed to retrieve merchant. Status code: {StatusCode}, Response: {@Response}",
                 response.StatusCode, response.Content);
             string errorMessage = await response.Content.ReadAsStringAsync();
             throw new HttpRequestException($"Error retrieving merchant: {errorMessage}");

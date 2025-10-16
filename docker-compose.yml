@@ -80,7 +80,7 @@ services:
   #      dockerfile: UserInterfaces/WebApplication/Dockerfile
 
   otelcollector:
-    image: otel/opentelemetry-collector:latest
+    image: otel/opentelemetry-collector-contrib:latest
   
   prometheus:
     image: prom/prometheus:latest
@@ -106,11 +106,4 @@ volumes:
   loki_data:
   jaeger_data:
   grafana_data:
-      
-  
   webapp:
-    image: webapp
-    build:
-      context: .
-      dockerfile: src/Uis/WebApp/Dockerfile
-

@@ -2,16 +2,22 @@ using Basket.Api.Application.Dto;
 using Basket.Api.Domain.Entities;
 using Basket.Api.Domain.Repositories;
 using BuildingBlocks;
+using BuildingBlocks.Loggers.Abstractions;
 
 namespace Basket.Api.Application.Basket.GetBasketById;
 
-public class GetBasketByIdHandler(IBasketRepository repository, ILogger<GetBasketByIdHandler> logger)
+public class GetBasketByIdHandler(
+    IBasketRepository repository, 
+    IApplicationLogger<GetBasketByIdHandler> applicationLogger,
+    IBusinessLogger<GetBasketByIdHandler> businessLogger)
     : IGetBasketByIdHandler
 {
     public async Task<Result<GetBasketByIdResult>> HandleAsync(GetBasketByIdQuery query)
     {
         try
         {
+            applicationLogger.LogInformation("Processing get basket request for user: {Username}", query.Username);
+            
             ShoppingCartEntity? shoppingCart = await repository.GetCartAsync(query.Username);
 
             if (shoppingCart is null)
@@ -36,7 +42,7 @@ public class GetBasketByIdHandler(IBasketRepository repository, ILogger<GetBaske
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while getting basket by username.");
+            applicationLogger.LogError(ex, "An error occurred while getting basket by username.");
             return Result<GetBasketByIdResult>.Failure("An error occurred while processing your request.");
         }
     }

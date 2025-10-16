@@ -2,16 +2,22 @@ using Basket.Api.Application.Dto;
 using Basket.Api.Domain.Entities;
 using Basket.Api.Domain.Repositories;
 using BuildingBlocks;
+using BuildingBlocks.Loggers.Abstractions;
 
 namespace Basket.Api.Application.Basket.CreateBasket;
 
-public sealed class CreateBasketHandler(IBasketRepository repository, ILogger<CreateBasketHandler> logger)
+public sealed class CreateBasketHandler(
+    IBasketRepository repository, 
+    IApplicationLogger<CreateBasketHandler> applicationLogger,
+    IBusinessLogger<CreateBasketHandler> businessLogger)
     : ICreateBasketHandler
 {
     public async Task<Result<CreateBasketResult>> HandleAsync(CreateBasketCommand command)
     {
         try
         {
+            applicationLogger.LogInformation("Processing create basket request for user: {Username}", command.Username);
+            
             ShoppingCartEntity cartEntity = new ShoppingCartEntity
             {
                 Username = command.Username,
@@ -26,7 +32,9 @@ public sealed class CreateBasketHandler(IBasketRepository repository, ILogger<Cr
 
             ShoppingCartEntity result = await repository.CreateCartAsync(cartEntity);
 
-            logger.LogInformation("Basket created successfully: {BasketId}", cartEntity.Username);
+            businessLogger.LogInformation("Basket created successfully. Username: {Username}, ItemCount: {ItemCount}", 
+                cartEntity.Username, 
+                cartEntity.Items.Count);
 
             ShoppingCartDto cartDto = new ShoppingCartDto()
             {
@@ -44,7 +52,7 @@ public sealed class CreateBasketHandler(IBasketRepository repository, ILogger<Cr
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while creating the basket: {Command}", command);
+            applicationLogger.LogError(ex, "An error occurred while creating the basket: {Command}", command);
             return Result<CreateBasketResult>.Failure($"An error occurred while creating the basket: {ex.Message}");
         }
     }

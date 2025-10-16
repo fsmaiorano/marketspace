@@ -1,6 +1,7 @@
 using BackendForFrontend.Api.Merchant.Contracts;
 using BackendForFrontend.Api.Merchant.Dtos;
 using BuildingBlocks;
+using BuildingBlocks.Loggers.Abstractions;
 using Merchant.Api.Application.Merchant.CreateMerchant;
 using Merchant.Api.Application.Merchant.DeleteMerchant;
 using Merchant.Api.Application.Merchant.GetMerchantById;
@@ -10,7 +11,10 @@ using System.Net.Http.Json;
 
 namespace BackendForFrontend.Test.Mocks;
 
-public class TestMerchantService(HttpClient httpClient, ILogger<TestMerchantService> logger) : IMerchantService
+public class TestMerchantService(
+    HttpClient httpClient, 
+    IApplicationLogger<TestMerchantService> applicationLogger,
+    IBusinessLogger<TestMerchantService> businessLogger) : IMerchantService
 {
     public async Task<Result<CreateMerchantResponse>> CreateMerchantAsync(CreateMerchantRequest request)
     {
@@ -30,18 +34,18 @@ public class TestMerchantService(HttpClient httpClient, ILogger<TestMerchantServ
                             MerchantId = resultWrapper.Data.MerchantId
                         });
 
-                    logger.LogInformation("Merchant created successfully: {@Merchant}", merchantResponse);
+                    applicationLogger.LogInformation("Merchant created successfully: {@Merchant}", merchantResponse);
                     return merchantResponse;
                 }
             }
 
-            logger.LogError("Failed to create merchant. Status code: {StatusCode}", response.StatusCode);
+            applicationLogger.LogError("Failed to create merchant. Status code: {StatusCode}", response.StatusCode);
             string errorMessage = await response.Content.ReadAsStringAsync();
             throw new HttpRequestException($"Error creating merchant: {errorMessage}");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error occurred while creating merchant");
+            applicationLogger.LogError(ex, "Error occurred while creating merchant");
             throw;
         }
     }
@@ -65,18 +69,18 @@ public class TestMerchantService(HttpClient httpClient, ILogger<TestMerchantServ
                             IsSuccess = resultWrapper.IsSuccess
                         });
 
-                    logger.LogInformation("Merchant updated successfully: {@Merchant}", merchantResponse);
+                    applicationLogger.LogInformation("Merchant updated successfully: {@Merchant}", merchantResponse);
                     return merchantResponse;
                 }
             }
 
-            logger.LogError("Failed to update merchant. Status code: {StatusCode}", response.StatusCode);
+            applicationLogger.LogError("Failed to update merchant. Status code: {StatusCode}", response.StatusCode);
             string errorMessage = response.Content.ReadAsStringAsync().Result;
             throw new HttpRequestException($"Error updating merchant: {errorMessage}");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error occurred while updating merchant");
+            applicationLogger.LogError(ex, "Error occurred while updating merchant");
             throw;
         }
     }
@@ -100,18 +104,18 @@ public class TestMerchantService(HttpClient httpClient, ILogger<TestMerchantServ
                             IsSuccess = resultWrapper.IsSuccess
                         });
 
-                    logger.LogInformation("Merchant deleted successfully: {@Merchant}", merchantResponse);
+                    applicationLogger.LogInformation("Merchant deleted successfully: {@Merchant}", merchantResponse);
                     return merchantResponse;
                 }
             }
 
-            logger.LogError("Failed to delete merchant. Status code: {StatusCode}", response.StatusCode);
+            applicationLogger.LogError("Failed to delete merchant. Status code: {StatusCode}", response.StatusCode);
             string errorMessage = response.Content.ReadAsStringAsync().Result;
             throw new HttpRequestException($"Error deleting merchant: {errorMessage}");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error occurred while deleting merchant");
+            applicationLogger.LogError(ex, "Error occurred while deleting merchant");
             throw;
         }
     }
@@ -137,18 +141,18 @@ public class TestMerchantService(HttpClient httpClient, ILogger<TestMerchantServ
                             Address = resultWrapper.Data.Address
                         });
 
-                    logger.LogInformation("Merchant retrieved successfully: {@Merchant}", merchantResponse);
+                    applicationLogger.LogInformation("Merchant retrieved successfully: {@Merchant}", merchantResponse);
                     return merchantResponse;
                 }
             }
 
-            logger.LogError("Failed to retrieve merchant. Status code: {StatusCode}", response.StatusCode);
+            applicationLogger.LogError("Failed to retrieve merchant. Status code: {StatusCode}", response.StatusCode);
             string errorMessage = response.Content.ReadAsStringAsync().Result;
             throw new HttpRequestException($"Error retrieving merchant: {errorMessage}");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error occurred while retrieving merchant");
+            applicationLogger.LogError(ex, "Error occurred while retrieving merchant");
             throw;
         }
     }

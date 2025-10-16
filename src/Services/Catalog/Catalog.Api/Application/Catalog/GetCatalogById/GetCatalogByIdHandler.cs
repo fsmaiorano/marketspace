@@ -1,4 +1,5 @@
 using BuildingBlocks;
+using BuildingBlocks.Loggers.Abstractions;
 using BuildingBlocks.Storage.Minio;
 using Catalog.Api.Domain.Entities;
 using Catalog.Api.Domain.Repositories;
@@ -9,7 +10,8 @@ namespace Catalog.Api.Application.Catalog.GetCatalogById;
 
 public class GetCatalogByIdHandler(
     ICatalogRepository repository,
-    ILogger<GetCatalogByIdHandler> logger,
+    IApplicationLogger<GetCatalogByIdHandler> applicationLogger,
+    IBusinessLogger<GetCatalogByIdHandler> businessLogger,
     IMinioBucket minioBucket)
     : IGetCatalogByIdHandler
 {
@@ -17,6 +19,8 @@ public class GetCatalogByIdHandler(
     {
         try
         {
+            applicationLogger.LogInformation("Processing get catalog by ID request for: {CatalogId}", query.Id);
+            
             CatalogId catalogId = CatalogId.Of(query.Id);
 
             CatalogEntity? catalog = await repository.GetByIdAsync(catalogId, isTrackingEnabled: false);
@@ -41,7 +45,7 @@ public class GetCatalogByIdHandler(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while getting catalog by ID.");
+            applicationLogger.LogError(ex, "An error occurred while getting catalog by ID.");
             return Result<GetCatalogByIdResult>.Failure("An error occurred while processing your request.");
         }
     }
