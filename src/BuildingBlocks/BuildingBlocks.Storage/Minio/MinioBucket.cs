@@ -3,24 +3,9 @@ using Minio.DataModel.Args;
 
 namespace BuildingBlocks.Storage.Minio;
 
-public interface IMinioBucket
-{
-    Task<(string objectName, string objectUrl)> SendImageAsync(string imageUrl);
-    Task<string?> GetImageAsync(string imageName);
-    Task<string> GetImageToDownload(string imageName);
-    Task DeleteImageAsync(string imageName);
-}
-
-public class MinioBucket : IMinioBucket
+public class MinioBucket(IMinioClient minioClient) : IMinioBucket
 {
     private const string BucketName = "masketspace";
-
-    private readonly IMinioClient _minioClient;
-
-    public MinioBucket(IMinioClient minioClient)
-    {
-        _minioClient = minioClient;
-    }
 
     public async Task<(string objectName, string objectUrl)> SendImageAsync(string imageUrl)
     {
@@ -62,11 +47,11 @@ public class MinioBucket : IMinioBucket
             response.EnsureSuccessStatusCode();
             await using Stream imageStream = await response.Content.ReadAsStreamAsync();
 
-            bool found = await _minioClient.BucketExistsAsync(new BucketExistsArgs().WithBucket(BucketName));
+            bool found = await minioClient.BucketExistsAsync(new BucketExistsArgs().WithBucket(BucketName));
             if (!found)
-                await _minioClient.MakeBucketAsync(new MakeBucketArgs().WithBucket(BucketName));
+                await minioClient.MakeBucketAsync(new MakeBucketArgs().WithBucket(BucketName));
 
-            await _minioClient.PutObjectAsync(new PutObjectArgs()
+            await minioClient.PutObjectAsync(new PutObjectArgs()
                 .WithBucket(BucketName)
                 .WithObject(objectName)
                 .WithStreamData(imageStream)
@@ -90,7 +75,7 @@ public class MinioBucket : IMinioBucket
     {
         try
         {
-            string? presignedUrl = await _minioClient.PresignedGetObjectAsync(new PresignedGetObjectArgs()
+            string? presignedUrl = await minioClient.PresignedGetObjectAsync(new PresignedGetObjectArgs()
                 .WithBucket(BucketName)
                 .WithObject(imageName)
                 .WithExpiry(60 * 60)); // URL valid for 1 hour
@@ -109,7 +94,7 @@ public class MinioBucket : IMinioBucket
     {
         try
         {
-            string? presignedUrl = await _minioClient.PresignedGetObjectAsync(new PresignedGetObjectArgs()
+            string? presignedUrl = await minioClient.PresignedGetObjectAsync(new PresignedGetObjectArgs()
                 .WithBucket(BucketName)
                 .WithObject(imageName)
                 .WithExpiry(60 * 60) // URL valid for 1 hour
@@ -132,7 +117,7 @@ public class MinioBucket : IMinioBucket
     {
         try
         {
-            await _minioClient.RemoveObjectAsync(new RemoveObjectArgs()
+            await minioClient.RemoveObjectAsync(new RemoveObjectArgs()
                 .WithBucket(BucketName)
                 .WithObject(imageName));
 
