@@ -128,11 +128,13 @@ services:
       - MessageBroker__Password=guest
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+      - Observability__OtlpEndpoint=http://otelcollector:4318
+      - Observability__LokiUrl=http://loki:3100
+      - Observability__JaegerEndpoint=http://jaeger:14268/api/traces
     depends_on:
       - basketdb
-    #      - distributedcache
-    #      - discount.grpc
-    #      - messagebroker
+      - otelcollector
+      - loki
     ports:
       - "6001:8080"
       - "6061:8081"
@@ -202,12 +204,19 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
-      - ConnectionStrings__Database=Server=merchantdb;Port=5436;Database=MerchantDb;User Id=postgres;Password=postgres;;Include Error Detail=true;
+      - ConnectionStrings__Database=Server=merchantdb;Port=5432;Database=MerchantDb;User Id=postgres;Password=postgres;;Include Error Detail=true;
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+      - Observability__OtlpEndpoint=http://otelcollector:4318
+      - Observability__LokiUrl=http://loki:3100
+      - Observability__JaegerEndpoint=http://jaeger:14268/api/traces
     restart: unless-stopped
     depends_on:
       merchantdb:
+        condition: service_started
+      otelcollector:
+        condition: service_started
+      loki:
         condition: service_started
     ports:
       - "6005:8080"
@@ -326,6 +335,7 @@ services:
     ports:
       - "4317:4317"   # OTLP gRPC
       - "4318:4318"   # OTLP HTTP
+      - "8889:8889"   # Prometheus metrics
       - "55679:55679" # health check
 
   prometheus:
@@ -352,6 +362,8 @@ services:
 
   jaeger:
     container_name: jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
     ports:
       - "16686:16686" # UI
       - "14250:14250" # gRPC
