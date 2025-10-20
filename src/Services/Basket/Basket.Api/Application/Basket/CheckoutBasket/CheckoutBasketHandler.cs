@@ -1,12 +1,110 @@
+using Basket.Api.Application.Basket.CheckoutBasket.Contracts;
+using Basket.Api.Application.Basket.CheckoutBasket.Services;
+using Basket.Api.Domain.Entities;
+using Basket.Api.Domain.Repositories;
 using BuildingBlocks;
+using BuildingBlocks.Loggers.Abstractions;
 
 namespace Basket.Api.Application.Basket.CheckoutBasket;
 
-public class CheckoutBasketHandler : ICheckoutBasketHandler
+public class CheckoutBasketHandler(
+    IBasketRepository basketRepository,
+    OrderService orderService,
+    IApplicationLogger<CheckoutBasketHandler> applicationLogger,
+    IBusinessLogger<CheckoutBasketHandler> businessLogger)
+    : ICheckoutBasketHandler
 {
-    // Start integration between Basket and Order services
-    public Task<Result<CheckoutBasketResult>> HandleAsync(CheckoutBasketCommand command)
+    public async Task<Result<CheckoutBasketResult>> HandleAsync(CheckoutBasketCommand command)
     {
-        throw new NotImplementedException();
+        try
+        {
+            applicationLogger.LogInformation("Starting checkout process for user: {Username}", command.UserName);
+
+            ShoppingCartEntity? basket = await basketRepository.GetCartAsync(command.UserName);
+
+            if (basket is null || basket.Items.Count == 0)
+            {
+                applicationLogger.LogWarning("Basket not found or empty for user: {Username}", command.UserName);
+                return Result<CheckoutBasketResult>.Failure("Basket is empty or does not exist.");
+            }
+
+            applicationLogger.LogInformation("Basket found with {ItemCount} items for user: {Username}",
+                basket.Items.Count, command.UserName);
+
+            List<OrderItemRequest> orderItems = basket.Items.Select(item => new OrderItemRequest
+            {
+                CatalogId = Guid.Parse(item.ProductId), Quantity = item.Quantity, Price = item.Price
+            }).ToList();
+
+            CreateOrderRequest orderRequest = new CreateOrderRequest
+            {
+                CustomerId = command.CustomerId,
+                ShippingAddress =
+                    new AddressRequest
+                    {
+                        FirstName = command.FirstName,
+                        LastName = command.LastName,
+                        EmailAddress = command.EmailAddress,
+                        AddressLine = command.AddressLine,
+                        Country = command.Country,
+                        State = command.State,
+                        ZipCode = command.ZipCode
+                    },
+                BillingAddress = new AddressRequest
+                {
+                    FirstName = command.FirstName,
+                    LastName = command.LastName,
+                    EmailAddress = command.EmailAddress,
+                    AddressLine = command.AddressLine,
+                    Country = command.Country,
+                    State = command.State,
+                    ZipCode = command.ZipCode
+                },
+                Payment = new PaymentRequest
+                {
+                    CardName = command.CardName,
+                    CardNumber = command.CardNumber,
+                    Expiration = command.Expiration,
+                    Cvv = command.Cvv,
+                    PaymentMethod = command.PaymentMethod
+                },
+                Items = orderItems
+            };
+
+            applicationLogger.LogInformation("Creating order for customer: {CustomerId} with {ItemCount} items",
+                command.CustomerId, orderItems.Count);
+
+            CreateOrderResponse? orderResponse = await orderService.CreateOrderAsync(orderRequest);
+
+            if (orderResponse == null)
+            {
+                applicationLogger.LogError("Failed to create order for customer: {CustomerId}", command.CustomerId);
+                return Result<CheckoutBasketResult>.Failure("Failed to create order.");
+            }
+
+            bool checkoutSuccess = await basketRepository.CheckoutAsync(command.UserName);
+
+            if (!checkoutSuccess)
+            {
+                applicationLogger.LogWarning(
+                    "Order created but failed to clear basket for user: {Username}. OrderId: {OrderId}",
+                    command.UserName, orderResponse.OrderId);
+            }
+
+            businessLogger.LogInformation(
+                "Checkout completed successfully. Username: {Username}, CustomerId: {CustomerId}, OrderId: {OrderId}, TotalAmount: {TotalAmount}, ItemCount: {ItemCount}",
+                command.UserName,
+                command.CustomerId,
+                orderResponse.OrderId,
+                basket.TotalPrice,
+                basket.Items.Count);
+
+            return Result<CheckoutBasketResult>.Success(new CheckoutBasketResult(true));
+        }
+        catch (Exception ex)
+        {
+            applicationLogger.LogError(ex, "An error occurred during checkout for user: {Username}", command.UserName);
+            return Result<CheckoutBasketResult>.Failure($"Checkout failed: {ex.Message}");
+        }
     }
 }

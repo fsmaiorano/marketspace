@@ -1,4 +1,5 @@
 using Basket.Api.Application.Basket.CheckoutBasket;
+using Basket.Api.Application.Basket.CheckoutBasket.Services;
 using Basket.Api.Application.Basket.CreateBasket;
 using Basket.Api.Application.Basket.DeleteBasket;
 using Basket.Api.Application.Basket.GetBasketById;
@@ -17,6 +18,9 @@ public static class DependencyInjection
         services.AddScoped<IDeleteBasketHandler, DeleteBasketHandler>();
         services.AddScoped<IGetBasketByIdHandler, GetBasketByIdHandler>();
         services.AddScoped<ICheckoutBasketHandler, CheckoutBasketHandler>();
+        
+        services.AddHttpClient<OrderService>();
+        
         return services;
     }
 }
