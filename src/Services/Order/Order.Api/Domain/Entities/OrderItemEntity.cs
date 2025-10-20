@@ -18,11 +18,14 @@ public class OrderItemEntity : Aggregate<OrderItemId>
     {
         ArgumentNullException.ThrowIfNull(orderId, nameof(orderId));
         ArgumentNullException.ThrowIfNull(catalogId, nameof(catalogId));
+        
         if (catalogId.Value == Guid.Empty)
             throw new ArgumentException("CatalogId cannot be empty.", nameof(catalogId));
+        
         if (quantity <= 0)
             throw new ArgumentOutOfRangeException(nameof(quantity), "Quantity must be greater than zero.");
-        if (price == null) throw new ArgumentNullException(nameof(price));
+        
+        ArgumentNullException.ThrowIfNull(price);
 
         return new OrderItemEntity
         {
