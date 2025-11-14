@@ -310,19 +310,21 @@ services:
     #    volumes:
     #      - ./myrealm.json:/opt/keycloak/data/import/myrealm.json
   
-#  webapp:
-#    container_name: webapp
-#    environment:
-#      - NODE_ENV=production
-#    depends_on:
-#      - backendforfrontend.api
-#      - keycloak
-#    restart: always
-#    ports:
-#      - "80:80"
-#      - "4001:4001"
-#      - "4041:4041"
-
+  webapp:
+    container_name: webapp
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - API_BASE_URL=http://backendforfrontendpi:8080
+      - KEYCLOAK_URL=http://keycloak:8080
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+    depends_on:
+      - backendforfrontend.api
+      - keycloak
+    restart: always
+    ports:
+      - "80:4000"
+      - "4001:4000"
 
   otelcollector:
     container_name: otel-collector
