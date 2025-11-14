@@ -1,11 +1,11 @@
 services:
   keycloakdb:
-    image: postgres:latest
+    image: postgres:18
     networks:
       - marketspace
 
   catalogdb:
-    image: postgres:latest
+    image: postgres:18
     networks:
       - marketspace
   
@@ -15,7 +15,7 @@ services:
       - marketspace
   
   basketdb:
-    image: postgres:latest
+    image: postgres:18
     networks:
       - marketspace
 
@@ -28,12 +28,12 @@ services:
   #    image: redis:latest
   
   orderdb:
-    image: postgres:latest
+    image: postgres:18
     networks:
       - marketspace
 
   merchantdb:
-    image: postgres:latest
+    image: postgres:18
     networks:
       - marketspace
   #
@@ -81,7 +81,7 @@ services:
       dockerfile: ./src/Services/Merchant/Merchant.Api/Dockerfile
     networks:
       - marketspace
-      
+  
   backendforfrontend.api:
     image: ${DOCKER_REGISTRY-}backendforfrontendapi
     build:
@@ -97,11 +97,11 @@ services:
   #      context: .
   #      dockerfile: ./src/Gateways/GatewayApi/Dockerfile
   
-  #  webapp:
-  #    image: ${DOCKER_REGISTRY-}webapp
-  #    build:
-  #      context: .
-  #      dockerfile: UserInterfaces/WebApplication/Dockerfile
+#  webapp:
+#    image: ${DOCKER_REGISTRY-}webapp
+#    build:
+#      context: .
+#      dockerfile: ./uis/WebApp/Dockerfile
 
   otelcollector:
     image: otel/opentelemetry-collector-contrib:latest
@@ -122,11 +122,11 @@ services:
     image: jaegertracing/all-in-one:latest
     networks:
       - marketspace
-    
+  
   grafana:
-      image: grafana/grafana:latest
-      networks:
-        - marketspace
+    image: grafana/grafana:latest
+    networks:
+      - marketspace
 
 networks:
   marketspace:
