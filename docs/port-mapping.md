@@ -6,9 +6,9 @@
 | Ordering      | 5003 - 5053 | 6003 - 6063 | 8080 - 8081   |
 | Gateway       | 5004 - 5054 | 6004 - 6064 | 8080 - 8081   |
 | Merchant      | 5005 - 5055 | 6005 - 6065 | 8080 - 8081   |
-| keycloak      | xxxx - xxxx | 7005 - xxxx | 8080 - xxxx   |
-| WebApp        | 3001 - 3041 | 4001 - 4041 | 8080 - xxxx   |
-| BFF           | 4001 - 4041 | 5001 - 5051 | 8080 - xxxx   |
+| Keycloak      | xxxx - xxxx | 7005 - xxxx | 8080 - xxxx   |
+| WebApp        | 3000 - xxxx | 80 + 4001   | 4000          |
+| BFF           | 4000 - xxxx | 5001 - 5051 | 8080 - 8081   |
 
 
 | Others        | Local Env | Docker Env      | Docker Inside |

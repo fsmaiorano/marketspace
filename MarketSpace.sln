@@ -15,6 +15,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C38A8607-17BA-43D8-97BC-5808977A347F}"
 	ProjectSection(SolutionItems) = preProject
 		docs\port-mapping.md = docs\port-mapping.md
+		docs\webapp-docker-configuration.md = docs\webapp-docker-configuration.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{16324693-9B2C-451C-B4B2-9833589E9FD9}"

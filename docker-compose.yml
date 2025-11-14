@@ -97,11 +97,13 @@ services:
   #      context: .
   #      dockerfile: ./src/Gateways/GatewayApi/Dockerfile
   
-#  webapp:
-#    image: ${DOCKER_REGISTRY-}webapp
-#    build:
-#      context: .
-#      dockerfile: ./uis/WebApp/Dockerfile
+  webapp:
+    image: ${DOCKER_REGISTRY-}webapp
+    build:
+      context: .
+      dockerfile: ./uis/WebApp/Dockerfile
+    networks:
+      - marketspace
 
   otelcollector:
     image: otel/opentelemetry-collector-contrib:latest
