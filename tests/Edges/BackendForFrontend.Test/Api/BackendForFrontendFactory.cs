@@ -27,6 +27,7 @@ using Merchant.Test.Api;
 using BackendForFrontend.Test.Mocks;
 using BuildingBlocks.Storage.Minio;
 using BuildingBlocks.Loggers.Abstractions;
+using Microsoft.AspNetCore.TestHost;
 using Minio;
 
 namespace BackendForFrontend.Test.Api;
@@ -55,7 +56,7 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureServices(services =>
+        builder.ConfigureTestServices(services =>
         {
             List<ServiceDescriptor> descriptorsToRemove = services
                 .Where(d => d.ServiceType.FullName != null &&
@@ -96,13 +97,23 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
             foreach (ServiceDescriptor descriptor in descriptorsToRemove)
                 services.Remove(descriptor);
 
+            // Remove Serilog services
             services.RemoveAll<ILoggerFactory>();
-            services.TryAddSingleton<DiagnosticContext>();
-            services.AddLogging(loggingBuilder => loggingBuilder.AddConsole().SetMinimumLevel(LogLevel.Warning));
+            services.RemoveAll(typeof(ILogger<>));
+            services.RemoveAll<Serilog.ILogger>();
+            services.RemoveAll<DiagnosticContext>();
+            
+            // Add simple console logging for tests
+            services.AddLogging(loggingBuilder => 
+            {
+                loggingBuilder.ClearProviders();
+                loggingBuilder.AddConsole();
+                loggingBuilder.SetMinimumLevel(LogLevel.Warning);
+            });
 
             MongoDbRunner? runner = MongoDbRunner.Start();
 
-            services.AddSingleton<IMongoClient>(sp => new MongoClient(runner.ConnectionString));
+            services.AddSingleton<IMongoClient>(_ => new MongoClient(runner.ConnectionString));
 
             services.AddScoped(sp =>
             {
@@ -136,7 +147,7 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
             {
                 IApplicationLogger<TestBasketService> applicationLogger = provider.GetRequiredService<IApplicationLogger<TestBasketService>>();
                 IBusinessLogger<TestBasketService> businessLogger = provider.GetRequiredService<IBusinessLogger<TestBasketService>>();
-                return new TestBasketService(_basketApiClient!, applicationLogger, businessLogger);
+                return new TestBasketService(_basketApiClient, applicationLogger, businessLogger);
             });
 
             services.AddScoped<ICatalogService>(provider =>
@@ -155,9 +166,10 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
         });
     }
 
-    public async Task InitializeAsync()
+    public Task InitializeAsync()
     {
         // Minio container is no longer used, so nothing to initialize
+        return Task.CompletedTask;
     }
 
     public new async Task DisposeAsync()

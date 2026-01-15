@@ -39,7 +39,7 @@ services:
   
   basketdb:
     container_name: basketdb
-    image: mongo:6.0
+    image: mongo
     restart: always
     ports:
       - "27017:27017"
@@ -76,17 +76,6 @@ services:
     volumes:
       - postgres_merchant:/var/lib/postgresql
   
-  #  messagebroker:
-  #    container_name: messagebroker
-  #    hostname: ecommerce-mq
-  #    environment:
-  #      - RABBITMQ_DEFAULT_USER=guest
-  #      - RABBITMQ_DEFAULT_PASS=guest
-  #    restart: always
-  #    ports:
-  #      - "5672:5672"
-  #      - "15672:15672"
-  
   catalog.api:
     container_name: catalogapi
     environment:
@@ -96,9 +85,6 @@ services:
       - ConnectionStrings__Database=Server=catalogdb;Port=5432;Database=CatalogDb;User Id=postgres;Password=postgres;;Include Error Detail=true;
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=password
-      - Observability__OtlpEndpoint=http://otelcollector:4318
-      - Observability__LokiUrl=http://loki:3100
-      - Observability__JaegerEndpoint=http://jaeger:14268/api/traces
     depends_on:
       - catalogdb
       - minio
@@ -108,8 +94,6 @@ services:
       - "6000:8080"
       - "6060:8081"
     volumes:
-      #   - ${HOME}/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
-      #   - ${HOME}/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
       - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
       - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
   
@@ -128,9 +112,6 @@ services:
       - MessageBroker__Password=guest
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=password
-      - Observability__OtlpEndpoint=http://otelcollector:4318
-      - Observability__LokiUrl=http://loki:3100
-      - Observability__JaegerEndpoint=http://jaeger:14268/api/traces
     depends_on:
       - basketdb
       - otelcollector
@@ -139,32 +120,9 @@ services:
       - "6001:8080"
       - "6061:8081"
     volumes:
-      #   - ${HOME}/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
-      #   - ${HOME}/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
       - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
       - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
-    
-    #  discount.grpc:
-    #    container_name: discountgrpc
-    #    environment:
-    #      - ASPNETCORE_ENVIRONMENT=Production
-    #      - ASPNETCORE_HTTP_PORTS=8080
-    #      - ASPNETCORE_HTTPS_PORTS=8081
-    #      - ConnectionStrings__Database=Data Source=discountdb
-    #      - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
-    #      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
-    #    depends_on:
-    #      - basketdb
-    #      - distributedcache
-    #    ports:
-    #      - "6002:8080"
-    #      - "6062:8081"
-    #    volumes:
-    #      #   - ${HOME}/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
-    #      #   - ${HOME}/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
-    #      - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
-    #      - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
-  
+
   order.api:
     container_name: orderapi
     environment:
@@ -193,8 +151,6 @@ services:
       - "6003:8080"
       - "6063:8081"
     volumes:
-      #   - ${HOME}/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
-      #   - ${HOME}/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
       - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
       - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
 
@@ -222,8 +178,6 @@ services:
       - "6005:8080"
       - "6065:8081"
     volumes:
-      #   - ${HOME}/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
-      #   - ${HOME}/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
       - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
       - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
   
@@ -239,9 +193,6 @@ services:
       - Services__OrderService__BaseUrl=https://orderapi:8081
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=password
-      - Observability__OtlpEndpoint=http://otelcollector:4318
-      - Observability__LokiUrl=http://loki:3100
-      - Observability__JaegerEndpoint=http://jaeger:14268/api/traces
     restart: unless-stopped
     depends_on:
       merchant.api:
@@ -260,31 +211,8 @@ services:
       - "5001:8080"
       - "5051:8081"
     volumes:
-      #   - ${HOME}/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
-      #   - ${HOME}/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
       - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
       - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
-  
-  #  gatewayapi:
-  #    container_name: gatewayapi
-  #    environment:
-  #      - ASPNETCORE_ENVIRONMENT=Production
-  #      - ASPNETCORE_HTTP_PORTS=8080
-  #      - ASPNETCORE_HTTPS_PORTS=8081
-  #      - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
-  #      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
-  #    depends_on:
-  #      - catalog.api
-  #      - basket.api
-  #      - order.api
-  #    ports:
-  #      - "6004:8080"
-  #      - "6064:8081"
-  #    volumes:
-  #      #   - ${HOME}/.microsoft/usersecrets:/home/app/.microsoft/usersecrets:ro
-  #      #   - ${HOME}/.microsoft/usersecrets:/root/.microsoft/usersecrets:ro
-  #      - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
-  #      - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
   
   keycloak:
     container_name: keycloak
@@ -326,68 +254,6 @@ services:
       - "80:4000"
       - "4001:4000"
 
-  otelcollector:
-    container_name: otel-collector
-    command: [ "--config=/etc/otel-collector-config.yaml" ]
-    volumes:
-      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
-      - otel_collector_config:/etc/otel-collector
-    ports:
-      - "4317:4317"   # OTLP gRPC
-      - "4318:4318"   # OTLP HTTP
-      - "8889:8889"   # Prometheus metrics
-      - "55679:55679" # health check
-
-  prometheus:
-    container_name: prometheus
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
-    ports:
-      - "9090:9090"
-
-  loki:
-    container_name: loki
-    command: -config.file=/etc/loki/local-config.yaml
-    volumes:
-      - ./loki-config.yaml:/etc/loki/local-config.yaml
-      - loki_data:/loki
-    ports:
-      - "3100:3100"
-    healthcheck:
-      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  jaeger:
-    container_name: jaeger
-    environment:
-      - COLLECTOR_OTLP_ENABLED=true
-    ports:
-      - "16686:16686" # UI
-      - "14250:14250" # gRPC
-      - "14268:14268" # HTTP
-    volumes:
-      - jaeger_data:/var/lib/jaeger
-
-  grafana:
-    container_name: grafana
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    volumes:
-      - ./grafana/provisioning:/etc/grafana/provisioning
-    ports:
-      - "3000:3000"
-    depends_on:
-      prometheus:
-        condition: service_started
-      loki:
-        condition: service_healthy
-      jaeger:
-        condition: service_started
-
 volumes:
   postgres_catalog:
   postgres_keycloak:
@@ -395,8 +261,3 @@ volumes:
   postgres_order:
   minio_data:
   mongo_basket_data:
-  otel_collector_config:
-  prometheus_data:
-  loki_data:
-  jaeger_data:
-  grafana_data:

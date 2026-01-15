@@ -4,6 +4,7 @@ using Basket.Api.Infrastructure.Data;
 using Basket.Api.Infrastructure.Data.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -18,7 +19,7 @@ public class BasketApiFactory : WebApplicationFactory<BasketProgram>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureServices(services =>
+        builder.ConfigureTestServices(services =>
         {
             List<ServiceDescriptor> descriptorsToRemove = services
                 .Where(d => d.ServiceType.FullName != null &&
@@ -36,7 +37,7 @@ public class BasketApiFactory : WebApplicationFactory<BasketProgram>
 
             MongoDbRunner? runner = MongoDbRunner.Start();
             
-            services.AddSingleton<IMongoClient>(sp => new MongoClient(runner.ConnectionString));
+            services.AddSingleton<IMongoClient>(_ => new MongoClient(runner.ConnectionString));
             
             services.AddScoped(sp =>
             {
@@ -46,9 +47,25 @@ public class BasketApiFactory : WebApplicationFactory<BasketProgram>
 
             services.AddScoped<IBasketDataRepository, BasketDataRepository>();
 
+            // Remove Serilog services
             services.RemoveAll<ILoggerFactory>();
-            services.TryAddSingleton<DiagnosticContext>();
-            services.AddLogging(loggingBuilder => loggingBuilder.AddConsole().SetMinimumLevel(LogLevel.Warning));
+            services.RemoveAll(typeof(ILogger<>));
+            services.RemoveAll<Serilog.ILogger>();
+            services.RemoveAll<DiagnosticContext>();
+            
+            // Add simple console logging for tests
+            services.AddLogging(loggingBuilder => 
+            {
+                loggingBuilder.ClearProviders();
+                loggingBuilder.AddConsole();
+                loggingBuilder.SetMinimumLevel(LogLevel.Warning);
+            });
+        });
+        
+        builder.UseDefaultServiceProvider((context, options) =>
+        {
+            options.ValidateScopes = false;
+            options.ValidateOnBuild = false;
         });
     }
 }

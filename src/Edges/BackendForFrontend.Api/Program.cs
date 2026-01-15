@@ -29,14 +29,9 @@ builder.Services.AddBasketServices(builder.Configuration);
 builder.Services.AddCatalogServices(builder.Configuration);
 builder.Services.AddOrderServices(builder.Configuration);
 builder.Services.AddAggregationServices(builder.Configuration);
+builder.Services.AddCustomLoggers();
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
-builder.Services
-    .AddObservability(builder.Configuration, options =>
-    {
-        options.ServiceName = "BackendForFrontend.Api";
-        options.ServiceVersion = "1.0.0";
-    });
 
 builder.Host.UseSerilog();
 builder.Services.AddSingleton<DiagnosticContext>();
@@ -71,7 +66,6 @@ app.UseSwaggerUI(options =>
 });
 
 app.UseMiddleware<CorrelationIdMiddleware>();
-app.UseObservability();
 app.UseExceptionHandler(options => { });
 app.UseCors("CorsPolicy");
 

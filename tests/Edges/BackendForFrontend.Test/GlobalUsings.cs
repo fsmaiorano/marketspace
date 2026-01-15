@@ -1,0 +1,25 @@
+global using BackendForFrontend.Api;
+global using BackendForFrontend.Api.Basket.Contracts;
+global using BackendForFrontend.Api.Basket.Services;
+global using BackendForFrontend.Api.Catalog.Contracts;
+global using BackendForFrontend.Api.Catalog.Services;
+global using BackendForFrontend.Api.Merchant.Contracts;
+global using BackendForFrontend.Api.Merchant.Services;
+global using BackendForFrontend.Api.Order.Contracts;
+global using BackendForFrontend.Api.Order.Services;
+global using BackendForFrontend.Test.Api;
+global using BackendForFrontend.Test.Mocks;
+global using Builder;
+global using BuildingBlocks;
+global using BuildingBlocks.Exceptions;
+global using BuildingBlocks.Loggers;
+global using BuildingBlocks.Loggers.Abstractions;
+global using FluentAssertions;
+global using Microsoft.AspNetCore.Hosting;
+global using Microsoft.AspNetCore.Mvc.Testing;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Logging;
+global using Moq;
+global using System.Net.Http.Json;
+global using Xunit;
+

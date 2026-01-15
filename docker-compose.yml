@@ -89,44 +89,12 @@ services:
       dockerfile: ./src/Edges/BackendForFrontend.Api/Dockerfile
     networks:
       - marketspace
-  #  
-  #  gatewayapi:
-  #    image: ${DOCKER_REGISTRY-}gatewayapi
-  #    platform: linux/amd64
-  #    build:
-  #      context: .
-  #      dockerfile: ./src/Gateways/GatewayApi/Dockerfile
   
   webapp:
     image: ${DOCKER_REGISTRY-}webapp
     build:
       context: .
       dockerfile: ./uis/WebApp/Dockerfile
-    networks:
-      - marketspace
-
-  otelcollector:
-    image: otel/opentelemetry-collector-contrib:latest
-    networks:
-      - marketspace
-  
-  prometheus:
-    image: prom/prometheus:latest
-    networks:
-      - marketspace
-
-  loki:
-    image: grafana/loki:latest
-    networks:
-      - marketspace
-
-  jaeger:
-    image: jaegertracing/all-in-one:latest
-    networks:
-      - marketspace
-  
-  grafana:
-    image: grafana/grafana:latest
     networks:
       - marketspace
 
@@ -141,9 +109,4 @@ volumes:
   postgres_merchant:
   mongo_basket_data:
   minio_data:
-  otel_collector_config:
-  prometheus_data:
-  loki_data:
-  jaeger_data:
-  grafana_data:
   webapp:

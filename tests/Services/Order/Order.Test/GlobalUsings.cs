@@ -1,0 +1,23 @@
+global using Builder;
+global using BuildingBlocks;
+global using BuildingBlocks.Exceptions;
+global using BuildingBlocks.Loggers;
+global using BuildingBlocks.Loggers.Abstractions;
+global using FluentAssertions;
+global using Microsoft.AspNetCore.Hosting;
+global using Microsoft.AspNetCore.Mvc.Testing;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Logging;
+global using Moq;
+global using Order.Api.Application.Order.CreateOrder;
+global using Order.Api.Application.Order.DeleteOrder;
+global using Order.Api.Application.Order.GetOrderById;
+global using Order.Api.Application.Order.UpdateOrder;
+global using Order.Api.Domain.Entities;
+global using Order.Api.Domain.Repositories;
+global using Order.Api.Infrastructure.Data;
+global using Order.Test.Api;
+global using System.Net.Http.Json;
+global using Xunit;
+
