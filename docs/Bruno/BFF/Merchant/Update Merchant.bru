@@ -1,0 +1,22 @@
+meta {
+  name: Update Merchant
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{bff_url}}/api/merchant/{{merchant_id}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Updated Merchant Name",
+    "description": "Updated merchant description",
+    "address": "456 Updated Street, City, State",
+    "phoneNumber": "555-5678",
+    "email": "updated@example.com"
+  }
+}
+

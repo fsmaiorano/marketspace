@@ -1,0 +1,37 @@
+meta {
+  name: Update Order
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{order_url}}/order
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "id": "{{order_id}}",
+    "customerId": "{{customer_id}}",
+    "orderName": "Updated Direct Order #1",
+    "shippingAddress": {
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "emailAddress": "jane.smith@example.com",
+      "addressLine": "999 Updated Direct Street",
+      "country": "USA",
+      "state": "NY",
+      "zipCode": "10001"
+    },
+    "payment": {
+      "cardName": "Jane Smith",
+      "cardNumber": "5555555555554444",
+      "expiration": "12/26",
+      "cvv": "456",
+      "paymentMethod": 1
+    },
+    "status": 2
+  }
+}
+

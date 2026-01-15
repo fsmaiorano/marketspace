@@ -1,0 +1,18 @@
+meta {
+  name: Delete Merchant
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{merchant_url}}/merchant
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "id": "{{merchant_id}}"
+  }
+}
+

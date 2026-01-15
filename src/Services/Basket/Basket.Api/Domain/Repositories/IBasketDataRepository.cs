@@ -2,7 +2,7 @@ using Basket.Api.Domain.Entities;
 
 namespace Basket.Api.Domain.Repositories;
 
-public interface IBasketRepository
+public interface IBasketDataRepository
 {
     Task<ShoppingCartEntity> CreateCartAsync(ShoppingCartEntity cart);
     Task<ShoppingCartEntity?> GetCartAsync(string username);

@@ -1,0 +1,12 @@
+meta {
+  name: Delete Merchant
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{bff_url}}/api/merchant/{{merchant_id}}
+  body: none
+  auth: none
+}
+

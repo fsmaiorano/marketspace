@@ -44,7 +44,7 @@ public class BasketApiFactory : WebApplicationFactory<BasketProgram>
                 return client.GetDatabase("BasketInMemoryDbForTesting");
             });
 
-            services.AddScoped<IBasketRepository, BasketRepository>();
+            services.AddScoped<IBasketDataRepository, BasketDataRepository>();
 
             services.RemoveAll<ILoggerFactory>();
             services.TryAddSingleton<DiagnosticContext>();

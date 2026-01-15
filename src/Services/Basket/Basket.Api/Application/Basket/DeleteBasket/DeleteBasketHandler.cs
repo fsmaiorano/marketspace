@@ -5,7 +5,7 @@ using Basket.Api.Domain.Repositories;
 namespace Basket.Api.Application.Basket.DeleteBasket;
 
 public class DeleteBasketHandler(
-    IBasketRepository repository, 
+    IBasketDataRepository dataRepository, 
     IApplicationLogger<DeleteBasketHandler> applicationLogger,
     IBusinessLogger<DeleteBasketHandler> businessLogger)
     : IDeleteBasketHandler
@@ -16,7 +16,7 @@ public class DeleteBasketHandler(
         {
             applicationLogger.LogInformation("Processing delete basket request for user: {Username}", command.Username);
             
-            await repository.DeleteCartAsync(command.Username);
+            await dataRepository.DeleteCartAsync(command.Username);
             
             businessLogger.LogInformation("Basket deleted successfully. Username: {Username}", command.Username);
             return Result<DeleteBasketResult>.Success(new DeleteBasketResult(true));

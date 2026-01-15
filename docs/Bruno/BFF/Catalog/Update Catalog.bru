@@ -1,0 +1,23 @@
+meta {
+  name: Update Catalog
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{bff_url}}/api/catalog/{{catalog_id}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "id": "{{catalog_id}}",
+    "name": "Updated Product",
+    "description": "An updated product description",
+    "imageFile": "updated-product.jpg",
+    "price": 39.99,
+    "category": ["Electronics", "Gadgets", "New"]
+  }
+}
+

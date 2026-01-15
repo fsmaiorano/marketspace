@@ -1,22 +1,23 @@
-using System.Net.Http.Json;
 using Basket.Api.Application.Basket.CheckoutBasket.Contracts;
+using Basket.Api.Domain.Repositories;
 using BuildingBlocks.Loggers.Abstractions;
 
-namespace Basket.Api.Application.Basket.CheckoutBasket.Services;
+namespace Basket.Api.Infrastructure.Http.Repositories;
 
-public class OrderService(
+public class CheckoutHttpRepository(
     HttpClient httpClient,
     IConfiguration configuration,
-    IApplicationLogger<OrderService> applicationLogger)
+    IApplicationLogger<CheckoutHttpRepository> applicationLogger) : ICheckoutHttpRepository
 {
     public async Task<CreateOrderResponse?> CreateOrderAsync(CreateOrderRequest request)
     {
         try
         {
-            string baseUrl = configuration["OrderService:BaseUrl"] 
-                ?? throw new InvalidOperationException("OrderService BaseUrl is not configured.");
+            string baseUrl = configuration["OrderService:BaseUrl"]
+                             ?? throw new InvalidOperationException("OrderService BaseUrl is not configured.");
 
-            applicationLogger.LogInformation("Calling Order Service to create order for customer: {CustomerId}", request.CustomerId);
+            applicationLogger.LogInformation("Calling Order Service to create order for customer: {CustomerId}",
+                request.CustomerId);
 
             HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{baseUrl}/order", request);
 
@@ -28,13 +29,14 @@ public class OrderService(
             }
 
             string errorContent = await response.Content.ReadAsStringAsync();
-            applicationLogger.LogError("Failed to create order. Status: {StatusCode}, Error: {Error}", 
+            applicationLogger.LogError("Failed to create order. Status: {StatusCode}, Error: {Error}",
                 response.StatusCode, errorContent);
             return null;
         }
         catch (Exception ex)
         {
-            applicationLogger.LogError(ex, "Exception occurred while calling Order Service for customer: {CustomerId}", request.CustomerId);
+            applicationLogger.LogError(ex, "Exception occurred while calling Order Service for customer: {CustomerId}",
+                request.CustomerId);
             throw;
         }
     }

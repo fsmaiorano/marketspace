@@ -1,6 +1,7 @@
 using Basket.Api.Domain.Repositories;
 using Basket.Api.Infrastructure.Data;
 using Basket.Api.Infrastructure.Data.Repositories;
+using Basket.Api.Infrastructure.Http.Repositories;
 using MongoDB.Driver;
 
 namespace Basket.Api.Infrastructure;
@@ -29,7 +30,8 @@ public static class DependencyInjection
         });
 
         services.AddHttpContextAccessor();
-        services.AddScoped<IBasketRepository, BasketRepository>();
+        services.AddScoped<IBasketDataRepository, BasketDataRepository>();
+        services.AddScoped<ICheckoutHttpRepository, CheckoutHttpRepository>();
 
         return services;
     }

@@ -1,0 +1,12 @@
+meta {
+  name: Get Orders By Customer Id
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{bff_url}}/api/order/customer/{{customer_id}}
+  body: none
+  auth: none
+}
+

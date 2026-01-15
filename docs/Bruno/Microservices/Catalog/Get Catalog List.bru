@@ -1,0 +1,17 @@
+meta {
+  name: Get Catalog List
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{catalog_url}}/catalog?PageIndex=0&PageSize=10
+  body: none
+  auth: none
+}
+
+params:query {
+  PageIndex: 0
+  PageSize: 10
+}
+

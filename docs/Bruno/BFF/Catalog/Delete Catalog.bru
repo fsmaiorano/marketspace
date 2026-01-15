@@ -1,0 +1,12 @@
+meta {
+  name: Delete Catalog
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{bff_url}}/api/catalog/{{catalog_id}}
+  body: none
+  auth: none
+}
+
