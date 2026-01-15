@@ -1,0 +1,37 @@
+meta {
+  name: Update Order
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{bff_url}}/api/order/{{order_id}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "id": "{{order_id}}",
+    "customerId": "{{customer_id}}",
+    "orderName": "Updated Order #1",
+    "shippingAddress": {
+      "firstName": "John",
+      "lastName": "Doe",
+      "emailAddress": "john.doe@example.com",
+      "addressLine": "456 Updated Street",
+      "country": "USA",
+      "state": "CA",
+      "zipCode": "90210"
+    },
+    "payment": {
+      "cardName": "John Doe",
+      "cardNumber": "4111111111111111",
+      "expiration": "12/25",
+      "cvv": "123",
+      "paymentMethod": 1
+    },
+    "status": 1
+  }
+}
+

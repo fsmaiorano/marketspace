@@ -7,7 +7,7 @@ using BuildingBlocks.Loggers.Abstractions;
 namespace Basket.Api.Application.Basket.GetBasketById;
 
 public class GetBasketByIdHandler(
-    IBasketRepository repository, 
+    IBasketDataRepository dataRepository, 
     IApplicationLogger<GetBasketByIdHandler> applicationLogger,
     IBusinessLogger<GetBasketByIdHandler> businessLogger)
     : IGetBasketByIdHandler
@@ -18,7 +18,7 @@ public class GetBasketByIdHandler(
         {
             applicationLogger.LogInformation("Processing get basket request for user: {Username}", query.Username);
             
-            ShoppingCartEntity? shoppingCart = await repository.GetCartAsync(query.Username);
+            ShoppingCartEntity? shoppingCart = await dataRepository.GetCartAsync(query.Username);
 
             if (shoppingCart is null)
             {

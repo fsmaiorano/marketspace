@@ -1,0 +1,23 @@
+meta {
+  name: Update Catalog
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{catalog_url}}/catalog
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "id": "{{catalog_id}}",
+    "name": "Updated Direct Product",
+    "description": "Updated via direct service API",
+    "imageFile": "updated-direct.jpg",
+    "price": 59.99,
+    "category": ["Electronics", "Updated"]
+  }
+}
+

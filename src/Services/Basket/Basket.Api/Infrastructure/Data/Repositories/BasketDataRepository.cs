@@ -5,14 +5,10 @@ using MongoDB.Driver;
 
 namespace Basket.Api.Infrastructure.Data.Repositories;
 
-public class BasketRepository : IBasketRepository
+public class BasketDataRepository(IMongoDatabase database, IOptions<DatabaseSettings> settings)
+    : IBasketDataRepository
 {
-    private readonly IMongoCollection<ShoppingCartEntity> _collection;
-
-    public BasketRepository(IMongoDatabase database, IOptions<DatabaseSettings> settings)
-    {
-        _collection = database.GetCollection<ShoppingCartEntity>(settings.Value.CollectionName);
-    }
+    private readonly IMongoCollection<ShoppingCartEntity> _collection = database.GetCollection<ShoppingCartEntity>(settings.Value.CollectionName);
 
     public async Task<ShoppingCartEntity> CreateCartAsync(ShoppingCartEntity cart)
     {

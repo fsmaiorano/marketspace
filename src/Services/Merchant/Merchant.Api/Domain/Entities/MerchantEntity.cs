@@ -33,8 +33,8 @@ public class MerchantEntity : Aggregate<MerchantId>
         if (string.IsNullOrWhiteSpace(phoneNumber))
             throw new ArgumentException("PhoneNumber is required.", nameof(phoneNumber));
 
-        if (email == null)
-            throw new ArgumentNullException(nameof(email));
+        if (string.IsNullOrWhiteSpace(email.Value))
+            throw new ArgumentException("E-mail is required.", nameof(phoneNumber));
 
         return new MerchantEntity
         {

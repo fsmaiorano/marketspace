@@ -7,7 +7,7 @@ using BuildingBlocks.Loggers.Abstractions;
 namespace Basket.Api.Application.Basket.CreateBasket;
 
 public sealed class CreateBasketHandler(
-    IBasketRepository repository, 
+    IBasketDataRepository dataRepository, 
     IApplicationLogger<CreateBasketHandler> applicationLogger,
     IBusinessLogger<CreateBasketHandler> businessLogger)
     : ICreateBasketHandler
@@ -30,7 +30,7 @@ public sealed class CreateBasketHandler(
                 }).ToList(),
             };
 
-            ShoppingCartEntity result = await repository.CreateCartAsync(cartEntity);
+            ShoppingCartEntity result = await dataRepository.CreateCartAsync(cartEntity);
 
             businessLogger.LogInformation("Basket created successfully. Username: {Username}, ItemCount: {ItemCount}", 
                 cartEntity.Username, 

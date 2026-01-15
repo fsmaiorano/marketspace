@@ -1,0 +1,29 @@
+meta {
+  name: Checkout Basket
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{basket_url}}/basket/checkout
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "userName": "{{username}}",
+    "customerId": "{{customer_id}}",
+    "totalPrice": 49.99
+  }
+}
+
+script:post-response {
+  if (res.status === 200) {
+    const response = res.body;
+    if (response.isSuccess && response.data && response.data.orderId) {
+      bru.setVar("orderId", response.data.orderId);
+    }
+  }
+}
+

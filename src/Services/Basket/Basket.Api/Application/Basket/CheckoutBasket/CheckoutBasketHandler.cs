@@ -1,5 +1,4 @@
 using Basket.Api.Application.Basket.CheckoutBasket.Contracts;
-using Basket.Api.Application.Basket.CheckoutBasket.Services;
 using Basket.Api.Domain.Entities;
 using Basket.Api.Domain.Repositories;
 using BuildingBlocks;
@@ -8,8 +7,8 @@ using BuildingBlocks.Loggers.Abstractions;
 namespace Basket.Api.Application.Basket.CheckoutBasket;
 
 public class CheckoutBasketHandler(
-    IBasketRepository basketRepository,
-    OrderService orderService,
+    IBasketDataRepository basketDataRepository,
+    ICheckoutHttpRepository checkoutHttpRepository,
     IApplicationLogger<CheckoutBasketHandler> applicationLogger,
     IBusinessLogger<CheckoutBasketHandler> businessLogger)
     : ICheckoutBasketHandler
@@ -20,7 +19,7 @@ public class CheckoutBasketHandler(
         {
             applicationLogger.LogInformation("Starting checkout process for user: {Username}", command.UserName);
 
-            ShoppingCartEntity? basket = await basketRepository.GetCartAsync(command.UserName);
+            ShoppingCartEntity? basket = await basketDataRepository.GetCartAsync(command.UserName);
 
             if (basket is null || basket.Items.Count == 0)
             {
@@ -74,7 +73,7 @@ public class CheckoutBasketHandler(
             applicationLogger.LogInformation("Creating order for customer: {CustomerId} with {ItemCount} items",
                 command.CustomerId, orderItems.Count);
 
-            CreateOrderResponse? orderResponse = await orderService.CreateOrderAsync(orderRequest);
+            CreateOrderResponse? orderResponse = await checkoutHttpRepository.CreateOrderAsync(orderRequest);
 
             if (orderResponse == null)
             {
@@ -82,7 +81,7 @@ public class CheckoutBasketHandler(
                 return Result<CheckoutBasketResult>.Failure("Failed to create order.");
             }
 
-            bool checkoutSuccess = await basketRepository.CheckoutAsync(command.UserName);
+            bool checkoutSuccess = await basketDataRepository.CheckoutAsync(command.UserName);
 
             if (!checkoutSuccess)
             {

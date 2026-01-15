@@ -1,0 +1,18 @@
+meta {
+  name: Delete Order
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{order_url}}/order
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "id": "{{order_id}}"
+  }
+}
+

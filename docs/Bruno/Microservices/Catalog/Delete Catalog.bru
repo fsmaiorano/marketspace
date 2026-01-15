@@ -1,0 +1,18 @@
+meta {
+  name: Delete Catalog
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{catalog_url}}/catalog
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "id": "{{catalog_id}}"
+  }
+}
+

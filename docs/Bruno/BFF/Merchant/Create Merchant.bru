@@ -1,0 +1,31 @@
+meta {
+  name: Create Merchant
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{bff_url}}/api/merchant
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Sample Merchant",
+    "description": "A sample merchant description",
+    "address": "123 Main Street, City, State",
+    "phoneNumber": "555-1234",
+    "email": "merchant@example.com"
+  }
+}
+
+script:post-response {
+  if (res.status === 200) {
+    const response = res.body;
+    if (response.isSuccess && response.data && response.data.merchantId) {
+      bru.setVar("merchantId", response.data.merchantId);
+    }
+  }
+}
+

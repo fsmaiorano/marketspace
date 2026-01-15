@@ -1,0 +1,23 @@
+meta {
+  name: Update Merchant
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{merchant_url}}/merchant
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "id": "{{merchant_id}}",
+    "name": "Updated Merchant Direct",
+    "description": "Updated via direct service API",
+    "address": "789 Updated Street, City, State",
+    "phoneNumber": "555-9999",
+    "email": "updated@merchant.com"
+  }
+}
+
