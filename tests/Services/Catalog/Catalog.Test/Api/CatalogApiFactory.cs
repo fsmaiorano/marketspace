@@ -9,27 +9,22 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog.Extensions.Hosting;
 using BuildingBlocks.Storage.Minio;
 using Catalog.Test.Mocks;
+using Microsoft.AspNetCore.TestHost;
 
 namespace Catalog.Test.Api;
 
 public class CatalogApiFactory : WebApplicationFactory<CatalogProgram>, IAsyncLifetime
 {
-    public CatalogApiFactory()
-    {
-        // No longer need Minio container since we're using a mock
-    }
-
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureServices(services =>
+        builder.ConfigureTestServices(services =>
         {
+            // Remove production services
             List<ServiceDescriptor> descriptorsToRemove = services
                 .Where(d => d.ServiceType.FullName != null &&
                             (d.ServiceType == typeof(DbContextOptions<CatalogDbContext>) ||
                              d.ServiceType == typeof(CatalogDbContext) ||
                              d.ServiceType == typeof(ICatalogDbContext) ||
-                             // d.ServiceType == typeof(MinioClient) ||
-                             // d.ServiceType == typeof(IMinioClient) ||
                              d.ServiceType == typeof(IMinioBucket) ||
                              d.ServiceType.FullName.Contains(nameof(CatalogDbContext)) ||
                              d.ServiceType.FullName.Contains(nameof(ICatalogDbContext)) ||
@@ -49,19 +44,35 @@ public class CatalogApiFactory : WebApplicationFactory<CatalogProgram>, IAsyncLi
             // Use mock Minio bucket instead of real container
             services.Replace(ServiceDescriptor.Scoped<IMinioBucket, MockMinioBucket>());
 
+            // Remove Serilog services
             services.RemoveAll<ILoggerFactory>();
-            services.TryAddSingleton<DiagnosticContext>();
-            services.AddLogging(loggingBuilder => loggingBuilder.AddConsole().SetMinimumLevel(LogLevel.Warning));
+            services.RemoveAll(typeof(ILogger<>));
+            services.RemoveAll<Serilog.ILogger>();
+            services.RemoveAll<DiagnosticContext>();
+            
+            // Add simple console logging for tests
+            services.AddLogging(loggingBuilder => 
+            {
+                loggingBuilder.ClearProviders();
+                loggingBuilder.AddConsole();
+                loggingBuilder.SetMinimumLevel(LogLevel.Warning);
+            });
+        });
+        
+        builder.UseDefaultServiceProvider((context, options) =>
+        {
+            options.ValidateScopes = false;
+            options.ValidateOnBuild = false;
         });
     }
 
-    public async Task InitializeAsync()
+    public Task InitializeAsync()
     {
         // No longer need to start Minio container
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
-    public async Task DisposeAsync()
+    public new async Task DisposeAsync()
     {
         // No longer need to dispose Minio container
         await base.DisposeAsync();

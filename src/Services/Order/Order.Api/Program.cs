@@ -1,6 +1,7 @@
 using BuildingBlocks.Exceptions;
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
+using BuildingBlocks.Services.Correlation;
 using Order.Api.Application;
 using Order.Api.Endpoints;
 using Order.Api.Infrastructure;
@@ -12,15 +13,13 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddApplicationServices(builder.Configuration)
-    .AddInfrastructureServices(builder.Configuration);
+    .AddInfrastructureServices(builder.Configuration)
+    .AddCustomLoggers();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICorrelationIdService, CorrelationIdService>();
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
-builder.Services
-    .AddObservability(builder.Configuration, options =>
-    {
-        options.ServiceName = "Order.Api";
-        options.ServiceVersion = "1.0.0";
-    });
 
 builder.Host.UseSerilog();
 builder.Services.AddSingleton<DiagnosticContext>();
@@ -45,7 +44,6 @@ app.UseSwaggerUI(options =>
 });
 
 app.UseMiddleware<CorrelationIdMiddleware>();
-app.UseObservability();
 app.UseExceptionHandler(options => { });
 
 CreateOrderEndpoint.MapEndpoint(app);

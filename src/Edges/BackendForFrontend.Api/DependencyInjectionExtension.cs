@@ -7,6 +7,7 @@ using BackendForFrontend.Api.Catalog.Services;
 using BackendForFrontend.Api.Order.Contracts;
 using BackendForFrontend.Api.Order.Services;
 using BuildingBlocks.Http;
+using BuildingBlocks.Services.Correlation;
 
 namespace BackendForFrontend.Api;
 
@@ -28,6 +29,7 @@ public static class DependencyInjectionExtension
 
     private static void AddServices(IServiceCollection services, IConfiguration configuration)
     {
+        services.AddScoped<ICorrelationIdService, CorrelationIdService>();
         services.AddScoped<CorrelationIdHandler>();
         services.AddTransient<LoggingHandler>();
 

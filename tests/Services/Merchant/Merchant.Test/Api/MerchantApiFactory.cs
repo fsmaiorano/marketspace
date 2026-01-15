@@ -1,4 +1,10 @@
 using Merchant.Api;
+using Merchant.Api.Infrastructure.Data;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -10,7 +16,7 @@ public class MerchantApiFactory : WebApplicationFactory<MerchantProgram>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureServices(services =>
+        builder.ConfigureTestServices(services =>
         {
             List<ServiceDescriptor> descriptorsToRemove = services
                 .Where(d => d.ServiceType.FullName != null &&
@@ -31,9 +37,25 @@ public class MerchantApiFactory : WebApplicationFactory<MerchantProgram>
 
             services.AddScoped<IMerchantDbContext, MerchantDbContext>();
 
+            // Remove Serilog services
             services.RemoveAll<ILoggerFactory>();
-            services.TryAddSingleton<DiagnosticContext>();
-            services.AddLogging(loggingBuilder => loggingBuilder.AddConsole().SetMinimumLevel(LogLevel.Warning));
+            services.RemoveAll(typeof(ILogger<>));
+            services.RemoveAll<Serilog.ILogger>();
+            services.RemoveAll<DiagnosticContext>();
+            
+            // Add simple console logging for tests
+            services.AddLogging(loggingBuilder => 
+            {
+                loggingBuilder.ClearProviders();
+                loggingBuilder.AddConsole();
+                loggingBuilder.SetMinimumLevel(LogLevel.Warning);
+            });
+        });
+        
+        builder.UseDefaultServiceProvider((context, options) =>
+        {
+            options.ValidateScopes = false;
+            options.ValidateOnBuild = false;
         });
     }
 }
