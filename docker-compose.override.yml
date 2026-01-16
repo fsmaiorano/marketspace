@@ -88,8 +88,6 @@ services:
     depends_on:
       - catalogdb
       - minio
-      - otelcollector
-      - loki
     ports:
       - "6000:8080"
       - "6060:8081"
@@ -114,8 +112,6 @@ services:
       - ASPNETCORE_Kestrel__Certificates__Default__Password=password
     depends_on:
       - basketdb
-      - otelcollector
-      - loki
     ports:
       - "6001:8080"
       - "6061:8081"
@@ -136,16 +132,9 @@ services:
       - FeatureManagement__OrderFullfilment=false
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=password
-      - Observability__OtlpEndpoint=http://otelcollector:4318
-      - Observability__LokiUrl=http://loki:3100
-      - Observability__JaegerEndpoint=http://jaeger:14268/api/traces
     restart: unless-stopped
     depends_on:
       orderdb:
-        condition: service_started
-      otelcollector:
-        condition: service_started
-      loki:
         condition: service_started
     ports:
       - "6003:8080"
@@ -163,16 +152,9 @@ services:
       - ConnectionStrings__Database=Server=merchantdb;Port=5432;Database=MerchantDb;User Id=postgres;Password=postgres;;Include Error Detail=true;
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=password
-      - Observability__OtlpEndpoint=http://otelcollector:4318
-      - Observability__LokiUrl=http://loki:3100
-      - Observability__JaegerEndpoint=http://jaeger:14268/api/traces
     restart: unless-stopped
     depends_on:
       merchantdb:
-        condition: service_started
-      otelcollector:
-        condition: service_started
-      loki:
         condition: service_started
     ports:
       - "6005:8080"
@@ -202,10 +184,6 @@ services:
       basket.api:
         condition: service_started
       order.api:
-        condition: service_started
-      otelcollector:
-        condition: service_started
-      loki:
         condition: service_started
     ports:
       - "5001:8080"
