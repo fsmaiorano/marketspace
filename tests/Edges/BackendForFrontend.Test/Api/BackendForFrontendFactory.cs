@@ -1,32 +1,13 @@
-using BackendForFrontend.Api;
-using BackendForFrontend.Api.Merchant.Contracts;
-using BackendForFrontend.Api.Basket.Contracts;
-using BackendForFrontend.Api.Basket.Services;
-using BackendForFrontend.Api.Catalog.Contracts;
-using BackendForFrontend.Api.Catalog.Services;
-using BackendForFrontend.Api.Order.Contracts;
 using Basket.Api.Infrastructure.Data;
 using Basket.Test.Api;
-using Catalog.Api.Infrastructure.Data;
-using Catalog.Test.Api;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Merchant.Api.Infrastructure.Data;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Mongo2Go;
 using MongoDB.Driver;
 using Order.Api.Infrastructure.Data;
 using Order.Test.Api;
 using Serilog.Extensions.Hosting;
-using BackendForFrontend.Api.Merchant.Services;
-using BackendForFrontend.Api.Order.Services;
 using Merchant.Test.Api;
-using BackendForFrontend.Test.Mocks;
-using BuildingBlocks.Storage.Minio;
-using BuildingBlocks.Loggers.Abstractions;
 using Microsoft.AspNetCore.TestHost;
 using Minio;
 
@@ -34,10 +15,10 @@ namespace BackendForFrontend.Test.Api;
 
 public class BackendForFrontendFactory : WebApplicationFactory<BackendForFrontendProgram>, IAsyncLifetime
 {
-    private HttpClient _merchantApiClient;
-    private HttpClient _orderApiClient;
-    private HttpClient _basketApiClient;
-    private HttpClient _catalogApiClient;
+    private readonly HttpClient _merchantApiClient;
+    private readonly HttpClient _orderApiClient;
+    private readonly HttpClient _basketApiClient;
+    private readonly HttpClient _catalogApiClient;
 
     public BackendForFrontendFactory()
     {
@@ -102,9 +83,9 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
             services.RemoveAll(typeof(ILogger<>));
             services.RemoveAll<Serilog.ILogger>();
             services.RemoveAll<DiagnosticContext>();
-            
+
             // Add simple console logging for tests
-            services.AddLogging(loggingBuilder => 
+            services.AddLogging(loggingBuilder =>
             {
                 loggingBuilder.ClearProviders();
                 loggingBuilder.AddConsole();
@@ -138,29 +119,37 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
 
             services.AddScoped<IMerchantService>(provider =>
             {
-                IApplicationLogger<TestMerchantService> applicationLogger = provider.GetRequiredService<IApplicationLogger<TestMerchantService>>();
-                IBusinessLogger<TestMerchantService> businessLogger = provider.GetRequiredService<IBusinessLogger<TestMerchantService>>();
+                IApplicationLogger<TestMerchantService> applicationLogger =
+                    provider.GetRequiredService<IApplicationLogger<TestMerchantService>>();
+                IBusinessLogger<TestMerchantService> businessLogger =
+                    provider.GetRequiredService<IBusinessLogger<TestMerchantService>>();
                 return new TestMerchantService(_merchantApiClient, applicationLogger, businessLogger);
             });
 
             services.AddScoped<IBasketService>(provider =>
             {
-                IApplicationLogger<TestBasketService> applicationLogger = provider.GetRequiredService<IApplicationLogger<TestBasketService>>();
-                IBusinessLogger<TestBasketService> businessLogger = provider.GetRequiredService<IBusinessLogger<TestBasketService>>();
+                IApplicationLogger<TestBasketService> applicationLogger =
+                    provider.GetRequiredService<IApplicationLogger<TestBasketService>>();
+                IBusinessLogger<TestBasketService> businessLogger =
+                    provider.GetRequiredService<IBusinessLogger<TestBasketService>>();
                 return new TestBasketService(_basketApiClient, applicationLogger, businessLogger);
             });
 
             services.AddScoped<ICatalogService>(provider =>
             {
-                IApplicationLogger<TestCatalogService> applicationLogger = provider.GetRequiredService<IApplicationLogger<TestCatalogService>>();
-                IBusinessLogger<TestCatalogService> businessLogger = provider.GetRequiredService<IBusinessLogger<TestCatalogService>>();
+                IApplicationLogger<TestCatalogService> applicationLogger =
+                    provider.GetRequiredService<IApplicationLogger<TestCatalogService>>();
+                IBusinessLogger<TestCatalogService> businessLogger =
+                    provider.GetRequiredService<IBusinessLogger<TestCatalogService>>();
                 return new TestCatalogService(_catalogApiClient, applicationLogger, businessLogger);
             });
 
             services.AddScoped<IOrderService>(provider =>
             {
-                IApplicationLogger<TestOrderService> applicationLogger = provider.GetRequiredService<IApplicationLogger<TestOrderService>>();
-                IBusinessLogger<TestOrderService> businessLogger = provider.GetRequiredService<IBusinessLogger<TestOrderService>>();
+                IApplicationLogger<TestOrderService> applicationLogger =
+                    provider.GetRequiredService<IApplicationLogger<TestOrderService>>();
+                IBusinessLogger<TestOrderService> businessLogger =
+                    provider.GetRequiredService<IBusinessLogger<TestOrderService>>();
                 return new TestOrderService(_orderApiClient, applicationLogger, businessLogger);
             });
         });
@@ -168,13 +157,11 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
 
     public Task InitializeAsync()
     {
-        // Minio container is no longer used, so nothing to initialize
         return Task.CompletedTask;
     }
 
     public new async Task DisposeAsync()
     {
-        // Minio container is no longer used, so nothing to dispose
         await base.DisposeAsync();
     }
 }

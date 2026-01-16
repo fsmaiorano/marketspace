@@ -1,15 +1,7 @@
 using BackendForFrontend.Api.Catalog.Contracts;
-using BackendForFrontend.Api.Catalog.Dtos;
-using Builder;
-using BuildingBlocks;
-using BuildingBlocks.Loggers.Abstractions;
 using Catalog.Api.Application.Catalog.CreateCatalog;
 using Catalog.Api.Application.Catalog.DeleteCatalog;
 using Catalog.Api.Application.Catalog.GetCatalog;
-using Catalog.Api.Application.Catalog.GetCatalogById;
-using Catalog.Api.Application.Catalog.UpdateCatalog;
-using Microsoft.Extensions.Logging;
-using System.Net.Http.Json;
 
 namespace BackendForFrontend.Test.Mocks;
 

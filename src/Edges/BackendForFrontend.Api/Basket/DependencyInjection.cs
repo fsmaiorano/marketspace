@@ -1,4 +1,3 @@
-using BackendForFrontend.Api.Basket.Contracts;
 using BackendForFrontend.Api.Basket.Services;
 using BackendForFrontend.Api.Basket.UseCases;
 
@@ -11,7 +10,6 @@ public static class DependencyInjection
     {
         services.AddScoped<IBasketUseCase, BasketUseCase>();
         
-        // Register HttpClient for BasketService
         services.AddHttpClient<IBasketService, BasketService>();
         
         return services;

@@ -1,5 +1,3 @@
-using BuildingBlocks.Storage.Minio;
-
 namespace BackendForFrontend.Test.Mocks;
 
 public class MockMinioBucket : IMinioBucket

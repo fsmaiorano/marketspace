@@ -1,8 +1,3 @@
-using BackendForFrontend.Api.Catalog.Dtos;
-using BuildingBlocks;
-using FluentAssertions;
-using System.Net.Http.Json;
-
 namespace BackendForFrontend.Test.Api.Endpoints;
 
 public class GetCatalogListEndpointTest(BackendForFrontendFactory factory) : HttpFixture(factory)

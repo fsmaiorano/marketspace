@@ -1,5 +1,5 @@
-using BackendForFrontend.Api.Basket.Contracts;
 using BackendForFrontend.Api.Basket.Dtos;
+using BackendForFrontend.Api.Basket.UseCases;
 using Microsoft.AspNetCore.Mvc;
 using BuildingBlocks;
 

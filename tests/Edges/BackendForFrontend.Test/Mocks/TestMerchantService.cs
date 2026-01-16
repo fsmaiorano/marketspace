@@ -1,13 +1,8 @@
 using BackendForFrontend.Api.Merchant.Contracts;
-using BackendForFrontend.Api.Merchant.Dtos;
-using BuildingBlocks;
-using BuildingBlocks.Loggers.Abstractions;
 using Merchant.Api.Application.Merchant.CreateMerchant;
 using Merchant.Api.Application.Merchant.DeleteMerchant;
 using Merchant.Api.Application.Merchant.GetMerchantById;
 using Merchant.Api.Application.Merchant.UpdateMerchant;
-using Microsoft.Extensions.Logging;
-using System.Net.Http.Json;
 
 namespace BackendForFrontend.Test.Mocks;
 

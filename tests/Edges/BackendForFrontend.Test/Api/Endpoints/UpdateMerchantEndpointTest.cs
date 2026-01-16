@@ -1,12 +1,3 @@
-using BackendForFrontend.Api.Merchant.Dtos;
-using Builder;
-using BuildingBlocks;
-using FluentAssertions;
-using Merchant.Api.Domain.Entities;
-using Merchant.Api.Infrastructure.Data;
-using Microsoft.Extensions.DependencyInjection;
-using System.Net.Http.Json;
-
 namespace BackendForFrontend.Test.Api.Endpoints;
 
 public class UpdateMerchantEndpointTest(BackendForFrontendFactory factory) : HttpFixture(factory)

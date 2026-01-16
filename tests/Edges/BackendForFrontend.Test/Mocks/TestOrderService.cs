@@ -1,8 +1,4 @@
 using BackendForFrontend.Api.Order.Contracts;
-using BackendForFrontend.Api.Order.Dtos;
-using BuildingBlocks;
-using BuildingBlocks.Loggers.Abstractions;
-using Microsoft.Extensions.Logging;
 
 namespace BackendForFrontend.Test.Mocks;
 
