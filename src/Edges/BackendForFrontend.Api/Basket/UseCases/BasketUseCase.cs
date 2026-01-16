@@ -1,9 +1,17 @@
-using BackendForFrontend.Api.Basket.Contracts;
 using BackendForFrontend.Api.Basket.Dtos;
+using BackendForFrontend.Api.Basket.Services;
 using BuildingBlocks;
 using BuildingBlocks.Loggers.Abstractions;
 
 namespace BackendForFrontend.Api.Basket.UseCases;
+
+public interface IBasketUseCase
+{
+    Task<Result<CreateBasketResponse>> CreateBasketAsync(CreateBasketRequest request);
+    Task<Result<GetBasketResponse>> GetBasketByIdAsync(string username);
+    Task<Result<DeleteBasketResponse>> DeleteBasketAsync(string username);
+    Task<Result<CheckoutBasketResponse>> CheckoutBasketAsync(CheckoutBasketRequest request);
+}
 
 public class BasketUseCase(
     IApplicationLogger<BasketUseCase> applicationLogger,

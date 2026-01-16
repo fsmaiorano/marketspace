@@ -1,6 +1,5 @@
 using BackendForFrontend.Api.Merchant.Contracts;
 using BackendForFrontend.Api.Merchant.Services;
-using BackendForFrontend.Api.Basket.Contracts;
 using BackendForFrontend.Api.Basket.Services;
 using BackendForFrontend.Api.Catalog.Contracts;
 using BackendForFrontend.Api.Catalog.Services;
@@ -13,14 +12,17 @@ namespace BackendForFrontend.Api;
 
 public static class DependencyInjectionExtension
 {
-    public static void AddApplication(this IServiceCollection services, IConfiguration configuration)
+    extension(IServiceCollection services)
     {
-        AddUseCases(services);
-    }
+        public void AddApplication(IConfiguration configuration)
+        {
+            AddUseCases(services);
+        }
 
-    public static void AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
-    {
-        AddServices(services, configuration);
+        public void AddInfrastructure(IConfiguration configuration)
+        {
+            AddServices(services, configuration);
+        }
     }
 
     private static void AddUseCases(IServiceCollection services)

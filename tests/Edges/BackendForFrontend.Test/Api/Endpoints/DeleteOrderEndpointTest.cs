@@ -1,8 +1,3 @@
-using BackendForFrontend.Api.Order.Dtos;
-using BuildingBlocks;
-using FluentAssertions;
-using System.Net.Http.Json;
-
 namespace BackendForFrontend.Test.Api.Endpoints;
 
 public class DeleteOrderEndpointTest(BackendForFrontendFactory factory) : HttpFixture(factory)

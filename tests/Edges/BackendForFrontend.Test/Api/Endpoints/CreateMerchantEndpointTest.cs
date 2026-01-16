@@ -1,9 +1,3 @@
-using BackendForFrontend.Api.Merchant.Dtos;
-using Builder;
-using BuildingBlocks;
-using FluentAssertions;
-using System.Net.Http.Json;
-
 namespace BackendForFrontend.Test.Api.Endpoints;
 
 public class CreateMerchantEndpointTest(BackendForFrontendFactory factory) : HttpFixture(factory)

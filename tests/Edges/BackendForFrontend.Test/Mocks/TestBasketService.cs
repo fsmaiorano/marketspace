@@ -1,13 +1,6 @@
-using BackendForFrontend.Api.Basket.Contracts;
-using BackendForFrontend.Api.Basket.Dtos;
 using Basket.Api.Application.Basket.CreateBasket;
 using Basket.Api.Application.Basket.DeleteBasket;
 using Basket.Api.Application.Basket.GetBasketById;
-using Builder;
-using BuildingBlocks;
-using BuildingBlocks.Loggers.Abstractions;
-using Microsoft.Extensions.Logging;
-using System.Net.Http.Json;
 
 namespace BackendForFrontend.Test.Mocks;
 
