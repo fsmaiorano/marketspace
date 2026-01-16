@@ -1,5 +1,6 @@
 using Builder;
 using BuildingBlocks;
+using Order.Api.Application.Dto;
 using Order.Api.Application.Order.GetOrderById;
 using Order.Api.Domain.Entities;
 using Order.Api.Domain.ValueObjects;
@@ -25,11 +26,45 @@ public class GetOrderByIdEndpointTest(OrderApiFactory factory) : IClassFixture<O
         GetOrderByIdResult result = new GetOrderByIdResult
         {
             Id = Guid.CreateVersion7(),
-            Name = "Test Order",
-            Description = "This is a test order",
-            ImageUrl = "http://example.com/image.jpg",
-            Price = 99.99m,
-            Categories = new List<string> { "Category1", "Category2" }
+            CustomerId = Guid.CreateVersion7(),
+            Status = "Pending",
+            TotalAmount = 99.99m,
+            ShippingAddress = new AddressDto
+            {
+                FirstName = "John",
+                LastName = "Doe",
+                EmailAddress = "john.doe@example.com",
+                AddressLine = "123 Main St",
+                Country = "US",
+                State = "CA",
+                ZipCode = "90001"
+            },
+            BillingAddress = new AddressDto
+            {
+                FirstName = "John",
+                LastName = "Doe",
+                EmailAddress = "john.doe@example.com",
+                AddressLine = "123 Main St",
+                Country = "US",
+                State = "CA",
+                ZipCode = "90001"
+            },
+            Payment = new PaymentSummaryDto
+            {
+                CardName = "John Doe",
+                MaskedCardNumber = "************1234",
+                PaymentMethod = 1
+            },
+            Items = new List<OrderItemDto>
+            {
+                new()
+                {
+                    OrderId = orderId,
+                    CatalogId = Guid.CreateVersion7(),
+                    Quantity = 1,
+                    Price = 99.99m
+                }
+            }
         };
 
 
@@ -79,7 +114,6 @@ public class GetOrderByIdEndpointTest(OrderApiFactory factory) : IClassFixture<O
         OrderDbContext dbContext = scope.ServiceProvider.GetRequiredService<OrderDbContext>();
 
         OrderEntity? order = OrderBuilder.CreateOrderFaker().Generate();
-
         order.Id = OrderId.Of(Guid.CreateVersion7());
 
         dbContext.Orders.Add(order);
@@ -88,11 +122,42 @@ public class GetOrderByIdEndpointTest(OrderApiFactory factory) : IClassFixture<O
         GetOrderByIdResult result = new GetOrderByIdResult
         {
             Id = order.Id.Value,
-            Name = "Test Order",
-            Description = "This is a test order",
-            ImageUrl = "http://example.com/image.jpg",
-            Price = 99.99m,
-            Categories = new List<string> { "Category1", "Category2" }
+            CustomerId = order.CustomerId.Value,
+            Status = order.Status.ToString(),
+            TotalAmount = order.TotalAmount.Value,
+            ShippingAddress = new AddressDto
+            {
+                FirstName = order.ShippingAddress.FirstName,
+                LastName = order.ShippingAddress.LastName,
+                EmailAddress = order.ShippingAddress.EmailAddress,
+                AddressLine = order.ShippingAddress.AddressLine,
+                Country = order.ShippingAddress.Country,
+                State = order.ShippingAddress.State,
+                ZipCode = order.ShippingAddress.ZipCode
+            },
+            BillingAddress = new AddressDto
+            {
+                FirstName = order.BillingAddress.FirstName,
+                LastName = order.BillingAddress.LastName,
+                EmailAddress = order.BillingAddress.EmailAddress,
+                AddressLine = order.BillingAddress.AddressLine,
+                Country = order.BillingAddress.Country,
+                State = order.BillingAddress.State,
+                ZipCode = order.BillingAddress.ZipCode
+            },
+            Payment = new PaymentSummaryDto
+            {
+                CardName = order.Payment.CardName,
+                MaskedCardNumber = "************1234",
+                PaymentMethod = order.Payment.PaymentMethod
+            },
+            Items = order.Items.Select(i => new OrderItemDto
+            {
+                OrderId = i.OrderId.Value,
+                CatalogId = i.CatalogId.Value,
+                Quantity = i.Quantity,
+                Price = i.Price.Value
+            }).ToList()
         };
 
         _mockHandler
@@ -105,5 +170,6 @@ public class GetOrderByIdEndpointTest(OrderApiFactory factory) : IClassFixture<O
         Result<GetOrderByIdResult>? responseResult =
             await response.Content.ReadFromJsonAsync<Result<GetOrderByIdResult>>();
         responseResult?.Data.Should().NotBeNull();
+        responseResult?.Data?.Id.Should().Be(order.Id.Value);
     }
 }

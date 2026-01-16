@@ -22,4 +22,6 @@ public class CheckoutBasketCommand
     public string Expiration { get; set; } = null!;
     public string Cvv { get; set; } = null!;
     public int PaymentMethod { get; set; } = 0;
+    public string? RequestId { get; set; }
+    public string? IdempotencyKey { get; set; }
 }

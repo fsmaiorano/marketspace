@@ -2,13 +2,13 @@ namespace Order.Api.Domain.ValueObjects;
 
 public record Address
 {
-    private string FirstName { get; set; } = null!;
-    private string LastName { get; set; } = null!;
-    private string EmailAddress { get; set; } = null!;
-    private string AddressLine { get; set; } = null!;
-    private string Country { get; set; } = null!;
-    private string State { get; set; } = null!;
-    private string ZipCode { get; set; } = null!;
+    public string FirstName { get; private set; } = null!;
+    public string LastName { get; private set; } = null!;
+    public string EmailAddress { get; private set; } = null!;
+    public string AddressLine { get; private set; } = null!;
+    public string Country { get; private set; } = null!;
+    public string State { get; private set; } = null!;
+    public string ZipCode { get; private set; } = null!;
 
     protected Address()
     {

@@ -1,3 +1,5 @@
+using System.Net.Http;
+using System.Net.Http.Json;
 using Basket.Api.Application.Basket.CheckoutBasket.Contracts;
 using Basket.Api.Domain.Repositories;
 using BuildingBlocks.Loggers.Abstractions;
@@ -9,7 +11,7 @@ public class CheckoutHttpRepository(
     IConfiguration configuration,
     IApplicationLogger<CheckoutHttpRepository> applicationLogger) : ICheckoutHttpRepository
 {
-    public async Task<CreateOrderResponse?> CreateOrderAsync(CreateOrderRequest request)
+    public async Task<CreateOrderResponse?> CreateOrderAsync(CreateOrderRequest request, string? idempotencyKey, string? correlationId)
     {
         try
         {
@@ -19,7 +21,20 @@ public class CheckoutHttpRepository(
             applicationLogger.LogInformation("Calling Order Service to create order for customer: {CustomerId}",
                 request.CustomerId);
 
-            HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{baseUrl}/order", request);
+            using HttpRequestMessage message = new(HttpMethod.Post, $"{baseUrl}/order");
+            message.Content = JsonContent.Create(request);
+
+            if (!string.IsNullOrWhiteSpace(idempotencyKey))
+            {
+                message.Headers.TryAddWithoutValidation("Idempotency-Key", idempotencyKey);
+            }
+
+            if (!string.IsNullOrWhiteSpace(correlationId))
+            {
+                message.Headers.TryAddWithoutValidation("X-Correlation-Id", correlationId);
+            }
+
+            HttpResponseMessage response = await httpClient.SendAsync(message);
 
             if (response.IsSuccessStatusCode)
             {

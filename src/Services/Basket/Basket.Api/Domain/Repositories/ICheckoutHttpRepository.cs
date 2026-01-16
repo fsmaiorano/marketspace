@@ -4,5 +4,5 @@ namespace Basket.Api.Domain.Repositories;
 
 public interface ICheckoutHttpRepository
 {
-    Task<CreateOrderResponse?> CreateOrderAsync(CreateOrderRequest request);
+    Task<CreateOrderResponse?> CreateOrderAsync(CreateOrderRequest request, string? idempotencyKey, string? correlationId);
 }

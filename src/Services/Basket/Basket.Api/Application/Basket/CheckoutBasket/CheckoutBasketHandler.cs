@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Basket.Api.Application.Basket.CheckoutBasket.Contracts;
 using Basket.Api.Domain.Entities;
 using Basket.Api.Domain.Repositories;
@@ -17,6 +18,14 @@ public class CheckoutBasketHandler(
     {
         try
         {
+            string correlationId = !string.IsNullOrWhiteSpace(command.RequestId)
+                ? command.RequestId!
+                : Guid.NewGuid().ToString();
+           
+            string? idempotencyKey = !string.IsNullOrWhiteSpace(command.IdempotencyKey)
+                ? command.IdempotencyKey
+                : command.RequestId;
+            
             applicationLogger.LogInformation("Starting checkout process for user: {Username}", command.UserName);
 
             ShoppingCartEntity? basket = await basketDataRepository.GetCartAsync(command.UserName);
@@ -73,7 +82,8 @@ public class CheckoutBasketHandler(
             applicationLogger.LogInformation("Creating order for customer: {CustomerId} with {ItemCount} items",
                 command.CustomerId, orderItems.Count);
 
-            CreateOrderResponse? orderResponse = await checkoutHttpRepository.CreateOrderAsync(orderRequest);
+            CreateOrderResponse? orderResponse =
+                await checkoutHttpRepository.CreateOrderAsync(orderRequest, idempotencyKey, correlationId);
 
             if (orderResponse == null)
             {
@@ -91,12 +101,13 @@ public class CheckoutBasketHandler(
             }
 
             businessLogger.LogInformation(
-                "Checkout completed successfully. Username: {Username}, CustomerId: {CustomerId}, OrderId: {OrderId}, TotalAmount: {TotalAmount}, ItemCount: {ItemCount}",
+                "Checkout completed successfully. Username: {Username}, CustomerId: {CustomerId}, OrderId: {OrderId}, TotalAmount: {TotalAmount}, ItemCount: {ItemCount}, CorrelationId: {CorrelationId}",
                 command.UserName,
                 command.CustomerId,
                 orderResponse.OrderId,
                 basket.TotalPrice,
-                basket.Items.Count);
+                basket.Items.Count,
+                correlationId);
 
             return Result<CheckoutBasketResult>.Success(new CheckoutBasketResult(true));
         }
