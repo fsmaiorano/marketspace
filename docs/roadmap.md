@@ -1,0 +1,8 @@
+- Substitute MongoDB for Redis
+- Configure messaging service – Kafka or RabbitMQ
+- Implement checkout feature, take basket items from Redis
+- Create an event to send the Order
+- Receive the order from the event, send to the payment gateway
+- Create a payment gateway (rust)
+- Rust read Kafka message and send to the payment gateway
+- Respond back to the Order (grpc)

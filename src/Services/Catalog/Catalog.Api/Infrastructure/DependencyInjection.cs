@@ -10,7 +10,9 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services,
         IConfiguration configuration)
     {
-        string connectionString = configuration.GetConnectionString("Database")
+        // Try Aspire naming first (catalogdb), then fallback to default (Database)
+        string connectionString = configuration.GetConnectionString("catalogdb")
+                                  ?? configuration.GetConnectionString("Database")
                                   ?? throw new InvalidOperationException(
                                       "Database connection string is not configured.");
         ;
