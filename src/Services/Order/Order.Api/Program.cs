@@ -2,6 +2,7 @@ using BuildingBlocks.Exceptions;
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
 using BuildingBlocks.Services.Correlation;
+using MarketSpace.ServiceDefaults;
 using Order.Api.Application;
 using Order.Api.Endpoints;
 using Order.Api.Infrastructure;
@@ -10,6 +11,8 @@ using Serilog;
 using Serilog.Extensions.Hosting;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+builder.AddServiceDefaults();
 
 builder.Services
     .AddApplicationServices(builder.Configuration)
@@ -27,6 +30,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 WebApplication app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 if (app.Environment.IsDevelopment())
 {

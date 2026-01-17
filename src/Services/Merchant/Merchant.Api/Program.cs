@@ -2,6 +2,7 @@ using BuildingBlocks.Exceptions;
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
 using BuildingBlocks.Services.Correlation;
+using MarketSpace.ServiceDefaults;
 using Merchant.Api.Application;
 using Merchant.Api.Endpoints;
 using Merchant.Api.Infrastructure;
@@ -10,6 +11,8 @@ using Serilog;
 using Serilog.Extensions.Hosting;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+builder.AddServiceDefaults();
 
 builder.Services.AddOpenApi();
 
@@ -30,6 +33,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 WebApplication app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 if (app.Environment.IsDevelopment())
 {

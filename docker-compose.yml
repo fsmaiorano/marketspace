@@ -1,5 +1,5 @@
 services:
-  keycloakdb:
+  userdb:
     image: postgres:18
     networks:
       - marketspace
@@ -16,11 +16,6 @@ services:
   
   basketdb:
     image: postgres:18
-    networks:
-      - marketspace
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:24.0.3
     networks:
       - marketspace
   
@@ -82,6 +77,16 @@ services:
     networks:
       - marketspace
   
+  user.api:
+    image: ${DOCKER_REGISTRY-}userapi
+    depends_on:
+      - userdb
+    build:
+      context: .
+      dockerfile: ./src/Services/User/Dockerfile
+    networks:
+      - marketspace
+  
   backendforfrontend.api:
     image: ${DOCKER_REGISTRY-}backendforfrontendapi
     build:
@@ -104,7 +109,7 @@ networks:
 
 volumes:
   postgres_catalog:
-  postgres_keycloak:
+  postgres_user:
   postgres_order:
   postgres_merchant:
   mongo_basket_data:

@@ -14,12 +14,32 @@ public static class DependencyInjection
         services.Configure<DatabaseSettings>(
             configuration.GetSection("DatabaseSettings"));
 
-        string connectionString = configuration.GetSection("DatabaseSettings:ConnectionString").Value
+        // Try Aspire naming first (basketdb), then fallback to DatabaseSettings:ConnectionString
+        string connectionString = configuration.GetConnectionString("basketdb")
+                                  ?? configuration.GetSection("DatabaseSettings:ConnectionString").Value
                                   ?? throw new InvalidOperationException(
                                       "Database connection string is not configured.");
 
-        string databaseName = configuration.GetSection("DatabaseSettings:DatabaseName").Value
-                              ?? throw new InvalidOperationException("Database name is not configured.");
+        // For Aspire, extract database name from connection string if present
+        // MongoDB connection string format: mongodb://host:port/database
+        string databaseName = configuration.GetSection("DatabaseSettings:DatabaseName").Value ?? "BasketDb";
+        
+        // If using Aspire connection string, try to extract database name from URL
+        if (configuration.GetConnectionString("basketdb") != null)
+        {
+            try
+            {
+                var mongoUrl = MongoUrl.Create(connectionString);
+                if (!string.IsNullOrEmpty(mongoUrl.DatabaseName))
+                {
+                    databaseName = mongoUrl.DatabaseName;
+                }
+            }
+            catch
+            {
+                // If parsing fails, use the fallback database name
+            }
+        }
 
         services.AddSingleton<IMongoClient>(_ => new MongoClient(connectionString));
 

@@ -6,10 +6,13 @@ using Catalog.Api.Application;
 using Catalog.Api.Endpoints;
 using Catalog.Api.Infrastructure;
 using Catalog.Api.Infrastructure.Data.Extensions;
+using MarketSpace.ServiceDefaults;
 using Serilog;
 using Serilog.Extensions.Hosting;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+builder.AddServiceDefaults();
 
 builder.Services.AddOpenApi();
 
@@ -29,6 +32,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 WebApplication app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 if (app.Environment.IsDevelopment())
 {

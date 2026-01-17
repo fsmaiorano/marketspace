@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <Sdk Name="Aspire.AppHost.Sdk" Version="9.0.0"/>
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsAspireHost>true</IsAspireHost>
+        <UserSecretsId>ce3995a2-7f96-4f10-89b2-80cf94d59c62</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Aspire.Hosting.AppHost" Version="13.1.0" />
+        <PackageReference Include="Aspire.Hosting.MongoDB" Version="13.1.0" />
+        <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.1.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../src/Services/Catalog/Catalog.Api/Catalog.Api.csproj"/>
+        <ProjectReference Include="../src/Services/Basket/Basket.Api/Basket.Api.csproj"/>
+        <ProjectReference Include="../src/Services/Order/Order.Api/Order.Api.csproj"/>
+        <ProjectReference Include="../src/Services/Merchant/Merchant.Api/Merchant.Api.csproj"/>
+        <ProjectReference Include="../src/Services/User/User.csproj"/>
+        <ProjectReference Include="../src/Edges/BackendForFrontend.Api/BackendForFrontend.Api.csproj"/>
+    </ItemGroup>
+
+</Project>
