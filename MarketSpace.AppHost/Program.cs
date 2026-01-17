@@ -2,34 +2,41 @@ var builder = DistributedApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
 // Databases - Postgres
-var catalogDbConfig = config.GetSection("Aspire:Databases:Postgres:Catalog");
-var catalogDb = builder.AddPostgres(catalogDbConfig["Name"]!)
+var postgresConfig = config.GetSection("Aspire:Databases:Postgres");
+var postgresPassword = builder.AddParameter("postgres-password", "postgres");
+
+var catalogDbConfig = postgresConfig.GetSection("Catalog");
+var catalogDb = builder.AddPostgres(catalogDbConfig["Name"]!, password: postgresPassword)
     .WithEnvironment("POSTGRES_DB", catalogDbConfig["DatabaseName"]!)
     .WithLifetime(ContainerLifetime.Persistent)
+    .WithHostPort(int.Parse(catalogDbConfig["Port"]!))
     .AddDatabase(catalogDbConfig["ConnectionName"]!);
 
-var orderDbConfig = config.GetSection("Aspire:Databases:Postgres:Order");
-var orderDb = builder.AddPostgres(orderDbConfig["Name"]!)
+var orderDbConfig = postgresConfig.GetSection("Order");
+var orderDb = builder.AddPostgres(orderDbConfig["Name"]!, password: postgresPassword)
     .WithEnvironment("POSTGRES_DB", orderDbConfig["DatabaseName"]!)
     .WithLifetime(ContainerLifetime.Persistent)
+    .WithHostPort(int.Parse(orderDbConfig["Port"]!))
     .AddDatabase(orderDbConfig["ConnectionName"]!);
 
-var merchantDbConfig = config.GetSection("Aspire:Databases:Postgres:Merchant");
-var merchantDb = builder.AddPostgres(merchantDbConfig["Name"]!)
+var merchantDbConfig = postgresConfig.GetSection("Merchant");
+var merchantDb = builder.AddPostgres(merchantDbConfig["Name"]!, password: postgresPassword)
     .WithEnvironment("POSTGRES_DB", merchantDbConfig["DatabaseName"]!)
     .WithLifetime(ContainerLifetime.Persistent)
+    .WithHostPort(int.Parse(merchantDbConfig["Port"]!))
     .AddDatabase(merchantDbConfig["ConnectionName"]!);
 
-var userDbConfig = config.GetSection("Aspire:Databases:Postgres:User");
-var userDb = builder.AddPostgres(userDbConfig["Name"]!)
+var userDbConfig = postgresConfig.GetSection("User");
+var userDb = builder.AddPostgres(userDbConfig["Name"]!, password: postgresPassword)
     .WithEnvironment("POSTGRES_DB", userDbConfig["DatabaseName"]!)
     .WithLifetime(ContainerLifetime.Persistent)
+    .WithHostPort(int.Parse(userDbConfig["Port"]!))
     .AddDatabase(userDbConfig["ConnectionName"]!);
 
 var mongoDbConfig = config.GetSection("Aspire:Databases:MongoDB");
-var basketDb = builder.AddMongoDB(mongoDbConfig["Name"]!)
-    .WithLifetime(ContainerLifetime.Persistent)
-    .AddDatabase(mongoDbConfig.GetSection("Basket")["DatabaseName"]!);
+var mongoServer = builder.AddMongoDB(mongoDbConfig["Name"]!, int.Parse(mongoDbConfig["Port"]!))
+    .WithLifetime(ContainerLifetime.Persistent);
+var basketDb = mongoServer.AddDatabase(mongoDbConfig.GetSection("Basket")["DatabaseName"]!);
 
 // Storage - Minio
 var minioConfig = config.GetSection("Aspire:Storage:Minio");
