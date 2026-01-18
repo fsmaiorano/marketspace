@@ -15,7 +15,11 @@ services:
       - marketspace
   
   basketdb:
-    image: postgres:18
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_basket_data:/data/db
     networks:
       - marketspace
   
@@ -49,6 +53,8 @@ services:
     image: ${DOCKER_REGISTRY-}basketapi
     depends_on:
       - basketdb
+    environment:
+      - DatabaseSettings__ConnectionString=mongodb://basketdb:27017
     build:
       context: .
       dockerfile: ./src/Services/Basket/Basket.Api/Dockerfile

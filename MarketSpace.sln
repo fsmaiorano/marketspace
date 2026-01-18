@@ -73,9 +73,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bruno", "Bruno", "{18BD9DDB
 		docs\Bruno\bruno.json = docs\Bruno\bruno.json
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarketSpace.AppHost", "MarketSpace.AppHost\MarketSpace.AppHost.csproj", "{DDE0B5A2-AA50-4620-BEA1-780E96FF9028}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarketSpace.AppHost", "infra\MarketSpace.AppHost\MarketSpace.AppHost.csproj", "{DDE0B5A2-AA50-4620-BEA1-780E96FF9028}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarketSpace.ServiceDefaults", "MarketSpace.ServiceDefaults\MarketSpace.ServiceDefaults.csproj", "{310B3793-42DA-4495-9ED7-C85ADB1CA110}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarketSpace.ServiceDefaults", "infra\MarketSpace.ServiceDefaults\MarketSpace.ServiceDefaults.csproj", "{310B3793-42DA-4495-9ED7-C85ADB1CA110}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "infra", "infra", "{0E59F629-A466-4FDB-B1F4-373D8229A5EF}"
 EndProject
