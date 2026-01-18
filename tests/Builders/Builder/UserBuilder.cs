@@ -8,27 +8,27 @@ public class UserBuilder
 {
     private static readonly Faker _faker = new();
 
-    public static Faker<RegisterRequest> CreateRegisterRequest()
+    public static RegisterRequest CreateRegisterRequest(string? email = null, string? password = null)
     {
         return new Faker<RegisterRequest>()
             .CustomInstantiator(f => new RegisterRequest
             {
-                Email = f.Internet.Email(), 
-                Password = f.Internet.Password(8, false, "", "@1Aa")
+                Email = email ?? f.Internet.Email(),
+                Password = password ?? f.Internet.Password(8, false, "", "@1Aa")
             });
     }
 
-    public static Faker<AuthRequest> CreateLoginRequest()
+    public static AuthRequest CreateLoginRequest(string? email, string? password)
     {
         return new Faker<AuthRequest>()
             .CustomInstantiator(f => new AuthRequest
             {
-                Email = f.Internet.Email(), 
-                Password = f.Internet.Password(8, false, "", "@1Aa")
+                Email = email ?? f.Internet.Email(),
+                Password = password ?? f.Internet.Password(8, false, "", "@1Aa")
             });
     }
 
-    public static Faker<RefreshRequest> CreateRefreshRequest(string? accessToken = null, string? refreshToken = null)
+    public static RefreshRequest CreateRefreshRequest(string? accessToken = null, string? refreshToken = null)
     {
         return new Faker<RefreshRequest>()
             .CustomInstantiator(f => new RefreshRequest
@@ -43,12 +43,7 @@ public class UserBuilder
         string? userName = null)
     {
         var userEmail = email ?? _faker.Internet.Email();
-        return new ApplicationUser 
-        { 
-            Email = userEmail, 
-            UserName = userName ?? userEmail, 
-            EmailConfirmed = true 
-        };
+        return new ApplicationUser { Email = userEmail, UserName = userName ?? userEmail, EmailConfirmed = true };
     }
 
     public static RefreshToken CreateRefreshToken(
