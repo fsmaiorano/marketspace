@@ -1,5 +1,5 @@
 using BuildingBlocks;
-using BuildingBlocks.Loggers.Abstractions;
+using BuildingBlocks.Loggers;
 using Merchant.Api.Domain.Entities;
 using Merchant.Api.Domain.Repositories;
 using Merchant.Api.Domain.ValueObjects;
@@ -8,15 +8,14 @@ namespace Merchant.Api.Application.Merchant.CreateMerchant;
 
 public sealed class CreateMerchantHandler(
     IMerchantRepository repository, 
-    IApplicationLogger<CreateMerchantHandler> applicationLogger,
-    IBusinessLogger<CreateMerchantHandler> businessLogger)
+    IAppLogger<CreateMerchantHandler> logger)
     : ICreateMerchantHandler
 {
     public async Task<Result<CreateMerchantResult>> HandleAsync(CreateMerchantCommand command)
     {
         try
         {
-            applicationLogger.LogInformation("Processing create merchant request for: {Name}", command.Name);
+            logger.LogInformation(LogTypeEnum.Application, "Processing create merchant request for: {Name}", command.Name);
             
             MerchantEntity merchantEntity = MerchantEntity.Create(
                 command.Name,
@@ -29,11 +28,11 @@ public sealed class CreateMerchantHandler(
             
             if (result <= 0)
             {
-                applicationLogger.LogError("Failed to persist merchant to database for: {Name}", command.Name);
+                logger.LogError(LogTypeEnum.Application, null, "Failed to persist merchant to database for: {Name}", command.Name);
                 return Result<CreateMerchantResult>.Failure("Failed to create merchant.");
             }
             
-            businessLogger.LogInformation("Merchant created successfully. MerchantId: {MerchantId}, Name: {Name}, Email: {Email}", 
+            logger.LogInformation(LogTypeEnum.Business, "Merchant created successfully. MerchantId: {MerchantId}, Name: {Name}, Email: {Email}", 
                 merchantEntity.Id, 
                 command.Name, 
                 command.Email);
@@ -41,7 +40,7 @@ public sealed class CreateMerchantHandler(
         }
         catch (Exception ex)
         {
-            applicationLogger.LogError(ex, "An error occurred while creating the merchant: {Command}", command);
+            logger.LogError(LogTypeEnum.Exception, ex, "An error occurred while creating the merchant: {Command}", command);
             return Result<CreateMerchantResult>.Failure($"An error occurred while creating the merchant: {ex.Message}");
         }
     }

@@ -4,12 +4,11 @@ namespace BackendForFrontend.Test.Mocks;
 
 public class TestOrderService(
     HttpClient httpClient, 
-    IApplicationLogger<TestOrderService> applicationLogger,
-    IBusinessLogger<TestOrderService> businessLogger) : IOrderService
+    IAppLogger<TestOrderService> logger) : IOrderService
 {
     public async Task<Result<CreateOrderResponse>> CreateOrderAsync(CreateOrderRequest request)
     {
-        applicationLogger.LogInformation("Mock: Creating order for customer: {CustomerId}", request.CustomerId);
+        logger.LogInformation(LogTypeEnum.Application, "Mock: Creating order for customer: {CustomerId}", request.CustomerId);
 
         Result<CreateOrderResponse> response = Result<CreateOrderResponse>.Success(new CreateOrderResponse
         {
@@ -29,7 +28,7 @@ public class TestOrderService(
 
     public async Task<Result<GetOrderResponse>> GetOrderByIdAsync(Guid orderId)
     {
-        applicationLogger.LogInformation("Mock: Retrieving order with ID: {OrderId}", orderId);
+        logger.LogInformation(LogTypeEnum.Application, "Mock: Retrieving order with ID: {OrderId}", orderId);
 
         Result<GetOrderResponse> response = Result<GetOrderResponse>.Success(new GetOrderResponse
         {
@@ -49,7 +48,7 @@ public class TestOrderService(
 
     public async Task<Result<UpdateOrderResponse>> UpdateOrderAsync(UpdateOrderRequest request)
     {
-        applicationLogger.LogInformation("Mock: Updating order with ID: {OrderId}", request.Id);
+        logger.LogInformation(LogTypeEnum.Application, "Mock: Updating order with ID: {OrderId}", request.Id);
 
         Result<UpdateOrderResponse> response = Result<UpdateOrderResponse>.Success(new UpdateOrderResponse
         {
@@ -61,7 +60,7 @@ public class TestOrderService(
 
     public async Task<Result<DeleteOrderResponse>> DeleteOrderAsync(Guid orderId)
     {
-        applicationLogger.LogInformation("Mock: Deleting order with ID: {OrderId}", orderId);
+        logger.LogInformation(LogTypeEnum.Application, "Mock: Deleting order with ID: {OrderId}", orderId);
 
         Result<DeleteOrderResponse> response =
             Result<DeleteOrderResponse>.Success(new DeleteOrderResponse { IsDeleted = true });
@@ -71,7 +70,7 @@ public class TestOrderService(
 
     public async Task<Result<GetOrderListResponse>> GetOrdersByCustomerIdAsync(Guid customerId)
     {
-        applicationLogger.LogInformation("Mock: Retrieving orders for customer: {CustomerId}", customerId);
+        logger.LogInformation(LogTypeEnum.Application, "Mock: Retrieving orders for customer: {CustomerId}", customerId);
 
         Result<GetOrderListResponse> response = Result<GetOrderListResponse>.Success(new GetOrderListResponse
         {

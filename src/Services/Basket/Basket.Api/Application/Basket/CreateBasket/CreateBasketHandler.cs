@@ -2,21 +2,20 @@ using Basket.Api.Application.Dto;
 using Basket.Api.Domain.Entities;
 using Basket.Api.Domain.Repositories;
 using BuildingBlocks;
-using BuildingBlocks.Loggers.Abstractions;
+using BuildingBlocks.Loggers;
 
 namespace Basket.Api.Application.Basket.CreateBasket;
 
 public sealed class CreateBasketHandler(
     IBasketDataRepository dataRepository, 
-    IApplicationLogger<CreateBasketHandler> applicationLogger,
-    IBusinessLogger<CreateBasketHandler> businessLogger)
+    IAppLogger<CreateBasketHandler> logger)
     : ICreateBasketHandler
 {
     public async Task<Result<CreateBasketResult>> HandleAsync(CreateBasketCommand command)
     {
         try
         {
-            applicationLogger.LogInformation("Processing create basket request for user: {Username}", command.Username);
+            logger.LogInformation(LogTypeEnum.Application, "Processing create basket request for user: {Username}", command.Username);
             
             ShoppingCartEntity cartEntity = new ShoppingCartEntity
             {
@@ -32,7 +31,7 @@ public sealed class CreateBasketHandler(
 
             ShoppingCartEntity result = await dataRepository.CreateCartAsync(cartEntity);
 
-            businessLogger.LogInformation("Basket created successfully. Username: {Username}, ItemCount: {ItemCount}", 
+            logger.LogInformation(LogTypeEnum.Business, "Basket created successfully. Username: {Username}, ItemCount: {ItemCount}", 
                 cartEntity.Username, 
                 cartEntity.Items.Count);
 
@@ -52,7 +51,7 @@ public sealed class CreateBasketHandler(
         }
         catch (Exception ex)
         {
-            applicationLogger.LogError(ex, "An error occurred while creating the basket: {Command}", command);
+            logger.LogError(LogTypeEnum.Exception, ex, "An error occurred while creating the basket: {Command}", command);
             return Result<CreateBasketResult>.Failure($"An error occurred while creating the basket: {ex.Message}");
         }
     }

@@ -3,15 +3,14 @@ using Basket.Api.Application.Basket.CheckoutBasket.Contracts;
 using Basket.Api.Domain.Entities;
 using Basket.Api.Domain.Repositories;
 using BuildingBlocks;
-using BuildingBlocks.Loggers.Abstractions;
+using BuildingBlocks.Loggers;
 
 namespace Basket.Api.Application.Basket.CheckoutBasket;
 
 public class CheckoutBasketHandler(
     IBasketDataRepository basketDataRepository,
     ICheckoutHttpRepository checkoutHttpRepository,
-    IApplicationLogger<CheckoutBasketHandler> applicationLogger,
-    IBusinessLogger<CheckoutBasketHandler> businessLogger)
+    IAppLogger<CheckoutBasketHandler> logger)
     : ICheckoutBasketHandler
 {
     public async Task<Result<CheckoutBasketResult>> HandleAsync(CheckoutBasketCommand command)
@@ -26,17 +25,17 @@ public class CheckoutBasketHandler(
                 ? command.IdempotencyKey
                 : command.RequestId;
             
-            applicationLogger.LogInformation("Starting checkout process for user: {Username}", command.UserName);
+            logger.LogInformation(LogTypeEnum.Application, "Starting checkout process for user: {Username}", command.UserName);
 
             ShoppingCartEntity? basket = await basketDataRepository.GetCartAsync(command.UserName);
 
             if (basket is null || basket.Items.Count == 0)
             {
-                applicationLogger.LogWarning("Basket not found or empty for user: {Username}", command.UserName);
+                logger.LogWarning(LogTypeEnum.Application, "Basket not found or empty for user: {Username}", command.UserName);
                 return Result<CheckoutBasketResult>.Failure("Basket is empty or does not exist.");
             }
 
-            applicationLogger.LogInformation("Basket found with {ItemCount} items for user: {Username}",
+            logger.LogInformation(LogTypeEnum.Application, "Basket found with {ItemCount} items for user: {Username}",
                 basket.Items.Count, command.UserName);
 
             List<OrderItemRequest> orderItems = basket.Items.Select(item => new OrderItemRequest
@@ -79,7 +78,7 @@ public class CheckoutBasketHandler(
                 Items = orderItems
             };
 
-            applicationLogger.LogInformation("Creating order for customer: {CustomerId} with {ItemCount} items",
+            logger.LogInformation(LogTypeEnum.Application, "Creating order for customer: {CustomerId} with {ItemCount} items",
                 command.CustomerId, orderItems.Count);
 
             CreateOrderResponse? orderResponse =
@@ -87,7 +86,7 @@ public class CheckoutBasketHandler(
 
             if (orderResponse == null)
             {
-                applicationLogger.LogError("Failed to create order for customer: {CustomerId}", command.CustomerId);
+                logger.LogError(LogTypeEnum.Application, null, "Failed to create order for customer: {CustomerId}", command.CustomerId);
                 return Result<CheckoutBasketResult>.Failure("Failed to create order.");
             }
 
@@ -95,12 +94,12 @@ public class CheckoutBasketHandler(
 
             if (!checkoutSuccess)
             {
-                applicationLogger.LogWarning(
+                logger.LogWarning(LogTypeEnum.Application, 
                     "Order created but failed to clear basket for user: {Username}. OrderId: {OrderId}",
                     command.UserName, orderResponse.OrderId);
             }
 
-            businessLogger.LogInformation(
+            logger.LogInformation(LogTypeEnum.Business, 
                 "Checkout completed successfully. Username: {Username}, CustomerId: {CustomerId}, OrderId: {OrderId}, TotalAmount: {TotalAmount}, ItemCount: {ItemCount}, CorrelationId: {CorrelationId}",
                 command.UserName,
                 command.CustomerId,
@@ -113,7 +112,7 @@ public class CheckoutBasketHandler(
         }
         catch (Exception ex)
         {
-            applicationLogger.LogError(ex, "An error occurred during checkout for user: {Username}", command.UserName);
+            logger.LogError(LogTypeEnum.Exception, ex, "An error occurred during checkout for user: {Username}", command.UserName);
             return Result<CheckoutBasketResult>.Failure($"Checkout failed: {ex.Message}");
         }
     }

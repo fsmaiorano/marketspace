@@ -1,5 +1,5 @@
 using BuildingBlocks;
-using BuildingBlocks.Loggers.Abstractions;
+using BuildingBlocks.Loggers;
 using Catalog.Api.Domain.Entities;
 using Catalog.Api.Domain.Repositories;
 using Catalog.Api.Domain.ValueObjects;
@@ -8,15 +8,14 @@ namespace Catalog.Api.Application.Catalog.UpdateCatalog;
 
 public sealed class UpdateCatalogHandler(
     ICatalogRepository repository, 
-    IApplicationLogger<UpdateCatalogHandler> applicationLogger,
-    IBusinessLogger<UpdateCatalogHandler> businessLogger)
+    IAppLogger<UpdateCatalogHandler> logger)
     : IUpdateCatalogHandler
 {
     public async Task<Result<UpdateCatalogResult>> HandleAsync(UpdateCatalogCommand command)
     {
         try
         {
-            applicationLogger.LogInformation("Processing update catalog request for: {CatalogId}", command.Id);
+            logger.LogInformation(LogTypeEnum.Application, "Processing update catalog request for: {CatalogId}", command.Id);
             
             CatalogEntity catalogEntity = CatalogEntity.Create(
                 name: command.Name,
@@ -31,7 +30,7 @@ public sealed class UpdateCatalogHandler(
 
             await repository.UpdateAsync(catalogEntity);
             
-            businessLogger.LogInformation("Catalog updated successfully. CatalogId: {CatalogId}, Name: {Name}", 
+            logger.LogInformation(LogTypeEnum.Business, "Catalog updated successfully. CatalogId: {CatalogId}, Name: {Name}", 
                 command.Id, 
                 command.Name);
 
@@ -39,7 +38,7 @@ public sealed class UpdateCatalogHandler(
         }
         catch (Exception ex)
         {
-            applicationLogger.LogError(ex, "An error occurred while updating the catalog: {Command}", command);
+            logger.LogError(LogTypeEnum.Exception, ex, "An error occurred while updating the catalog: {Command}", command);
             return Result<UpdateCatalogResult>.Failure("An error occurred while updating the catalog.");
         }
     }

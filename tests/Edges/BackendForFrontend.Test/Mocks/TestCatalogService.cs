@@ -7,8 +7,7 @@ namespace BackendForFrontend.Test.Mocks;
 
 public class TestCatalogService(
     HttpClient httpClient, 
-    IApplicationLogger<TestCatalogService> applicationLogger,
-    IBusinessLogger<TestCatalogService> businessLogger) : ICatalogService
+    IAppLogger<TestCatalogService> logger) : ICatalogService
 {
     public async Task<Result<CreateCatalogResponse>> CreateCatalogAsync(CreateCatalogRequest request)
     {
@@ -34,19 +33,19 @@ public class TestCatalogService(
                             ImageUrl = request.ImageUrl,
                             MerchantId = request.MerchantId
                         });
-                    applicationLogger.LogInformation("Catalog created successfully: {@Catalog}", catalogResponse);
+                    logger.LogInformation(LogTypeEnum.Application, "Catalog created successfully: {@Catalog}", catalogResponse);
 
                     return catalogResponse;
                 }
             }
 
-            applicationLogger.LogError("Failed to create catalog. Status code: {StatusCode}", response.StatusCode);
+            logger.LogError(LogTypeEnum.Application, null, "Failed to create catalog. Status code: {StatusCode}", response.StatusCode);
             string errorMessage = await response.Content.ReadAsStringAsync();
             throw new HttpRequestException($"Error creating catalog: {errorMessage}");
         }
         catch (Exception ex)
         {
-            applicationLogger.LogError(ex, "Error occurred while creating catalog");
+            logger.LogError(LogTypeEnum.Exception, ex, "Error occurred while creating catalog");
             throw;
         }
     }
@@ -79,18 +78,18 @@ public class TestCatalogService(
                             UpdatedAt = catalogData.UpdatedAt
                         });
 
-                    applicationLogger.LogInformation("Catalog retrieved successfully: {@Catalog}", catalogResponse);
+                    logger.LogInformation(LogTypeEnum.Application, "Catalog retrieved successfully: {@Catalog}", catalogResponse);
                     return catalogResponse;
                 }
             }
 
-            applicationLogger.LogError("Failed to retrieve catalog. Status code: {StatusCode}", response.StatusCode);
+            logger.LogError(LogTypeEnum.Application, null, "Failed to retrieve catalog. Status code: {StatusCode}", response.StatusCode);
             string errorMessage = await response.Content.ReadAsStringAsync();
             throw new HttpRequestException($"Error retrieving catalog: {errorMessage}");
         }
         catch (Exception ex)
         {
-            applicationLogger.LogError(ex, "Error occurred while retrieving catalog with ID: {CatalogId}", catalogId);
+            logger.LogError(LogTypeEnum.Exception, ex, "Error occurred while retrieving catalog with ID: {CatalogId}", catalogId);
             throw;
         }
     }
@@ -129,18 +128,18 @@ public class TestCatalogService(
                             }).ToList()
                         });
 
-                    applicationLogger.LogInformation("Catalog list retrieved successfully: {@CatalogList}", catalogListResponse);
+                    logger.LogInformation(LogTypeEnum.Application, "Catalog list retrieved successfully: {@CatalogList}", catalogListResponse);
                     return catalogListResponse;
                 }
             }
 
-            applicationLogger.LogError("Failed to retrieve catalog list. Status code: {StatusCode}", response.StatusCode);
+            logger.LogError(LogTypeEnum.Application, null, "Failed to retrieve catalog list. Status code: {StatusCode}", response.StatusCode);
             string errorMessage = response.Content.ReadAsStringAsync().Result;
             throw new HttpRequestException($"Error retrieving catalog list: {errorMessage}");
         }
         catch (Exception ex)
         {
-            applicationLogger.LogError(ex, "Error occurred while retrieving catalog list");
+            logger.LogError(LogTypeEnum.Exception, ex, "Error occurred while retrieving catalog list");
             throw;
         }
     }
@@ -170,18 +169,18 @@ public class TestCatalogService(
                             MerchantId = request.MerchantId
                         });
 
-                    applicationLogger.LogInformation("Catalog updated successfully: {@Catalog}", catalogResponse);
+                    logger.LogInformation(LogTypeEnum.Application, "Catalog updated successfully: {@Catalog}", catalogResponse);
                     return catalogResponse;
                 }
             }
 
-            applicationLogger.LogError("Failed to update catalog. Status code: {StatusCode}", response.StatusCode);
+            logger.LogError(LogTypeEnum.Application, null, "Failed to update catalog. Status code: {StatusCode}", response.StatusCode);
             string errorMessage = response.Content.ReadAsStringAsync().Result;
             throw new HttpRequestException($"Error updating catalog: {errorMessage}");
         }
         catch (Exception ex)
         {
-            applicationLogger.LogError(ex, "Error occurred while updating catalog with ID: {CatalogId}", request.Id);
+            logger.LogError(LogTypeEnum.Exception, ex, "Error occurred while updating catalog with ID: {CatalogId}", request.Id);
             throw;
         }
     }
@@ -206,18 +205,18 @@ public class TestCatalogService(
                     Result<DeleteCatalogResponse> catalogResponse = Result<DeleteCatalogResponse>.Success(
                         new DeleteCatalogResponse { IsSuccess = resultWrapper.IsSuccess });
 
-                    applicationLogger.LogInformation("Catalog deleted successfully: {@Catalog}", catalogResponse);
+                    logger.LogInformation(LogTypeEnum.Application, "Catalog deleted successfully: {@Catalog}", catalogResponse);
                     return catalogResponse;
                 }
             }
 
-            applicationLogger.LogError("Failed to delete catalog. Status code: {StatusCode}", response.StatusCode);
+            logger.LogError(LogTypeEnum.Application, null, "Failed to delete catalog. Status code: {StatusCode}", response.StatusCode);
             string errorMessage = response.Content.ReadAsStringAsync().Result;
             throw new HttpRequestException($"Error deleting catalog: {errorMessage}");
         }
         catch (Exception ex)
         {
-            applicationLogger.LogError(ex, "Error occurred while deleting catalog with ID: {CatalogId}", catalogId);
+            logger.LogError(LogTypeEnum.Exception, ex, "Error occurred while deleting catalog with ID: {CatalogId}", catalogId);
             throw;
         }
     }

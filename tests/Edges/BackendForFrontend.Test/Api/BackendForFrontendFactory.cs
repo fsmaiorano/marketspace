@@ -119,38 +119,30 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
 
             services.AddScoped<IMerchantService>(provider =>
             {
-                IApplicationLogger<TestMerchantService> applicationLogger =
-                    provider.GetRequiredService<IApplicationLogger<TestMerchantService>>();
-                IBusinessLogger<TestMerchantService> businessLogger =
-                    provider.GetRequiredService<IBusinessLogger<TestMerchantService>>();
-                return new TestMerchantService(_merchantApiClient, applicationLogger, businessLogger);
+                IAppLogger<TestMerchantService> logger =
+                    provider.GetRequiredService<IAppLogger<TestMerchantService>>();
+                return new TestMerchantService(_merchantApiClient, logger);
             });
 
             services.AddScoped<IBasketService>(provider =>
             {
-                IApplicationLogger<TestBasketService> applicationLogger =
-                    provider.GetRequiredService<IApplicationLogger<TestBasketService>>();
-                IBusinessLogger<TestBasketService> businessLogger =
-                    provider.GetRequiredService<IBusinessLogger<TestBasketService>>();
-                return new TestBasketService(_basketApiClient, applicationLogger, businessLogger);
+                IAppLogger<TestBasketService> logger =
+                    provider.GetRequiredService<IAppLogger<TestBasketService>>();
+                return new TestBasketService(_basketApiClient, logger);
             });
 
             services.AddScoped<ICatalogService>(provider =>
             {
-                IApplicationLogger<TestCatalogService> applicationLogger =
-                    provider.GetRequiredService<IApplicationLogger<TestCatalogService>>();
-                IBusinessLogger<TestCatalogService> businessLogger =
-                    provider.GetRequiredService<IBusinessLogger<TestCatalogService>>();
-                return new TestCatalogService(_catalogApiClient, applicationLogger, businessLogger);
+                IAppLogger<TestCatalogService> logger =
+                    provider.GetRequiredService<IAppLogger<TestCatalogService>>();
+                return new TestCatalogService(_catalogApiClient, logger);
             });
 
             services.AddScoped<IOrderService>(provider =>
             {
-                IApplicationLogger<TestOrderService> applicationLogger =
-                    provider.GetRequiredService<IApplicationLogger<TestOrderService>>();
-                IBusinessLogger<TestOrderService> businessLogger =
-                    provider.GetRequiredService<IBusinessLogger<TestOrderService>>();
-                return new TestOrderService(_orderApiClient, applicationLogger, businessLogger);
+                IAppLogger<TestOrderService> logger =
+                    provider.GetRequiredService<IAppLogger<TestOrderService>>();
+                return new TestOrderService(_orderApiClient, logger);
             });
         });
     }

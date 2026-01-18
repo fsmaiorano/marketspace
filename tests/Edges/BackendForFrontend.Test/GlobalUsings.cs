@@ -16,7 +16,6 @@ global using Builder;
 global using BuildingBlocks;
 global using BuildingBlocks.Exceptions;
 global using BuildingBlocks.Loggers;
-global using BuildingBlocks.Loggers.Abstractions;
 global using BuildingBlocks.Storage.Minio;
 global using Catalog.Api.Application.Catalog.GetCatalogById;
 global using Catalog.Api.Application.Catalog.UpdateCatalog;

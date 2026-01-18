@@ -1,5 +1,5 @@
 using BuildingBlocks;
-using BuildingBlocks.Loggers.Abstractions;
+using BuildingBlocks.Loggers;
 using Order.Api.Domain.Entities;
 using Order.Api.Domain.Repositories;
 using Order.Api.Domain.ValueObjects;
@@ -9,8 +9,7 @@ namespace Order.Api.Application.Order.CreateOrder;
 
 public sealed class CreateOrderHandler(
     IOrderRepository repository,
-    IApplicationLogger<CreateOrderHandler> applicationLogger,
-    IBusinessLogger<CreateOrderHandler> businessLogger
+    IAppLogger<CreateOrderHandler> logger
 )
     : ICreateOrderHandler
 {
@@ -18,7 +17,7 @@ public sealed class CreateOrderHandler(
     {
         try
         {
-            applicationLogger.LogInformation("Processing create order request for customer: {CustomerId}", command.CustomerId);
+            logger.LogInformation(LogTypeEnum.Application, "Processing create order request for customer: {CustomerId}", command.CustomerId);
             
             OrderId orderId = OrderId.Of(Guid.CreateVersion7());
             Address shippingAddress = command.ShippingAddress.ToAddress();
@@ -39,11 +38,11 @@ public sealed class CreateOrderHandler(
 
             if (result <= 0)
             {
-                applicationLogger.LogError("Failed to persist order to database for customer: {CustomerId}", command.CustomerId);
+                logger.LogError(LogTypeEnum.Application, null, "Failed to persist order to database for customer: {CustomerId}", command.CustomerId);
                 return Result<CreateOrderResult>.Failure("Failed to create order.");
             }
 
-            businessLogger.LogInformation("Order created successfully. OrderId: {OrderId}, CustomerId: {CustomerId}, TotalAmount: {TotalAmount}, ItemCount: {ItemCount}", 
+            logger.LogInformation(LogTypeEnum.Business, "Order created successfully. OrderId: {OrderId}, CustomerId: {CustomerId}, TotalAmount: {TotalAmount}, ItemCount: {ItemCount}", 
                 orderEntity.Id.Value, 
                 command.CustomerId, 
                 orderEntity.TotalAmount.Value, 
@@ -53,7 +52,7 @@ public sealed class CreateOrderHandler(
         }
         catch (Exception ex)
         {
-            applicationLogger.LogError(ex, "An error occurred while creating the order for customer: {CustomerId}", command.CustomerId);
+            logger.LogError(LogTypeEnum.Exception, ex, "An error occurred while creating the order for customer: {CustomerId}", command.CustomerId);
             return Result<CreateOrderResult>.Failure($"An error occurred while creating the order: {ex.Message}");
         }
     }

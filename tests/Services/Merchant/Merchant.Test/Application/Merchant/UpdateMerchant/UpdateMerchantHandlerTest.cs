@@ -7,8 +7,7 @@ public class UpdateMerchantHandlerTest
     {
         MerchantEntity? merchant = MerchantBuilder.CreateMerchantFaker("").Generate();
         Mock<IMerchantRepository> repositoryMock = new();
-        Mock<IApplicationLogger<UpdateMerchantHandler>> applicationLoggerMock = new();
-        Mock<IBusinessLogger<UpdateMerchantHandler>> businessLoggerMock = new();
+        Mock<IAppLogger<UpdateMerchantHandler>> loggerMock = new();
 
         MerchantId merchantId = MerchantId.Of(Guid.CreateVersion7());
 
@@ -19,7 +18,7 @@ public class UpdateMerchantHandlerTest
                 r.GetByIdAsync(It.IsAny<MerchantId>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(() => merchant);
 
-        UpdateMerchantHandler handler = new UpdateMerchantHandler(repositoryMock.Object, applicationLoggerMock.Object, businessLoggerMock.Object);
+        UpdateMerchantHandler handler = new UpdateMerchantHandler(repositoryMock.Object, loggerMock.Object);
 
         UpdateMerchantCommand command = new UpdateMerchantCommand
         {
