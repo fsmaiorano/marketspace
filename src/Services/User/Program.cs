@@ -120,3 +120,8 @@ app.MapAuthEndpoints();
 app.MapDefaultEndpoints();
 
 app.Run();
+
+namespace User.Api
+{
+    public partial class UserProgram;
+}
