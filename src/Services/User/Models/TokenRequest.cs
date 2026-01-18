@@ -1,3 +1,3 @@
-namespace User.DTOs;
+namespace User.Models;
 
 public record TokenRequest(string AccessToken, string RefreshToken);

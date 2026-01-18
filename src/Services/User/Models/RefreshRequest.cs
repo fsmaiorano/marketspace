@@ -1,4 +1,4 @@
-namespace User.DTOs;
+namespace User.Models;
 
 public class RefreshRequest
 {

@@ -1,5 +1,5 @@
 using User.Data.Models;
-using User.DTOs;
+using User.Models;
 
 namespace User.Services;
 

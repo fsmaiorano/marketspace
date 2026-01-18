@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using User.Data;
 using User.Data.Models;
-using User.DTOs;
+using User.Models;
 
 namespace User.Services;
 
