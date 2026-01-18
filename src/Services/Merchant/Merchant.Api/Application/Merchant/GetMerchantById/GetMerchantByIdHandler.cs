@@ -1,5 +1,5 @@
 using BuildingBlocks;
-using BuildingBlocks.Loggers.Abstractions;
+using BuildingBlocks.Loggers;
 using Merchant.Api.Domain.Entities;
 using Merchant.Api.Domain.Repositories;
 using Merchant.Api.Domain.ValueObjects;
@@ -8,15 +8,14 @@ namespace Merchant.Api.Application.Merchant.GetMerchantById;
 
 public class GetMerchantByIdHandler(
     IMerchantRepository repository, 
-    IApplicationLogger<GetMerchantByIdHandler> applicationLogger,
-    IBusinessLogger<GetMerchantByIdHandler> businessLogger)
+    IAppLogger<GetMerchantByIdHandler> logger)
     : IGetMerchantByIdHandler
 {
     public async Task<Result<GetMerchantByIdResult>> HandleAsync(GetMerchantByIdQuery query)
     {
         try
         {
-            applicationLogger.LogInformation("Processing get merchant by ID request for: {MerchantId}", query.Id);
+            logger.LogInformation(LogTypeEnum.Application, "Processing get merchant by ID request for: {MerchantId}", query.Id);
             
             MerchantId merchantId = MerchantId.Of(query.Id);
 
@@ -24,7 +23,7 @@ public class GetMerchantByIdHandler(
 
             if (merchant is null)
             {
-                applicationLogger.LogInformation("Merchant with ID {MerchantId} not found.", query.Id);
+                logger.LogInformation(LogTypeEnum.Application, "Merchant with ID {MerchantId} not found.", query.Id);
                 return Result<GetMerchantByIdResult>.Failure($"Catalog with ID {query.Id} not found.");
             }
 
@@ -41,7 +40,7 @@ public class GetMerchantByIdHandler(
         }
         catch (Exception ex)
         {
-            applicationLogger.LogError(ex, "An error occurred while getting merchant by ID.");
+            logger.LogError(LogTypeEnum.Exception, ex, "An error occurred while getting merchant by ID.");
             return Result<GetMerchantByIdResult>.Failure("An error occurred while processing your request.");
         }
     }

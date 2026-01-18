@@ -1,4 +1,3 @@
-using BuildingBlocks.Loggers.Abstractions;
 using BuildingBlocks.Loggers.Enrichers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -9,6 +8,10 @@ namespace BuildingBlocks.Loggers;
 
 public static class LoggerExtensions
 {
+    /// <summary>
+    /// Adds custom logging services with Serilog configuration.
+    /// Registers IAppLogger for unified structured logging with LogType categorization.
+    /// </summary>
     public static IServiceCollection AddCustomLoggers(this IServiceCollection services)
     {
         LoggerConfiguration loggerConfig = new LoggerConfiguration()
@@ -37,8 +40,7 @@ public static class LoggerExtensions
             builder.AddSerilog(dispose: true);
         });
 
-        services.AddScoped(typeof(IApplicationLogger<>), typeof(ApplicationLogger<>));
-        services.AddScoped(typeof(IBusinessLogger<>), typeof(BusinessLogger<>));
+        services.AddScoped(typeof(IAppLogger<>), typeof(AppLogger<>));
 
         return services;
     }

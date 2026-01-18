@@ -8,16 +8,14 @@ public class CreateBasketHandlerTest
     public async Task HandleAsync_ShouldReturnSuccessResult_WhenNoExceptionOccurs()
     {
         Mock<IBasketDataRepository> repositoryMock = new();
-        Mock<IApplicationLogger<CreateBasketHandler>> applicationLoggerMock = new();
-        Mock<IBusinessLogger<CreateBasketHandler>> businessLoggerMock = new();
+        Mock<IAppLogger<CreateBasketHandler>> loggerMock = new();
         ShoppingCartEntity? shoppingCartEntity = BasketBuilder.CreateShoppingCartFaker("").Generate();
 
         CreateBasketCommand command = BasketBuilder.CreateBasketCommandFaker();
 
         CreateBasketHandler handler = new CreateBasketHandler(
             repositoryMock.Object, 
-            applicationLoggerMock.Object, 
-            businessLoggerMock.Object);
+            loggerMock.Object);
         
         Result<CreateBasketResult> result = await handler.HandleAsync(command);
 

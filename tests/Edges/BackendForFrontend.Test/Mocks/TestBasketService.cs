@@ -6,8 +6,7 @@ namespace BackendForFrontend.Test.Mocks;
 
 public class TestBasketService(
     HttpClient httpClient, 
-    IApplicationLogger<TestBasketService> applicationLogger,
-    IBusinessLogger<TestBasketService> businessLogger) : IBasketService
+    IAppLogger<TestBasketService> logger) : IBasketService
 {
     public async Task<Result<CreateBasketResponse>> CreateBasketAsync(CreateBasketRequest request)
     {
@@ -38,18 +37,15 @@ public class TestBasketService(
                             }
                         });
 
-                    applicationLogger.LogInformation("Basket created successfully: {@Basket}", basketResponse);
                     return basketResponse;
                 }
             }
 
-            applicationLogger.LogError("Failed to create basket. Status code: {StatusCode}", response.StatusCode);
             string errorMessage = await response.Content.ReadAsStringAsync();
             throw new HttpRequestException($"Error creating basket: {errorMessage}");
         }
         catch (Exception ex)
         {
-            applicationLogger.LogError(ex, "Error occurred while creating basket");
             throw;
         }
     }
@@ -82,18 +78,15 @@ public class TestBasketService(
                         }
                     });
 
-                    applicationLogger.LogInformation("Basket retrieved successfully: {@Basket}", basketResponse);
                     return basketResponse;
                 }
             }
 
-            applicationLogger.LogError("Failed to retrieve basket. Status code: {StatusCode}", response.StatusCode);
             string errorMessage = await response.Content.ReadAsStringAsync();
             throw new HttpRequestException($"Error retrieving basket: {errorMessage}");
         }
         catch (Exception ex)
         {
-            applicationLogger.LogError(ex, "Error occurred while retrieving basket");
             throw;
         }
     }
@@ -109,17 +102,14 @@ public class TestBasketService(
 
             if (response.IsSuccessStatusCode)
             {
-                applicationLogger.LogInformation("Basket deleted successfully for user: {Username}", username);
                 return Result<DeleteBasketResponse>.Success(new DeleteBasketResponse { IsSuccess = true });
             }
 
-            applicationLogger.LogError("Failed to delete basket. Status code: {StatusCode}", response.StatusCode);
             string errorMessage = await response.Content.ReadAsStringAsync();
             throw new HttpRequestException($"Error deleting basket: {errorMessage}");
         }
         catch (Exception ex)
         {
-            applicationLogger.LogError(ex, "Error occurred while deleting basket");
             throw;
         }
     }
@@ -132,17 +122,17 @@ public class TestBasketService(
 
             if (response.IsSuccessStatusCode)
             {
-                applicationLogger.LogInformation("Basket checkout initiated successfully for user: {Username}", request.Username);
+                logger.LogInformation(LogTypeEnum.Application, "Basket checkout initiated successfully for user: {Username}", request.Username);
                 return Result<CheckoutBasketResponse>.Success(new CheckoutBasketResponse { IsSuccess = true });
             }
 
-            applicationLogger.LogError("Failed to checkout basket. Status code: {StatusCode}", response.StatusCode);
+            logger.LogError(LogTypeEnum.Application, null, "Failed to checkout basket. Status code: {StatusCode}", response.StatusCode);
             string errorMessage = await response.Content.ReadAsStringAsync();
             throw new HttpRequestException($"Error checking out basket: {errorMessage}");
         }
         catch (Exception ex)
         {
-            applicationLogger.LogError(ex, "Error occurred while checking out basket");
+            logger.LogError(LogTypeEnum.Exception, ex, "Error occurred while checking out basket");
             throw;
         }
     }

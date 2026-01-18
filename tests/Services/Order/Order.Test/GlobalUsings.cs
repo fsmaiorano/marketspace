@@ -2,7 +2,6 @@ global using Builder;
 global using BuildingBlocks;
 global using BuildingBlocks.Exceptions;
 global using BuildingBlocks.Loggers;
-global using BuildingBlocks.Loggers.Abstractions;
 global using FluentAssertions;
 global using Microsoft.AspNetCore.Hosting;
 global using Microsoft.AspNetCore.Mvc.Testing;

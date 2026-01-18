@@ -1,5 +1,5 @@
 using BuildingBlocks;
-using BuildingBlocks.Loggers.Abstractions;
+using BuildingBlocks.Loggers;
 using Order.Api.Application.Dto;
 using Order.Api.Domain.Entities;
 using Order.Api.Domain.Repositories;
@@ -10,15 +10,14 @@ namespace Order.Api.Application.Order.GetOrderById;
 
 public class GetOrderByIdHandler(
     IOrderRepository repository, 
-    IApplicationLogger<GetOrderByIdHandler> applicationLogger,
-    IBusinessLogger<GetOrderByIdHandler> businessLogger)
+    IAppLogger<GetOrderByIdHandler> logger)
     : IGetOrderByIdHandler
 {
     public async Task<Result<GetOrderByIdResult>> HandleAsync(GetOrderByIdQuery query)
     {
         try
         {
-            applicationLogger.LogInformation("Processing get order by ID request for: {OrderId}", query.Id);
+            logger.LogInformation(LogTypeEnum.Application, "Processing get order by ID request for: {OrderId}", query.Id);
             OrderId orderId = OrderId.Of(query.Id);
             OrderEntity? order = await repository.GetByIdAsync(orderId, isTrackingEnabled: false);
 
@@ -72,7 +71,7 @@ public class GetOrderByIdHandler(
         }
         catch (Exception ex)
         {
-            applicationLogger.LogError(ex, "An error occurred while getting order by ID.");
+            logger.LogError(LogTypeEnum.Exception, ex, "An error occurred while getting order by ID.");
             return Result<GetOrderByIdResult>.Failure("An error occurred while processing your request.");
         }
     }

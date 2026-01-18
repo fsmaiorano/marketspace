@@ -2,14 +2,14 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using Basket.Api.Application.Basket.CheckoutBasket.Contracts;
 using Basket.Api.Domain.Repositories;
-using BuildingBlocks.Loggers.Abstractions;
+using BuildingBlocks.Loggers;
 
 namespace Basket.Api.Infrastructure.Http.Repositories;
 
 public class CheckoutHttpRepository(
     HttpClient httpClient,
     IConfiguration configuration,
-    IApplicationLogger<CheckoutHttpRepository> applicationLogger) : ICheckoutHttpRepository
+    IAppLogger<CheckoutHttpRepository> logger) : ICheckoutHttpRepository
 {
     public async Task<CreateOrderResponse?> CreateOrderAsync(CreateOrderRequest request, string? idempotencyKey, string? correlationId)
     {
@@ -18,7 +18,7 @@ public class CheckoutHttpRepository(
             string baseUrl = configuration["OrderService:BaseUrl"]
                              ?? throw new InvalidOperationException("OrderService BaseUrl is not configured.");
 
-            applicationLogger.LogInformation("Calling Order Service to create order for customer: {CustomerId}",
+            logger.LogInformation(LogTypeEnum.Application, "Calling Order Service to create order for customer: {CustomerId}",
                 request.CustomerId);
 
             using HttpRequestMessage message = new(HttpMethod.Post, $"{baseUrl}/order");
@@ -39,18 +39,18 @@ public class CheckoutHttpRepository(
             if (response.IsSuccessStatusCode)
             {
                 CreateOrderResponse? result = await response.Content.ReadFromJsonAsync<CreateOrderResponse>();
-                applicationLogger.LogInformation("Order created successfully: {OrderId}", result?.OrderId);
+                logger.LogInformation(LogTypeEnum.Application, "Order created successfully: {OrderId}", result?.OrderId);
                 return result;
             }
 
             string errorContent = await response.Content.ReadAsStringAsync();
-            applicationLogger.LogError("Failed to create order. Status: {StatusCode}, Error: {Error}",
+            logger.LogError(LogTypeEnum.Application, null, "Failed to create order. Status: {StatusCode}, Error: {Error}",
                 response.StatusCode, errorContent);
             return null;
         }
         catch (Exception ex)
         {
-            applicationLogger.LogError(ex, "Exception occurred while calling Order Service for customer: {CustomerId}",
+            logger.LogError(LogTypeEnum.Exception, ex, "Exception occurred while calling Order Service for customer: {CustomerId}",
                 request.CustomerId);
             throw;
         }
