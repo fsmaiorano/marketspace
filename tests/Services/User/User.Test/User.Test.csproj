@@ -19,6 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\..\..\infra\MarketSpace.ServiceDefaults\MarketSpace.ServiceDefaults.csproj" />
       <ProjectReference Include="..\..\..\..\src\Services\User\User.csproj" />
     </ItemGroup>
 
