@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="Bogus" Version="35.6.5" />
+      <PackageReference Include="Moq" Version="4.20.72" />
     </ItemGroup>
 
     <ItemGroup>
@@ -16,6 +17,7 @@
       <ProjectReference Include="..\..\..\src\Services\Catalog\Catalog.Api\Catalog.Api.csproj" />
       <ProjectReference Include="..\..\..\src\Services\Merchant\Merchant.Api\Merchant.Api.csproj" />
       <ProjectReference Include="..\..\..\src\Services\Order\Order.Api\Order.Api.csproj" />
+      <ProjectReference Include="..\..\..\src\Services\User\User.csproj" />
     </ItemGroup>
 
 </Project>

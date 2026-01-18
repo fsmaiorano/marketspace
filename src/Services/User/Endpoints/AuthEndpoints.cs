@@ -2,7 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using User.Data;
 using User.Data.Models;
-using User.DTOs;
+using User.Models;
 using User.Services;
 
 namespace User.Endpoints;

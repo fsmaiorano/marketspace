@@ -23,7 +23,7 @@ new ContainerBuilder()
     .WithCommand("server", "/data", "--console-address", ":9001")
     .Build();
 
-const int createMerchantCounter = 100;
+const int createMerchantCounter = 1;
 
 List<MerchantEntity> createdMerchants = [];
 List<ShoppingCartEntity> createdShoppingCarts = [];
@@ -79,15 +79,15 @@ for (int i = 0; i < createdMerchants.Count; i++)
     }
 }
 
-// // Create basket
-// IMongoDatabase basketDb = basketMongoClient.GetDatabase("BasketDb");
-// IMongoCollection<ShoppingCartEntity>
-//     shoppingCartCollection = basketDb.GetCollection<ShoppingCartEntity>("ShoppingCart");
-//
-// for (int i = 0; i < createdMerchants.Count; i++)
-// {
-//     ShoppingCartEntity shoppingCart =
-//         BasketBuilder.CreateShoppingCartFaker(username: createdMerchants.ElementAt(i).Name);
-//     createdShoppingCarts.Add(shoppingCart);
-//     shoppingCartCollection.InsertMany(createdShoppingCarts);
-// }
+// Create basket
+var basketDb = basketMongoClient.GetDatabase("BasketDb");
+IMongoCollection<ShoppingCartEntity>
+    shoppingCartCollection = basketDb.GetCollection<ShoppingCartEntity>("ShoppingCart");
+
+for (int i = 0; i < createdMerchants.Count; i++)
+{
+    ShoppingCartEntity shoppingCart =
+        BasketBuilder.CreateShoppingCartFaker(username: createdMerchants.ElementAt(i).Name);
+    createdShoppingCarts.Add(shoppingCart);
+    shoppingCartCollection.InsertMany(createdShoppingCarts);
+}

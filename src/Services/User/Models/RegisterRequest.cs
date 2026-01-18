@@ -1,6 +1,6 @@
-namespace User.DTOs;
+namespace User.Models;
 
-public class AuthRequest
+public class RegisterRequest
 {
     public string Email { get; set; } = null!;
     public string Password { get; set; } = null!;
