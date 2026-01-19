@@ -20,7 +20,7 @@ public sealed class TestFixture : WebApplicationFactory<UserProgram>, IAsyncLife
 
         builder.ConfigureServices(services =>
         {
-            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<UserDbContext>));
+            ServiceDescriptor? descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<UserDbContext>));
             if (descriptor != null)
                 services.Remove(descriptor);
 
@@ -33,19 +33,19 @@ public sealed class TestFixture : WebApplicationFactory<UserProgram>, IAsyncLife
 
     public UserDbContext GetDbContext()
     {
-        var scope = Services.CreateScope();
+        IServiceScope scope = Services.CreateScope();
         return scope.ServiceProvider.GetRequiredService<UserDbContext>();
     }
 
     public UserManager<ApplicationUser> GetUserManager()
     {
-        var scope = Services.CreateScope();
+        IServiceScope scope = Services.CreateScope();
         return scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
     }
 
     public ITokenService GetTokenService()
     {
-        var scope = Services.CreateScope();
+        IServiceScope scope = Services.CreateScope();
         return scope.ServiceProvider.GetRequiredService<ITokenService>();
     }
 
@@ -59,7 +59,7 @@ public sealed class TestFixture : WebApplicationFactory<UserProgram>, IAsyncLife
     public async Task<HttpResponseMessage> DoPost(string method, object request, string token = "",
         string culture = "en-US")
     {
-        var client = GetHttpClient();
+        HttpClient client = GetHttpClient();
         ChangeRequestCulture(culture, client);
         AuthorizeRequest(token, client);
         return await client.PostAsJsonAsync(method, request);
@@ -67,7 +67,7 @@ public sealed class TestFixture : WebApplicationFactory<UserProgram>, IAsyncLife
 
     public async Task<HttpResponseMessage> DoGet(string method, string token = "", string culture = "en-US")
     {
-        var client = GetHttpClient();
+        HttpClient client = GetHttpClient();
         ChangeRequestCulture(culture, client);
         AuthorizeRequest(token, client);
         return await client.GetAsync(method);
@@ -76,7 +76,7 @@ public sealed class TestFixture : WebApplicationFactory<UserProgram>, IAsyncLife
     public async Task<HttpResponseMessage> DoPut(string method, object request, string token = "",
         string culture = "en-US")
     {
-        var client = GetHttpClient();
+        HttpClient client = GetHttpClient();
         ChangeRequestCulture(culture, client);
         AuthorizeRequest(token, client);
         return await client.PutAsJsonAsync(method, request);
@@ -85,7 +85,7 @@ public sealed class TestFixture : WebApplicationFactory<UserProgram>, IAsyncLife
     public async Task<HttpResponseMessage> DoPatch(string method, object request, string token = "",
         string culture = "en-US")
     {
-        var client = GetHttpClient();
+        HttpClient client = GetHttpClient();
         ChangeRequestCulture(culture, client);
         AuthorizeRequest(token, client);
         return await client.PatchAsJsonAsync(method, request);
@@ -93,7 +93,7 @@ public sealed class TestFixture : WebApplicationFactory<UserProgram>, IAsyncLife
 
     public async Task<HttpResponseMessage> DoDelete(string method, string token = "", string culture = "en-US")
     {
-        var client = GetHttpClient();
+        HttpClient client = GetHttpClient();
         ChangeRequestCulture(culture, client);
         AuthorizeRequest(token, client);
         return await client.DeleteAsync(method);

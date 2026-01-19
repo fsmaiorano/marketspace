@@ -12,16 +12,16 @@ public class LoginEndpointUnitTest(TestFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task Login_WithValidCredentials_ShouldReturn200AndTokens()
     {
-        var email = Faker.Internet.Email();
-        var password = Faker.Internet.Password(25, false, string.Empty, "1");
+        string? email = Faker.Internet.Email();
+        string? password = Faker.Internet.Password(25, false, string.Empty, "1");
         await CreateTestUserAsync(email, password);
 
-        var request = UserBuilder.CreateLoginRequest(email: email, password: password);
-        var response = await DoPost("/api/auth/login", request);
+        AuthRequest request = UserBuilder.CreateLoginRequest(email: email, password: password);
+        HttpResponseMessage response = await DoPost("/api/auth/login", request);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         
-        var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
+        AuthResponse? result = await response.Content.ReadFromJsonAsync<AuthResponse>();
         Assert.NotNull(result);
         Assert.NotEmpty(result.AccessToken);
         Assert.NotEmpty(result.RefreshToken);
@@ -32,37 +32,37 @@ public class LoginEndpointUnitTest(TestFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task Login_WithNonExistentEmail_ShouldReturn401()
     {
-        var request = UserBuilder.CreateLoginRequest(email: "nonexistent@example.com", password: "Password123!");
-        var response = await DoPost("/api/auth/login", request);
+        AuthRequest request = UserBuilder.CreateLoginRequest(email: "nonexistent@example.com", password: "Password123!");
+        HttpResponseMessage response = await DoPost("/api/auth/login", request);
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [Fact]
     public async Task Login_WithWrongPassword_ShouldReturn401()
     {
-        var email = Faker.Internet.Email();
-        var password = Faker.Internet.Password(25);
+        string? email = Faker.Internet.Email();
+        string? password = Faker.Internet.Password(25);
         await CreateTestUserAsync(email, password);
 
-        var request = UserBuilder.CreateLoginRequest(email: email, password: "WrongPassword123!");
-        var response = await DoPost("/api/auth/login", request);
+        AuthRequest request = UserBuilder.CreateLoginRequest(email: email, password: "WrongPassword123!");
+        HttpResponseMessage response = await DoPost("/api/auth/login", request);
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [Fact]
     public async Task Login_MultipleTimes_ShouldGenerateDifferentTokens()
     {
-        var email = Faker.Internet.Email();
-        var password = Faker.Internet.Password(25);
+        string? email = Faker.Internet.Email();
+        string? password = Faker.Internet.Password(25);
         await CreateTestUserAsync(email, password);
 
-        var request = UserBuilder.CreateLoginRequest(email: email, password: password);
+        AuthRequest request = UserBuilder.CreateLoginRequest(email: email, password: password);
 
-        var response1 = await DoPost("/api/auth/login", request);
-        var result1 = await response1.Content.ReadFromJsonAsync<AuthResponse>();
+        HttpResponseMessage response1 = await DoPost("/api/auth/login", request);
+        AuthResponse? result1 = await response1.Content.ReadFromJsonAsync<AuthResponse>();
 
-        var response2 = await DoPost("/api/auth/login", request);
-        var result2 = await response2.Content.ReadFromJsonAsync<AuthResponse>();
+        HttpResponseMessage response2 = await DoPost("/api/auth/login", request);
+        AuthResponse? result2 = await response2.Content.ReadFromJsonAsync<AuthResponse>();
 
         Assert.NotNull(result1);
         Assert.NotNull(result2);
