@@ -190,8 +190,7 @@ public class TestCatalogService(
     {
         try
         {
-            DeleteCatalogCommand command = CatalogBuilder.CreateDeleteCatalogCommandFaker(catalogId).Generate();
-            HttpRequestMessage request = new(HttpMethod.Delete, "/catalog") { Content = JsonContent.Create(command) };
+            HttpRequestMessage request = new(HttpMethod.Delete, $"/catalog/{catalogId}");
 
             HttpResponseMessage response = await httpClient.SendAsync(request);
 
