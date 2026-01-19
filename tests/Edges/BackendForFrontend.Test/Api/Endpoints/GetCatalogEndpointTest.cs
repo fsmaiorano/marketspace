@@ -1,5 +1,7 @@
 namespace BackendForFrontend.Test.Api.Endpoints;
 
+using CatalogTestFixture = Catalog.Test.Fixtures.TestFixture;
+
 public class GetCatalogEndpointTest(BackendForFrontendFactory factory) : HttpFixture(factory)
 {
     private readonly HttpClient _client = factory.CreateClient();
@@ -8,8 +10,8 @@ public class GetCatalogEndpointTest(BackendForFrontendFactory factory) : HttpFix
     [Fact]
     public async Task Returns_Ok_When_Catalog_Is_Retrieved_Successfully()
     {
-        CatalogApiFactory factory = new();
-        using IServiceScope scope = factory.Services.CreateScope();
+        CatalogTestFixture catalogFixture = new();
+        using IServiceScope scope = catalogFixture.Services.CreateScope();
         CatalogDbContext dbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
 
         CatalogEntity? catalog = CatalogBuilder.CreateCatalogFaker().Generate();

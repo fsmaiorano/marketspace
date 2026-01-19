@@ -22,7 +22,6 @@ global using Catalog.Api.Application.Catalog.UpdateCatalog;
 global using Catalog.Api.Domain.Entities;
 global using Catalog.Api.Domain.ValueObjects;
 global using Catalog.Api.Infrastructure.Data;
-global using Catalog.Test.Api;
 global using FluentAssertions;
 global using Merchant.Api.Domain.Entities;
 global using Merchant.Api.Infrastructure.Data;
