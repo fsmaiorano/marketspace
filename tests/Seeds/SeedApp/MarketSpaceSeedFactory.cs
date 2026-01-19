@@ -20,10 +20,24 @@ public class MarketSpaceSeedFactory
     private const string MinioAccessKey = "admin";
     private const string MinioSecretKey = "admin123";
 
+    private readonly string _mongoConnectionString;
+    private readonly string _minioEndpoint;
+    private readonly string _minioAccessKey;
+    private readonly string _minioSecretKey;
+
     public IServiceProvider Services { get; private set; }
 
-    public MarketSpaceSeedFactory()
+    public MarketSpaceSeedFactory(
+        string mongoConnectionString = BasketDbConnectionString,
+        string minioEndpoint = MinioEndpoint,
+        string minioAccessKey = MinioAccessKey,
+        string minioSecretKey = MinioSecretKey)
     {
+        _mongoConnectionString = mongoConnectionString;
+        _minioEndpoint = minioEndpoint;
+        _minioAccessKey = minioAccessKey;
+        _minioSecretKey = minioSecretKey;
+        
         IHost host = CreateHost();
         Services = host.Services;
     }
@@ -39,7 +53,7 @@ public class MarketSpaceSeedFactory
                 services.AddDbContext<CatalogDbContext>(options =>
                     options.UseNpgsql(CatalogDbConnectionString));
                 
-                services.AddSingleton<IMongoClient>(_ => new MongoClient(BasketDbConnectionString));
+                services.AddSingleton<IMongoClient>(_ => new MongoClient(_mongoConnectionString));
 
                 services.AddScoped(sp =>
                 {
@@ -50,8 +64,8 @@ public class MarketSpaceSeedFactory
                 services.AddSingleton<IMinioClient>(_ =>
                 {
                     return new MinioClient()
-                        .WithEndpoint(MinioEndpoint)
-                        .WithCredentials(MinioAccessKey, MinioSecretKey)
+                        .WithEndpoint(_minioEndpoint)
+                        .WithCredentials(_minioAccessKey, _minioSecretKey)
                         .Build();
                 });
 

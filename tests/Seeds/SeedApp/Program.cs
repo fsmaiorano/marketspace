@@ -4,9 +4,31 @@ using Catalog.Api.Domain.Entities;
 using Catalog.Api.Domain.ValueObjects;
 using Catalog.Api.Infrastructure.Data;
 using MongoDB.Driver;
-using DotNet.Testcontainers.Builders;
+using Testcontainers.MongoDb;
+using Testcontainers.Minio;
 
-MarketSpaceSeedFactory factory = new();
+Console.WriteLine("Starting MongoDB container...");
+MongoDbContainer mongoDbContainer = new MongoDbBuilder()
+    .WithImage("mongo:latest")
+    .Build();
+
+await mongoDbContainer.StartAsync();
+Console.WriteLine($"MongoDB container started at: {mongoDbContainer.GetConnectionString()}");
+
+Console.WriteLine("Starting MinIO container...");
+MinioContainer minioContainer = new MinioBuilder()
+    .WithImage("minio/minio:latest")
+    .Build();
+
+await minioContainer.StartAsync();
+Console.WriteLine($"MinIO container started at: {minioContainer.GetConnectionString()}");
+
+MarketSpaceSeedFactory factory = new(
+    mongoConnectionString: mongoDbContainer.GetConnectionString(),
+    minioEndpoint: minioContainer.GetConnectionString().Replace("http://", ""),
+    minioAccessKey: MinioBuilder.DefaultUsername,
+    minioSecretKey: MinioBuilder.DefaultPassword
+);
 IServiceScopeFactory scopeFactory = factory.Services.GetRequiredService<IServiceScopeFactory>();
 
 using IServiceScope scope = scopeFactory.CreateScope();
@@ -15,13 +37,6 @@ CatalogDbContext catalogDbContext = scope.ServiceProvider.GetRequiredService<Cat
 IMongoClient basketMongoClient = scope.ServiceProvider.GetRequiredService<IMongoClient>();
 IMinioBucket minioBucket = scope.ServiceProvider.GetRequiredService<IMinioBucket>();
 
-new ContainerBuilder()
-    .WithImage("minio/minio:latest")
-    .WithEnvironment("MINIO_ROOT_USER", "admin")
-    .WithEnvironment("MINIO_ROOT_PASSWORD", "admin123")
-    .WithPortBinding(9000, true)
-    .WithCommand("server", "/data", "--console-address", ":9001")
-    .Build();
 
 const int createMerchantCounter = 1;
 
@@ -88,6 +103,19 @@ for (int i = 0; i < createdMerchants.Count; i++)
 {
     ShoppingCartEntity shoppingCart =
         BasketBuilder.CreateShoppingCartFaker(username: createdMerchants.ElementAt(i).Name);
+    
     createdShoppingCarts.Add(shoppingCart);
-    shoppingCartCollection.InsertMany(createdShoppingCarts);
+    await shoppingCartCollection.InsertOneAsync(shoppingCart);
+    Console.WriteLine($"Shopping cart created for user: {createdMerchants.ElementAt(i).Name}");
 }
+
+Console.WriteLine("\n✅ Seeding completed successfully!");
+Console.WriteLine($"Created {createdMerchants.Count} merchant(s)");
+Console.WriteLine($"Created {createdShoppingCarts.Count} shopping cart(s)");
+Console.WriteLine("\nContainers are still running. Press any key to stop and cleanup...");
+Console.ReadKey();
+
+Console.WriteLine("\nStopping containers...");
+await mongoDbContainer.StopAsync();
+await minioContainer.StopAsync();
+Console.WriteLine("Containers stopped. Goodbye!");
