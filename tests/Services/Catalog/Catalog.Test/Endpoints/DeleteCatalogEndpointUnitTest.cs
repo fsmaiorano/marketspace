@@ -11,24 +11,12 @@ public class DeleteCatalogEndpointUnitTest(TestFixture fixture) : BaseTest(fixtu
     public async Task Can_Delete_Catalog_Endpoint()
     {
         CatalogEntity? catalog = CatalogBuilder.CreateCatalogFaker().Generate();
-        catalog.Id = CatalogId.Of(Guid.CreateVersion7());
 
         Context.Catalogs.Add(catalog);
         await Context.SaveChangesAsync();
         
-        Context.Entry(catalog).State = EntityState.Detached;
-
         DeleteCatalogCommand command = CatalogBuilder.CreateDeleteCatalogCommandFaker(catalog.Id.Value).Generate();
-        HttpRequestMessage request = new(HttpMethod.Delete, "/catalog") { Content = JsonContent.Create(command) };
-        HttpResponseMessage response = await HttpClient.SendAsync(request);
-        
-        if (!response.IsSuccessStatusCode)
-        {
-            string errorContent = await response.Content.ReadAsStringAsync();
-            throw new Exception($"Expected success but got {response.StatusCode}. Error: {errorContent}");
-        }
-        
-        response.EnsureSuccessStatusCode();
+        HttpResponseMessage response = await DoDelete($"/catalog/{command.Id}");
         Result<DeleteCatalogResult>? result = await response.Content.ReadFromJsonAsync<Result<DeleteCatalogResult>>();
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
