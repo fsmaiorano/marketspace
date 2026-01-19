@@ -9,6 +9,7 @@ using User.Data.Models;
 using User.Endpoints;
 using User.Extensions;
 using User.Services;
+using MarketSpace.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 
