@@ -9,7 +9,7 @@ public class RefreshTokenUnitTest
     public void IsExpired_WhenExpiresInFuture_ShouldReturnFalse()
     {
         // Arrange
-        var token = UserBuilder.CreateRefreshToken("user-id", expires: DateTime.UtcNow.AddDays(1));
+        RefreshToken token = UserBuilder.CreateRefreshToken("user-id", expires: DateTime.UtcNow.AddDays(1));
 
         // Act & Assert
         Assert.False(token.IsExpired);
@@ -19,7 +19,7 @@ public class RefreshTokenUnitTest
     public void IsExpired_WhenExpiresInPast_ShouldReturnTrue()
     {
         // Arrange
-        var token = UserBuilder.CreateRefreshToken("user-id", expires: DateTime.UtcNow.AddDays(-1));
+        RefreshToken token = UserBuilder.CreateRefreshToken("user-id", expires: DateTime.UtcNow.AddDays(-1));
 
         // Act & Assert
         Assert.True(token.IsExpired);
@@ -29,7 +29,7 @@ public class RefreshTokenUnitTest
     public void IsExpired_WhenExpiresNow_ShouldReturnTrue()
     {
         // Arrange
-        var token = UserBuilder.CreateRefreshToken("user-id", expires: DateTime.UtcNow);
+        RefreshToken token = UserBuilder.CreateRefreshToken("user-id", expires: DateTime.UtcNow);
 
         // Act & Assert
         Assert.True(token.IsExpired);
@@ -39,7 +39,7 @@ public class RefreshTokenUnitTest
     public void IsActive_WhenNotRevokedAndNotExpired_ShouldReturnTrue()
     {
         // Arrange
-        var token = UserBuilder.CreateRefreshToken("user-id", expires: DateTime.UtcNow.AddDays(1), isRevoked: false);
+        RefreshToken token = UserBuilder.CreateRefreshToken("user-id", expires: DateTime.UtcNow.AddDays(1), isRevoked: false);
 
         // Act & Assert
         Assert.True(token.IsActive);
@@ -49,7 +49,7 @@ public class RefreshTokenUnitTest
     public void IsActive_WhenRevoked_ShouldReturnFalse()
     {
         // Arrange
-        var token = UserBuilder.CreateRefreshToken("user-id", expires: DateTime.UtcNow.AddDays(1), isRevoked: true);
+        RefreshToken token = UserBuilder.CreateRefreshToken("user-id", expires: DateTime.UtcNow.AddDays(1), isRevoked: true);
 
         // Act & Assert
         Assert.False(token.IsActive);
@@ -59,7 +59,7 @@ public class RefreshTokenUnitTest
     public void IsActive_WhenExpired_ShouldReturnFalse()
     {
         // Arrange
-        var token = UserBuilder.CreateRefreshToken("user-id", expires: DateTime.UtcNow.AddDays(-1), isRevoked: false);
+        RefreshToken token = UserBuilder.CreateRefreshToken("user-id", expires: DateTime.UtcNow.AddDays(-1), isRevoked: false);
 
         // Act & Assert
         Assert.False(token.IsActive);
@@ -69,7 +69,7 @@ public class RefreshTokenUnitTest
     public void IsActive_WhenRevokedAndExpired_ShouldReturnFalse()
     {
         // Arrange
-        var token = UserBuilder.CreateRefreshToken("user-id", expires: DateTime.UtcNow.AddDays(-1), isRevoked: true);
+        RefreshToken token = UserBuilder.CreateRefreshToken("user-id", expires: DateTime.UtcNow.AddDays(-1), isRevoked: true);
 
         // Act & Assert
         Assert.False(token.IsActive);
@@ -79,13 +79,13 @@ public class RefreshTokenUnitTest
     public void RefreshToken_ShouldHaveCorrectProperties()
     {
         // Arrange
-        var userId = "test-user-id";
-        var tokenString = "test-token";
-        var expires = DateTime.UtcNow.AddDays(30);
-        var createdByIp = "192.168.1.1";
+        string userId = "test-user-id";
+        string tokenString = "test-token";
+        DateTime expires = DateTime.UtcNow.AddDays(30);
+        string createdByIp = "192.168.1.1";
 
         // Act
-        var token = new RefreshToken
+        RefreshToken token = new RefreshToken
         {
             Token = tokenString,
             UserId = userId,

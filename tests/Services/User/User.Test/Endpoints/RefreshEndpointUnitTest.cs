@@ -12,16 +12,16 @@ public class RefreshEndpointUnitTest(TestFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task Refresh_WithValidTokens_ShouldReturn200AndNewTokens()
     {
-        var tokens = await CreateTestUserWithTokensAsync(Faker.Internet.Email(), Faker.Internet.Password(25, false, string.Empty, "1"));
-        var request = UserBuilder.CreateRefreshRequest(
+        AuthResponse tokens = await CreateTestUserWithTokensAsync(Faker.Internet.Email(), Faker.Internet.Password(25, false, string.Empty, "1"));
+        RefreshRequest request = UserBuilder.CreateRefreshRequest(
             accessToken: tokens.AccessToken,
             refreshToken: tokens.RefreshToken);
 
-        var response = await DoPost("/api/auth/refresh", request);
+        HttpResponseMessage response = await DoPost("/api/auth/refresh", request);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
+        AuthResponse? result = await response.Content.ReadFromJsonAsync<AuthResponse>();
         Assert.NotNull(result);
         Assert.NotEmpty(result.AccessToken);
         Assert.NotEmpty(result.RefreshToken);
@@ -32,42 +32,42 @@ public class RefreshEndpointUnitTest(TestFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task Refresh_WithInvalidRefreshToken_ShouldReturn400()
     {
-        var tokens = await CreateTestUserWithTokensAsync(Faker.Internet.Email(), Faker.Internet.Password(25, false, string.Empty, "1"));
-        var request = UserBuilder.CreateRefreshRequest(
+        AuthResponse tokens = await CreateTestUserWithTokensAsync(Faker.Internet.Email(), Faker.Internet.Password(25, false, string.Empty, "1"));
+        RefreshRequest request = UserBuilder.CreateRefreshRequest(
             accessToken: tokens.AccessToken,
             refreshToken: "invalid-refresh-token");
 
-        var response = await DoPost("/api/auth/refresh", request);
+        HttpResponseMessage response = await DoPost("/api/auth/refresh", request);
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
     public async Task Refresh_WithRevokedToken_ShouldReturn400()
     {
-        var tokens = await CreateTestUserWithTokensAsync(Faker.Internet.Email(), Faker.Internet.Password(25, false, string.Empty, "1"));
+        AuthResponse tokens = await CreateTestUserWithTokensAsync(Faker.Internet.Email(), Faker.Internet.Password(25, false, string.Empty, "1"));
 
         await TokenService.RevokeRefreshTokenAsync(tokens.RefreshToken, Faker.Internet.Ip());
 
-        var request = UserBuilder.CreateRefreshRequest(
+        RefreshRequest request = UserBuilder.CreateRefreshRequest(
             accessToken: tokens.AccessToken,
             refreshToken: tokens.RefreshToken);
 
-        var response = await DoPost("/api/auth/refresh", request);
+        HttpResponseMessage response = await DoPost("/api/auth/refresh", request);
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
     public async Task Refresh_AfterUsingRefreshToken_OldTokenShouldBeInvalid()
     {
-        var tokens = await CreateTestUserWithTokensAsync(Faker.Internet.Email(), Faker.Internet.Password(25, false, string.Empty, "1"));
-        var request = UserBuilder.CreateRefreshRequest(
+        AuthResponse tokens = await CreateTestUserWithTokensAsync(Faker.Internet.Email(), Faker.Internet.Password(25, false, string.Empty, "1"));
+        RefreshRequest request = UserBuilder.CreateRefreshRequest(
             accessToken: tokens.AccessToken,
             refreshToken: tokens.RefreshToken);
 
-        var response1 = await DoPost("/api/auth/refresh", request);
+        HttpResponseMessage response1 = await DoPost("/api/auth/refresh", request);
         Assert.Equal(HttpStatusCode.OK, response1.StatusCode);
 
-        var response2 = await DoPost("/api/auth/refresh", request);
+        HttpResponseMessage response2 = await DoPost("/api/auth/refresh", request);
         Assert.Equal(HttpStatusCode.BadRequest, response2.StatusCode);
     }
 }

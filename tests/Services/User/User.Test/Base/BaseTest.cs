@@ -75,8 +75,8 @@ public abstract class BaseTest : IClassFixture<TestFixture>, IDisposable
 
     protected async Task<ApplicationUser> CreateTestUserAsync(string email, string password)
     {
-        var user = new ApplicationUser { UserName = email, Email = email };
-        var result = await UserManager.CreateAsync(user, password);
+        ApplicationUser user = new ApplicationUser { UserName = email, Email = email };
+        IdentityResult result = await UserManager.CreateAsync(user, password);
         if (!result.Succeeded)
             throw new Exception(
                 $"Failed to create test user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
@@ -85,9 +85,9 @@ public abstract class BaseTest : IClassFixture<TestFixture>, IDisposable
 
     private async Task<ApplicationUser> CreateTestUserAsync()
     {
-        var user = new ApplicationUser
+        ApplicationUser user = new ApplicationUser
             { UserName = Faker.Internet.UserName(), Email = Faker.Internet.Email() };
-        var result = await UserManager.CreateAsync(user, Faker.Internet.Password(25, false, string.Empty, "1"));
+        IdentityResult result = await UserManager.CreateAsync(user, Faker.Internet.Password(25, false, string.Empty, "1"));
         if (!result.Succeeded)
             throw new Exception(
                 $"Failed to create test user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
@@ -96,13 +96,13 @@ public abstract class BaseTest : IClassFixture<TestFixture>, IDisposable
 
     protected async Task<AuthResponse> CreateTestUserWithTokensAsync(string email, string password)
     {
-        var user = await CreateTestUserAsync(email, password);
+        ApplicationUser user = await CreateTestUserAsync(email, password);
         return await TokenService.CreateTokensAsync(user, Faker.Internet.Ip());
     }
 
     protected async Task<AuthResponse> CreateTestUserWithTokensAsync()
     {
-        var user = await CreateTestUserAsync();
+        ApplicationUser user = await CreateTestUserAsync();
         return await TokenService.CreateTokensAsync(user, Faker.Internet.Ip());
     }
 }
