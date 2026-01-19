@@ -19,14 +19,14 @@ public static class CatalogBuilder
     public static Faker<CatalogEntity> CreateCatalogFaker(Guid merchantId = default)
     {
         return new Faker<CatalogEntity>()
-            .CustomInstantiator(f => CatalogEntity.Create(
-                name: f.Commerce.ProductName(),
-                categories: f.PickRandom(ProductCategories, f.Random.Int(1, 4)),
-                description: f.Commerce.ProductDescription(),
-                imageUrl: f.Image.PicsumUrl(800, 600),
-                price: Price.Of(f.Finance.Amount(1, 1000, 2)),
-                merchantId: merchantId.Equals(Guid.Empty) ? f.Random.Guid() : merchantId
-            ));
+            .RuleFor(m => m.Id, f => CatalogId.Of(f.Random.Guid()))
+            .RuleFor(m => m.Name, f => f.Company.CompanyName())
+            .RuleFor(m => m.Description, f => f.Lorem.Sentence())
+            .RuleFor(m => m.ImageUrl, f => f.Image.PicsumUrl(800, 600))
+            .RuleFor(m => m.Price, f => Price.Of(f.Finance.Amount(1, 1000, 2)))
+            .RuleFor(m => m.Categories,
+                f => f.PickRandom(ProductCategories, f.Random.Int(1, 10)).ToList())
+            .RuleFor(m => m.MerchantId, f => merchantId == default ? f.Random.Guid() : merchantId);
     }
 
 

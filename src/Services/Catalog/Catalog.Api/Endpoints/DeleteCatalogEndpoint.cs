@@ -8,9 +8,10 @@ public static class DeleteCatalogEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapDelete("/catalog",
-                async ([FromBody] DeleteCatalogCommand command, [FromServices] IDeleteCatalogHandler handler) =>
+        app.MapDelete("/catalog/{catalogId}",
+                async ([FromRoute] string catalogId, [FromServices] IDeleteCatalogHandler handler) =>
                 {
+                    DeleteCatalogCommand command = new() { Id = Guid.Parse(catalogId)};
                     Result<DeleteCatalogResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess
                         ? Results.Ok(result)
