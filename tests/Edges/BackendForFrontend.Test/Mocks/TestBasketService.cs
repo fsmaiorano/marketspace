@@ -1,5 +1,4 @@
 using Basket.Api.Application.Basket.CreateBasket;
-using Basket.Api.Application.Basket.DeleteBasket;
 using Basket.Api.Application.Basket.GetBasketById;
 
 namespace BackendForFrontend.Test.Mocks;
@@ -95,8 +94,7 @@ public class TestBasketService(
     {
         try
         {
-            DeleteBasketCommand command = BasketBuilder.CreateDeleteBasketCommandFaker(username).Generate();
-            HttpRequestMessage request = new(HttpMethod.Delete, "/basket") { Content = JsonContent.Create(command) };
+            HttpRequestMessage request = new(HttpMethod.Delete, $"/basket/{username}");
 
             HttpResponseMessage response = await httpClient.SendAsync(request);
 
