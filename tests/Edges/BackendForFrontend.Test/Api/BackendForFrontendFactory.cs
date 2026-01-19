@@ -1,15 +1,16 @@
 using Basket.Api.Infrastructure.Data;
-using Basket.Test.Api;
+using Basket.Test.Fixtures;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Mongo2Go;
 using MongoDB.Driver;
 using Order.Api.Infrastructure.Data;
-using Order.Test.Api;
+using Order.Test.Fixtures;
 using Serilog.Extensions.Hosting;
-using Merchant.Test.Api;
+using Merchant.Test.Fixtures;
 using Microsoft.AspNetCore.TestHost;
 using Minio;
+using CatalogTestFixture = Catalog.Test.Fixtures.TestFixture;
 
 namespace BackendForFrontend.Test.Api;
 
@@ -22,17 +23,17 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
 
     public BackendForFrontendFactory()
     {
-        MerchantApiFactory merchantApiFactory = new();
-        _merchantApiClient = merchantApiFactory.CreateClient();
+        Merchant.Test.Fixtures.TestFixture merchantTestFixture = new();
+        _merchantApiClient = merchantTestFixture.CreateClient();
 
-        OrderApiFactory orderApiFactory = new();
-        _orderApiClient = orderApiFactory.CreateClient();
+        Order.Test.Fixtures.TestFixture orderTestFixture = new();
+        _orderApiClient = orderTestFixture.CreateClient();
 
-        BasketApiFactory basketApiFactory = new();
-        _basketApiClient = basketApiFactory.CreateClient();
+        Basket.Test.Fixtures.TestFixture basketTestFixture = new();
+        _basketApiClient = basketTestFixture.CreateClient();
 
-        CatalogApiFactory catalogApiFactory = new();
-        _catalogApiClient = catalogApiFactory.CreateClient();
+        CatalogTestFixture catalogTestFixture = new();
+        _catalogApiClient = catalogTestFixture.CreateClient();
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -113,9 +114,9 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
 
             services.Replace(ServiceDescriptor.Scoped<IMinioBucket, MockMinioBucket>());
 
-            services.AddScoped<BasketApiFactory>();
-            services.AddScoped<OrderApiFactory>();
-            services.AddScoped<CatalogApiFactory>();
+            services.AddScoped<Basket.Test.Fixtures.TestFixture>();
+            services.AddScoped<Order.Test.Fixtures.TestFixture>();
+            services.AddScoped<CatalogTestFixture>();
 
             services.AddScoped<IMerchantService>(provider =>
             {

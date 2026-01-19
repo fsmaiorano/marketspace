@@ -10,7 +10,6 @@ global using Catalog.Api.Application.Catalog.GetCatalogById;
 global using Catalog.Api.Domain.Entities;
 global using Catalog.Api.Domain.Repositories;
 global using Catalog.Api.Infrastructure.Data;
-global using Catalog.Test.Api;
 global using FluentAssertions;
 global using Microsoft.AspNetCore.Hosting;
 global using Microsoft.AspNetCore.Mvc.Testing;
@@ -19,5 +18,16 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using Moq;
 global using System.Net.Http.Json;
+// Global using directives
+
+global using Catalog.Api;
+global using Catalog.Api.Infrastructure.Data;
+global using Microsoft.AspNetCore.Hosting;
+global using Microsoft.AspNetCore.Mvc.Testing;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.DependencyInjection;
+global using Moq;
 global using Xunit;
+
+
 
