@@ -17,6 +17,7 @@ public class CreateBasketEndpointUnitTest(TestFixture fixture) : BaseTest(fixtur
         CreateBasketCommand command = BasketBuilder.CreateBasketCommandFaker().Generate();
         HttpResponseMessage response = await DoPost("/basket", command);
 
+
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         
         Result<CreateBasketResult>? result = await response.Content.ReadFromJsonAsync<Result<CreateBasketResult>>();

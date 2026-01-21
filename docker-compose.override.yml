@@ -39,12 +39,15 @@ services:
   
   basketdb:
     container_name: basketdb
-    image: mongo
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=BasketDb
     restart: always
     ports:
-      - "27017:27017"
+      - "5433:5432"
     volumes:
-      - mongo_basket_data:/data/db
+      - postgres_basket:/var/lib/postgresql
   
   #  distributedcache:
   #    container_name: distributedcache
@@ -101,9 +104,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
-      - DatabaseSettings__ConnectionString=mongodb://basketdb:27017
-      - DatabaseSettings__DatabaseName=BasketDb
-      - DatabaseSettings__CollectionName=ShoppingCarts
+      - ConnectionStrings__basketdb=Server=basketdb;Port=5432;Database=BasketDb;User Id=postgres;Password=postgres;Include Error Detail=true;
       - GrpcSettings__DiscountUrl=https://discountgrpc:8081
       - MessageBroker__Host=amqp://ecommerce-mq:5672
       - MessageBroker__UserName=guest
@@ -242,5 +243,5 @@ volumes:
   postgres_user:
   postgres_merchant:
   postgres_order:
+  postgres_basket:
   minio_data:
-  mongo_basket_data:

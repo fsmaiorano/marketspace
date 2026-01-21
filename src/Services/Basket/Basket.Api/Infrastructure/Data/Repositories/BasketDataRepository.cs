@@ -1,32 +1,40 @@
 using Basket.Api.Domain.Entities;
 using Basket.Api.Domain.Repositories;
-using Microsoft.Extensions.Options;
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
 
 namespace Basket.Api.Infrastructure.Data.Repositories;
 
-public class BasketDataRepository(IMongoDatabase database, IOptions<DatabaseSettings> settings)
-    : IBasketDataRepository
+public class BasketDataRepository(BasketDbContext context) : IBasketDataRepository
 {
-    private readonly IMongoCollection<ShoppingCartEntity> _collection = database.GetCollection<ShoppingCartEntity>(settings.Value.CollectionName);
-
     public async Task<ShoppingCartEntity> CreateCartAsync(ShoppingCartEntity cart)
     {
         await DeleteCartAsync(cart.Username);
-        await _collection.InsertOneAsync(cart);
+        
+        context.ShoppingCarts.Add(cart);
+        await context.SaveChangesAsync();
+        
         return cart;
     }
 
     public async Task<ShoppingCartEntity?> GetCartAsync(string username)
     {
-        return await _collection.Find(sc => sc.Username.Equals(username)).FirstOrDefaultAsync();
+        return await context.ShoppingCarts
+            .FirstOrDefaultAsync(sc => sc.Username == username);
     }
 
     public async Task<bool> CheckoutAsync(string username)
     {
         try
         {
-            await _collection.DeleteOneAsync(cart => cart.Username == username);
+            ShoppingCartEntity? cart = await context.ShoppingCarts
+                .FirstOrDefaultAsync(c => c.Username == username);
+            
+            if (cart != null)
+            {
+                context.ShoppingCarts.Remove(cart);
+                await context.SaveChangesAsync();
+            }
+            
             return true;
         }
         catch
@@ -37,6 +45,13 @@ public class BasketDataRepository(IMongoDatabase database, IOptions<DatabaseSett
 
     public async Task DeleteCartAsync(string username)
     {
-        await _collection.DeleteOneAsync(cart => cart.Username == username);
+        ShoppingCartEntity? cart = await context.ShoppingCarts
+            .FirstOrDefaultAsync(c => c.Username == username);
+        
+        if (cart != null)
+        {
+            context.ShoppingCarts.Remove(cart);
+            await context.SaveChangesAsync();
+        }
     }
 }

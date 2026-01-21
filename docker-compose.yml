@@ -53,8 +53,6 @@ services:
     image: ${DOCKER_REGISTRY-}basketapi
     depends_on:
       - basketdb
-    environment:
-      - DatabaseSettings__ConnectionString=mongodb://basketdb:27017
     build:
       context: .
       dockerfile: ./src/Services/Basket/Basket.Api/Dockerfile
@@ -118,6 +116,6 @@ volumes:
   postgres_user:
   postgres_order:
   postgres_merchant:
-  mongo_basket_data:
+  postgres_basket:
   minio_data:
   webapp:

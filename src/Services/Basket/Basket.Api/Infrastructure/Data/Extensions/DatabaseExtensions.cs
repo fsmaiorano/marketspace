@@ -1,13 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace Catalog.Api.Infrastructure.Data.Extensions;
+namespace Basket.Api.Infrastructure.Data.Extensions;
 
 public static class DatabaseExtensions
 {
     public static async Task InitialiseDatabaseAsync(this WebApplication app)
     {
         using IServiceScope scope = app.Services.CreateScope();
-        CatalogDbContext context = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
+        BasketDbContext context = scope.ServiceProvider.GetRequiredService<BasketDbContext>();
 
         try
         {
@@ -20,7 +20,7 @@ public static class DatabaseExtensions
                     if (context.Database.IsRelational())
                     {
                         await context.Database.MigrateAsync();
-                        Console.WriteLine("Database migration completed successfully.");
+                        Console.WriteLine("Basket database migration completed successfully.");
                     }
                     else
                     {
@@ -29,18 +29,18 @@ public static class DatabaseExtensions
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Migration failed, but continuing: {ex.Message}");
+                    Console.WriteLine($"Basket migration failed, but continuing: {ex.Message}");
                     Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 }
             }
             else
             {
-                Console.WriteLine("Database was created successfully.");
+                Console.WriteLine("Basket database was created successfully.");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Database initialization failed: {ex.Message}");
+            Console.WriteLine($"Basket database initialization failed: {ex.Message}");
             Console.WriteLine("Application will continue without database initialization.");
         }
     }

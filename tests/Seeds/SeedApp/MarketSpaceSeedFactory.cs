@@ -1,7 +1,8 @@
+using Basket.Api.Infrastructure.Data;
 using Catalog.Api.Infrastructure.Data;
-using MongoDB.Driver;
 using BuildingBlocks.Storage.Minio;
 using Minio;
+using Npgsql;
 
 namespace SeedApp;
 
@@ -14,13 +15,13 @@ public class MarketSpaceSeedFactory
         "Server=localhost;Port=5432;Database=CatalogDb;User Id=postgres;Password=postgres;Include Error Detail=true";
     
     private const string BasketDbConnectionString =
-        "mongodb://localhost:27017";
+        "Server=localhost;Port=5433;Database=BasketDb;User Id=postgres;Password=postgres;Include Error Detail=true";
 
     private const string MinioEndpoint = "localhost:9000";
     private const string MinioAccessKey = "admin";
     private const string MinioSecretKey = "admin123";
 
-    private readonly string _mongoConnectionString;
+    private readonly string _basketConnectionString;
     private readonly string _minioEndpoint;
     private readonly string _minioAccessKey;
     private readonly string _minioSecretKey;
@@ -28,12 +29,12 @@ public class MarketSpaceSeedFactory
     public IServiceProvider Services { get; private set; }
 
     public MarketSpaceSeedFactory(
-        string mongoConnectionString = BasketDbConnectionString,
+        string basketConnectionString = BasketDbConnectionString,
         string minioEndpoint = MinioEndpoint,
         string minioAccessKey = MinioAccessKey,
         string minioSecretKey = MinioSecretKey)
     {
-        _mongoConnectionString = mongoConnectionString;
+        _basketConnectionString = basketConnectionString;
         _minioEndpoint = minioEndpoint;
         _minioAccessKey = minioAccessKey;
         _minioSecretKey = minioSecretKey;
@@ -53,13 +54,13 @@ public class MarketSpaceSeedFactory
                 services.AddDbContext<CatalogDbContext>(options =>
                     options.UseNpgsql(CatalogDbConnectionString));
                 
-                services.AddSingleton<IMongoClient>(_ => new MongoClient(_mongoConnectionString));
-
-                services.AddScoped(sp =>
-                {
-                    IMongoClient client = sp.GetRequiredService<IMongoClient>();
-                    return client.GetDatabase("BasketDb");
-                });
+                // Configure BasketDbContext with EnableDynamicJson for JSONB support
+                var basketDataSourceBuilder = new NpgsqlDataSourceBuilder(_basketConnectionString);
+                basketDataSourceBuilder.EnableDynamicJson();
+                var basketDataSource = basketDataSourceBuilder.Build();
+                
+                services.AddDbContext<BasketDbContext>(options =>
+                    options.UseNpgsql(basketDataSource));
 
                 services.AddSingleton<IMinioClient>(_ =>
                 {
@@ -73,6 +74,7 @@ public class MarketSpaceSeedFactory
 
                 services.AddScoped<IMerchantDbContext, MerchantDbContext>();
                 services.AddScoped<ICatalogDbContext, CatalogDbContext>();
+                services.AddScoped<IBasketDbContext, BasketDbContext>();
             });
 
         return builder.Build();

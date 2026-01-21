@@ -1,15 +1,12 @@
 using Basket.Api;
-using Basket.Api.Domain.Repositories;
 using Basket.Api.Infrastructure.Data;
-using Basket.Api.Infrastructure.Data.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
-using Mongo2Go;
-using MongoDB.Driver;
 using Serilog.Extensions.Hosting;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -26,11 +23,11 @@ public sealed class TestFixture : WebApplicationFactory<BasketProgram>, IAsyncLi
         {
             List<ServiceDescriptor> descriptorsToRemove = services
                 .Where(d => d.ServiceType.FullName != null &&
-                            (d.ServiceType == typeof(BasketDbContext) ||
+                            (d.ServiceType == typeof(DbContextOptions<BasketDbContext>) ||
+                             d.ServiceType == typeof(BasketDbContext) ||
                              d.ServiceType == typeof(IBasketDbContext) ||
                              d.ServiceType.FullName.Contains(nameof(BasketDbContext)) ||
                              d.ServiceType.FullName.Contains(nameof(IBasketDbContext)) ||
-                             d.ServiceType.FullName.Contains(nameof(IMongoClient)) ||
                              d.ServiceType.FullName.Contains("EntityFramework") ||
                              d.ServiceType.FullName.Contains("Npgsql")))
                 .ToList();
@@ -38,25 +35,16 @@ public sealed class TestFixture : WebApplicationFactory<BasketProgram>, IAsyncLi
             foreach (ServiceDescriptor descriptor in descriptorsToRemove)
                 services.Remove(descriptor);
 
-            MongoDbRunner? runner = MongoDbRunner.Start();
-            
-            services.AddSingleton<IMongoClient>(_ => new MongoClient(runner.ConnectionString));
-            
-            services.AddScoped(sp =>
-            {
-                IMongoClient client = sp.GetRequiredService<IMongoClient>();
-                return client.GetDatabase("BasketInMemoryDbForTesting");
-            });
+            services.AddDbContext<BasketDbContext>(options =>
+                options.UseInMemoryDatabase("InMemoryDbForTesting"));
 
-            services.AddScoped<IBasketDataRepository, BasketDataRepository>();
+            services.AddScoped<IBasketDbContext, BasketDbContext>();
 
-            // Remove Serilog services
             services.RemoveAll<ILoggerFactory>();
             services.RemoveAll(typeof(ILogger<>));
             services.RemoveAll<Serilog.ILogger>();
             services.RemoveAll<DiagnosticContext>();
             
-            // Add simple console logging for tests
             services.AddLogging(loggingBuilder => 
             {
                 loggingBuilder.ClearProviders();

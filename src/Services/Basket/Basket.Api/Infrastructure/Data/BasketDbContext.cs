@@ -1,27 +1,42 @@
 using Basket.Api.Domain.Entities;
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
+using System.Reflection;
+using System.Text.Json;
 
 namespace Basket.Api.Infrastructure.Data;
 
 public interface IBasketDbContext
 {
-    IMongoCollection<ShoppingCartEntity> ShoppingCart { get; }
-    IMongoCollection<ShoppingCartItemEntity> ShoppingCartItems { get; }
+    DbSet<ShoppingCartEntity> ShoppingCarts { get; }
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
 
-public class BasketDbContext : IBasketDbContext
+public class BasketDbContext : DbContext, IBasketDbContext
 {
-    private readonly IMongoDatabase _database;
-
-    public BasketDbContext(string connectionString, string databaseName)
+    public BasketDbContext(DbContextOptions<BasketDbContext> options)
+        : base(options)
     {
-        MongoClient client = new MongoClient(connectionString);
-        _database = client.GetDatabase(databaseName);
     }
 
-    public IMongoCollection<ShoppingCartEntity> ShoppingCart =>
-        _database.GetCollection<ShoppingCartEntity>("ShoppingCartDto");
+    public DbSet<ShoppingCartEntity> ShoppingCarts => Set<ShoppingCartEntity>();
 
-    public IMongoCollection<ShoppingCartItemEntity> ShoppingCartItems =>
-        _database.GetCollection<ShoppingCartItemEntity>("ShoppingCartItems");
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        // Apply configurations from assembly
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        
+        // Special handling for InMemory database - override the JSONB column type with a converter
+        if (Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory")
+        {
+            modelBuilder.Entity<ShoppingCartEntity>()
+                .Property(e => e.Items)
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                    v => JsonSerializer.Deserialize<List<ShoppingCartItemEntity>>(v, (JsonSerializerOptions?)null) ?? new List<ShoppingCartItemEntity>()
+                );
+        }
+        
+        base.OnModelCreating(modelBuilder);
+    }
 }
+

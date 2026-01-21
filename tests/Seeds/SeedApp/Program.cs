@@ -1,19 +1,22 @@
-﻿using Basket.Api.Domain.Entities;
+﻿﻿using Basket.Api.Domain.Entities;
+using Basket.Api.Infrastructure.Data;
 using BuildingBlocks.Storage.Minio;
 using Catalog.Api.Domain.Entities;
 using Catalog.Api.Domain.ValueObjects;
 using Catalog.Api.Infrastructure.Data;
-using MongoDB.Driver;
-using Testcontainers.MongoDb;
+using Testcontainers.PostgreSql;
 using Testcontainers.Minio;
 
-Console.WriteLine("Starting MongoDB container...");
-MongoDbContainer mongoDbContainer = new MongoDbBuilder()
-    .WithImage("mongo:latest")
+Console.WriteLine("Starting PostgreSQL container for Basket...");
+PostgreSqlContainer basketPostgresContainer = new PostgreSqlBuilder()
+    .WithImage("postgres:latest")
+    .WithDatabase("BasketDb")
+    .WithUsername("postgres")
+    .WithPassword("postgres")
     .Build();
 
-await mongoDbContainer.StartAsync();
-Console.WriteLine($"MongoDB container started at: {mongoDbContainer.GetConnectionString()}");
+await basketPostgresContainer.StartAsync();
+Console.WriteLine($"Basket PostgreSQL container started at: {basketPostgresContainer.GetConnectionString()}");
 
 Console.WriteLine("Starting MinIO container...");
 MinioContainer minioContainer = new MinioBuilder()
@@ -24,7 +27,7 @@ await minioContainer.StartAsync();
 Console.WriteLine($"MinIO container started at: {minioContainer.GetConnectionString()}");
 
 MarketSpaceSeedFactory factory = new(
-    mongoConnectionString: mongoDbContainer.GetConnectionString(),
+    basketConnectionString: basketPostgresContainer.GetConnectionString(),
     minioEndpoint: minioContainer.GetConnectionString().Replace("http://", ""),
     minioAccessKey: MinioBuilder.DefaultUsername,
     minioSecretKey: MinioBuilder.DefaultPassword
@@ -34,8 +37,11 @@ IServiceScopeFactory scopeFactory = factory.Services.GetRequiredService<IService
 using IServiceScope scope = scopeFactory.CreateScope();
 MerchantDbContext merchantDbContext = scope.ServiceProvider.GetRequiredService<MerchantDbContext>();
 CatalogDbContext catalogDbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
-IMongoClient basketMongoClient = scope.ServiceProvider.GetRequiredService<IMongoClient>();
+BasketDbContext basketDbContext = scope.ServiceProvider.GetRequiredService<BasketDbContext>();
 IMinioBucket minioBucket = scope.ServiceProvider.GetRequiredService<IMinioBucket>();
+
+// Apply migrations
+await basketDbContext.Database.EnsureCreatedAsync();
 
 
 const int createMerchantCounter = 1;
@@ -95,17 +101,14 @@ for (int i = 0; i < createdMerchants.Count; i++)
 }
 
 // Create basket
-var basketDb = basketMongoClient.GetDatabase("BasketDb");
-IMongoCollection<ShoppingCartEntity>
-    shoppingCartCollection = basketDb.GetCollection<ShoppingCartEntity>("ShoppingCart");
-
 for (int i = 0; i < createdMerchants.Count; i++)
 {
     ShoppingCartEntity shoppingCart =
         BasketBuilder.CreateShoppingCartFaker(username: createdMerchants.ElementAt(i).Name);
     
     createdShoppingCarts.Add(shoppingCart);
-    await shoppingCartCollection.InsertOneAsync(shoppingCart);
+    basketDbContext.ShoppingCarts.Add(shoppingCart);
+    var x = await basketDbContext.SaveChangesAsync();
     Console.WriteLine($"Shopping cart created for user: {createdMerchants.ElementAt(i).Name}");
 }
 
@@ -116,6 +119,6 @@ Console.WriteLine("\nContainers are still running. Press any key to stop and cle
 Console.ReadKey();
 
 Console.WriteLine("\nStopping containers...");
-await mongoDbContainer.StopAsync();
+await basketPostgresContainer.StopAsync();
 await minioContainer.StopAsync();
 Console.WriteLine("Containers stopped. Goodbye!");
