@@ -35,10 +35,12 @@ IResourceBuilder<PostgresDatabaseResource> userDb = builder.AddPostgres(userDbCo
     .WithHostPort(int.Parse(userDbConfig["Port"]!))
     .AddDatabase(userDbConfig["ConnectionName"]!);
 
-IConfigurationSection mongoDbConfig = config.GetSection("Aspire:Databases:MongoDB");
-IResourceBuilder<MongoDBServerResource> mongoServer = builder.AddMongoDB(mongoDbConfig["Name"]!, int.Parse(mongoDbConfig["Port"]!))
-    .WithLifetime(ContainerLifetime.Persistent);
-IResourceBuilder<MongoDBDatabaseResource> basketDb = mongoServer.AddDatabase(mongoDbConfig.GetSection("Basket")["DatabaseName"]!);
+IConfigurationSection basketDbConfig = postgresConfig.GetSection("Basket");
+IResourceBuilder<PostgresDatabaseResource> basketDb = builder.AddPostgres(basketDbConfig["Name"]!, password: postgresPassword)
+    .WithEnvironment("POSTGRES_DB", basketDbConfig["DatabaseName"]!)
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithHostPort(int.Parse(basketDbConfig["Port"]!))
+    .AddDatabase(basketDbConfig["ConnectionName"]!);
 
 // Storage - Minio
 IConfigurationSection minioConfig = config.GetSection("Aspire:Storage:Minio");
@@ -64,8 +66,6 @@ IResourceBuilder<ProjectResource> catalogApi = builder.AddProject<Projects.Catal
 IConfigurationSection basketConfig = config.GetSection("Aspire:Services:Basket");
 IResourceBuilder<ProjectResource> basketApi = builder.AddProject<Projects.Basket_Api>(basketConfig["ProjectName"]!)
     .WithReference(basketDb)
-    .WithEnvironment("DatabaseSettings__DatabaseName", mongoDbConfig.GetSection("Basket")["DatabaseName"]!)
-    .WithEnvironment("DatabaseSettings__CollectionName", mongoDbConfig.GetSection("Basket")["CollectionName"]!)
     .WithHttpEndpoint(port: int.Parse(basketConfig["HttpPort"]!), name: "basket-http")
     .WithHttpsEndpoint(port: int.Parse(basketConfig["HttpsPort"]!), name: "basket-https");
 

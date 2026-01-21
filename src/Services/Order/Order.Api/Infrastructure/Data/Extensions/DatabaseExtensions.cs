@@ -25,7 +25,7 @@ public static class DatabaseExtensions
                     }
                     else
                     {
-                        Console.WriteLine("Using non-relational database provider - skipping migrations.");
+                        Console.WriteLine("Using non-relational database provider - skiphahaping migrations.");
                     }
                 }
                 catch (Exception ex)

@@ -1,13 +1,8 @@
 using Basket.Api.Infrastructure.Data;
-using Basket.Test.Fixtures;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Mongo2Go;
-using MongoDB.Driver;
 using Order.Api.Infrastructure.Data;
-using Order.Test.Fixtures;
 using Serilog.Extensions.Hosting;
-using Merchant.Test.Fixtures;
 using Microsoft.AspNetCore.TestHost;
 using Minio;
 using CatalogTestFixture = Catalog.Test.Fixtures.TestFixture;
@@ -59,7 +54,6 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
                              d.ServiceType.FullName.Contains(nameof(IMerchantDbContext)) ||
                              d.ServiceType.FullName.Contains(nameof(BasketDbContext)) ||
                              d.ServiceType.FullName.Contains(nameof(IBasketDbContext)) ||
-                             d.ServiceType.FullName.Contains(nameof(IMongoClient)) ||
                              d.ServiceType.FullName.Contains(nameof(CatalogDbContext)) ||
                              d.ServiceType.FullName.Contains(nameof(ICatalogDbContext)) ||
                              d.ServiceType.FullName.Contains("EntityFramework") ||
@@ -93,15 +87,10 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
                 loggingBuilder.SetMinimumLevel(LogLevel.Warning);
             });
 
-            MongoDbRunner? runner = MongoDbRunner.Start();
+            services.AddDbContext<BasketDbContext>(options =>
+                options.UseInMemoryDatabase("InMemoryDbForTesting"));
 
-            services.AddSingleton<IMongoClient>(_ => new MongoClient(runner.ConnectionString));
-
-            services.AddScoped(sp =>
-            {
-                IMongoClient client = sp.GetRequiredService<IMongoClient>();
-                return client.GetDatabase("BasketInMemoryDbForTesting");
-            });
+            services.AddScoped<IBasketDbContext, BasketDbContext>();
 
             services.AddDbContext<MerchantDbContext>(options =>
                 options.UseInMemoryDatabase("InMemoryDbForTesting"));

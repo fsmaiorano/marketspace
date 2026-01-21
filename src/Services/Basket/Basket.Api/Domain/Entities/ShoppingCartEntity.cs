@@ -1,18 +1,15 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using System.ComponentModel.DataAnnotations;
 
 namespace Basket.Api.Domain.Entities;
 
 public class ShoppingCartEntity
 {
-    // [BsonRepresentation(BsonType.ObjectId)]
-    // public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+    [Key]
+    public string Username { get; set; } = null!;
 
-    [BsonId] [BsonElement("username")] public string Username { get; set; } = null!;
+    public List<ShoppingCartItemEntity> Items { get; set; } = new();
 
-    [BsonElement("items")] public List<ShoppingCartItemEntity> Items { get; set; } = new();
-
-    [BsonIgnore] public decimal TotalPrice => Items.Sum(item => item.Price * item.Quantity);
+    public decimal TotalPrice => Items.Sum(item => item.Price * item.Quantity);
 
     public static ShoppingCartEntity Create(string username, List<ShoppingCartItemEntity> items)
     {

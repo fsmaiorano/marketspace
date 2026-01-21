@@ -13,10 +13,11 @@
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
         <PackageReference Include="Testcontainers" Version="4.10.0" />
         <PackageReference Include="Testcontainers.Minio" Version="4.10.0" />
-        <PackageReference Include="Testcontainers.MongoDb" Version="4.10.0" />
+        <PackageReference Include="Testcontainers.PostgreSql" Version="4.10.0" />
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\..\src\Services\Basket\Basket.Api\Basket.Api.csproj" />
         <ProjectReference Include="..\..\..\src\Services\Merchant\Merchant.Api\Merchant.Api.csproj" />
         <ProjectReference Include="..\..\Builders\Builder\Builder.csproj" />
         <ProjectReference Include="..\..\..\src\BuildingBlocks\BuildingBlocks.Storage\BuildingBlocks.Storage.csproj" />

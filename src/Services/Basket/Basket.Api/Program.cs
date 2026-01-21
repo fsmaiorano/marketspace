@@ -1,6 +1,7 @@
 using Basket.Api.Application;
 using Basket.Api.Endpoints;
 using Basket.Api.Infrastructure;
+using Basket.Api.Infrastructure.Data.Extensions;
 using BuildingBlocks.Exceptions;
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
@@ -35,6 +36,7 @@ app.MapDefaultEndpoints();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    await app.InitialiseDatabaseAsync();
 }
 
 // app.UseHttpsRedirection();

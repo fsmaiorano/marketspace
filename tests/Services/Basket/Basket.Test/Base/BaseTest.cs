@@ -1,7 +1,6 @@
 using Bogus;
 using Microsoft.Extensions.DependencyInjection;
 using Basket.Api.Infrastructure.Data;
-using MongoDB.Driver;
 using Basket.Test.Fixtures;
 
 namespace Basket.Test.Base;
@@ -16,10 +15,6 @@ public abstract class BaseTest : IClassFixture<TestFixture>, IDisposable
 
     protected IBasketDbContext Context => _scope.ServiceProvider.GetRequiredService<IBasketDbContext>();
 
-    protected IMongoClient MongoClient => _scope.ServiceProvider.GetRequiredService<IMongoClient>();
-
-    protected IMongoDatabase Database => MongoClient.GetDatabase("BasketInMemoryDbForTesting");
-
     protected readonly Faker Faker;
 
     protected HttpClient HttpClient { get; }
@@ -32,9 +27,6 @@ public abstract class BaseTest : IClassFixture<TestFixture>, IDisposable
         _scope = fixture.Services.CreateScope();
         HttpClient = fixture.CreateClient();
         Faker = new Faker();
-
-        // Clean database before each test
-        Database.DropCollection("ShoppingCart");
     }
 
     #region HTTP Request Helpers
