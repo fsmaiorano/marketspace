@@ -10,29 +10,48 @@ public static class BasketBuilder
 {
     private static readonly string[] ProductNames =
     {
-        "Wireless Headphones", "Gaming Mouse", "Coffee Mug", "Bluetooth Speaker", "Phone Case", 
-        "Laptop Stand", "Water Bottle", "Desk Lamp", "Notebook", "Pen Set", "USB Cable", 
-        "Power Bank", "Screen Protector", "Keyboard", "Mouse Pad", "Tablet", "Camera", "Backpack"
+        "Wireless Headphones", "Gaming Mouse", "Coffee Mug", "Bluetooth Speaker", "Phone Case", "Laptop Stand",
+        "Water Bottle", "Desk Lamp", "Notebook", "Pen Set", "USB Cable", "Power Bank", "Screen Protector",
+        "Keyboard", "Mouse Pad", "Tablet", "Camera", "Backpack"
     };
 
-    public static Faker<ShoppingCartEntity> CreateShoppingCartFaker(string username = "")
+    public static Faker<ShoppingCartEntity> CreateShoppingCartFaker(string username = "",
+        ShoppingCartEntity[]? products = null)
     {
         return new Faker<ShoppingCartEntity>()
             .CustomInstantiator(f => new ShoppingCartEntity
             {
                 Username = !string.IsNullOrEmpty(username) ? username : f.Internet.UserName(),
-                Items = CreateShoppingCartItemFaker().Generate(f.Random.Int(1, 5))
+                Items = CreateShoppingCartItemFaker(products).Generate(f.Random.Int(1, 5))
             });
     }
 
-    public static Faker<ShoppingCartItemEntity> CreateShoppingCartItemFaker()
+    public static Faker<ShoppingCartItemEntity> CreateShoppingCartItemFaker(ShoppingCartEntity[]? products = null)
     {
         return new Faker<ShoppingCartItemEntity>()
-            .CustomInstantiator(f => new ShoppingCartItemEntity
+            .CustomInstantiator(f =>
             {
-                ProductName = f.PickRandom(ProductNames),
-                Price = f.Finance.Amount(1, 500, 2),
-                Quantity = f.Random.Int(1, 10)
+                ShoppingCartItemEntity[]? availableItems = products?.SelectMany(p => p.Items ?? []).ToArray();
+
+                if (availableItems is not { Length: > 0 })
+                {
+                    return new ShoppingCartItemEntity
+                    {
+                        ProductId = Guid.NewGuid().ToString(),
+                        ProductName = f.PickRandom(ProductNames),
+                        Price = f.Finance.Amount(1, 500, 2),
+                        Quantity = f.Random.Int(1, 10)
+                    };
+                }
+
+                ShoppingCartItemEntity? selectedItem = f.PickRandom(availableItems);
+                return new ShoppingCartItemEntity
+                {
+                    ProductId = selectedItem.ProductId,
+                    ProductName = selectedItem.ProductName,
+                    Price = f.Finance.Amount(1, 500, 2),
+                    Quantity = f.Random.Int(1, 10)
+                };
             });
     }
 
