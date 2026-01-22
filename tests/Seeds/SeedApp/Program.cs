@@ -128,25 +128,9 @@ for (int i = 0; i < createdMerchants.Count; i++)
     Console.WriteLine($"Shopping cart created for user: {createdMerchants.ElementAt(i).Name} with {shoppingCart.Items.Count} items");
 }
 
-// Verify basket data was saved
-Console.WriteLine("\nVerifying basket data in database...");
-int basketCount = await basketDbContext.ShoppingCarts.CountAsync();
-Console.WriteLine($"Total shopping carts in database: {basketCount}");
-
-if (basketCount > 0)
-{
-    Console.WriteLine("\nShopping cart details:");
-    var allCarts = await basketDbContext.ShoppingCarts.ToListAsync();
-    foreach (var cart in allCarts)
-    {
-        Console.WriteLine($"  - User: {cart.Username}, Items: {cart.Items?.Count ?? 0}, Total: ${cart.TotalPrice:F2}");
-    }
-}
-
 Console.WriteLine("\n✅ Seeding completed successfully!");
 Console.WriteLine($"Created {createdMerchants.Count} merchant(s)");
 Console.WriteLine($"Created {createdShoppingCarts.Count} shopping cart(s)");
-Console.WriteLine($"Verified {basketCount} shopping cart(s) in database");
 Console.WriteLine("\n===========================================");
 Console.WriteLine("Data has been persisted to your databases!");
 Console.WriteLine("===========================================");
