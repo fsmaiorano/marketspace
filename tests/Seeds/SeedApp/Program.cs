@@ -4,33 +4,38 @@ using BuildingBlocks.Storage.Minio;
 using Catalog.Api.Domain.Entities;
 using Catalog.Api.Domain.ValueObjects;
 using Catalog.Api.Infrastructure.Data;
-using Testcontainers.PostgreSql;
-using Testcontainers.Minio;
+using Microsoft.EntityFrameworkCore;
 
-Console.WriteLine("Starting PostgreSQL container for Basket...");
-PostgreSqlContainer basketPostgresContainer = new PostgreSqlBuilder()
-    .WithImage("postgres:latest")
-    .WithDatabase("BasketDb")
-    .WithUsername("postgres")
-    .WithPassword("postgres")
-    .Build();
+Console.WriteLine("===========================================");
+Console.WriteLine("MarketSpace Seed Application");
+Console.WriteLine("===========================================");
+Console.WriteLine("This application will seed data to your REAL databases.");
+Console.WriteLine("Make sure your docker-compose services are running:");
+Console.WriteLine("  - docker compose up -d");
+Console.WriteLine();
 
-await basketPostgresContainer.StartAsync();
-Console.WriteLine($"Basket PostgreSQL container started at: {basketPostgresContainer.GetConnectionString()}");
+// Using real database connections from docker-compose
+const string merchantConnectionString = "Server=localhost;Port=5436;Database=MerchantDb;User Id=postgres;Password=postgres;Include Error Detail=true";
+const string catalogConnectionString = "Server=localhost;Port=5432;Database=CatalogDb;User Id=postgres;Password=postgres;Include Error Detail=true";
+const string basketConnectionString = "Server=localhost;Port=5433;Database=BasketDb;User Id=postgres;Password=postgres;Include Error Detail=true";
+const string minioEndpoint = "localhost:9000";
+const string minioAccessKey = "admin";
+const string minioSecretKey = "admin123";
 
-Console.WriteLine("Starting MinIO container...");
-MinioContainer minioContainer = new MinioBuilder()
-    .WithImage("minio/minio:latest")
-    .Build();
-
-await minioContainer.StartAsync();
-Console.WriteLine($"MinIO container started at: {minioContainer.GetConnectionString()}");
+Console.WriteLine("Connecting to databases:");
+Console.WriteLine($"  - MerchantDb: localhost:5436");
+Console.WriteLine($"  - CatalogDb:  localhost:5432");
+Console.WriteLine($"  - BasketDb:   localhost:5433");
+Console.WriteLine($"  - MinIO:      localhost:9000");
+Console.WriteLine();
 
 MarketSpaceSeedFactory factory = new(
-    basketConnectionString: basketPostgresContainer.GetConnectionString(),
-    minioEndpoint: minioContainer.GetConnectionString().Replace("http://", ""),
-    minioAccessKey: MinioBuilder.DefaultUsername,
-    minioSecretKey: MinioBuilder.DefaultPassword
+    merchantConnectionString: merchantConnectionString,
+    catalogConnectionString: catalogConnectionString,
+    basketConnectionString: basketConnectionString,
+    minioEndpoint: minioEndpoint,
+    minioAccessKey: minioAccessKey,
+    minioSecretKey: minioSecretKey
 );
 IServiceScopeFactory scopeFactory = factory.Services.GetRequiredService<IServiceScopeFactory>();
 
@@ -40,11 +45,21 @@ CatalogDbContext catalogDbContext = scope.ServiceProvider.GetRequiredService<Cat
 BasketDbContext basketDbContext = scope.ServiceProvider.GetRequiredService<BasketDbContext>();
 IMinioBucket minioBucket = scope.ServiceProvider.GetRequiredService<IMinioBucket>();
 
-// Apply migrations
+// Create database schemas
+Console.WriteLine("Creating Merchant database schema...");
+await merchantDbContext.Database.EnsureCreatedAsync();
+Console.WriteLine("Merchant database schema created successfully!");
+
+Console.WriteLine("Creating Catalog database schema...");
+await catalogDbContext.Database.EnsureCreatedAsync();
+Console.WriteLine("Catalog database schema created successfully!");
+
+Console.WriteLine("Creating Basket database schema...");
 await basketDbContext.Database.EnsureCreatedAsync();
+Console.WriteLine("Basket database schema created successfully!");
 
 
-const int createMerchantCounter = 1;
+const int createMerchantCounter = 20;
 
 List<MerchantEntity> createdMerchants = [];
 List<ShoppingCartEntity> createdShoppingCarts = [];
@@ -101,6 +116,7 @@ for (int i = 0; i < createdMerchants.Count; i++)
 }
 
 // Create basket
+Console.WriteLine("\nCreating shopping carts...");
 for (int i = 0; i < createdMerchants.Count; i++)
 {
     ShoppingCartEntity shoppingCart =
@@ -108,17 +124,29 @@ for (int i = 0; i < createdMerchants.Count; i++)
     
     createdShoppingCarts.Add(shoppingCart);
     basketDbContext.ShoppingCarts.Add(shoppingCart);
-    var x = await basketDbContext.SaveChangesAsync();
-    Console.WriteLine($"Shopping cart created for user: {createdMerchants.ElementAt(i).Name}");
+    await basketDbContext.SaveChangesAsync();
+    Console.WriteLine($"Shopping cart created for user: {createdMerchants.ElementAt(i).Name} with {shoppingCart.Items.Count} items");
+}
+
+// Verify basket data was saved
+Console.WriteLine("\nVerifying basket data in database...");
+int basketCount = await basketDbContext.ShoppingCarts.CountAsync();
+Console.WriteLine($"Total shopping carts in database: {basketCount}");
+
+if (basketCount > 0)
+{
+    Console.WriteLine("\nShopping cart details:");
+    var allCarts = await basketDbContext.ShoppingCarts.ToListAsync();
+    foreach (var cart in allCarts)
+    {
+        Console.WriteLine($"  - User: {cart.Username}, Items: {cart.Items?.Count ?? 0}, Total: ${cart.TotalPrice:F2}");
+    }
 }
 
 Console.WriteLine("\n✅ Seeding completed successfully!");
 Console.WriteLine($"Created {createdMerchants.Count} merchant(s)");
 Console.WriteLine($"Created {createdShoppingCarts.Count} shopping cart(s)");
-Console.WriteLine("\nContainers are still running. Press any key to stop and cleanup...");
-Console.ReadKey();
-
-Console.WriteLine("\nStopping containers...");
-await basketPostgresContainer.StopAsync();
-await minioContainer.StopAsync();
-Console.WriteLine("Containers stopped. Goodbye!");
+Console.WriteLine($"Verified {basketCount} shopping cart(s) in database");
+Console.WriteLine("\n===========================================");
+Console.WriteLine("Data has been persisted to your databases!");
+Console.WriteLine("===========================================");
