@@ -1,0 +1,30 @@
+meta {
+  name: Login
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{user_url}}/api/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "user@example.com",
+    "password": "Password123!"
+  }
+}
+
+script:post-response {
+  if (res.status === 200) {
+    const response = res.body;
+    if (response && response.accessToken) {
+      bru.setVar("access_token", response.accessToken);
+    }
+    if (response && response.refreshToken) {
+      bru.setVar("refresh_token", response.refreshToken);
+    }
+  }
+}
