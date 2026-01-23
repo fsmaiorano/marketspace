@@ -30,6 +30,12 @@ public class UserDbContext : IdentityDbContext<ApplicationUser, IdentityRole, st
 
         builder.Entity<ApplicationUser>(entity =>
         {
+            entity.Property(e => e.FirstName)
+                .HasMaxLength(100);
+            
+            entity.Property(e => e.LastName)
+                .HasMaxLength(100);
+            
             entity.Property(e => e.EnableNotifications)
                 .HasDefaultValue(true);
         });

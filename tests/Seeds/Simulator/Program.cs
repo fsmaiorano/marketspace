@@ -1,4 +1,5 @@
 ﻿using Simulator;
+using System.Net.Http.Json;
 using User.Api.Data;
 
 Console.WriteLine("===========================================");
@@ -12,7 +13,6 @@ const string targetUserEmail = "fsmaiorano@gmail.com";
 const bool doCheckout = false;
 // ======================================
 
-
 // Using real database connections from docker-compose
 const string merchantConnectionString =
     "Server=localhost;Port=5436;Database=MerchantDb;User Id=postgres;Password=postgres;Include Error Detail=true";
@@ -20,7 +20,7 @@ const string catalogConnectionString =
     "Server=localhost;Port=5432;Database=CatalogDb;User Id=postgres;Password=postgres;Include Error Detail=true";
 const string basketConnectionString =
     "Server=localhost;Port=5433;Database=BasketDb;User Id=postgres;Password=postgres;Include Error Detail=true";
-const string userConnectionString = 
+const string userConnectionString =
     "Server=localhost;Port=5437;Database=UserDb;User Id=postgres;Password=postgres;Include Error Detail=true";
 
 const string minioEndpoint = "localhost:9000";
@@ -156,6 +156,60 @@ else
         Console.WriteLine($"  2. With username: {existingCart.Username}");
         Console.WriteLine($"  3. Total amount: ${existingCart.TotalPrice:F2}");
         Console.WriteLine("\nThe shopping cart is now persisted in the database and ready for checkout via the API.");
+
+        if (doCheckout)
+        {
+            Console.WriteLine("\n🚀 Proceeding with checkout...");
+
+            try
+            {
+                using HttpClient httpClient = new();
+                httpClient.BaseAddress = new Uri("http://localhost:5001");
+                httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+
+                var checkoutCommand = new
+                {
+                    UserName = existingCart.Username,
+                    CustomerId = targetUser.Id,
+                    TotalPrice = existingCart.TotalPrice,
+                    FirstName = targetUser.FirstName ?? "John",
+                    LastName = targetUser.LastName ?? "Doe",
+                    EmailAddress = targetUser.Email,
+                    AddressLine = "123 Main St",
+                    Country = "USA",
+                    State = "CA",
+                    ZipCode = "12345",
+                    CardName = $"{targetUser.FirstName} {targetUser.LastName}",
+                    CardNumber = "1234567890123456",
+                    Expiration = "12/26",
+                    Cvv = "123",
+                    PaymentMethod = 1,
+                    RequestId = Guid.NewGuid().ToString(),
+                    IdempotencyKey = Guid.NewGuid().ToString()
+                };
+
+                Console.WriteLine($"   Posting checkout request to: {httpClient.BaseAddress}/basket/checkout");
+                HttpResponseMessage response = await httpClient.PostAsJsonAsync("/basket/checkout", checkoutCommand);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine("✅ Checkout completed successfully!");
+                    Console.WriteLine($"   Response: {responseContent}");
+                }
+                else
+                {
+                    string errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"❌ Checkout failed with status code: {response.StatusCode}");
+                    Console.WriteLine($"   Error: {errorContent}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Exception during checkout: {ex.Message}");
+                Console.WriteLine($"   Make sure the Basket API is running on http://localhost:5001");
+            }
+        }
     }
 }
 

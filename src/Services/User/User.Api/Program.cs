@@ -11,15 +11,15 @@ using User.Api.Extensions;
 using User.Api.Services;
 using MarketSpace.ServiceDefaults;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
 
-var useInMemoryDatabase = builder.Configuration.GetValue<bool>("UseInMemoryDatabase") ||
-                          builder.Environment.IsEnvironment("Testing");
+bool useInMemoryDatabase = builder.Configuration.GetValue<bool>("UseInMemoryDatabase") ||
+                           builder.Environment.IsEnvironment("Testing");
 
-var isUnitTest = AppDomain.CurrentDomain.GetAssemblies().Any(a =>
+bool isUnitTest = AppDomain.CurrentDomain.GetAssemblies().Any(a =>
     a.FullName != null && (a.FullName.Contains("xunit") || a.FullName.Contains("nunit") ||
                            a.FullName.Contains("testhost")));
 
@@ -44,9 +44,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddDefaultTokenProviders();
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
-var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()!;
+JwtSettings jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()!;
 
-var key = Encoding.UTF8.GetBytes(jwtSettings.Key);
+byte[] key = Encoding.UTF8.GetBytes(jwtSettings.Key);
 
 builder.Services.AddAuthentication(options =>
     {
@@ -94,7 +94,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI(options =>

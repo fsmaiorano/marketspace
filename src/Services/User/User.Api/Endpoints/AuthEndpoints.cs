@@ -1,5 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Primitives;
 using User.Api.Data;
 using User.Api.Data.Models;
 using User.Api.Models;
@@ -11,7 +13,7 @@ public static class AuthEndpoints
 {
     public static void MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/auth");
+        RouteGroupBuilder group = app.MapGroup("/api/auth");
         group.WithTags("Auth");
 
         group.MapPost("/register", Register)
@@ -43,30 +45,36 @@ public static class AuthEndpoints
         HttpContext http,
         ILoggerFactory loggerFactory)
     {
-        var logger = loggerFactory.CreateLogger("AuthEndpoints");
+        ILogger logger = loggerFactory.CreateLogger("AuthEndpoints");
         logger.LogInformation("Register attempt for email: {Email}", dto.Email);
-        
-        var isInMemory = dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory";
-        var transaction = isInMemory ? null : await dbContext.Database.BeginTransactionAsync();
+
+        bool isInMemory = dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory";
+        IDbContextTransaction? transaction = isInMemory ? null : await dbContext.Database.BeginTransactionAsync();
 
         try
         {
-            var existing = await userManager.FindByEmailAsync(dto.Email);
+            ApplicationUser? existing = await userManager.FindByEmailAsync(dto.Email);
             if (existing is not null)
             {
                 logger.LogWarning("Registration failed: Email {Email} already exists", dto.Email);
                 return Results.BadRequest(new { message = "E-mail already exists." });
             }
 
-            var user = new ApplicationUser { UserName = dto.Email, Email = dto.Email };
+            ApplicationUser user = new()
+            {
+                UserName = dto.UserName ?? dto.Email,
+                Email = dto.Email,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName
+            };
 
-            var identityResult = await userManager.CreateAsync(user, dto.Password);
+            IdentityResult identityResult = await userManager.CreateAsync(user, dto.Password);
             if (!identityResult.Succeeded)
             {
-                var errors = string.Join("; ", identityResult.Errors.Select(e => e.Description));
+                string errors = string.Join("; ", identityResult.Errors.Select(e => e.Description));
                 logger.LogWarning("Registration failed for {Email}: {Errors}", dto.Email, errors);
-                return Results.BadRequest(new 
-                { 
+                return Results.BadRequest(new
+                {
                     message = "Registration failed",
                     errors = identityResult.Errors.Select(e => e.Description).ToList()
                 });
@@ -75,7 +83,7 @@ public static class AuthEndpoints
             if (!await roleManager.RoleExistsAsync("Member"))
                 await roleManager.CreateAsync(new IdentityRole("Member"));
 
-            var addToRoleResult = await userManager.AddToRoleAsync(user, "Member");
+            IdentityResult addToRoleResult = await userManager.AddToRoleAsync(user, "Member");
             if (!addToRoleResult.Succeeded)
             {
                 logger.LogError("Failed to assign role to user {Email}", dto.Email);
@@ -90,7 +98,7 @@ public static class AuthEndpoints
                 await transaction.CommitAsync();
 
             logger.LogInformation("User.Api {Email} registered successfully", dto.Email);
-            var tokens = await tokenService.CreateTokensAsync(user, GetIpAddress(http));
+            AuthResponse tokens = await tokenService.CreateTokensAsync(user, GetIpAddress(http));
             return Results.Ok(tokens);
         }
         catch (Exception ex)
@@ -114,15 +122,15 @@ public static class AuthEndpoints
         ITokenService tokenService,
         HttpContext http)
     {
-        var user = await userManager.FindByEmailAsync(dto.Email);
+        ApplicationUser? user = await userManager.FindByEmailAsync(dto.Email);
         if (user == null)
             return Results.Unauthorized();
 
-        var res = await signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
+        SignInResult res = await signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
         if (!res.Succeeded)
             return Results.Unauthorized();
 
-        var tokens = await tokenService.CreateTokensAsync(user, GetIpAddress(http));
+        AuthResponse tokens = await tokenService.CreateTokensAsync(user, GetIpAddress(http));
         return Results.Ok(tokens);
     }
 
@@ -131,7 +139,7 @@ public static class AuthEndpoints
         ITokenService tokenService,
         HttpContext http)
     {
-        var response = await tokenService.RefreshAsync(dto.AccessToken, dto.RefreshToken, GetIpAddress(http));
+        AuthResponse? response = await tokenService.RefreshAsync(dto.AccessToken, dto.RefreshToken, GetIpAddress(http));
         return response is null ? Results.BadRequest(new { message = "Invalid Token" }) : Results.Ok(response);
     }
 
@@ -146,14 +154,24 @@ public static class AuthEndpoints
 
     private static IResult Me(ClaimsPrincipal user)
     {
-        var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        var email = user.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-        return Results.Ok(new { userId, email });
+        string? userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        string? userName = user.FindFirst(ClaimTypes.Name)?.Value;
+        string? email = user.FindFirst(ClaimTypes.Email)?.Value;
+        string? firstName = user.FindFirst(ClaimTypes.GivenName)?.Value;
+        string? lastName = user.FindFirst(ClaimTypes.Surname)?.Value;
+        return Results.Ok(new
+        {
+            userId,
+            userName,
+            email,
+            firstName,
+            lastName
+        });
     }
 
     private static string GetIpAddress(HttpContext http)
     {
-        if (http.Request.Headers.TryGetValue("X-Forwarded-For", out var value))
+        if (http.Request.Headers.TryGetValue("X-Forwarded-For", out StringValues value))
             return value.ToString();
         return http.Connection.RemoteIpAddress?.ToString() ?? "unknown";
     }
