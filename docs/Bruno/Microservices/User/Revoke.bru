@@ -1,0 +1,18 @@
+meta {
+  name: Revoke
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{user_url}}/api/auth/revoke
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "accessToken": "{{access_token}}",
+    "refreshToken": "{{refresh_token}}"
+  }
+}
