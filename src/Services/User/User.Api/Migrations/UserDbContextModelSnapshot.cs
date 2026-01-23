@@ -178,6 +178,14 @@ namespace User.Api.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(true);
 
+                    b.Property<string>("FirstName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("LastName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
 
@@ -318,13 +326,13 @@ namespace User.Api.Migrations
 
             modelBuilder.Entity("User.Api.Data.Models.RefreshToken", b =>
                 {
-                    b.HasOne("User.Api.Data.Models.ApplicationUser", "User.Api")
+                    b.HasOne("User.Api.Data.Models.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User.Api");
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }
