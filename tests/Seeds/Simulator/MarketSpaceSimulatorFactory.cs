@@ -1,8 +1,8 @@
 using User.Api.Data;
 
-namespace SeedApp;
+namespace Simulator;
 
-public class MarketSpaceSeedFactory
+public class MarketSpaceSimulatorFactory
 {
     private const string MerchantDbConnectionString =
         "Server=localhost;Port=5436;Database=MerchantDb;User Id=postgres;Password=postgres;Include Error Detail=true";
@@ -30,7 +30,7 @@ public class MarketSpaceSeedFactory
 
     public IServiceProvider Services { get; private set; }
 
-    public MarketSpaceSeedFactory(
+    public MarketSpaceSimulatorFactory(
         string merchantConnectionString = MerchantDbConnectionString,
         string catalogConnectionString = CatalogDbConnectionString,
         string basketConnectionString = BasketDbConnectionString,

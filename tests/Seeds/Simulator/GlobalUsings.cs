@@ -12,4 +12,3 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 global using Minio;
 global using Npgsql;
-global using SeedApp;
