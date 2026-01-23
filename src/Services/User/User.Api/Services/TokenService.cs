@@ -31,10 +31,10 @@ public class TokenService(
 
     public async Task<AuthResponse> CreateTokensAsync(ApplicationUser user, string ipAddress)
     {
-        var accessToken = await GenerateAccessToken(user);
-        var refreshToken = GenerateRefreshToken(ipAddress);
+        (string Token, DateTime Expires) accessToken = await GenerateAccessToken(user);
+        (string Token, DateTime Expires, DateTime Created, string CreatedByIp) refreshToken = GenerateRefreshToken(ipAddress);
 
-        var refreshEntity = new RefreshToken
+        RefreshToken refreshEntity = new RefreshToken
         {
             Token = refreshToken.Token,
             Expires = refreshToken.Expires,
@@ -57,13 +57,13 @@ public class TokenService(
 
     public async Task<AuthResponse?> RefreshAsync(string accessToken, string refreshToken, string ipAddress)
     {
-        var principal = GetPrincipalFromExpiredToken(accessToken);
+        ClaimsPrincipal? principal = GetPrincipalFromExpiredToken(accessToken);
         if (principal == null) return null;
 
-        var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        string? userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null) return null;
 
-        var stored = await db.RefreshTokens.SingleOrDefaultAsync(rt => rt.Token == refreshToken && rt.UserId == userId);
+        RefreshToken? stored = await db.RefreshTokens.SingleOrDefaultAsync(rt => rt.Token == refreshToken && rt.UserId == userId);
         if (stored == null || !stored.IsActive) return null;
 
         // revoke old token
@@ -71,13 +71,13 @@ public class TokenService(
         stored.RevokedByIp = ipAddress;
 
         // create new pair
-        var user = await userManager.FindByIdAsync(userId);
+        ApplicationUser? user = await userManager.FindByIdAsync(userId);
         if (user == null) return null;
 
-        var newAccess = await GenerateAccessToken(user);
-        var newRefresh = GenerateRefreshToken(ipAddress);
+        (string Token, DateTime Expires) newAccess = await GenerateAccessToken(user);
+        (string Token, DateTime Expires, DateTime Created, string CreatedByIp) newRefresh = GenerateRefreshToken(ipAddress);
 
-        var refreshEntity = new RefreshToken
+        RefreshToken refreshEntity = new RefreshToken
         {
             Token = newRefresh.Token,
             Expires = newRefresh.Expires,
@@ -100,7 +100,7 @@ public class TokenService(
 
     public async Task RevokeRefreshTokenAsync(string refreshToken, string ipAddress)
     {
-        var stored = await db.RefreshTokens.SingleOrDefaultAsync(rt => rt.Token == refreshToken);
+        RefreshToken? stored = await db.RefreshTokens.SingleOrDefaultAsync(rt => rt.Token == refreshToken);
         if (stored == null || !stored.IsActive) return;
 
         stored.Revoked = DateTime.UtcNow;
@@ -110,47 +110,54 @@ public class TokenService(
 
     private async Task<(string Token, DateTime Expires)> GenerateAccessToken(ApplicationUser user)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
+        SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var claims = new List<Claim>
+        List<Claim> claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id),
             new(ClaimTypes.Name, user.UserName ?? user.Email ?? string.Empty),
+            new(ClaimTypes.Email, user.Email ?? string.Empty),
             new(JwtRegisteredClaimNames.Sub, user.Email ?? string.Empty),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
+        
+        if (!string.IsNullOrWhiteSpace(user.FirstName))
+            claims.Add(new Claim(ClaimTypes.GivenName, user.FirstName));
+        
+        if (!string.IsNullOrWhiteSpace(user.LastName))
+            claims.Add(new Claim(ClaimTypes.Surname, user.LastName));
 
-        var roles = await userManager.GetRolesAsync(user);
+        IList<string> roles = await userManager.GetRolesAsync(user);
         claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
-        var expires = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes);
+        DateTime expires = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes);
 
-        var token = new JwtSecurityToken(
+        JwtSecurityToken token = new JwtSecurityToken(
             issuer: _jwtSettings.Issuer,
             audience: _jwtSettings.Audience,
             claims: claims,
             expires: expires,
             signingCredentials: creds);
 
-        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+        string? tokenString = new JwtSecurityTokenHandler().WriteToken(token);
         return (tokenString, expires);
     }
 
     private (string Token, DateTime Expires, DateTime Created, string CreatedByIp) GenerateRefreshToken(string ipAddress)
     {
-        var randomBytes = new byte[64];
-        using var rng = RandomNumberGenerator.Create();
+        byte[] randomBytes = new byte[64];
+        using RandomNumberGenerator rng = RandomNumberGenerator.Create();
         rng.GetBytes(randomBytes);
-        var token = Convert.ToBase64String(randomBytes);
-        var created = DateTime.UtcNow;
-        var expires = created.AddDays(_jwtSettings.RefreshTokenExpirationDays);
+        string token = Convert.ToBase64String(randomBytes);
+        DateTime created = DateTime.UtcNow;
+        DateTime expires = created.AddDays(_jwtSettings.RefreshTokenExpirationDays);
         return (token, expires, created, ipAddress);
     }
 
     private ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
     {
-        var tokenValidationParameters = new TokenValidationParameters
+        TokenValidationParameters tokenValidationParameters = new TokenValidationParameters
         {
             ValidateAudience = true,
             ValidAudience = _jwtSettings.Audience,
@@ -161,10 +168,10 @@ public class TokenService(
             ValidateLifetime = false // we want to get principal from expired token
         };
 
-        var tokenHandler = new JwtSecurityTokenHandler();
+        JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
         try
         {
-            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
+            ClaimsPrincipal? principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken? securityToken);
             if (securityToken is not JwtSecurityToken jwt || !jwt.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.OrdinalIgnoreCase))
                 return null;
             return principal;
