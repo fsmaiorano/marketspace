@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using User.Api.Data;
 using User.Api.Data.Models;
 
@@ -21,7 +20,6 @@ public static class DatabaseExtensions
             {
                 try
                 {
-                    // Only run migrations if using a relational database provider
                     if (context.Database.IsRelational())
                     {
                         await context.Database.MigrateAsync();
@@ -72,8 +70,8 @@ public static class DatabaseExtensions
         UserManager<ApplicationUser> userManager =
             scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-        const string adminEmail = "admin@forum.com";
-        const string adminPassword = "Admin123!";
+        const string adminEmail = "admin@marketspace.com";
+        const string adminPassword = "Password123!";
 
         ApplicationUser? adminUser = await userManager.FindByEmailAsync(adminEmail);
         if (adminUser == null)

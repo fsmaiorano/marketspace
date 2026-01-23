@@ -35,4 +35,8 @@
         <ProjectReference Include="..\..\..\BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj" />
         <ProjectReference Include="..\..\..\MarketSpace.ServiceDefaults\MarketSpace.ServiceDefaults.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Migrations\" />
+    </ItemGroup>
 </Project>
