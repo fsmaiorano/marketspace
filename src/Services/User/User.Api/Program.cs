@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
-using User.Data;
-using User.Data.Models;
-using User.Endpoints;
-using User.Extensions;
-using User.Services;
+using User.Api.Data;
+using User.Api.Data.Models;
+using User.Api.Endpoints;
+using User.Api.Extensions;
+using User.Api.Services;
 using MarketSpace.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -89,7 +89,7 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "User API",
+        Title = "User.Api API",
         Version = "v1",
     });
 });
@@ -122,7 +122,7 @@ app.MapDefaultEndpoints();
 
 app.Run();
 
-namespace User.Api
+namespace User.Api.Api
 {
     public partial class UserProgram;
 }

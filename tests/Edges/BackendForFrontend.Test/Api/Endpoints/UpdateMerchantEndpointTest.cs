@@ -16,7 +16,8 @@ public class UpdateMerchantEndpointTest(BackendForFrontendFactory factory) : Htt
         dbContext.Merchants.Add(merchant);
         await dbContext.SaveChangesAsync();
 
-        UpdateMerchantRequest updateRequest = new UpdateMerchantRequest
+        UpdateMerchantRequest updateRequest = new()
+
         {
             Id = merchant.Id.Value,
             Name = "Updated Catalog Name",

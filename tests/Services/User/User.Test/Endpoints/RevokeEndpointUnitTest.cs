@@ -1,7 +1,7 @@
 using Builder;
 using System.Net;
-using User.Data.Models;
-using User.Models;
+using User.Api.Data.Models;
+using User.Api.Models;
 using User.Test.Base;
 using User.Test.Fixtures;
 

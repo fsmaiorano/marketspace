@@ -1,3 +1,3 @@
-namespace User.Models;
+namespace User.Api.Models;
 
 public record TokenRequest(string AccessToken, string RefreshToken);

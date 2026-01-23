@@ -9,13 +9,13 @@ namespace SeedApp;
 public class MarketSpaceSeedFactory
 {
     private const string MerchantDbConnectionString =
-        "Server=localhost;Port=5436;Database=MerchantDb;User Id=postgres;Password=postgres;Include Error Detail=true";
+        "Server=localhost;Port=5436;Database=MerchantDb;User.Api Id=postgres;Password=postgres;Include Error Detail=true";
 
     private const string CatalogDbConnectionString =
-        "Server=localhost;Port=5432;Database=CatalogDb;User Id=postgres;Password=postgres;Include Error Detail=true";
+        "Server=localhost;Port=5432;Database=CatalogDb;User.Api Id=postgres;Password=postgres;Include Error Detail=true";
 
     private const string BasketDbConnectionString =
-        "Server=localhost;Port=5433;Database=BasketDb;User Id=postgres;Password=postgres;Include Error Detail=true";
+        "Server=localhost;Port=5433;Database=BasketDb;User.Api Id=postgres;Password=postgres;Include Error Detail=true";
 
     private const string MinioEndpoint = "localhost:9000";
     private const string MinioAccessKey = "admin";

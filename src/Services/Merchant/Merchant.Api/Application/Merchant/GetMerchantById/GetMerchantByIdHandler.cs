@@ -1,4 +1,3 @@
-using BuildingBlocks;
 using BuildingBlocks.Loggers;
 using Merchant.Api.Domain.Entities;
 using Merchant.Api.Domain.Repositories;
@@ -7,7 +6,7 @@ using Merchant.Api.Domain.ValueObjects;
 namespace Merchant.Api.Application.Merchant.GetMerchantById;
 
 public class GetMerchantByIdHandler(
-    IMerchantRepository repository, 
+    IMerchantRepository repository,
     IAppLogger<GetMerchantByIdHandler> logger)
     : IGetMerchantByIdHandler
 {
@@ -16,7 +15,7 @@ public class GetMerchantByIdHandler(
         try
         {
             logger.LogInformation(LogTypeEnum.Application, "Processing get merchant by ID request for: {MerchantId}", query.Id);
-            
+
             MerchantId merchantId = MerchantId.Of(query.Id);
 
             MerchantEntity? merchant = await repository.GetByIdAsync(merchantId, isTrackingEnabled: false);
@@ -27,7 +26,7 @@ public class GetMerchantByIdHandler(
                 return Result<GetMerchantByIdResult>.Failure($"Catalog with ID {query.Id} not found.");
             }
 
-            GetMerchantByIdResult result = new GetMerchantByIdResult
+            GetMerchantByIdResult result = new()
             {
                 Id = merchant.Id.Value,
                 Name = merchant.Name,

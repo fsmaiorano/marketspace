@@ -20,8 +20,9 @@ public class GetOrderByIdEndpointUnitTest(TestFixture fixture) : BaseTest(fixtur
     public async Task Returns_Ok_When_Order_Exists()
     {
         Guid orderId = Guid.CreateVersion7();
-        GetOrderByIdQuery query = new GetOrderByIdQuery(orderId);
-        GetOrderByIdResult result = new GetOrderByIdResult
+        GetOrderByIdQuery query = new(orderId);
+        GetOrderByIdResult result = new()
+
         {
             Id = Guid.CreateVersion7(),
             CustomerId = Guid.CreateVersion7(),
@@ -78,7 +79,7 @@ public class GetOrderByIdEndpointUnitTest(TestFixture fixture) : BaseTest(fixtur
     public async Task Returns_NotFound_When_Order_Does_Not_Exist()
     {
         Guid orderId = Guid.CreateVersion7();
-        GetOrderByIdQuery query = new GetOrderByIdQuery(orderId);
+        GetOrderByIdQuery query = new(orderId);
         Result<GetOrderByIdResult> result =
             Result<GetOrderByIdResult>.Failure($"Order with ID {query.Id} not found.");
 
@@ -94,7 +95,7 @@ public class GetOrderByIdEndpointUnitTest(TestFixture fixture) : BaseTest(fixtur
     [Fact]
     public async Task Throws_Exception_When_Handler_Throws()
     {
-        GetOrderByIdQuery query = new GetOrderByIdQuery(Guid.CreateVersion7());
+        GetOrderByIdQuery query = new(Guid.CreateVersion7());
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<GetOrderByIdQuery>()))
             .ThrowsAsync(new Exception("Unexpected error"));
@@ -113,7 +114,8 @@ public class GetOrderByIdEndpointUnitTest(TestFixture fixture) : BaseTest(fixtur
         Context.Orders.Add(order);
         await Context.SaveChangesAsync();
 
-        GetOrderByIdResult result = new GetOrderByIdResult
+        GetOrderByIdResult result = new()
+
         {
             Id = order.Id.Value,
             CustomerId = order.CustomerId.Value,

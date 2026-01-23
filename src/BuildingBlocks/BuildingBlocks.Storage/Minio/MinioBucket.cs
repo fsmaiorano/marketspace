@@ -137,11 +137,11 @@ public class MinioBucket(IMinioClient minioClient) : IMinioBucket
 
     private static HttpClient CreateHttpClient()
     {
-        HttpClientHandler handler = new HttpClientHandler();
+        HttpClientHandler handler = new();
 
         handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true;
 
-        HttpClient client = new HttpClient(handler);
+        HttpClient client = new(handler);
         client.Timeout = TimeSpan.FromSeconds(30);
 
         return client;

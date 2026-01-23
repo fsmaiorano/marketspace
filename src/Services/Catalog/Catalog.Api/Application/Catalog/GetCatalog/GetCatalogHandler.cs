@@ -22,7 +22,8 @@ public class GetCatalogHandler(
         List<CatalogDto> catalogDtoList = [];
         foreach (CatalogEntity product in products.Data)
         {
-            CatalogDto catalogDto = new CatalogDto
+            CatalogDto catalogDto = new()
+
             {
                 Id = product.Id.Value,
                 Name = product.Name,

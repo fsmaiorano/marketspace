@@ -40,14 +40,15 @@ public class CatalogEntity : Aggregate<CatalogId>
         if (merchantId == Guid.Empty)
             throw new ArgumentException("MerchantId cannot be empty.", nameof(merchantId));
 
-        CatalogEntity entity = new CatalogEntity
+        CatalogEntity entity = new()
+
         {
             Name = name,
             Description = description,
             ImageUrl = imageUrl,
             Price = price,
             MerchantId = merchantId,
-            Categories = [..categories.Distinct()],
+            Categories = [.. categories.Distinct()],
             CreatedAt = DateTimeOffset.UtcNow
         };
 

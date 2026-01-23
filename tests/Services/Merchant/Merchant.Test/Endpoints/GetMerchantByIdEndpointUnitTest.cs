@@ -18,8 +18,9 @@ public class GetMerchantByIdEndpointUnitTest(TestFixture fixture) : BaseTest(fix
     public async Task Returns_Ok_When_Merchant_Exists()
     {
         Guid merchantId = Guid.CreateVersion7();
-        GetMerchantByIdQuery query = new GetMerchantByIdQuery(merchantId);
-        GetMerchantByIdResult result = new GetMerchantByIdResult
+        GetMerchantByIdQuery query = new(merchantId);
+        GetMerchantByIdResult result = new()
+
         {
             Id = merchantId,
             Name = "Test Merchant",
@@ -41,7 +42,7 @@ public class GetMerchantByIdEndpointUnitTest(TestFixture fixture) : BaseTest(fix
     public async Task Returns_NotFound_When_Merchant_Does_Not_Exist()
     {
         Guid merchantId = Guid.CreateVersion7();
-        GetMerchantByIdQuery query = new GetMerchantByIdQuery(merchantId);
+        GetMerchantByIdQuery query = new(merchantId);
         Result<GetMerchantByIdResult> result =
             Result<GetMerchantByIdResult>.Failure($"Catalog with ID {query.Id} not found.");
 
@@ -57,7 +58,7 @@ public class GetMerchantByIdEndpointUnitTest(TestFixture fixture) : BaseTest(fix
     [Fact]
     public async Task Throws_Exception_When_Handler_Throws()
     {
-        GetMerchantByIdQuery query = new GetMerchantByIdQuery(Guid.CreateVersion7());
+        GetMerchantByIdQuery query = new(Guid.CreateVersion7());
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<GetMerchantByIdQuery>()))
             .ThrowsAsync(new Exception("Unexpected error"));
@@ -75,7 +76,7 @@ public class GetMerchantByIdEndpointUnitTest(TestFixture fixture) : BaseTest(fix
         await Context.SaveChangesAsync();
 
         GetMerchantByIdQuery query = new(merchant.Id.Value);
-        GetMerchantByIdResult result = new GetMerchantByIdResult()
+        GetMerchantByIdResult result = new()
         {
             Id = merchant.Id.Value,
             Name = merchant.Name,

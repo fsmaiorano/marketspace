@@ -52,7 +52,7 @@ public abstract class HttpHelper(HttpClient httpClient)
         ChangeRequestCulture(httpClient, culture);
         AuthorizeRequest(httpClient, token);
 
-        MultipartFormDataContent multipartContent = new MultipartFormDataContent();
+        MultipartFormDataContent multipartContent = new();
         List<PropertyInfo> requestProperties = request.GetType().GetProperties().ToList();
 
         foreach (PropertyInfo property in requestProperties)

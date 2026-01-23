@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using User.Data;
-using User.Data.Models;
-using User.Models;
+using User.Api.Data;
+using User.Api.Data.Models;
+using User.Api.Models;
 
-namespace User.Services;
+namespace User.Api.Services;
 
 public class JwtSettings
 {
@@ -115,10 +115,10 @@ public class TokenService(
 
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Name, user.UserName ?? user.Email ?? string.Empty),
-            new Claim(JwtRegisteredClaimNames.Sub, user.Email ?? string.Empty),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new(ClaimTypes.NameIdentifier, user.Id),
+            new(ClaimTypes.Name, user.UserName ?? user.Email ?? string.Empty),
+            new(JwtRegisteredClaimNames.Sub, user.Email ?? string.Empty),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
         var roles = await userManager.GetRolesAsync(user);

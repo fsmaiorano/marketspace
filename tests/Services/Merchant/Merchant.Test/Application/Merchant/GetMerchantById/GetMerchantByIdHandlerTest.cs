@@ -10,13 +10,13 @@ public class GetMerchantByIdHandlerTest
         MerchantEntity? merchant = MerchantBuilder.CreateMerchantFaker("").Generate();
         Mock<IMerchantRepository> repositoryMock = new();
         Mock<IAppLogger<GetMerchantByIdHandler>> loggerMock = new();
-        
+
         repositoryMock
             .Setup(r => r.GetByIdAsync(It.IsAny<MerchantId>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(merchant);
 
         GetMerchantByIdHandler handler = new(repositoryMock.Object, loggerMock.Object);
-        GetMerchantByIdQuery query = new GetMerchantByIdQuery(merchant.Id.Value);
+        GetMerchantByIdQuery query = new(merchant.Id.Value);
 
         Result<GetMerchantByIdResult> result = await handler.HandleAsync(query);
 

@@ -1,4 +1,3 @@
-using BuildingBlocks;
 using BuildingBlocks.Loggers;
 using Merchant.Api.Domain.Repositories;
 using Merchant.Api.Domain.ValueObjects;
@@ -6,7 +5,7 @@ using Merchant.Api.Domain.ValueObjects;
 namespace Merchant.Api.Application.Merchant.DeleteMerchant;
 
 public class DeleteMerchantHandler(
-    IMerchantRepository repository, 
+    IMerchantRepository repository,
     IAppLogger<DeleteMerchantHandler> logger)
     : IDeleteMerchantHandler
 {
@@ -15,11 +14,11 @@ public class DeleteMerchantHandler(
         try
         {
             logger.LogInformation(LogTypeEnum.Application, "Processing delete merchant request for: {MerchantId}", command.Id);
-            
+
             MerchantId merchantId = MerchantId.Of(command.Id);
 
             await repository.RemoveAsync(merchantId);
-            
+
             logger.LogInformation(LogTypeEnum.Business, "Merchant deleted successfully. MerchantId: {MerchantId}", command.Id);
             return Result<DeleteMerchantResult>.Success(new DeleteMerchantResult(true));
         }

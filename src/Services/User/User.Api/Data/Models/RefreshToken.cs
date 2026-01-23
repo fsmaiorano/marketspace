@@ -1,4 +1,4 @@
-namespace User.Data.Models;
+namespace User.Api.Data.Models;
 
 public class RefreshToken
 {

@@ -19,18 +19,19 @@ public class GetCatalogByIdHandler(
         try
         {
             logger.LogInformation(LogTypeEnum.Application, "Processing get catalog by ID request for: {CatalogId}", query.Id);
-            
+
             CatalogId catalogId = CatalogId.Of(query.Id);
 
             CatalogEntity? catalog = await repository.GetByIdAsync(catalogId, isTrackingEnabled: false);
 
             if (catalog is null)
                 return Result<GetCatalogByIdResult>.Failure($"Catalog with ID {query.Id} not found.");
-            
+
             var x = await minioBucket.GetImageAsync(catalog.ImageUrl);
             var y = await minioBucket.GetImageToDownload(catalog.ImageUrl);
 
-            GetCatalogByIdResult result = new GetCatalogByIdResult
+            GetCatalogByIdResult result = new()
+
             {
                 Id = catalog.Id.Value,
                 Name = catalog.Name,

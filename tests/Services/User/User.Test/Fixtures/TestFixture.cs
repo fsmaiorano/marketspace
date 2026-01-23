@@ -3,9 +3,10 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using User.Api;
-using User.Data;
-using User.Data.Models;
+using User.Api.Api;
+using User.Api.Data;
+using User.Api.Data.Models;
+using User.Api.Services;
 
 namespace User.Test.Fixtures;
 

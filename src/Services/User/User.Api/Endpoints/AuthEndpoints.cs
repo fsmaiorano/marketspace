@@ -1,11 +1,11 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
-using User.Data;
-using User.Data.Models;
-using User.Models;
-using User.Services;
+using User.Api.Data;
+using User.Api.Data.Models;
+using User.Api.Models;
+using User.Api.Services;
 
-namespace User.Endpoints;
+namespace User.Api.Endpoints;
 
 public static class AuthEndpoints
 {
@@ -89,7 +89,7 @@ public static class AuthEndpoints
             if (transaction is not null)
                 await transaction.CommitAsync();
 
-            logger.LogInformation("User {Email} registered successfully", dto.Email);
+            logger.LogInformation("User.Api {Email} registered successfully", dto.Email);
             var tokens = await tokenService.CreateTokensAsync(user, GetIpAddress(http));
             return Results.Ok(tokens);
         }
