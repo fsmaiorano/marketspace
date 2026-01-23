@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using User.Data.Models;
+using User.Api.Data.Models;
 
-namespace User.Data;
+namespace User.Api.Data;
 
 public class UserDbContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
 {

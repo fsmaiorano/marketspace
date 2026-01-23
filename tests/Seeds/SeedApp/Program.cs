@@ -15,9 +15,9 @@ Console.WriteLine("  - docker compose up -d");
 Console.WriteLine();
 
 // Using real database connections from docker-compose
-const string merchantConnectionString = "Server=localhost;Port=5436;Database=MerchantDb;User Id=postgres;Password=postgres;Include Error Detail=true";
-const string catalogConnectionString = "Server=localhost;Port=5432;Database=CatalogDb;User Id=postgres;Password=postgres;Include Error Detail=true";
-const string basketConnectionString = "Server=localhost;Port=5433;Database=BasketDb;User Id=postgres;Password=postgres;Include Error Detail=true";
+const string merchantConnectionString = "Server=localhost;Port=5436;Database=MerchantDb;User.Api Id=postgres;Password=postgres;Include Error Detail=true";
+const string catalogConnectionString = "Server=localhost;Port=5432;Database=CatalogDb;User.Api Id=postgres;Password=postgres;Include Error Detail=true";
+const string basketConnectionString = "Server=localhost;Port=5433;Database=BasketDb;User.Api Id=postgres;Password=postgres;Include Error Detail=true";
 const string minioEndpoint = "localhost:9000";
 const string minioAccessKey = "admin";
 const string minioSecretKey = "admin123";

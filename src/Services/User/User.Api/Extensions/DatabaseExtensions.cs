@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using User.Data;
-using User.Data.Models;
+using User.Api.Data;
+using User.Api.Data.Models;
 
-namespace User.Extensions;
+namespace User.Api.Extensions;
 
 public static class DatabaseExtensions
 {
@@ -18,7 +18,7 @@ public static class DatabaseExtensions
             if (context.Database.IsRelational())
             {
                 Console.WriteLine("Checking database connection and pending migrations...");
-                
+
                 // Check if the database can be connected to
                 var canConnect = await context.Database.CanConnectAsync();
                 if (!canConnect)
@@ -32,7 +32,7 @@ public static class DatabaseExtensions
                     // Check for pending migrations
                     var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
                     var pendingMigrationsList = pendingMigrations.ToList();
-                    
+
                     if (pendingMigrationsList.Any())
                     {
                         Console.WriteLine($"Applying {pendingMigrationsList.Count} pending migration(s)...");
@@ -40,7 +40,7 @@ public static class DatabaseExtensions
                         {
                             Console.WriteLine($"  - {migration}");
                         }
-                        
+
                         try
                         {
                             await context.Database.MigrateAsync();
@@ -69,32 +69,32 @@ public static class DatabaseExtensions
                 await context.Database.EnsureCreatedAsync();
                 Console.WriteLine("Using non-relational database provider - database ensured created.");
             }
-            
+
             Console.WriteLine("Database initialization completed successfully.");
-            
+
             // Initialize roles
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            
+
             if (!await roleManager.RoleExistsAsync("Admin"))
             {
                 Console.WriteLine("Creating Admin role...");
                 await roleManager.CreateAsync(new IdentityRole("Admin"));
             }
-            
+
             if (!await roleManager.RoleExistsAsync("Member"))
             {
                 Console.WriteLine("Creating Member role...");
                 await roleManager.CreateAsync(new IdentityRole("Member"));
             }
-            
+
             Console.WriteLine("Role initialization completed successfully.");
-            
+
             // Initialize admin user
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            
+
             const string adminEmail = "admin@forum.com";
             const string adminPassword = "Admin123!";
-            
+
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
             if (adminUser == null)
             {
@@ -106,7 +106,7 @@ public static class DatabaseExtensions
                     EmailConfirmed = true,
                     EnableNotifications = true
                 };
-                
+
                 var result = await userManager.CreateAsync(adminUser, adminPassword);
                 if (result.Succeeded)
                 {
@@ -122,19 +122,19 @@ public static class DatabaseExtensions
             {
                 Console.WriteLine("Admin user already exists.");
             }
-            
-            Console.WriteLine("User initialization completed successfully.");
+
+            Console.WriteLine("User.Api initialization completed successfully.");
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Database initialization failed: {ex.GetType().Name}: {ex.Message}");
-            
+
             // Log inner exception if exists
             if (ex.InnerException != null)
             {
                 Console.WriteLine($"Inner exception: {ex.InnerException.GetType().Name}: {ex.InnerException.Message}");
             }
-            
+
             Console.WriteLine("Application will continue without database initialization.");
             Console.WriteLine("Note: If tables already exist, you may need to:");
             Console.WriteLine("  1. Ensure __EFMigrationsHistory table exists and is up to date");

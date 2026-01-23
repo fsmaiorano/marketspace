@@ -1,8 +1,9 @@
 using Bogus;
 using Microsoft.Extensions.DependencyInjection;
-using User.Data;
-using User.Data.Models;
-using User.Models;
+using User.Api.Data;
+using User.Api.Data.Models;
+using User.Api.Models;
+using User.Api.Services;
 using User.Test.Fixtures;
 
 namespace User.Test.Base;
@@ -75,7 +76,7 @@ public abstract class BaseTest : IClassFixture<TestFixture>, IDisposable
 
     protected async Task<ApplicationUser> CreateTestUserAsync(string email, string password)
     {
-        ApplicationUser user = new ApplicationUser { UserName = email, Email = email };
+        ApplicationUser user = new() { UserName = email, Email = email };
         IdentityResult result = await UserManager.CreateAsync(user, password);
         if (!result.Succeeded)
             throw new Exception(
@@ -85,8 +86,7 @@ public abstract class BaseTest : IClassFixture<TestFixture>, IDisposable
 
     private async Task<ApplicationUser> CreateTestUserAsync()
     {
-        ApplicationUser user = new ApplicationUser
-            { UserName = Faker.Internet.UserName(), Email = Faker.Internet.Email() };
+        ApplicationUser user = new() { UserName = Faker.Internet.UserName(), Email = Faker.Internet.Email() };
         IdentityResult result = await UserManager.CreateAsync(user, Faker.Internet.Password(25, false, string.Empty, "1"));
         if (!result.Succeeded)
             throw new Exception(

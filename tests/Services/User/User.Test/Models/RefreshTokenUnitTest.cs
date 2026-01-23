@@ -1,5 +1,5 @@
 using Builder;
-using User.Data.Models;
+using User.Api.Data.Models;
 
 namespace User.Test.Models;
 
@@ -85,7 +85,8 @@ public class RefreshTokenUnitTest
         string createdByIp = "192.168.1.1";
 
         // Act
-        RefreshToken token = new RefreshToken
+        RefreshToken token = new()
+
         {
             Token = tokenString,
             UserId = userId,

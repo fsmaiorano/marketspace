@@ -7,7 +7,7 @@ using BuildingBlocks.Loggers;
 namespace Basket.Api.Application.Basket.CreateBasket;
 
 public sealed class CreateBasketHandler(
-    IBasketDataRepository dataRepository, 
+    IBasketDataRepository dataRepository,
     IAppLogger<CreateBasketHandler> logger)
     : ICreateBasketHandler
 {
@@ -16,33 +16,34 @@ public sealed class CreateBasketHandler(
         try
         {
             logger.LogInformation(LogTypeEnum.Application, "Processing create basket request for user: {Username}", command.Username);
-            
-            ShoppingCartEntity cartEntity = new ShoppingCartEntity
+
+            ShoppingCartEntity cartEntity = new()
+
             {
                 Username = command.Username,
                 Items = command.Items.Select(item => new ShoppingCartItemEntity
                 {
                     ProductName = item.ProductName,
                     ProductId = item.ProductId,
-                    Quantity = item.Quantity, 
+                    Quantity = item.Quantity,
                     Price = item.Price,
                 }).ToList(),
             };
 
             ShoppingCartEntity result = await dataRepository.CreateCartAsync(cartEntity);
 
-            logger.LogInformation(LogTypeEnum.Business, "Basket created successfully. Username: {Username}, ItemCount: {ItemCount}", 
-                cartEntity.Username, 
+            logger.LogInformation(LogTypeEnum.Business, "Basket created successfully. Username: {Username}, ItemCount: {ItemCount}",
+                cartEntity.Username,
                 cartEntity.Items.Count);
 
-            ShoppingCartDto cartDto = new ShoppingCartDto()
+            ShoppingCartDto cartDto = new()
             {
                 Username = result.Username,
                 Items = result.Items.Select(item => new ShoppingCartItemDto
                 {
                     ProductId = item.ProductId,
                     ProductName = item.ProductName,
-                    Quantity = item.Quantity, 
+                    Quantity = item.Quantity,
                     Price = item.Price
                 }).ToList()
             };

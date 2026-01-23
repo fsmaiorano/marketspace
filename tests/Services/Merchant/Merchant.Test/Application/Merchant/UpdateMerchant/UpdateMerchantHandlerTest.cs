@@ -18,9 +18,10 @@ public class UpdateMerchantHandlerTest
                 r.GetByIdAsync(It.IsAny<MerchantId>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(() => merchant);
 
-        UpdateMerchantHandler handler = new UpdateMerchantHandler(repositoryMock.Object, loggerMock.Object);
+        UpdateMerchantHandler handler = new(repositoryMock.Object, loggerMock.Object);
 
-        UpdateMerchantCommand command = new UpdateMerchantCommand
+        UpdateMerchantCommand command = new()
+
         {
             Id = merchantId.Value,
             Name = $"{merchant.Name}_Updated",

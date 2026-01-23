@@ -17,7 +17,7 @@ public static class DependencyInjection
                                   ?? throw new InvalidOperationException(
                                       "Database connection string is not configured.");
 
-        NpgsqlDataSourceBuilder dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+        NpgsqlDataSourceBuilder dataSourceBuilder = new(connectionString);
         dataSourceBuilder.EnableDynamicJson();
         NpgsqlDataSource dataSource = dataSourceBuilder.Build();
 

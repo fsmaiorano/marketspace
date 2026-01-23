@@ -1,4 +1,4 @@
-namespace User.Models;
+namespace User.Api.Models;
 
 public class RegisterRequest
 {

@@ -2,8 +2,6 @@
 
 global using Microsoft.AspNetCore.Identity;
 global using Microsoft.EntityFrameworkCore;
-global using Moq;
-global using User;
-global using User.Services;
+global using User.Api.Services;
 global using Xunit;
 

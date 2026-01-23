@@ -18,9 +18,10 @@ public class UpdateCatalogEndpointUnitTest(TestFixture fixture) : BaseTest(fixtu
         Context.Catalogs.Add(catalog);
         await Context.SaveChangesAsync();
 
-        UpdateCatalogCommand command = new UpdateCatalogCommand 
-        { 
-            Id = catalog.Id.Value, 
+        UpdateCatalogCommand command = new()
+
+        {
+            Id = catalog.Id.Value,
             Name = "Updated Catalog Name",
             Description = catalog.Description,
             ImageUrl = catalog.ImageUrl,
@@ -28,13 +29,13 @@ public class UpdateCatalogEndpointUnitTest(TestFixture fixture) : BaseTest(fixtu
             Categories = catalog.Categories,
             MerchantId = catalog.MerchantId
         };
-        
+
         HttpResponseMessage response = await DoPut("/catalog", command);
         Result<UpdateCatalogResult>? result = await response.Content.ReadFromJsonAsync<Result<UpdateCatalogResult>>();
 
         result?.IsSuccess.Should().BeTrue();
         result?.Data.Should().NotBeNull();
-        
+
         Context.ChangeTracker.Clear();
         CatalogEntity? updatedCatalog = await Context.Catalogs.FindAsync(catalog.Id);
         updatedCatalog.Should().NotBeNull();

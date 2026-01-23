@@ -23,7 +23,7 @@ public class UpdateMerchantEndpointUnitTest(TestFixture fixture) : BaseTest(fixt
             .Setup(h => h.HandleAsync(It.IsAny<UpdateMerchantCommand>()))
             .ReturnsAsync(Result<UpdateMerchantResult>.Failure("Catalog not found."));
 
-        UpdateMerchantCommand command = new UpdateMerchantCommand { Id = merchantId };
+        UpdateMerchantCommand command = new() { Id = merchantId };
 
         Result<UpdateMerchantResult> response = await _mockHandler.Object.HandleAsync(command);
 
@@ -40,7 +40,7 @@ public class UpdateMerchantEndpointUnitTest(TestFixture fixture) : BaseTest(fixt
             .Setup(h => h.HandleAsync(It.IsAny<UpdateMerchantCommand>()))
             .ThrowsAsync(new Exception("Unexpected error"));
 
-        UpdateMerchantCommand command = new UpdateMerchantCommand { Id = merchantId };
+        UpdateMerchantCommand command = new() { Id = merchantId };
 
         Func<Task> act = async () => await _mockHandler.Object.HandleAsync(command);
 
@@ -56,7 +56,7 @@ public class UpdateMerchantEndpointUnitTest(TestFixture fixture) : BaseTest(fixt
             .Setup(h => h.HandleAsync(It.IsAny<UpdateMerchantCommand>()))
             .ReturnsAsync(Result<UpdateMerchantResult>.Success(new UpdateMerchantResult(isSuccess: true)));
 
-        UpdateMerchantCommand command = new UpdateMerchantCommand { Id = merchantId };
+        UpdateMerchantCommand command = new() { Id = merchantId };
 
         Result<UpdateMerchantResult> response = await _mockHandler.Object.HandleAsync(command);
 
@@ -72,7 +72,8 @@ public class UpdateMerchantEndpointUnitTest(TestFixture fixture) : BaseTest(fixt
         Context.Merchants.Add(merchant);
         await Context.SaveChangesAsync();
 
-        UpdateMerchantCommand command = new UpdateMerchantCommand
+        UpdateMerchantCommand command = new()
+
         {
             Id = merchant.Id.Value,
             Name = "Updated Catalog Name",

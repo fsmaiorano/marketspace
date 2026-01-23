@@ -20,11 +20,11 @@ public class CheckoutBasketHandler(
             string correlationId = !string.IsNullOrWhiteSpace(command.RequestId)
                 ? command.RequestId!
                 : Guid.NewGuid().ToString();
-           
+
             string? idempotencyKey = !string.IsNullOrWhiteSpace(command.IdempotencyKey)
                 ? command.IdempotencyKey
                 : command.RequestId;
-            
+
             logger.LogInformation(LogTypeEnum.Application, "Starting checkout process for user: {Username}", command.UserName);
 
             ShoppingCartEntity? basket = await basketDataRepository.GetCartAsync(command.UserName);
@@ -40,10 +40,13 @@ public class CheckoutBasketHandler(
 
             List<OrderItemRequest> orderItems = basket.Items.Select(item => new OrderItemRequest
             {
-                CatalogId = Guid.Parse(item.ProductId), Quantity = item.Quantity, Price = item.Price
+                CatalogId = Guid.Parse(item.ProductId),
+                Quantity = item.Quantity,
+                Price = item.Price
             }).ToList();
 
-            CreateOrderRequest orderRequest = new CreateOrderRequest
+            CreateOrderRequest orderRequest = new()
+
             {
                 CustomerId = command.CustomerId,
                 ShippingAddress =
@@ -94,12 +97,12 @@ public class CheckoutBasketHandler(
 
             if (!checkoutSuccess)
             {
-                logger.LogWarning(LogTypeEnum.Application, 
+                logger.LogWarning(LogTypeEnum.Application,
                     "Order created but failed to clear basket for user: {Username}. OrderId: {OrderId}",
                     command.UserName, orderResponse.OrderId);
             }
 
-            logger.LogInformation(LogTypeEnum.Business, 
+            logger.LogInformation(LogTypeEnum.Business,
                 "Checkout completed successfully. Username: {Username}, CustomerId: {CustomerId}, OrderId: {OrderId}, TotalAmount: {TotalAmount}, ItemCount: {ItemCount}, CorrelationId: {CorrelationId}",
                 command.UserName,
                 command.CustomerId,

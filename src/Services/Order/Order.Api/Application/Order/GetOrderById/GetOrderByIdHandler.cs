@@ -9,7 +9,7 @@ using System.Collections.ObjectModel;
 namespace Order.Api.Application.Order.GetOrderById;
 
 public class GetOrderByIdHandler(
-    IOrderRepository repository, 
+    IOrderRepository repository,
     IAppLogger<GetOrderByIdHandler> logger)
     : IGetOrderByIdHandler
 {
@@ -24,7 +24,8 @@ public class GetOrderByIdHandler(
             if (order is null)
                 return Result<GetOrderByIdResult>.Failure($"Order with ID {query.Id} not found.");
 
-            GetOrderByIdResult result = new GetOrderByIdResult
+            GetOrderByIdResult result = new()
+
             {
                 Id = order.Id.Value,
                 CustomerId = order.CustomerId.Value,

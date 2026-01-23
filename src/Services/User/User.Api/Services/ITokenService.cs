@@ -1,7 +1,7 @@
-using User.Data.Models;
-using User.Models;
+using User.Api.Data.Models;
+using User.Api.Models;
 
-namespace User.Services;
+namespace User.Api.Services;
 
 public interface ITokenService
 {

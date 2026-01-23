@@ -17,7 +17,7 @@ public class CreateMerchantHandlerTest
                 return 1;
             });
 
-        CreateMerchantHandler handler = new CreateMerchantHandler(repositoryMock.Object, loggerMock.Object);
+        CreateMerchantHandler handler = new(repositoryMock.Object, loggerMock.Object);
 
         CreateMerchantCommand command = MerchantBuilder.CreateCreateMerchantCommandFaker().Generate();
 

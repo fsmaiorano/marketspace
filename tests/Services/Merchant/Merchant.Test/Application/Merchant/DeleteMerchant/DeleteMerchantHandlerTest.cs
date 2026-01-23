@@ -15,7 +15,7 @@ public class DeleteMerchantHandlerTest
             .Setup(r => r.RemoveAsync(It.IsAny<MerchantId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(1);
 
-        DeleteMerchantHandler handler = new DeleteMerchantHandler(repositoryMock.Object, loggerMock.Object);
+        DeleteMerchantHandler handler = new(repositoryMock.Object, loggerMock.Object);
 
         DeleteMerchantCommand command = MerchantBuilder.CreateDeleteMerchantCommandFaker().Generate();
 

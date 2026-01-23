@@ -93,7 +93,8 @@ public class OrderEntity : Aggregate<OrderId>
         if (customerId.Value == Guid.Empty)
             throw new ArgumentException("CustomerId cannot be empty.", nameof(customerId));
 
-        OrderEntity order = new OrderEntity
+        OrderEntity order = new()
+
         {
             Id = orderId,
             CustomerId = customerId,
@@ -131,7 +132,8 @@ public class OrderEntity : Aggregate<OrderId>
         if (orderId.Value == Guid.Empty)
             throw new ArgumentException("OrderId cannot be empty.", nameof(orderId));
 
-        OrderEntity updatedOrder = new OrderEntity
+        OrderEntity updatedOrder = new()
+
         {
             Id = orderId,
             CustomerId = customerId,
