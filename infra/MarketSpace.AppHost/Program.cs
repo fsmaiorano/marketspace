@@ -28,7 +28,7 @@ IResourceBuilder<PostgresDatabaseResource> merchantDb = builder.AddPostgres(merc
     .WithHostPort(int.Parse(merchantDbConfig["Port"]!))
     .AddDatabase(merchantDbConfig["ConnectionName"]!);
 
-IConfigurationSection userDbConfig = postgresConfig.GetSection("User.Api");
+IConfigurationSection userDbConfig = postgresConfig.GetSection("User");
 IResourceBuilder<PostgresDatabaseResource> userDb = builder.AddPostgres(userDbConfig["Name"]!, password: postgresPassword)
     .WithEnvironment("POSTGRES_DB", userDbConfig["DatabaseName"]!)
     .WithLifetime(ContainerLifetime.Persistent)
@@ -81,7 +81,7 @@ IResourceBuilder<ProjectResource> merchantApi = builder.AddProject<Projects.Merc
     .WithHttpEndpoint(port: int.Parse(merchantConfig["HttpPort"]!), name: "merchant-http")
     .WithHttpsEndpoint(port: int.Parse(merchantConfig["HttpsPort"]!), name: "merchant-https");
 
-IConfigurationSection userConfig = config.GetSection("Aspire:Services:User.Api");
+IConfigurationSection userConfig = config.GetSection("Aspire:Services:User");
 IResourceBuilder<ProjectResource> userApi = builder.AddProject<Projects.User_Api>(userConfig["ProjectName"]!)
     .WithReference(userDb)
     .WithHttpEndpoint(port: int.Parse(userConfig["HttpPort"]!), name: "user-http")
