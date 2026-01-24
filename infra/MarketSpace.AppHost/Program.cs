@@ -11,6 +11,7 @@ IConfigurationSection catalogDbConfig = postgresConfig.GetSection("Catalog");
 IResourceBuilder<PostgresDatabaseResource> catalogDb = builder.AddPostgres(catalogDbConfig["Name"]!, password: postgresPassword)
     .WithEnvironment("POSTGRES_DB", catalogDbConfig["DatabaseName"]!)
     .WithLifetime(ContainerLifetime.Persistent)
+    .WithDataVolume()
     .WithHostPort(int.Parse(catalogDbConfig["Port"]!))
     .AddDatabase(catalogDbConfig["ConnectionName"]!);
 
@@ -18,6 +19,7 @@ IConfigurationSection orderDbConfig = postgresConfig.GetSection("Order");
 IResourceBuilder<PostgresDatabaseResource> orderDb = builder.AddPostgres(orderDbConfig["Name"]!, password: postgresPassword)
     .WithEnvironment("POSTGRES_DB", orderDbConfig["DatabaseName"]!)
     .WithLifetime(ContainerLifetime.Persistent)
+    .WithDataVolume()
     .WithHostPort(int.Parse(orderDbConfig["Port"]!))
     .AddDatabase(orderDbConfig["ConnectionName"]!);
 
@@ -25,6 +27,7 @@ IConfigurationSection merchantDbConfig = postgresConfig.GetSection("Merchant");
 IResourceBuilder<PostgresDatabaseResource> merchantDb = builder.AddPostgres(merchantDbConfig["Name"]!, password: postgresPassword)
     .WithEnvironment("POSTGRES_DB", merchantDbConfig["DatabaseName"]!)
     .WithLifetime(ContainerLifetime.Persistent)
+    .WithDataVolume()
     .WithHostPort(int.Parse(merchantDbConfig["Port"]!))
     .AddDatabase(merchantDbConfig["ConnectionName"]!);
 
@@ -32,6 +35,7 @@ IConfigurationSection userDbConfig = postgresConfig.GetSection("User");
 IResourceBuilder<PostgresDatabaseResource> userDb = builder.AddPostgres(userDbConfig["Name"]!, password: postgresPassword)
     .WithEnvironment("POSTGRES_DB", userDbConfig["DatabaseName"]!)
     .WithLifetime(ContainerLifetime.Persistent)
+    .WithDataVolume()
     .WithHostPort(int.Parse(userDbConfig["Port"]!))
     .AddDatabase(userDbConfig["ConnectionName"]!);
 
@@ -39,6 +43,7 @@ IConfigurationSection basketDbConfig = postgresConfig.GetSection("Basket");
 IResourceBuilder<PostgresDatabaseResource> basketDb = builder.AddPostgres(basketDbConfig["Name"]!, password: postgresPassword)
     .WithEnvironment("POSTGRES_DB", basketDbConfig["DatabaseName"]!)
     .WithLifetime(ContainerLifetime.Persistent)
+    .WithDataVolume()
     .WithHostPort(int.Parse(basketDbConfig["Port"]!))
     .AddDatabase(basketDbConfig["ConnectionName"]!);
 
@@ -50,7 +55,8 @@ IResourceBuilder<ContainerResource> minio = builder.AddContainer(minioConfig["Co
     .WithEnvironment("MINIO_ROOT_USER", minioConfig["RootUser"]!)
     .WithEnvironment("MINIO_ROOT_PASSWORD", minioConfig["RootPassword"]!)
     .WithArgs("server", "/data", "--console-address", $":{minioConfig["ConsolePort"]}")
-    .WithLifetime(ContainerLifetime.Persistent);
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithVolume("minio-data", "/data");
 
 // Microservices
 IConfigurationSection catalogConfig = config.GetSection("Aspire:Services:Catalog");
