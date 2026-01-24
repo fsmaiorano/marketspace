@@ -1,6 +1,8 @@
-﻿using Simulator;
+﻿using Bogus;
+using Simulator;
 using System.Net.Http.Json;
 using User.Api.Data;
+using User.Api.Data.Models;
 
 Console.WriteLine("===========================================");
 Console.WriteLine("MarketSpace Simulator Application");
@@ -9,9 +11,11 @@ Console.WriteLine("===========================================");
 // ======================================
 // CONFIGURATION: Set the user email for checkout simulation
 // ======================================
-const string targetUserEmail = "fsmaiorano@gmail.com";
-const bool doCheckout = false;
+const string targetUserEmail = "user@example.com";
+const bool doCheckout = true;
 // ======================================
+
+Faker faker = new Bogus.Faker();
 
 // Using real database connections from docker-compose
 const string merchantConnectionString =
@@ -78,7 +82,7 @@ Console.WriteLine("Starting Checkout Simulation");
 Console.WriteLine("===========================================");
 
 // Find the specific merchant/user by email
-var targetUser = await userDbContext.Users
+ApplicationUser? targetUser = await userDbContext.Users
     .FirstOrDefaultAsync(m => m.Email == targetUserEmail);
 
 if (targetUser == null)
@@ -167,6 +171,13 @@ else
                 httpClient.BaseAddress = new Uri("http://localhost:5001");
                 httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
 
+                if (string.IsNullOrWhiteSpace(targetUser.FirstName) || string.IsNullOrWhiteSpace(targetUser.LastName))
+                {
+                    targetUser.FirstName = faker.Person.FirstName;
+                    targetUser.LastName = faker.Person.LastName;
+                    await userDbContext.SaveChangesAsync();
+                }
+
                 var checkoutCommand = new
                 {
                     UserName = existingCart.Username,
@@ -175,14 +186,14 @@ else
                     FirstName = targetUser.FirstName ?? "John",
                     LastName = targetUser.LastName ?? "Doe",
                     EmailAddress = targetUser.Email,
-                    AddressLine = "123 Main St",
-                    Country = "USA",
-                    State = "CA",
-                    ZipCode = "12345",
+                    AddressLine = faker.Address.StreetAddress(),
+                    Country = faker.Address.Country(),
+                    State = faker.Address.State(),
+                    ZipCode = faker.Address.ZipCode(),
                     CardName = $"{targetUser.FirstName} {targetUser.LastName}",
-                    CardNumber = "1234567890123456",
-                    Expiration = "12/26",
-                    Cvv = "123",
+                    CardNumber = faker.Finance.CreditCardNumber(),
+                    Expiration = faker.Date.Future().ToString("MM/yy"),
+                    Cvv = faker.Random.Number(100, 999).ToString(),
                     PaymentMethod = 1,
                     RequestId = Guid.NewGuid().ToString(),
                     IdempotencyKey = Guid.NewGuid().ToString()
