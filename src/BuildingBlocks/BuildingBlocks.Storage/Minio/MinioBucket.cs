@@ -5,7 +5,7 @@ namespace BuildingBlocks.Storage.Minio;
 
 public class MinioBucket(IMinioClient minioClient) : IMinioBucket
 {
-    private const string BucketName = "masketspace";
+    private const string BucketName = "marketspace";
 
     public async Task<(string objectName, string objectUrl)> SendImageAsync(string imageUrl)
     {
