@@ -1,3 +1,4 @@
+using BuildingBlocks.Message.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Order.Api.Infrastructure.Data;
@@ -10,7 +11,6 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services,
         IConfiguration configuration)
     {
-        // Try Aspire naming first (orderdb), then fallback to default (Database)
         string connectionString = configuration.GetConnectionString("orderdb")
                                   ?? configuration.GetConnectionString("Database")
                                   ?? throw new InvalidOperationException(
@@ -26,6 +26,7 @@ public static class DependencyInjection
 
         services.AddHttpContextAccessor();
         services.AddScoped<IOrderDbContext, OrderDbContext>();
+        services.AddEventBus(configuration);
 
         return services;
     }

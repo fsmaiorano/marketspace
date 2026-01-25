@@ -1,5 +1,7 @@
 using BuildingBlocks;
 using BuildingBlocks.Loggers;
+using BuildingBlocks.Message.Abstractions;
+using Order.Api.Application.Events;
 using Order.Api.Domain.Entities;
 using Order.Api.Domain.Repositories;
 using Order.Api.Domain.ValueObjects;
@@ -9,7 +11,8 @@ namespace Order.Api.Application.Order.CreateOrder;
 
 public sealed class CreateOrderHandler(
     IOrderRepository repository,
-    IAppLogger<CreateOrderHandler> logger
+    IAppLogger<CreateOrderHandler> logger,
+    IEventBus eventBus
 )
     : ICreateOrderHandler
 {
@@ -47,6 +50,15 @@ public sealed class CreateOrderHandler(
                 command.CustomerId, 
                 orderEntity.TotalAmount.Value, 
                 orderItems.Count);
+
+            OrderCreatedIntegrationEvent integrationEvent = new(
+                orderEntity.Id.Value,
+                orderEntity.CustomerId.Value,
+                orderEntity.TotalAmount.Value,
+                orderEntity.Payment.PaymentMethod);
+
+            await eventBus.PublishAsync(integrationEvent, topic: "payments");
+            logger.LogInformation(LogTypeEnum.Application, "Published OrderCreatedIntegrationEvent for OrderId: {OrderId}", orderEntity.Id.Value);
             
             return Result<CreateOrderResult>.Success(new CreateOrderResult(orderEntity.Id.Value));
         }
