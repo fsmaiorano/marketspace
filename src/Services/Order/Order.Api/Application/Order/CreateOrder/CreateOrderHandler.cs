@@ -20,14 +20,15 @@ public sealed class CreateOrderHandler(
     {
         try
         {
-            logger.LogInformation(LogTypeEnum.Application, "Processing create order request for customer: {CustomerId}", command.CustomerId);
-            
+            logger.LogInformation(LogTypeEnum.Application, "Processing create order request for customer: {CustomerId}",
+                command.CustomerId);
+
             OrderId orderId = OrderId.Of(Guid.CreateVersion7());
             Address shippingAddress = command.ShippingAddress.ToAddress();
             Address billingAddress = command.BillingAddress.ToAddress();
             Payment payment = command.Payment.ToPayment();
             List<OrderItemEntity> orderItems = command.Items.Select(item => orderId.ToOrderItemEntity(item)).ToList();
-            
+
             OrderEntity orderEntity = OrderEntity.Create(
                 orderId: orderId,
                 customerId: CustomerId.Of(command.CustomerId),
@@ -41,14 +42,16 @@ public sealed class CreateOrderHandler(
 
             if (result <= 0)
             {
-                logger.LogError(LogTypeEnum.Application, null, "Failed to persist order to database for customer: {CustomerId}", command.CustomerId);
+                logger.LogError(LogTypeEnum.Application, null,
+                    "Failed to persist order to database for customer: {CustomerId}", command.CustomerId);
                 return Result<CreateOrderResult>.Failure("Failed to create order.");
             }
 
-            logger.LogInformation(LogTypeEnum.Business, "Order created successfully. OrderId: {OrderId}, CustomerId: {CustomerId}, TotalAmount: {TotalAmount}, ItemCount: {ItemCount}", 
-                orderEntity.Id.Value, 
-                command.CustomerId, 
-                orderEntity.TotalAmount.Value, 
+            logger.LogInformation(LogTypeEnum.Business,
+                "Order created successfully. OrderId: {OrderId}, CustomerId: {CustomerId}, TotalAmount: {TotalAmount}, ItemCount: {ItemCount}",
+                orderEntity.Id.Value,
+                command.CustomerId,
+                orderEntity.TotalAmount.Value,
                 orderItems.Count);
 
             OrderCreatedIntegrationEvent integrationEvent = new(
@@ -58,13 +61,15 @@ public sealed class CreateOrderHandler(
                 orderEntity.Payment.PaymentMethod);
 
             await eventBus.PublishAsync(integrationEvent, topic: "payments");
-            logger.LogInformation(LogTypeEnum.Application, "Published OrderCreatedIntegrationEvent for OrderId: {OrderId}", orderEntity.Id.Value);
-            
+            logger.LogInformation(LogTypeEnum.Application,
+                "Published OrderCreatedIntegrationEvent for OrderId: {OrderId}", orderEntity.Id.Value);
+
             return Result<CreateOrderResult>.Success(new CreateOrderResult(orderEntity.Id.Value));
         }
         catch (Exception ex)
         {
-            logger.LogError(LogTypeEnum.Exception, ex, "An error occurred while creating the order for customer: {CustomerId}", command.CustomerId);
+            logger.LogError(LogTypeEnum.Exception, ex,
+                "An error occurred while creating the order for customer: {CustomerId}", command.CustomerId);
             return Result<CreateOrderResult>.Failure($"An error occurred while creating the order: {ex.Message}");
         }
     }

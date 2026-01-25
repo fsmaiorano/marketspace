@@ -19,6 +19,7 @@
         </PackageReference>
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
         <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0" />
+        <PackageReference Include="Aspire.RabbitMQ.Client" Version="9.0.0" />
     </ItemGroup>
 
     <ItemGroup>

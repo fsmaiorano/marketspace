@@ -9,10 +9,12 @@ using Order.Api.Infrastructure;
 using Order.Api.Infrastructure.Data.Extensions;
 using Serilog;
 using Serilog.Extensions.Hosting;
+using RabbitMQ.Client;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+builder.AddRabbitMQClient("rabbitmq");
 
 builder.Services
     .AddApplicationServices(builder.Configuration)

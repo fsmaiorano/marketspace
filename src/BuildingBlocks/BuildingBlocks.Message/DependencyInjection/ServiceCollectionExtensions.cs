@@ -2,10 +2,12 @@ using Azure.Messaging.ServiceBus;
 using BuildingBlocks.Message.Abstractions;
 using BuildingBlocks.Message.AzureServiceBus;
 using BuildingBlocks.Message.Configuration;
+using BuildingBlocks.Message.RabbitMQ;
 using BuildingBlocks.Message.Serialization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using RabbitMQ.Client;
 
 namespace BuildingBlocks.Message.DependencyInjection;
 
@@ -17,22 +19,39 @@ public static class ServiceCollectionExtensions
         IConfigurationSection section = configuration.GetSection(EventBusOptions.SectionName);
         section.Bind(options);
 
-        options.ServiceBus.ConnectionString ??= configuration.GetConnectionString("ServiceBus")
-                                                    ?? configuration.GetConnectionString("sbemulatorns")
-                                                    ?? configuration["ServiceBus:ConnectionString"]
-                                                    ?? configuration["AzureServiceBus:ConnectionString"];
-
-        if (string.IsNullOrWhiteSpace(options.ServiceBus.ConnectionString))
-            throw new InvalidOperationException("Service Bus connection string is not configured. Set it under MessageBroker:ServiceBus:ConnectionString or as a connection string named 'ServiceBus'.");
-
         services.AddSingleton<IOptions<EventBusOptions>>(_ => Options.Create(options));
         services.AddSingleton<IEventSerializer, SystemTextJsonEventSerializer>();
 
-        if (options.Provider != EventBusProvider.AzureServiceBus)
-            throw new NotSupportedException($"Event bus provider '{options.Provider}' is not supported.");
+        switch (options.Provider)
+        {
+            case EventBusProvider.AzureServiceBus:
+                options.ServiceBus.ConnectionString ??= configuration.GetConnectionString("ServiceBus")
+                                                            ?? configuration.GetConnectionString("sbemulatorns")
+                                                            ?? configuration["ServiceBus:ConnectionString"]
+                                                            ?? configuration["AzureServiceBus:ConnectionString"];
 
-        services.AddSingleton(_ => new ServiceBusClient(options.ServiceBus.ConnectionString));
-        services.AddSingleton<IEventBus, ServiceBusEventBus>();
+                if (string.IsNullOrWhiteSpace(options.ServiceBus.ConnectionString))
+                    throw new InvalidOperationException("Service Bus connection string is not configured. Set it under MessageBroker:ServiceBus:ConnectionString or as a connection string named 'ServiceBus'.");
+
+                services.AddSingleton(_ => new ServiceBusClient(options.ServiceBus.ConnectionString));
+                services.AddSingleton<IEventBus, ServiceBusEventBus>();
+                break;
+
+            case EventBusProvider.RabbitMq:
+                string rabbitMqConnectionString = configuration.GetConnectionString("rabbitmq")
+                    ?? configuration["ConnectionStrings:rabbitmq"]
+                    ?? $"amqp://guest:guest@{options.RabbitMq.HostName}:{options.RabbitMq.Port}";
+
+                ConnectionFactory factory = new();
+                factory.Uri = new Uri(rabbitMqConnectionString);
+
+                services.AddSingleton<IConnection>(_ => factory.CreateConnection());
+                services.AddSingleton<IEventBus, RabbitMqEventBus>();
+                break;
+
+            default:
+                throw new NotSupportedException($"Event bus provider '{options.Provider}' is not supported.");
+        }
 
         return services;
     }
