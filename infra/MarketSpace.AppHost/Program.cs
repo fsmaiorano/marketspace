@@ -53,6 +53,15 @@ IResourceBuilder<PostgresDatabaseResource> basketDb = builder
     .WithHostPort(int.Parse(basketDbConfig["Port"]!))
     .AddDatabase(basketDbConfig["ConnectionName"]!);
 
+// Service Bus
+IResourceBuilder<AzureServiceBusResource> serviceBus = builder
+    .AddAzureServiceBus("sbemulatorns")
+    .RunAsEmulator();
+
+IResourceBuilder<AzureServiceBusTopicResource> paymentsTopic = serviceBus.AddServiceBusTopic("marketspace-payments");
+paymentsTopic.AddServiceBusSubscription("marketspace-payments-subscription");
+// serviceBus.AddServiceBusQueue("marketspace-orders");
+
 // Storage - Minio
 IConfigurationSection minioConfig = config.GetSection("Aspire:Storage:Minio");
 IResourceBuilder<ContainerResource> minio = builder
@@ -87,6 +96,7 @@ IResourceBuilder<ProjectResource> basketApi = builder.AddProject<Projects.Basket
 IConfigurationSection orderConfig = config.GetSection("Aspire:Services:Order");
 IResourceBuilder<ProjectResource> orderApi = builder.AddProject<Projects.Order_Api>(orderConfig["ProjectName"]!)
     .WithReference(orderDb)
+    .WithReference(serviceBus)
     .WithHttpEndpoint(port: int.Parse(orderConfig["HttpPort"]!), name: "order-http")
     .WithHttpsEndpoint(port: int.Parse(orderConfig["HttpsPort"]!), name: "order-https");
 
@@ -113,14 +123,5 @@ IResourceBuilder<ProjectResource> _ = builder.AddProject<Projects.BackendForFron
     .WithReference(userApi)
     .WithHttpEndpoint(port: int.Parse(bffConfig["HttpPort"]!), name: "bff-http")
     .WithHttpsEndpoint(port: int.Parse(bffConfig["HttpsPort"]!), name: "bff-https");
-
-// Service Bus
-IResourceBuilder<AzureServiceBusResource> serviceBus = builder
-                                                        .AddAzureServiceBus("sbemulatorns")
-                                                        .RunAsEmulator();
-
-IResourceBuilder<AzureServiceBusTopicResource> paymentsTopic = serviceBus.AddServiceBusTopic("marketspace-payments");
-paymentsTopic.AddServiceBusSubscription("marketspace-payments-subscription");
-// serviceBus.AddServiceBusQueue("marketspace-orders");
 
 builder.Build().Run();
