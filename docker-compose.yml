@@ -35,9 +35,14 @@ services:
     image: postgres:18
     networks:
       - marketspace
-  #
-  #  messagebroker:
-  #    image: rabbitmq:management
+
+  messagebroker:
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - marketspace
   
   catalog.api:
     image: ${DOCKER_REGISTRY-}catalogapi
@@ -67,6 +72,9 @@ services:
   #  
   order.api:
     image: ${DOCKER_REGISTRY-}orderapi
+    depends_on:
+      - orderdb
+      - messagebroker
     build:
       context: .
       dockerfile: ./src/Services/Order/Order.Api/Dockerfile

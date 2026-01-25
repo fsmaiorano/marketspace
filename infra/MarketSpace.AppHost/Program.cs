@@ -1,4 +1,5 @@
 using Aspire.Hosting.Azure;
+using Aspire.Hosting.RabbitMQ;
 using Microsoft.Extensions.Configuration;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
@@ -53,14 +54,22 @@ IResourceBuilder<PostgresDatabaseResource> basketDb = builder
     .WithHostPort(int.Parse(basketDbConfig["Port"]!))
     .AddDatabase(basketDbConfig["ConnectionName"]!);
 
-// Service Bus
+// Message Broker
+IConfigurationSection rabbitMqConfig = config.GetSection("Aspire:MessageBrokers:RabbitMQ");
+IResourceBuilder<ContainerResource> rabbitmq = builder.AddContainer(rabbitMqConfig["Name"]!, "rabbitmq", "management")
+    .WithEnvironment("RABBITMQ_DEFAULT_USER", "guest")
+    .WithEnvironment("RABBITMQ_DEFAULT_PASS", "guest")
+    .WithEnvironment("RABBITMQ_DEFAULT_VHOST", "/")
+    .WithEndpoint(port: int.Parse(rabbitMqConfig["Port"]!), targetPort: 5672, scheme: "amqp", name: "rabbitmq")
+    .WithHttpEndpoint(port: int.Parse(rabbitMqConfig["Ui"]!), targetPort: 15672, name: "rabbitmq-ui");
+
+IConfigurationSection serviceBusConfig = config.GetSection("Aspire:MessageBrokers:AzureServiceBus");
 IResourceBuilder<AzureServiceBusResource> serviceBus = builder
-    .AddAzureServiceBus("sbemulatorns")
+    .AddAzureServiceBus(serviceBusConfig["Name"]!)
     .RunAsEmulator();
 
 IResourceBuilder<AzureServiceBusTopicResource> paymentsTopic = serviceBus.AddServiceBusTopic("marketspace-payments");
 paymentsTopic.AddServiceBusSubscription("marketspace-payments-subscription");
-// serviceBus.AddServiceBusQueue("marketspace-orders");
 
 // Storage - Minio
 IConfigurationSection minioConfig = config.GetSection("Aspire:Storage:Minio");
@@ -96,7 +105,7 @@ IResourceBuilder<ProjectResource> basketApi = builder.AddProject<Projects.Basket
 IConfigurationSection orderConfig = config.GetSection("Aspire:Services:Order");
 IResourceBuilder<ProjectResource> orderApi = builder.AddProject<Projects.Order_Api>(orderConfig["ProjectName"]!)
     .WithReference(orderDb)
-    .WithReference(serviceBus)
+    .WithEnvironment("ConnectionStrings__RabbitMQ", $"amqp://guest:guest@localhost:{rabbitMqConfig["Port"]!}/")
     .WithHttpEndpoint(port: int.Parse(orderConfig["HttpPort"]!), name: "order-http")
     .WithHttpsEndpoint(port: int.Parse(orderConfig["HttpsPort"]!), name: "order-https");
 
