@@ -1,3 +1,4 @@
+using Aspire.Hosting.Azure;
 using Microsoft.Extensions.Configuration;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
@@ -8,7 +9,8 @@ IConfigurationSection postgresConfig = config.GetSection("Aspire:Databases:Postg
 IResourceBuilder<ParameterResource> postgresPassword = builder.AddParameter("postgres-password", "postgres");
 
 IConfigurationSection catalogDbConfig = postgresConfig.GetSection("Catalog");
-IResourceBuilder<PostgresDatabaseResource> catalogDb = builder.AddPostgres(catalogDbConfig["Name"]!, password: postgresPassword)
+IResourceBuilder<PostgresDatabaseResource> catalogDb = builder
+    .AddPostgres(catalogDbConfig["Name"]!, password: postgresPassword)
     .WithEnvironment("POSTGRES_DB", catalogDbConfig["DatabaseName"]!)
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume()
@@ -16,7 +18,8 @@ IResourceBuilder<PostgresDatabaseResource> catalogDb = builder.AddPostgres(catal
     .AddDatabase(catalogDbConfig["ConnectionName"]!);
 
 IConfigurationSection orderDbConfig = postgresConfig.GetSection("Order");
-IResourceBuilder<PostgresDatabaseResource> orderDb = builder.AddPostgres(orderDbConfig["Name"]!, password: postgresPassword)
+IResourceBuilder<PostgresDatabaseResource> orderDb = builder
+    .AddPostgres(orderDbConfig["Name"]!, password: postgresPassword)
     .WithEnvironment("POSTGRES_DB", orderDbConfig["DatabaseName"]!)
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume()
@@ -24,7 +27,8 @@ IResourceBuilder<PostgresDatabaseResource> orderDb = builder.AddPostgres(orderDb
     .AddDatabase(orderDbConfig["ConnectionName"]!);
 
 IConfigurationSection merchantDbConfig = postgresConfig.GetSection("Merchant");
-IResourceBuilder<PostgresDatabaseResource> merchantDb = builder.AddPostgres(merchantDbConfig["Name"]!, password: postgresPassword)
+IResourceBuilder<PostgresDatabaseResource> merchantDb = builder
+    .AddPostgres(merchantDbConfig["Name"]!, password: postgresPassword)
     .WithEnvironment("POSTGRES_DB", merchantDbConfig["DatabaseName"]!)
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume()
@@ -32,7 +36,8 @@ IResourceBuilder<PostgresDatabaseResource> merchantDb = builder.AddPostgres(merc
     .AddDatabase(merchantDbConfig["ConnectionName"]!);
 
 IConfigurationSection userDbConfig = postgresConfig.GetSection("User");
-IResourceBuilder<PostgresDatabaseResource> userDb = builder.AddPostgres(userDbConfig["Name"]!, password: postgresPassword)
+IResourceBuilder<PostgresDatabaseResource> userDb = builder
+    .AddPostgres(userDbConfig["Name"]!, password: postgresPassword)
     .WithEnvironment("POSTGRES_DB", userDbConfig["DatabaseName"]!)
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume()
@@ -40,7 +45,8 @@ IResourceBuilder<PostgresDatabaseResource> userDb = builder.AddPostgres(userDbCo
     .AddDatabase(userDbConfig["ConnectionName"]!);
 
 IConfigurationSection basketDbConfig = postgresConfig.GetSection("Basket");
-IResourceBuilder<PostgresDatabaseResource> basketDb = builder.AddPostgres(basketDbConfig["Name"]!, password: postgresPassword)
+IResourceBuilder<PostgresDatabaseResource> basketDb = builder
+    .AddPostgres(basketDbConfig["Name"]!, password: postgresPassword)
     .WithEnvironment("POSTGRES_DB", basketDbConfig["DatabaseName"]!)
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume()
@@ -49,9 +55,12 @@ IResourceBuilder<PostgresDatabaseResource> basketDb = builder.AddPostgres(basket
 
 // Storage - Minio
 IConfigurationSection minioConfig = config.GetSection("Aspire:Storage:Minio");
-IResourceBuilder<ContainerResource> minio = builder.AddContainer(minioConfig["ContainerName"]!, minioConfig["Image"]!, minioConfig["Tag"]!)
-    .WithHttpEndpoint(port: int.Parse(minioConfig["ApiPort"]!), targetPort: int.Parse(minioConfig["ApiPort"]!), name: "minio-api")
-    .WithHttpEndpoint(port: int.Parse(minioConfig["ConsolePort"]!), targetPort: int.Parse(minioConfig["ConsolePort"]!), name: "minio-console")
+IResourceBuilder<ContainerResource> minio = builder
+    .AddContainer(minioConfig["ContainerName"]!, minioConfig["Image"]!, minioConfig["Tag"]!)
+    .WithHttpEndpoint(port: int.Parse(minioConfig["ApiPort"]!), targetPort: int.Parse(minioConfig["ApiPort"]!),
+        name: "minio-api")
+    .WithHttpEndpoint(port: int.Parse(minioConfig["ConsolePort"]!), targetPort: int.Parse(minioConfig["ConsolePort"]!),
+        name: "minio-console")
     .WithEnvironment("MINIO_ROOT_USER", minioConfig["RootUser"]!)
     .WithEnvironment("MINIO_ROOT_PASSWORD", minioConfig["RootPassword"]!)
     .WithArgs("server", "/data", "--console-address", $":{minioConfig["ConsolePort"]}")
@@ -82,7 +91,8 @@ IResourceBuilder<ProjectResource> orderApi = builder.AddProject<Projects.Order_A
     .WithHttpsEndpoint(port: int.Parse(orderConfig["HttpsPort"]!), name: "order-https");
 
 IConfigurationSection merchantConfig = config.GetSection("Aspire:Services:Merchant");
-IResourceBuilder<ProjectResource> merchantApi = builder.AddProject<Projects.Merchant_Api>(merchantConfig["ProjectName"]!)
+IResourceBuilder<ProjectResource> merchantApi = builder
+    .AddProject<Projects.Merchant_Api>(merchantConfig["ProjectName"]!)
     .WithReference(merchantDb)
     .WithHttpEndpoint(port: int.Parse(merchantConfig["HttpPort"]!), name: "merchant-http")
     .WithHttpsEndpoint(port: int.Parse(merchantConfig["HttpsPort"]!), name: "merchant-https");
@@ -103,5 +113,14 @@ IResourceBuilder<ProjectResource> _ = builder.AddProject<Projects.BackendForFron
     .WithReference(userApi)
     .WithHttpEndpoint(port: int.Parse(bffConfig["HttpPort"]!), name: "bff-http")
     .WithHttpsEndpoint(port: int.Parse(bffConfig["HttpsPort"]!), name: "bff-https");
+
+// Service Bus
+IResourceBuilder<AzureServiceBusResource> serviceBus = builder
+                                                        .AddAzureServiceBus("sbemulatorns")
+                                                        .RunAsEmulator();
+
+IResourceBuilder<AzureServiceBusTopicResource> paymentsTopic = serviceBus.AddServiceBusTopic("marketspace-payments");
+paymentsTopic.AddServiceBusSubscription("marketspace-payments-subscription");
+// serviceBus.AddServiceBusQueue("marketspace-orders");
 
 builder.Build().Run();
