@@ -27,6 +27,8 @@ public static class DependencyInjection
         services.AddHttpContextAccessor();
         services.AddScoped<IOrderDbContext, OrderDbContext>();
         services.AddEventBus(configuration);
+        
+        RabbitMqInitializer.Initialize(configuration);
 
         return services;
     }
