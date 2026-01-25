@@ -34,11 +34,9 @@ public sealed class ServiceBusEventBus(
         {
             MessageId = @event.Id.ToString(),
             ContentType = "application/json",
-            Subject = typeof(TEvent).Name
+            Subject = typeof(TEvent).Name,
+            ApplicationProperties = { ["type"] = typeof(TEvent).FullName ?? typeof(TEvent).Name, ["occurredOn"] = @event.OccurredOn }
         };
-
-        message.ApplicationProperties["type"] = typeof(TEvent).FullName ?? typeof(TEvent).Name;
-        message.ApplicationProperties["occurredOn"] = @event.OccurredOn;
 
         _logger.LogInformation("Publishing event {EventType} to topic {Topic}", typeof(TEvent).Name, topicName);
 
@@ -65,12 +63,6 @@ public sealed class ServiceBusEventBus(
             try
             {
                 TEvent? deserialized = _serializer.Deserialize<TEvent>(args.Message.Body.ToString());
-                if (deserialized is null)
-                {
-                    _logger.LogWarning("Received null event while processing topic {Topic} subscription {Subscription}", topicName, subscriptionName);
-                    await args.DeadLetterMessageAsync(args.Message, cancellationToken: cancellationToken);
-                    return;
-                }
 
                 using IServiceScope scope = _serviceProvider.CreateScope();
                 THandler handler = scope.ServiceProvider.GetRequiredService<THandler>();
