@@ -31,7 +31,6 @@
     <ItemGroup>
       <ProjectReference Include="..\..\..\..\infra\MarketSpace.ServiceDefaults\MarketSpace.ServiceDefaults.csproj" />
       <ProjectReference Include="..\..\..\BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj" />
-      <ProjectReference Include="..\..\..\BuildingBlocks\BuildingBlocks.Message\BuildingBlocks.Message.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\..\..\..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
+      <Content Remove="Application\**" />
+      <Content Remove="HostedServices\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\..\infra\MarketSpace.ServiceDefaults\MarketSpace.ServiceDefaults.csproj" />
+      <ProjectReference Include="..\..\..\BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Application\**" />
+      <Compile Remove="HostedServices\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Application\**" />
+      <EmbeddedResource Remove="HostedServices\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Application\**" />
+      <None Remove="HostedServices\**" />
+    </ItemGroup>
+
+</Project>

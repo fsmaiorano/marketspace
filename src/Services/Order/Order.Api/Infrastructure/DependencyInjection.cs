@@ -1,4 +1,3 @@
-using BuildingBlocks.Message.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Order.Api.Infrastructure.Data;
@@ -26,7 +25,6 @@ public static class DependencyInjection
 
         services.AddHttpContextAccessor();
         services.AddScoped<IOrderDbContext, OrderDbContext>();
-        services.AddEventBus(configuration);
         
         RabbitMqInitializer.Initialize(configuration);
 
