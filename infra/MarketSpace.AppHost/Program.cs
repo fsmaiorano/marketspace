@@ -63,13 +63,13 @@ IResourceBuilder<ContainerResource> rabbitmq = builder.AddContainer(rabbitMqConf
     .WithEndpoint(port: int.Parse(rabbitMqConfig["Port"]!), targetPort: 5672, scheme: "amqp", name: "rabbitmq")
     .WithHttpEndpoint(port: int.Parse(rabbitMqConfig["Ui"]!), targetPort: 15672, name: "rabbitmq-ui");
 
-IConfigurationSection serviceBusConfig = config.GetSection("Aspire:MessageBrokers:AzureServiceBus");
-IResourceBuilder<AzureServiceBusResource> serviceBus = builder
-    .AddAzureServiceBus(serviceBusConfig["Name"]!)
-    .RunAsEmulator();
-
-IResourceBuilder<AzureServiceBusTopicResource> paymentsTopic = serviceBus.AddServiceBusTopic("marketspace-payments");
-paymentsTopic.AddServiceBusSubscription("marketspace-payments-subscription");
+// IConfigurationSection serviceBusConfig = config.GetSection("Aspire:MessageBrokers:AzureServiceBus");
+// IResourceBuilder<AzureServiceBusResource> serviceBus = builder
+//     .AddAzureServiceBus(serviceBusConfig["Name"]!)
+//     .RunAsEmulator();
+//
+// IResourceBuilder<AzureServiceBusTopicResource> paymentsTopic = serviceBus.AddServiceBusTopic("marketspace-payments");
+// paymentsTopic.AddServiceBusSubscription("marketspace-payments-subscription");
 
 // Storage - Minio
 IConfigurationSection minioConfig = config.GetSection("Aspire:Storage:Minio");
