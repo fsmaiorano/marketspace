@@ -1,5 +1,6 @@
 using BuildingBlocks.Abstractions;
 using Order.Api.Domain.Enums;
+using Order.Api.Domain.Events;
 using Order.Api.Domain.ValueObjects;
 
 namespace Order.Api.Domain.Entities;
@@ -94,7 +95,6 @@ public class OrderEntity : Aggregate<OrderId>
             throw new ArgumentException("CustomerId cannot be empty.", nameof(customerId));
 
         OrderEntity order = new()
-
         {
             Id = orderId,
             CustomerId = customerId,
@@ -109,6 +109,7 @@ public class OrderEntity : Aggregate<OrderId>
         }
 
         order.CalculateAndSetTotalAmount();
+        order.AddDomainEvent(new OrderCreatedDomainEvent(order));
 
         return order;
     }
@@ -133,7 +134,6 @@ public class OrderEntity : Aggregate<OrderId>
             throw new ArgumentException("OrderId cannot be empty.", nameof(orderId));
 
         OrderEntity updatedOrder = new()
-
         {
             Id = orderId,
             CustomerId = customerId,

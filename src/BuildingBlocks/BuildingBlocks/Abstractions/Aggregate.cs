@@ -1,3 +1,5 @@
+using BuildingBlocks.Messaging.DomainEvents;
+
 namespace BuildingBlocks.Abstractions;
 
 public interface IAggregate<T> : IAggregate, IEntity<T>
@@ -6,26 +8,26 @@ public interface IAggregate<T> : IAggregate, IEntity<T>
 
 public interface IAggregate : IEntity
 {
-    IReadOnlyList<object> DomainEvents { get; }
-    object[] ClearDomainEvents();
+    IReadOnlyList<IDomainEvent> DomainEvents { get; }
+    IDomainEvent[] ClearDomainEvents();
 }
 
 public abstract class Aggregate<TId> : Entity<TId>, IAggregate<TId>
     where TId : notnull
 {
-    private readonly List<object> _domainEvents = [];
+    private readonly List<IDomainEvent> _domainEvents = [];
 
-    public IReadOnlyList<object> DomainEvents => _domainEvents.AsReadOnly();
+    public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
-    protected void AddDomainEvent(object domainEvent)
+    protected void AddDomainEvent(IDomainEvent domainEvent)
     {
         ArgumentNullException.ThrowIfNull(domainEvent);
         _domainEvents.Add(domainEvent);
     }
 
-    public object[] ClearDomainEvents()
+    public IDomainEvent[] ClearDomainEvents()
     {
-        object[] events = _domainEvents.ToArray();
+        IDomainEvent[] events = _domainEvents.ToArray();
         _domainEvents.Clear();
         return events;
     }
