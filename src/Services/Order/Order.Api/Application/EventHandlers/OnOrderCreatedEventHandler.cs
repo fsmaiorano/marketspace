@@ -1,6 +1,7 @@
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Messaging;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
+using BuildingBlocks.Messaging.IntegrationEvents;
 using Order.Api.Domain.Events;
 using Order.Api.Domain.Repositories;
 
@@ -9,10 +10,15 @@ namespace Order.Api.Application.EventHandlers;
 public class OnOrderCreatedEventHandler(
     IAppLogger<OnOrderCreatedEventHandler> logger,
     IEventBus eventBus,
-    IOrderRepository orderRepository): IDomainEventHandler<OrderCreatedDomainEvent>
+    IOrderRepository orderRepository) : IDomainEventHandler<OrderCreatedDomainEvent>
 {
-    public Task HandleAsync(OrderCreatedDomainEvent @event, CancellationToken cancellationToken = default)
+    public async Task HandleAsync(OrderCreatedDomainEvent @event, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        logger.LogInformation(LogTypeEnum.Application, "Order created domain event received.");
+        
+        OrderCreatedIntegrationEvent integrationEvent = new() { };
+        await eventBus.PublishAsync(integrationEvent, cancellationToken);
+
+        logger.LogInformation(LogTypeEnum.Application, "Order created integration event published.");
     }
 }
