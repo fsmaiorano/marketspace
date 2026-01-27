@@ -19,7 +19,7 @@ public class EventBus : IEventBus, IDisposable
     private readonly IConnection _connection;
     private readonly IModel _channel;
     private readonly Dictionary<Type, List<Type>> _handlers = new();
-    private readonly string _exchangeName = "forum_events";
+    private readonly string _exchangeName = "marketspace_events";
 
     public EventBus(IServiceProvider serviceProvider, ILogger<EventBus> logger, string rabbitMqConnectionString)
     {
