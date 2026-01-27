@@ -1,18 +1,28 @@
+using BuildingBlocks.Messaging.DomainEvents;
 using Microsoft.EntityFrameworkCore;
 using Order.Api.Domain.Entities;
 using Order.Api.Domain.Enums;
+using Order.Api.Domain.Events;
 using Order.Api.Domain.Repositories;
 using Order.Api.Domain.ValueObjects;
 
 namespace Order.Api.Infrastructure.Data.Repositories;
 
-public class OrderRepository(IOrderDbContext dbContext) : IOrderRepository
+public class OrderRepository(IOrderDbContext dbContext, IDomainEventDispatcher eventDispatcher) : IOrderRepository
 {
     public async Task<int> AddAsync(OrderEntity order, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(order, nameof(order));
         await dbContext.Orders.AddAsync(order, cancellationToken);
-        return await dbContext.SaveChangesAsync(cancellationToken);
+
+        int result = await dbContext.SaveChangesAsync(cancellationToken);
+        
+        if(result <= 0) return result;
+
+        await eventDispatcher.DispatchAsync(order.DomainEvents, cancellationToken);
+        order.ClearDomainEvents();
+        
+        return result;
     }
 
     public async Task<int> UpdateAsync(OrderEntity order, CancellationToken cancellationToken = default)
