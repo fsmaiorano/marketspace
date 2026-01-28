@@ -15,7 +15,6 @@
       <Content Include="..\..\..\..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
-      <Content Remove="Application\**" />
       <Content Remove="HostedServices\**" />
     </ItemGroup>
 
@@ -25,17 +24,17 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Application\**" />
       <Compile Remove="HostedServices\**" />
+      <Compile Include="Application\DependencyInjection.cs" />
+      <Compile Include="Application\HostedService\IntegrationEventSubscriptionService.cs" />
+      <Compile Include="Application\Subscribers\OnOrderCreatedSubscriber.cs" />
     </ItemGroup>
 
     <ItemGroup>
-      <EmbeddedResource Remove="Application\**" />
       <EmbeddedResource Remove="HostedServices\**" />
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="Application\**" />
       <None Remove="HostedServices\**" />
     </ItemGroup>
 

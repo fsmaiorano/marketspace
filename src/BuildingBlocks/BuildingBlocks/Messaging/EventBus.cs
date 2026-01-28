@@ -26,7 +26,7 @@ public class EventBus : IEventBus, IDisposable
         _serviceProvider = serviceProvider;
         _logger = logger;
 
-        ConnectionFactory factory = new ConnectionFactory
+        ConnectionFactory factory = new()
         {
             Uri = new Uri(rabbitMqConnectionString),
             DispatchConsumersAsync = true
@@ -34,8 +34,6 @@ public class EventBus : IEventBus, IDisposable
 
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
-
-        // Declare exchange
         _channel.ExchangeDeclare(_exchangeName, ExchangeType.Topic, durable: true, autoDelete: false);
 
         _logger.LogInformation("RabbitMQ EventBus initialized with exchange {ExchangeName}", _exchangeName);
