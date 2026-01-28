@@ -22,20 +22,4 @@
       <ProjectReference Include="..\..\..\..\infra\MarketSpace.ServiceDefaults\MarketSpace.ServiceDefaults.csproj" />
       <ProjectReference Include="..\..\..\BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="HostedServices\**" />
-      <Compile Include="Application\DependencyInjection.cs" />
-      <Compile Include="Application\HostedService\IntegrationEventSubscriptionService.cs" />
-      <Compile Include="Application\Subscribers\OnOrderCreatedSubscriber.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <EmbeddedResource Remove="HostedServices\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="HostedServices\**" />
-    </ItemGroup>
-
 </Project>

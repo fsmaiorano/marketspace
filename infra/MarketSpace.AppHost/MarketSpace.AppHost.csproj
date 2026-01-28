@@ -26,6 +26,7 @@
         <ProjectReference Include="..\..\src/Services/Merchant/Merchant.Api/Merchant.Api.csproj"/>
         <ProjectReference Include="..\..\src/Services/User/User.Api/User.Api.csproj"/>
         <ProjectReference Include="..\..\src/Edges/BackendForFrontend.Api/BackendForFrontend.Api.csproj"/>
+        <ProjectReference Include="..\..\src\Services\Payment\Payment.Api\Payment.Api.csproj" />
     </ItemGroup>
 
 </Project>
