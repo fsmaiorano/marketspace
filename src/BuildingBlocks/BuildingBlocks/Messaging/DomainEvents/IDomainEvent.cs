@@ -1,4 +1,3 @@
-
 using BuildingBlocks.Abstractions;
 
 namespace BuildingBlocks.Messaging.DomainEvents;

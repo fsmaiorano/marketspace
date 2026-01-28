@@ -9,8 +9,7 @@ namespace Order.Api.Application.EventHandlers;
 
 public class OnOrderCreatedEventHandler(
     IAppLogger<OnOrderCreatedEventHandler> logger,
-    IEventBus eventBus,
-    IOrderRepository orderRepository) : IDomainEventHandler<OrderCreatedDomainEvent>
+    IEventBus eventBus) : IDomainEventHandler<OrderCreatedDomainEvent>
 {
     public async Task HandleAsync(OrderCreatedDomainEvent @event, CancellationToken cancellationToken = default)
     {

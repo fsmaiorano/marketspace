@@ -205,7 +205,6 @@ public class EventBus : IEventBus, IDisposable
                 continue;
             }
 
-            // Find the HandleAsync method that matches (TEvent, CancellationToken)
             MethodInfo? method = handlerType.GetMethod("HandleAsync", new[] { eventType, typeof(CancellationToken) });
             Task? task = (Task?)method?.Invoke(handler, new object[] { @event, cancellationToken });
             
