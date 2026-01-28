@@ -82,7 +82,7 @@ public class EventBus : IEventBus, IDisposable
         Type handlerType = typeof(THandler);
 
         if (!_handlers.ContainsKey(eventType))
-            _handlers[eventType] = [];
+            _handlers[eventType] = new List<Type>();
 
         if (!_handlers[eventType].Contains(handlerType))
         {
@@ -91,8 +91,8 @@ public class EventBus : IEventBus, IDisposable
         }
 
         // Create dead letter queue and exchange
-        string queueName = $"queue_{eventType.Name}";
-        string deadLetterQueueName = $"queue_{eventType.Name}_dlq";
+        string queueName = $"{eventType.Name}";
+        string deadLetterQueueName = $"{eventType.Name}_dlq";
         string deadLetterExchangeName = $"{_exchangeName}_dlq";
         string routingKey = eventType.Name;
 
@@ -205,8 +205,9 @@ public class EventBus : IEventBus, IDisposable
                 continue;
             }
 
-            MethodInfo? method = handlerType.GetMethod(nameof(IIntegrationEventHandler<TEvent>.HandleAsync));
-            Task? task = (Task?)method?.Invoke(handler, [@event, cancellationToken]);
+            // Find the HandleAsync method that matches (TEvent, CancellationToken)
+            MethodInfo? method = handlerType.GetMethod("HandleAsync", new[] { eventType, typeof(CancellationToken) });
+            Task? task = (Task?)method?.Invoke(handler, new object[] { @event, cancellationToken });
             
             if (task != null)
                 tasks.Add(task);

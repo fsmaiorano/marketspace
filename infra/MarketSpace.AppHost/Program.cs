@@ -116,6 +116,11 @@ IResourceBuilder<ProjectResource> merchantApi = builder
     .WithHttpEndpoint(port: int.Parse(merchantConfig["HttpPort"]!), name: "merchant-http")
     .WithHttpsEndpoint(port: int.Parse(merchantConfig["HttpsPort"]!), name: "merchant-https");
 
+IConfigurationSection paymentConfig = config.GetSection("Aspire:Services:Payment");
+IResourceBuilder<ProjectResource> paymentApi = builder.AddProject<Projects.Payment_Api>(paymentConfig["ProjectName"]!)
+    .WithHttpEndpoint(port: int.Parse(paymentConfig["HttpPort"]!), name: "payment-http")
+    .WithHttpsEndpoint(port: int.Parse(paymentConfig["HttpsPort"]!), name: "payment-https");
+
 IConfigurationSection userConfig = config.GetSection("Aspire:Services:User");
 IResourceBuilder<ProjectResource> userApi = builder.AddProject<Projects.User_Api>(userConfig["ProjectName"]!)
     .WithReference(userDb)
@@ -130,6 +135,7 @@ IResourceBuilder<ProjectResource> _ = builder.AddProject<Projects.BackendForFron
     .WithReference(orderApi)
     .WithReference(merchantApi)
     .WithReference(userApi)
+    .WithReference(paymentApi)
     .WithHttpEndpoint(port: int.Parse(bffConfig["HttpPort"]!), name: "bff-http")
     .WithHttpsEndpoint(port: int.Parse(bffConfig["HttpsPort"]!), name: "bff-https");
 
