@@ -1,5 +1,6 @@
 using BuildingBlocks.Messaging;
 using Payment.Api.Application.HostedService;
+using Payment.Api.Application.Subscribers;
 
 namespace Payment.Api.Application;
 
@@ -18,6 +19,7 @@ public static class DependencyInjection
             return new EventBus(sp, logger, rabbitMqConnectionString);
         });
 
+        services.AddScoped<OnOrderCreatedSubscriber>();
         services.AddHostedService<IntegrationEventSubscriptionService>();
 
         return services;

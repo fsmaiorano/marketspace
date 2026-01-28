@@ -1,8 +1,10 @@
+using BuildingBlocks.Loggers;
 using Payment.Api.Application;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddApplicationServices(builder.Configuration)
+    .AddCustomLoggers();
 builder.Services.AddOpenApi();
 
 WebApplication app = builder.Build();
