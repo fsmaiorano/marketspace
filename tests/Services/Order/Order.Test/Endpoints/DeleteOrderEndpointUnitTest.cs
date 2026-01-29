@@ -11,7 +11,7 @@ using System.Net.Http.Json;
 
 namespace Order.Test.Endpoints;
 
-public class DeleteOrderEndpointUnitTest(TestFixture fixture) : BaseTest(fixture)
+public class DeleteOrderEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fixture)
 {
     private readonly Mock<IDeleteOrderHandler> _mockHandler = new();
 

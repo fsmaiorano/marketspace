@@ -4,9 +4,8 @@ using Catalog.Test.Fixtures;
 
 namespace Catalog.Test.Endpoints;
 
-public class DeleteCatalogEndpointUnitTest(TestFixture fixture) : BaseTest(fixture)
+public class DeleteCatalogEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fixture)
 {
-
     [Fact]
     public async Task Can_Delete_Catalog_Endpoint()
     {
@@ -14,7 +13,7 @@ public class DeleteCatalogEndpointUnitTest(TestFixture fixture) : BaseTest(fixtu
 
         Context.Catalogs.Add(catalog);
         await Context.SaveChangesAsync();
-        
+
         DeleteCatalogCommand command = CatalogBuilder.CreateDeleteCatalogCommandFaker(catalog.Id.Value).Generate();
         HttpResponseMessage response = await DoDelete($"/catalog/{command.Id}");
         Result<DeleteCatalogResult>? result = await response.Content.ReadFromJsonAsync<Result<DeleteCatalogResult>>();

@@ -7,7 +7,7 @@ using User.Test.Fixtures;
 
 namespace User.Test.Endpoints;
 
-public class RevokeEndpointUnitTest(TestFixture fixture) : BaseTest(fixture)
+public class RevokeEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fixture)
 {
     [Fact]
     public async Task Revoke_WithValidRefreshToken_ShouldReturn204()

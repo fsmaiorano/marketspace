@@ -10,7 +10,7 @@ using System.Net.Http.Json;
 
 namespace Merchant.Test.Endpoints;
 
-public class UpdateMerchantEndpointUnitTest(TestFixture fixture) : BaseTest(fixture)
+public class UpdateMerchantEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fixture)
 {
     private readonly Mock<IUpdateMerchantHandler> _mockHandler = new();
 

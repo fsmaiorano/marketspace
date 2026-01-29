@@ -10,7 +10,7 @@ using System.Net.Http.Json;
 
 namespace Catalog.Test.Endpoints;
 
-public class GetCatalogEndpointUnitTest(TestFixture fixture) : BaseTest(fixture)
+public class GetCatalogEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fixture)
 {
     [Fact]
     public async Task Can_Get_Catalog_By_Id_Endpoint()

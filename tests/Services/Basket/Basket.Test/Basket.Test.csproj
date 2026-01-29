@@ -25,6 +25,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\..\..\infra\MarketSpace.ServiceDefaults\MarketSpace.ServiceDefaults.csproj" />
       <ProjectReference Include="..\..\..\..\src\Services\Basket\Basket.Api\Basket.Api.csproj" />
+      <ProjectReference Include="..\..\..\Base\BaseTest\BaseTest.csproj" />
       <ProjectReference Include="..\..\..\Builders\Builder\Builder.csproj" />
     </ItemGroup>
 

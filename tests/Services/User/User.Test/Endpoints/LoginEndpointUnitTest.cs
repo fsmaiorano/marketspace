@@ -7,7 +7,7 @@ using User.Test.Fixtures;
 
 namespace User.Test.Endpoints;
 
-public class LoginEndpointUnitTest(TestFixture fixture) : BaseTest(fixture)
+public class LoginEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fixture)
 {
     [Fact]
     public async Task Login_WithValidCredentials_ShouldReturn200AndTokens()

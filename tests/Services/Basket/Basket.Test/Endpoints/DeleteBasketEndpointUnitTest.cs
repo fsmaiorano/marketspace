@@ -8,13 +8,15 @@ using System.Net.Http.Json;
 
 namespace Basket.Test.Endpoints;
 
-public class DeleteBasketEndpointUnitTest(TestFixture fixture) : BaseTest(fixture)
+public class DeleteBasketEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fixture)
 {
+    private readonly TestFixture _fixture = fixture;
+
     [Fact]
     public async Task Returns_Ok_When_Basket_Is_Deleted_Successfully()
     {
         DeleteBasketCommand command = BasketBuilder.CreateDeleteBasketCommandFaker().Generate();
-        HttpResponseMessage response = await DoDelete($"/basket/{command.Username}");
+        HttpResponseMessage response = await _fixture.DoDelete($"/basket/{command.Username}");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         

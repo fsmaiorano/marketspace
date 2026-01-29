@@ -6,7 +6,7 @@ using User.Test.Fixtures;
 
 namespace User.Test.Services;
 
-public class TokenServiceUnitTest(TestFixture fixture) : BaseTest(fixture)
+public class TokenServiceUnitTest(TestFixture fixture) : Base.BaseTest(fixture)
 {
     [Fact]
     public async Task CreateTokensAsync_ShouldGenerateValidTokens()

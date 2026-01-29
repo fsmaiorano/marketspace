@@ -4,7 +4,7 @@ using Catalog.Test.Fixtures;
 
 namespace Catalog.Test.Endpoints;
 
-public class GetCatalogByIdEndpointUnitTest(TestFixture fixture) : BaseTest(fixture)
+public class GetCatalogByIdEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fixture)
 {
     private readonly TestFixture _fixture = fixture;
 

@@ -6,7 +6,7 @@ using User.Test.Fixtures;
 
 namespace User.Test.Endpoints;
 
-public class MeEndpointUnitTest(TestFixture fixture) : BaseTest(fixture)
+public class MeEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fixture)
 {
     [Fact]
     public async Task Me_WithValidToken_ShouldReturn200AndUserInfo()
