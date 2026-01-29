@@ -24,7 +24,7 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
         Order.Test.Fixtures.TestFixture orderTestFixture = new();
         _orderApiClient = orderTestFixture.CreateClient();
 
-        Basket.Test.Fixtures.TestFixture basketTestFixture = new(_orderApiClient);
+        Basket.Test.Fixtures.TestFixture basketTestFixture = new();
         _basketApiClient = basketTestFixture.CreateClient();
 
         CatalogTestFixture catalogTestFixture = new();
@@ -101,7 +101,7 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
             services.AddDbContext<CatalogDbContext>(options =>
                 options.UseInMemoryDatabase("InMemoryDbForTesting"));
 
-            services.Replace(ServiceDescriptor.Scoped<IMinioBucket, MarketSpace.TestFixtures.Mocks.MockMinioBucket>());
+            services.Replace(ServiceDescriptor.Scoped<IMinioBucket, MockMinioBucket>());
 
             services.AddScoped<Basket.Test.Fixtures.TestFixture>();
             services.AddScoped<Order.Test.Fixtures.TestFixture>();
@@ -134,11 +134,6 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
                     provider.GetRequiredService<IAppLogger<TestOrderService>>();
                 return new TestOrderService(_orderApiClient, logger);
             });
-
-            // Remove real CheckoutHttpRepository and register test implementation that uses the Order test server
-            services.RemoveAll(typeof(Basket.Api.Infrastructure.Http.Repositories.CheckoutHttpRepository));
-            services.RemoveAll<Basket.Api.Domain.Repositories.ICheckoutHttpRepository>();
-            services.AddScoped<Basket.Api.Domain.Repositories.ICheckoutHttpRepository>(_ => new MarketSpace.TestFixtures.Mocks.TestCheckoutHttpRepository(_orderApiClient));
         });
     }
 
