@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Order.Api.Infrastructure.Data;
 using Serilog.Extensions.Hosting;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
 using Minio;
 using CatalogTestFixture = Catalog.Test.Fixtures.TestFixture;
 
@@ -101,7 +102,8 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
             services.AddDbContext<CatalogDbContext>(options =>
                 options.UseInMemoryDatabase("InMemoryDbForTesting"));
 
-            services.Replace(ServiceDescriptor.Scoped<IMinioBucket, MockMinioBucket>());
+            // Garantir que o mock seja registrado (Replace não adiciona se já foi removido)
+            services.AddScoped<IMinioBucket, MockMinioBucket>();
 
             services.AddScoped<Basket.Test.Fixtures.TestFixture>();
             services.AddScoped<Order.Test.Fixtures.TestFixture>();
@@ -133,6 +135,14 @@ public class BackendForFrontendFactory : WebApplicationFactory<BackendForFronten
                 IAppLogger<TestOrderService> logger =
                     provider.GetRequiredService<IAppLogger<TestOrderService>>();
                 return new TestOrderService(_orderApiClient, logger);
+            });
+
+            // Ensure checkout repository uses the in-memory Order API test client instead of calling localhost
+            services.AddScoped<Basket.Api.Domain.Repositories.ICheckoutHttpRepository>(provider =>
+            {
+                var config = provider.GetRequiredService<IConfiguration>();
+                var logger = provider.GetRequiredService<IAppLogger<Basket.Api.Infrastructure.Http.Repositories.CheckoutHttpRepository>>();
+                return new Basket.Api.Infrastructure.Http.Repositories.CheckoutHttpRepository(_orderApiClient, config, logger);
             });
         });
     }
