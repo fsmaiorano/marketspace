@@ -1,8 +1,6 @@
 using BuildingBlocks.Messaging.DomainEvents;
 using Microsoft.EntityFrameworkCore;
 using Order.Api.Domain.Entities;
-using Order.Api.Domain.Enums;
-using Order.Api.Domain.Events;
 using Order.Api.Domain.Repositories;
 using Order.Api.Domain.ValueObjects;
 
@@ -16,12 +14,12 @@ public class OrderRepository(IOrderDbContext dbContext, IDomainEventDispatcher e
         await dbContext.Orders.AddAsync(order, cancellationToken);
 
         int result = await dbContext.SaveChangesAsync(cancellationToken);
-        
-        if(result <= 0) return result;
+
+        if (result <= 0) return result;
 
         await eventDispatcher.DispatchAsync(order.DomainEvents, cancellationToken);
         order.ClearDomainEvents();
-        
+
         return result;
     }
 

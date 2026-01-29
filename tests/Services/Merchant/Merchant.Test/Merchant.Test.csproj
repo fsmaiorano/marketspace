@@ -33,7 +33,6 @@
     <ItemGroup>
       <ProjectReference Include="..\..\..\..\infra\MarketSpace.ServiceDefaults\MarketSpace.ServiceDefaults.csproj" />
       <ProjectReference Include="..\..\..\..\src\Services\Merchant\Merchant.Api\Merchant.Api.csproj" />
-      <ProjectReference Include="..\..\..\Builders\Builder\Builder.csproj" />
-    </ItemGroup>
+      <ProjectReference Include="..\..\..\Builders\Builder\Builder.csproj" />      <ProjectReference Include="..\..\..\TestFixtures\TestFixtures.csproj" />    </ItemGroup>
 
 </Project>

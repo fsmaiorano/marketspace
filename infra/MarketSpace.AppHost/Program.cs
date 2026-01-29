@@ -1,5 +1,3 @@
-using Aspire.Hosting.Azure;
-using Aspire.Hosting.RabbitMQ;
 using Microsoft.Extensions.Configuration;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);

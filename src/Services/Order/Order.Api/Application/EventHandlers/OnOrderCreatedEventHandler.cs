@@ -3,7 +3,6 @@ using BuildingBlocks.Messaging;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using BuildingBlocks.Messaging.IntegrationEvents;
 using Order.Api.Domain.Events;
-using Order.Api.Domain.Repositories;
 
 namespace Order.Api.Application.EventHandlers;
 
@@ -14,7 +13,7 @@ public class OnOrderCreatedEventHandler(
     public async Task HandleAsync(OrderCreatedDomainEvent @event, CancellationToken cancellationToken = default)
     {
         logger.LogInformation(LogTypeEnum.Application, "Order created domain event received.");
-        
+
         OrderCreatedIntegrationEvent integrationEvent = new() { };
         await eventBus.PublishAsync(integrationEvent, cancellationToken);
 

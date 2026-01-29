@@ -1,4 +1,4 @@
-using Catalog.Test.Mocks;
+using MarketSpace.TestFixtures.Mocks;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog.Extensions.Hosting;
@@ -35,7 +35,7 @@ public sealed class TestFixture : WebApplicationFactory<CatalogProgram>, IAsyncL
 
             services.AddScoped<ICatalogDbContext, CatalogDbContext>();
 
-            services.Replace(ServiceDescriptor.Scoped<IMinioBucket, MockMinioBucket>());
+            services.Replace(ServiceDescriptor.Scoped<IMinioBucket, MarketSpace.TestFixtures.Mocks.MockMinioBucket>());
 
             services.RemoveAll<ILoggerFactory>();
             services.RemoveAll(typeof(ILogger<>));
