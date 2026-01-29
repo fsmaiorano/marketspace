@@ -3,7 +3,7 @@ using Order.Test.Fixtures;
 
 namespace Order.Test.Endpoints;
 
-public class CreateOrderEndpointUnitTest(TestFixture fixture) : BaseTest(fixture)
+public class CreateOrderEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fixture)
 {
     private readonly Mock<ICreateOrderHandler> _mockHandler = new();
 

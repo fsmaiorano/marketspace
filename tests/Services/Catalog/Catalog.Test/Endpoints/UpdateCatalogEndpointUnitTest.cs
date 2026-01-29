@@ -5,7 +5,7 @@ using Catalog.Test.Fixtures;
 
 namespace Catalog.Test.Endpoints;
 
-public class UpdateCatalogEndpointUnitTest(TestFixture fixture) : BaseTest(fixture)
+public class UpdateCatalogEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fixture)
 {
     private readonly Mock<IUpdateCatalogHandler> _mockHandler = new();
 
@@ -19,7 +19,6 @@ public class UpdateCatalogEndpointUnitTest(TestFixture fixture) : BaseTest(fixtu
         await Context.SaveChangesAsync();
 
         UpdateCatalogCommand command = new()
-
         {
             Id = catalog.Id.Value,
             Name = "Updated Catalog Name",

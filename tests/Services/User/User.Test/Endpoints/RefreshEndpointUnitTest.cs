@@ -7,7 +7,7 @@ using User.Test.Fixtures;
 
 namespace User.Test.Endpoints;
 
-public class RefreshEndpointUnitTest(TestFixture fixture) : BaseTest(fixture)
+public class RefreshEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fixture)
 {
     [Fact]
     public async Task Refresh_WithValidTokens_ShouldReturn200AndNewTokens()

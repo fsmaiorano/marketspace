@@ -8,7 +8,7 @@ using User.Test.Fixtures;
 
 namespace User.Test.Endpoints;
 
-public class RegisterEndpointUnitTest(TestFixture fixture) : BaseTest(fixture)
+public class RegisterEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fixture)
 {
     [Fact]
     public async Task Register_WithValidData_ShouldReturn200AndTokens()

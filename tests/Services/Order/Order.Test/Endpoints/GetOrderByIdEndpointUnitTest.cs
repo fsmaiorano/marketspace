@@ -12,7 +12,7 @@ using System.Net.Http.Json;
 
 namespace Order.Test.Endpoints;
 
-public class GetOrderByIdEndpointUnitTest(TestFixture fixture) : BaseTest(fixture)
+public class GetOrderByIdEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fixture)
 {
     private readonly Mock<IGetOrderByIdHandler> _mockHandler = new();
 
