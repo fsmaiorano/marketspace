@@ -7,8 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Serilog.Extensions.Hosting;
-using Microsoft.Extensions.Configuration;
-using BuildingBlocks.Messaging;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
@@ -20,20 +18,7 @@ public sealed class TestFixture : WebApplicationFactory<OrderProgram>, IAsyncLif
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        // Try to start RabbitMQ testcontainer and inject its connection string into configuration when available
-        RabbitMqTestcontainerFixture.Start();
-
         builder.UseEnvironment("Testing");
-
-        if (RabbitMqTestcontainerFixture.IsAvailable)
-        {
-            builder.ConfigureAppConfiguration((context, config) =>
-            {
-                // Override the RabbitMq connection string used by the app during tests
-                // Note: AddInMemoryCollection extension method is defined in Microsoft.Extensions.Configuration
-                config.AddInMemoryCollection(new[] { new KeyValuePair<string, string?>("ConnectionStrings:RabbitMq", RabbitMqTestcontainerFixture.GetConnectionString()) });
-            });
-        }
 
         builder.ConfigureServices(services =>
         {
@@ -61,21 +46,14 @@ public sealed class TestFixture : WebApplicationFactory<OrderProgram>, IAsyncLif
             services.RemoveAll(typeof(ILogger<>));
             services.RemoveAll<Serilog.ILogger>();
             services.RemoveAll<DiagnosticContext>();
-
+            
             // Add simple console logging for tests
-            services.AddLogging(loggingBuilder =>
+            services.AddLogging(loggingBuilder => 
             {
                 loggingBuilder.ClearProviders();
                 loggingBuilder.AddConsole();
                 loggingBuilder.SetMinimumLevel(LogLevel.Warning);
             });
-
-            // If RabbitMQ testcontainer is not available (e.g., Docker not running) register a no-op event bus
-            if (!RabbitMqTestcontainerFixture.IsAvailable)
-            {
-                services.RemoveAll<IEventBus>();
-                services.AddSingleton<IEventBus, MarketSpace.TestFixtures.NoopEventBus>();
-            }
         });
 
         builder.UseDefaultServiceProvider((context, options) =>

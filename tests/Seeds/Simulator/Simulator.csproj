@@ -14,7 +14,6 @@
         <PackageReference Include="Testcontainers" Version="4.10.0" />
         <PackageReference Include="Testcontainers.Minio" Version="4.10.0" />
         <PackageReference Include="Testcontainers.PostgreSql" Version="4.10.0" />
-        <ProjectReference Include="..\..\..\TestFixtures\TestFixtures.csproj" />
     </ItemGroup>
 
     <ItemGroup>

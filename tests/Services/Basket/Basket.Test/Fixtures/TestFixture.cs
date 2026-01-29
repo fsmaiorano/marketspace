@@ -15,13 +15,7 @@ namespace Basket.Test.Fixtures;
 
 public sealed class TestFixture : WebApplicationFactory<BasketProgram>, IAsyncLifetime
 {
-    private readonly HttpClient? _orderApiClient;
     private HttpClient? _httpClient;
-
-    public TestFixture(HttpClient? orderApiClient = null)
-    {
-        _orderApiClient = orderApiClient;
-    }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -50,23 +44,15 @@ public sealed class TestFixture : WebApplicationFactory<BasketProgram>, IAsyncLi
             services.RemoveAll(typeof(ILogger<>));
             services.RemoveAll<Serilog.ILogger>();
             services.RemoveAll<DiagnosticContext>();
-
-            services.AddLogging(loggingBuilder =>
+            
+            services.AddLogging(loggingBuilder => 
             {
                 loggingBuilder.ClearProviders();
                 loggingBuilder.AddConsole();
                 loggingBuilder.SetMinimumLevel(LogLevel.Warning);
             });
-
-            // If an Order Api client was provided to the fixture, replace the ICheckoutHttpRepository
-            // with the shared test implementation (points to the Order test server) instead of the external URL.
-            if (_orderApiClient != null)
-            {
-                services.RemoveAll<Basket.Api.Domain.Repositories.ICheckoutHttpRepository>();
-                services.AddScoped<Basket.Api.Domain.Repositories.ICheckoutHttpRepository>(_ => new MarketSpace.TestFixtures.Mocks.TestCheckoutHttpRepository(_orderApiClient));
-            }
         });
-
+        
         builder.UseDefaultServiceProvider((context, options) =>
         {
             options.ValidateScopes = false;

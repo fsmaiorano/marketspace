@@ -42,8 +42,7 @@ public class CheckoutBasketHandler(
             {
                 CatalogId = Guid.Parse(item.ProductId),
                 Quantity = item.Quantity,
-                // Ensure price conforms to expected format (max 2 decimal places)
-                Price = decimal.Round(item.Price, 2)
+                Price = item.Price
             }).ToList();
 
             CreateOrderRequest orderRequest = new()

@@ -25,6 +25,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\..\..\infra\MarketSpace.ServiceDefaults\MarketSpace.ServiceDefaults.csproj" />
       <ProjectReference Include="..\..\..\..\src\Services\User\User.Api\User.Api.csproj" />
-      <ProjectReference Include="..\..\..\Builders\Builder\Builder.csproj" />      <ProjectReference Include="..\..\..\TestFixtures\TestFixtures.csproj" />    </ItemGroup>
+      <ProjectReference Include="..\..\..\Builders\Builder\Builder.csproj" />
+    </ItemGroup>
 
 </Project>
