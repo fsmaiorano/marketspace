@@ -48,6 +48,7 @@ public class BaseTestFixture<T> : WebApplicationFactory<T>, IAsyncLifetime where
                              d.ServiceType == typeof(CatalogDbContext) ||
                              d.ServiceType == typeof(ICatalogDbContext) ||
                              d.ServiceType == typeof(IMinioBucket) ||
+                             d.ServiceType == typeof(BuildingBlocks.Messaging.IEventBus) ||
                              d.ServiceType == typeof(OrderDbContext) ||
                              d.ServiceType == typeof(IOrderDbContext) ||
                              d.ServiceType == typeof(MerchantDbContext) ||
@@ -61,20 +62,23 @@ public class BaseTestFixture<T> : WebApplicationFactory<T>, IAsyncLifetime where
             foreach (ServiceDescriptor descriptor in descriptorsToRemove)
                 services.Remove(descriptor);
 
+            // Use unique InMemory database names per factory to avoid cross-test contamination
+            string suffix = $"{typeof(T).Name}-{Guid.NewGuid():N}";
+
             services.AddDbContext<BasketDbContext>(options =>
-                options.UseInMemoryDatabase("BasketInMemoryDbForTesting"));
+                options.UseInMemoryDatabase($"BasketDb-{suffix}"));
 
             services.AddDbContext<CatalogDbContext>(options =>
-                options.UseInMemoryDatabase("CatalogInMemoryDbForTesting"));
+                options.UseInMemoryDatabase($"CatalogDb-{suffix}"));
 
             services.AddDbContext<MerchantDbContext>(options =>
-                options.UseInMemoryDatabase("MerchantInMemoryDbForTesting"));
+                options.UseInMemoryDatabase($"MerchantDb-{suffix}"));
 
             services.AddDbContext<OrderDbContext>(options =>
-                options.UseInMemoryDatabase("OrderInMemoryDbForTesting"));
+                options.UseInMemoryDatabase($"OrderDb-{suffix}"));
 
             services.AddDbContext<UserDbContext>(options =>
-                options.UseInMemoryDatabase("UserInMemoryDbForTesting"));
+                options.UseInMemoryDatabase($"UserDb-{suffix}"));
 
             services.AddScoped<UserDbContext>();
             services.AddScoped<IOrderDbContext, OrderDbContext>();
@@ -93,6 +97,12 @@ public class BaseTestFixture<T> : WebApplicationFactory<T>, IAsyncLifetime where
                 loggingBuilder.AddConsole();
                 loggingBuilder.SetMinimumLevel(LogLevel.Warning);
             });
+
+            // Registrar um MinioBucket de teste padrão para evitar falhas de resolução em testes
+            services.AddScoped<BuildingBlocks.Storage.Minio.IMinioBucket, BaseTest.Mocks.TestMinioBucket>();
+
+            // Registrar event bus de teste para evitar conexões a RabbitMQ durante os testes
+            services.AddSingleton<BuildingBlocks.Messaging.IEventBus, BaseTest.Mocks.TestEventBus>();
         });
 
         builder.UseDefaultServiceProvider((context, options) =>
@@ -169,11 +179,13 @@ public class BaseTestFixture<T> : WebApplicationFactory<T>, IAsyncLifetime where
 
     public Task InitializeAsync()
     {
-        throw new NotImplementedException();
+        // Nenhuma inicialização assíncrona necessária para InMemory
+        return Task.CompletedTask;
     }
 
-    public Task DisposeAsync()
+    public new Task DisposeAsync()
     {
-        throw new NotImplementedException();
+        // Nenhuma limpeza assíncrona necessária para InMemory
+        return Task.CompletedTask;
     }
 }
