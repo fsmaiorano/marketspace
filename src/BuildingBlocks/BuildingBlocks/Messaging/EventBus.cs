@@ -32,13 +32,31 @@ public class EventBus : IEventBus, IDisposable
             DispatchConsumersAsync = true
         };
 
-        _connection = factory.CreateConnection();
-        _channel = _connection.CreateModel();
-        _channel.ExchangeDeclare(_exchangeName, ExchangeType.Topic, durable: true, autoDelete: false);
+         int attempt = 0;
+        TimeSpan delay = TimeSpan.FromSeconds(2);
 
-        _logger.LogInformation("RabbitMQ EventBus initialized with exchange {ExchangeName}", _exchangeName);
+        while (true)
+        {
+            try
+            {
+                _connection = factory.CreateConnection();
+                _channel = _connection.CreateModel();
+                _channel.ExchangeDeclare(_exchangeName, ExchangeType.Topic, durable: true, autoDelete: false);
+
+                _logger.LogInformation("RabbitMQ EventBus initialized with exchange {ExchangeName}", _exchangeName);
+                break;
+            }
+            catch (Exception ex)
+            {
+                attempt++;
+                _logger.LogWarning(ex, "Unable to connect to RabbitMQ (attempt {Attempt}). Retrying in {Delay}s...", attempt, delay.TotalSeconds);
+
+                Thread.Sleep(delay);
+                delay = TimeSpan.FromSeconds(Math.Min(delay.TotalSeconds * 2, 30));
+            }
+        }
     }
-
+    
     public async Task PublishAsync<TEvent>(TEvent @event, CancellationToken cancellationToken = default)
         where TEvent : class, IIntegrationEvent
     {
