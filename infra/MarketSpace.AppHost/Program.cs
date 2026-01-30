@@ -63,14 +63,6 @@ IResourceBuilder<ContainerResource> rabbitmq = builder.AddContainer(rabbitMqConf
     .WithEndpoint(port: int.Parse(rabbitMqConfig["Port"]!), targetPort: 5672, scheme: "amqp", name: "rabbitmq")
     .WithHttpEndpoint(port: int.Parse(rabbitMqConfig["Ui"]!), targetPort: 15672, name: "rabbitmq-ui");
 
-// IConfigurationSection serviceBusConfig = config.GetSection("Aspire:MessageBrokers:AzureServiceBus");
-// IResourceBuilder<AzureServiceBusResource> serviceBus = builder
-//     .AddAzureServiceBus(serviceBusConfig["Name"]!)
-//     .RunAsEmulator();
-//
-// IResourceBuilder<AzureServiceBusTopicResource> paymentsTopic = serviceBus.AddServiceBusTopic("marketspace-payments");
-// paymentsTopic.AddServiceBusSubscription("marketspace-payments-subscription");
-
 // Storage - Minio
 IConfigurationSection minioConfig = config.GetSection("Aspire:Storage:Minio");
 IResourceBuilder<ContainerResource> minio = builder
@@ -99,12 +91,14 @@ IResourceBuilder<ProjectResource> catalogApi = builder.AddProject<Projects.Catal
 IConfigurationSection basketConfig = config.GetSection("Aspire:Services:Basket");
 IResourceBuilder<ProjectResource> basketApi = builder.AddProject<Projects.Basket_Api>(basketConfig["ProjectName"]!)
     .WithReference(basketDb)
+    .WaitFor(rabbitmq)
     .WithHttpEndpoint(port: int.Parse(basketConfig["HttpPort"]!), name: "basket-http")
     .WithHttpsEndpoint(port: int.Parse(basketConfig["HttpsPort"]!), name: "basket-https");
 
 IConfigurationSection orderConfig = config.GetSection("Aspire:Services:Order");
 IResourceBuilder<ProjectResource> orderApi = builder.AddProject<Projects.Order_Api>(orderConfig["ProjectName"]!)
     .WithReference(orderDb)
+    .WaitFor(rabbitmq)
     .WithEnvironment("ConnectionStrings__RabbitMQ", $"amqp://guest:guest@localhost:{rabbitMqConfig["Port"]!}/")
     .WithHttpEndpoint(port: int.Parse(orderConfig["HttpPort"]!), name: "order-http")
     .WithHttpsEndpoint(port: int.Parse(orderConfig["HttpsPort"]!), name: "order-https");
@@ -113,17 +107,20 @@ IConfigurationSection merchantConfig = config.GetSection("Aspire:Services:Mercha
 IResourceBuilder<ProjectResource> merchantApi = builder
     .AddProject<Projects.Merchant_Api>(merchantConfig["ProjectName"]!)
     .WithReference(merchantDb)
+    .WaitFor(rabbitmq)
     .WithHttpEndpoint(port: int.Parse(merchantConfig["HttpPort"]!), name: "merchant-http")
     .WithHttpsEndpoint(port: int.Parse(merchantConfig["HttpsPort"]!), name: "merchant-https");
 
 IConfigurationSection paymentConfig = config.GetSection("Aspire:Services:Payment");
 IResourceBuilder<ProjectResource> paymentApi = builder.AddProject<Projects.Payment_Api>(paymentConfig["ProjectName"]!)
+    .WaitFor(rabbitmq)
     .WithHttpEndpoint(port: int.Parse(paymentConfig["HttpPort"]!), name: "payment-http")
     .WithHttpsEndpoint(port: int.Parse(paymentConfig["HttpsPort"]!), name: "payment-https");
 
 IConfigurationSection userConfig = config.GetSection("Aspire:Services:User");
 IResourceBuilder<ProjectResource> userApi = builder.AddProject<Projects.User_Api>(userConfig["ProjectName"]!)
     .WithReference(userDb)
+    .WaitFor(rabbitmq)
     .WithHttpEndpoint(port: int.Parse(userConfig["HttpPort"]!), name: "user-http")
     .WithHttpsEndpoint(port: int.Parse(userConfig["HttpsPort"]!), name: "user-https");
 
