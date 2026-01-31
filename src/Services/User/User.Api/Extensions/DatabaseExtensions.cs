@@ -52,16 +52,29 @@ public static class DatabaseExtensions
         // Initialize roles
         RoleManager<IdentityRole> roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-        if (!await roleManager.RoleExistsAsync("Admin"))
+        // Ensure roles exist and remove duplicates that may have been created by multiple test factories
+        foreach (string roleName in new[] { "Admin", "Member" })
         {
-            Console.WriteLine("Creating Admin role...");
-            await roleManager.CreateAsync(new IdentityRole("Admin"));
-        }
+            string normalized = roleName.ToUpperInvariant();
+            List<IdentityRole> roles = await roleManager.Roles.Where(r => r.NormalizedName == normalized).ToListAsync();
 
-        if (!await roleManager.RoleExistsAsync("Member"))
-        {
-            Console.WriteLine("Creating Member role...");
-            await roleManager.CreateAsync(new IdentityRole("Member"));
+            if (roles.Count == 0)
+            {
+                Console.WriteLine($"Creating {roleName} role...");
+                await roleManager.CreateAsync(new IdentityRole(roleName));
+                continue;
+            }
+
+            // If more than one role exists with the same normalized name, keep the first and delete the others.
+            if (roles.Count > 1)
+            {
+                Console.WriteLine($"Found {roles.Count} roles named '{roleName}' in DB; removing duplicates...");
+                IdentityRole keep = roles.First();
+                foreach (IdentityRole duplicate in roles.Skip(1))
+                {
+                    await roleManager.DeleteAsync(duplicate);
+                }
+            }
         }
 
         Console.WriteLine("Role initialization completed successfully.");
@@ -73,7 +86,12 @@ public static class DatabaseExtensions
         const string adminEmail = "admin@marketspace.com";
         const string adminPassword = "Password123!";
 
-        ApplicationUser? adminUser = await userManager.FindByEmailAsync(adminEmail);
+        // Use a tolerant query against the Users DbSet to avoid SingleOrDefault exceptions
+        // when the InMemory provider contains duplicated entries (some test setups may create
+        // multiple WebApplicationFactory instances that share the same named InMemory database).
+        string normalizedAdminEmail = userManager.NormalizeEmail(adminEmail);
+        ApplicationUser? adminUser = await userManager.Users
+            .FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedAdminEmail);
         if (adminUser == null)
         {
             Console.WriteLine("Creating admin user...");

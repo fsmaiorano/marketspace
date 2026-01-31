@@ -1,5 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
 using BuildingBlocks.Messaging;
 using BuildingBlocks.Messaging.IntegrationEvents.Interfaces;
 

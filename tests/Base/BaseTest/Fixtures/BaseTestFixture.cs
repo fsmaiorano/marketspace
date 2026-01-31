@@ -23,6 +23,11 @@ public class BaseTestFixture<T> : WebApplicationFactory<T>, IAsyncLifetime where
 {
     private HttpClient? _httpClient;
     public readonly Faker Faker = new();
+    public BasketDbContext BasketDbContext;
+    public CatalogDbContext CatalogDbContext;
+    public MerchantDbContext MerchantDbContext;
+    public OrderDbContext OrderDbContext;
+    public UserDbContext UserDbContext;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -85,6 +90,12 @@ public class BaseTestFixture<T> : WebApplicationFactory<T>, IAsyncLifetime where
             services.AddScoped<IMerchantDbContext, MerchantDbContext>();
             services.AddScoped<ICatalogDbContext, CatalogDbContext>();
             services.AddScoped<IBasketDbContext, BasketDbContext>();
+            
+            UserDbContext = services.BuildServiceProvider().GetRequiredService<UserDbContext>();
+            OrderDbContext = services.BuildServiceProvider().GetRequiredService<OrderDbContext>();
+            MerchantDbContext = services.BuildServiceProvider().GetRequiredService<MerchantDbContext>();    
+            CatalogDbContext = services.BuildServiceProvider().GetRequiredService<CatalogDbContext>();
+            BasketDbContext = services.BuildServiceProvider().GetRequiredService<BasketDbContext>();
 
             services.RemoveAll<ILoggerFactory>();
             services.RemoveAll(typeof(ILogger<>));
