@@ -19,14 +19,19 @@ public static class DependencyInjection
         services.Configure<StorageSettings>(
             configuration.GetSection("Storage:Minio"));
 
-        IMinioClient? minio = new MinioClient()
-            .WithEndpoint(configuration.GetSection("Storage:Minio:Endpoint").Value)
-            .WithCredentials(configuration.GetSection("Storage:Minio:AccessKey").Value,
-                configuration.GetSection("Storage:Minio:SecretKey").Value)
-            .Build();
+        // Only register production MinIO services if a test or other caller hasn't already
+        // provided an implementation (tests typically register a mock).
+        if (!services.Any(s => s.ServiceType == typeof(IMinioBucket)))
+        {
+            IMinioClient? minio = new MinioClient()
+                .WithEndpoint(configuration.GetSection("Storage:Minio:Endpoint").Value)
+                .WithCredentials(configuration.GetSection("Storage:Minio:AccessKey").Value,
+                    configuration.GetSection("Storage:Minio:SecretKey").Value)
+                .Build();
 
-        services.AddSingleton<IMinioClient>(_ => minio);
-        services.AddScoped<IMinioBucket, MinioBucket>();
+            services.AddSingleton<IMinioClient>(_ => minio);
+            services.AddScoped<IMinioBucket, MinioBucket>();
+        }
 
         services.AddScoped<ICatalogRepository, CatalogRepository>();
         
