@@ -1,6 +1,7 @@
 using Catalog.Api.Domain.Entities;
 using Catalog.Api.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Catalog.Api.Infrastructure.Data.Configurations;
@@ -38,6 +39,12 @@ public class CatalogConfiguration : IEntityTypeConfiguration<CatalogEntity>
             .HasConversion(
                 categories => string.Join(',', categories),
                 dbCategories => dbCategories.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+            .Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                (c1, c2) => c1!.SequenceEqual(c2!),
+                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c.ToList()));
+        
+        builder.Property(c => c.Categories)
             .HasMaxLength(500);
 
         builder.Property(m => m.MerchantId)
