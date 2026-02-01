@@ -35,6 +35,7 @@
     <ItemGroup>
       <Folder Include="Application/EventHandlers/" />
       <Folder Include="Domain/Events/" />
+      <Folder Include="Infrastructure\Data\Migrations\" />
     </ItemGroup>
 
 </Project>
