@@ -1,4 +1,5 @@
 using BuildingBlocks.Messaging.DomainEvents;
+using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Order.Api.Infrastructure.Data;

@@ -1,5 +1,6 @@
 using Basket.Api.Infrastructure.Data;
 using Bogus;
+using BuildingBlocks.Messaging.Interfaces;
 using BuildingBlocks.Storage.Minio;
 using Catalog.Api.Infrastructure.Data;
 using Merchant.Api.Infrastructure.Data;
@@ -53,7 +54,7 @@ public class BaseTestFixture<T> : WebApplicationFactory<T>, IAsyncLifetime where
                              d.ServiceType == typeof(CatalogDbContext) ||
                              d.ServiceType == typeof(ICatalogDbContext) ||
                              d.ServiceType == typeof(IMinioBucket) ||
-                             d.ServiceType == typeof(BuildingBlocks.Messaging.IEventBus) ||
+                             d.ServiceType == typeof(IEventBus) ||
                              d.ServiceType == typeof(OrderDbContext) ||
                              d.ServiceType == typeof(IOrderDbContext) ||
                              d.ServiceType == typeof(MerchantDbContext) ||
@@ -113,7 +114,7 @@ public class BaseTestFixture<T> : WebApplicationFactory<T>, IAsyncLifetime where
             services.AddScoped<BuildingBlocks.Storage.Minio.IMinioBucket, BaseTest.Mocks.TestMinioBucket>();
 
             // Registrar event bus de teste para evitar conexões a RabbitMQ durante os testes
-            services.AddSingleton<BuildingBlocks.Messaging.IEventBus, BaseTest.Mocks.TestEventBus>();
+            services.AddSingleton<IEventBus, BaseTest.Mocks.TestEventBus>();
         });
 
         builder.UseDefaultServiceProvider((context, options) =>

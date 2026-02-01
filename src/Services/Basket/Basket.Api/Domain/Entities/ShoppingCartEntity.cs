@@ -1,11 +1,12 @@
+using Basket.Api.Domain.Events;
+using BuildingBlocks.Abstractions;
 using System.ComponentModel.DataAnnotations;
 
 namespace Basket.Api.Domain.Entities;
 
-public class ShoppingCartEntity
+public class ShoppingCartEntity : Aggregate<string>
 {
-    [Key]
-    public string Username { get; set; } = null!;
+    [Key] public string Username { get; set; } = null!;
 
     public List<ShoppingCartItemEntity> Items { get; set; } = new();
 
@@ -19,10 +20,17 @@ public class ShoppingCartEntity
         if (items == null || !items.Any())
             throw new ArgumentException("Items cannot be null or empty.", nameof(items));
 
-        return new ShoppingCartEntity
-        {
-            Username = username,
-            Items = items
-        };
+        return new ShoppingCartEntity { Username = username, Items = items };
+    }
+    
+    public static ShoppingCartEntity Update(ShoppingCartEntity cart, List<ShoppingCartItemEntity> items)
+    {
+        cart.Items = items;
+        return cart;
+    }
+
+    public void Checkout(ShoppingCartEntity cart)
+    {
+        cart.AddDomainEvent(new BasketCheckoutDomainEvent(cart));
     }
 }

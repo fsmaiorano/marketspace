@@ -1,5 +1,6 @@
 using BuildingBlocks.Abstractions;
 using BuildingBlocks.Messaging.DomainEvents;
+using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using Order.Api.Domain.Entities;
 
 namespace Order.Api.Domain.Events;

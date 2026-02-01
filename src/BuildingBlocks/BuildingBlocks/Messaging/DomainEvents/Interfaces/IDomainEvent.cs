@@ -1,6 +1,6 @@
 using BuildingBlocks.Abstractions;
 
-namespace BuildingBlocks.Messaging.DomainEvents;
+namespace BuildingBlocks.Messaging.DomainEvents.Interfaces;
 
 public interface IDomainEvent
 {
