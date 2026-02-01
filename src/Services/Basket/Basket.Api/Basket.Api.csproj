@@ -32,4 +32,9 @@
       <ProjectReference Include="..\..\..\BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Application/EventHandlers/" />
+      <Folder Include="Domain/Events/" />
+    </ItemGroup>
+
 </Project>

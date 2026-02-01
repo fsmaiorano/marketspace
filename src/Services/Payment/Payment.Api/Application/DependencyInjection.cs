@@ -1,4 +1,5 @@
 using BuildingBlocks.Messaging;
+using BuildingBlocks.Messaging.Interfaces;
 using Payment.Api.Application.HostedService;
 using Payment.Api.Application.Subscribers;
 

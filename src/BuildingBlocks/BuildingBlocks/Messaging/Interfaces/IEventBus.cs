@@ -1,6 +1,6 @@
 using BuildingBlocks.Messaging.IntegrationEvents.Interfaces;
 
-namespace BuildingBlocks.Messaging;
+namespace BuildingBlocks.Messaging.Interfaces;
 
 /// <summary>
 /// Interface for publishing and subscribing to integration events across services

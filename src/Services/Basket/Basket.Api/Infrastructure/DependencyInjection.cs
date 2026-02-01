@@ -2,6 +2,8 @@ using Basket.Api.Domain.Repositories;
 using Basket.Api.Infrastructure.Data;
 using Basket.Api.Infrastructure.Data.Repositories;
 using Basket.Api.Infrastructure.Http.Repositories;
+using BuildingBlocks.Messaging.DomainEvents;
+using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
@@ -32,6 +34,7 @@ public static class DependencyInjection
         services.AddScoped<IBasketDbContext>(provider => provider.GetRequiredService<BasketDbContext>());
 
         services.AddHttpContextAccessor();
+        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddScoped<IBasketDataRepository, BasketDataRepository>();
         services.AddScoped<ICheckoutHttpRepository, CheckoutHttpRepository>();
 

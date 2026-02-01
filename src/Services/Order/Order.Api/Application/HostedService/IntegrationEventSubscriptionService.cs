@@ -1,9 +1,8 @@
-using BuildingBlocks.Messaging;
 using BuildingBlocks.Messaging.IntegrationEvents;
 using BuildingBlocks.Messaging.Interfaces;
-using Payment.Api.Application.Subscribers;
+using Order.Api.Application.Subscribers;
 
-namespace Payment.Api.Application.HostedService;
+namespace Order.Api.Application.HostedService;
 
 /// <summary>
 /// Hosted service that subscribes to integration events on application startup
@@ -13,7 +12,7 @@ public class IntegrationEventSubscriptionService(IEventBus eventBus) : IHostedSe
     public Task StartAsync(CancellationToken cancellationToken)
     {
         // Subscribe to integration events
-        eventBus.Subscribe<OrderCreatedIntegrationEvent, OnOrderCreatedSubscriber>();
+        eventBus.Subscribe<BasketCheckoutIntegrationEvent, OnBasketCheckoutSubscriber>();
         return Task.CompletedTask;
     }
 

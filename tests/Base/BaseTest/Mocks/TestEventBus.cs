@@ -1,5 +1,6 @@
 using BuildingBlocks.Messaging;
 using BuildingBlocks.Messaging.IntegrationEvents.Interfaces;
+using BuildingBlocks.Messaging.Interfaces;
 
 namespace BaseTest.Mocks;
 

@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using BuildingBlocks.Messaging.IntegrationEvents.Interfaces;
+using BuildingBlocks.Messaging.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;

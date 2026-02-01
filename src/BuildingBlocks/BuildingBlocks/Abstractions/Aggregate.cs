@@ -1,4 +1,5 @@
 using BuildingBlocks.Messaging.DomainEvents;
+using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 
 namespace BuildingBlocks.Abstractions;
 
