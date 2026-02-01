@@ -195,8 +195,7 @@ else
                     Expiration = faker.Date.Future().ToString("MM/yy"),
                     Cvv = faker.Random.Number(100, 999).ToString(),
                     PaymentMethod = 1,
-                    RequestId = Guid.NewGuid().ToString(),
-                    IdempotencyKey = Guid.NewGuid().ToString()
+                    RequestId = Guid.NewGuid().ToString()
                 };
 
                 Console.WriteLine($"   Posting checkout request to: {httpClient.BaseAddress}/basket/checkout");

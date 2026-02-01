@@ -13,4 +13,5 @@ public class CreateOrderCommand
     public OrderStatusEnum Status { get; set; } = OrderStatusEnum.Pending;
     public List<OrderItemDto> Items { get; set; } = [];
     public decimal TotalAmount { get; set; } = 0.0m;
+    public string? CorrelationId { get; set; }
 }

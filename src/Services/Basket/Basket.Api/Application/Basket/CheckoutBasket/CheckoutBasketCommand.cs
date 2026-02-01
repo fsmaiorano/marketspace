@@ -23,5 +23,4 @@ public class CheckoutBasketCommand
     public string Cvv { get; set; } = null!;
     public int PaymentMethod { get; set; } = 0;
     public string? RequestId { get; set; }
-    public string? IdempotencyKey { get; set; }
 }

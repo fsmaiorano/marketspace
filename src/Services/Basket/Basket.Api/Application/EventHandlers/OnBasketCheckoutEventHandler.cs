@@ -12,12 +12,11 @@ public class OnBasketCheckoutEventHandler(IAppLogger<OnBasketCheckoutEventHandle
     public async Task HandleAsync(BasketCheckoutDomainEvent @event, CancellationToken cancellationToken = default)
     {
         logger.LogInformation(LogTypeEnum.Application, 
-            "Basket checkout domain event received for user: {UserName}, IdempotencyKey: {IdempotencyKey}",
-            @event.CheckoutData.UserName, @event.CheckoutData.IdempotencyKey);
+            "Basket checkout domain event received for user: {UserName}, CorrelationId: {CorrelationId}",
+            @event.CheckoutData.UserName, @event.CheckoutData.CorrelationId);
 
         BasketCheckoutIntegrationEvent integrationEvent = new()
         {
-            IdempotencyKey = @event.CheckoutData.IdempotencyKey,
             CorrelationId = @event.CheckoutData.CorrelationId,
             CustomerId = @event.CheckoutData.CustomerId,
             UserName = @event.CheckoutData.UserName,
@@ -61,7 +60,7 @@ public class OnBasketCheckoutEventHandler(IAppLogger<OnBasketCheckoutEventHandle
         await eventBus.PublishAsync(integrationEvent, cancellationToken);
 
         logger.LogInformation(LogTypeEnum.Application, 
-            "Basket checkout integration event published for customer: {CustomerId}, TotalPrice: {TotalPrice}, ItemCount: {ItemCount}",
-            @event.CheckoutData.CustomerId, @event.ShoppingCart.TotalPrice, @event.ShoppingCart.Items.Count);
+            "Basket checkout integration event published for customer: {CustomerId}, TotalPrice: {TotalPrice}, ItemCount: {ItemCount}, CorrelationId: {CorrelationId}",
+            @event.CheckoutData.CustomerId, @event.ShoppingCart.TotalPrice, @event.ShoppingCart.Items.Count, @event.CheckoutData.CorrelationId);
     }
 }
