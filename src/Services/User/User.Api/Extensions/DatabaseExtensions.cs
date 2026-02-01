@@ -7,44 +7,65 @@ namespace User.Api.Extensions;
 
 public static class DatabaseExtensions
 {
+    private static readonly SemaphoreSlim _migrationLock = new(1, 1);
+    
     public static async Task InitialiseDatabaseAsync(this WebApplication app)
     {
         using IServiceScope scope = app.Services.CreateScope();
         UserDbContext context = scope.ServiceProvider.GetRequiredService<UserDbContext>();
 
+        // Use semaphore to prevent multiple instances from migrating simultaneously
+        await _migrationLock.WaitAsync();
         try
         {
-            bool created = await context.Database.EnsureCreatedAsync();
-
-            if (!created)
+            // Check if database exists and if migrations are needed
+            if (context.Database.IsRelational())
             {
-                try
+                var pendingMigrations = (await context.Database.GetPendingMigrationsAsync()).ToList();
+                
+                if (pendingMigrations.Any())
                 {
-                    if (context.Database.IsRelational())
+                    Console.WriteLine($"User: Applying {pendingMigrations.Count()} pending migration(s)...");
+                    
+                    // Apply migrations with retry logic
+                    int retries = 3;
+                    while (retries > 0)
                     {
-                        await context.Database.MigrateAsync();
-                        Console.WriteLine("Database migration completed successfully.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Using non-relational database provider - skipping migrations.");
+                        try
+                        {
+                            await context.Database.MigrateAsync();
+                            Console.WriteLine("User database migration completed successfully.");
+                            break;
+                        }
+                        catch (Exception ex) when (retries > 1)
+                        {
+                            retries--;
+                            Console.WriteLine($"User migration attempt failed, retrying... ({retries} attempts left). Error: {ex.Message}");
+                            await Task.Delay(TimeSpan.FromSeconds(2));
+                        }
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    Console.WriteLine($"Migration failed, but continuing: {ex.Message}");
-                    Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                    Console.WriteLine("User database is up to date, no migrations needed.");
                 }
             }
             else
             {
-                Console.WriteLine("Database was created successfully.");
+                // For non-relational databases, ensure it's created
+                await context.Database.EnsureCreatedAsync();
+                Console.WriteLine("User non-relational database ensured.");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Database initialization failed: {ex.Message}");
+            Console.WriteLine($"User database initialization failed: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
             Console.WriteLine("Application will continue without database initialization.");
+        }
+        finally
+        {
+            _migrationLock.Release();
         }
 
         Console.WriteLine("Database initialization completed successfully.");
@@ -69,7 +90,6 @@ public static class DatabaseExtensions
             if (roles.Count > 1)
             {
                 Console.WriteLine($"Found {roles.Count} roles named '{roleName}' in DB; removing duplicates...");
-                IdentityRole keep = roles.First();
                 foreach (IdentityRole duplicate in roles.Skip(1))
                 {
                     await roleManager.DeleteAsync(duplicate);
