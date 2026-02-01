@@ -2,11 +2,13 @@ using System.Text;
 using System.Text.Json;
 using BuildingBlocks.Messaging.IntegrationEvents.Interfaces;
 using BuildingBlocks.Messaging.Interfaces;
+using BuildingBlocks.Services.Correlation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Reflection;
+using Serilog.Context;
 
 namespace BuildingBlocks.Messaging;
 
@@ -79,6 +81,22 @@ public class EventBus : IEventBus, IDisposable
         properties.DeliveryMode = 2; // Persistent
         properties.MessageId = @event.EventId.ToString();
         properties.Timestamp = new AmqpTimestamp(new DateTimeOffset(@event.OccurredAt).ToUnixTimeSeconds());
+        properties.Headers = new Dictionary<string, object>();
+
+        // Propagate CorrelationId via headers for distributed tracing
+        using (IServiceScope scope = _serviceProvider.CreateScope())
+        {
+            ICorrelationIdService? correlationIdService = scope.ServiceProvider.GetService<ICorrelationIdService>();
+            if (correlationIdService != null)
+            {
+                string correlationId = correlationIdService.GetCorrelationId();
+                if (!string.IsNullOrWhiteSpace(correlationId))
+                {
+                    properties.Headers["X-Correlation-ID"] = correlationId;
+                    _logger.LogDebug("Publishing event with CorrelationId: {CorrelationId}", correlationId);
+                }
+            }
+        }
 
         _channel.BasicPublish(
             exchange: _exchangeName,
@@ -162,7 +180,20 @@ public class EventBus : IEventBus, IDisposable
                 byte[] body = ea.Body.ToArray();
                 string message = Encoding.UTF8.GetString(body);
 
-                _logger.LogDebug("Received event {EventType} from RabbitMQ", eventType.Name);
+                // Extract CorrelationId from message headers
+                string? correlationId = null;
+                if (ea.BasicProperties?.Headers?.TryGetValue("X-Correlation-ID", out object? correlationIdObj) == true)
+                {
+                    correlationId = correlationIdObj switch
+                    {
+                        byte[] bytes => Encoding.UTF8.GetString(bytes),
+                        string str => str,
+                        _ => correlationIdObj?.ToString()
+                    };
+                }
+
+                _logger.LogDebug("Received event {EventType} from RabbitMQ with CorrelationId: {CorrelationId}", 
+                    eventType.Name, correlationId ?? "N/A");
 
                 TEvent? @event = JsonSerializer.Deserialize<TEvent>(message, new JsonSerializerOptions
                 {
@@ -171,7 +202,22 @@ public class EventBus : IEventBus, IDisposable
 
                 if (@event != null)
                 {
-                    await ProcessEventAsync(@event, eventType, CancellationToken.None);
+                    // Set CorrelationId in scope before processing
+                    using (IServiceScope scope = _serviceProvider.CreateScope())
+                    {
+                        if (!string.IsNullOrWhiteSpace(correlationId))
+                        {
+                            ICorrelationIdService? correlationIdService = 
+                                scope.ServiceProvider.GetService<ICorrelationIdService>();
+                            correlationIdService?.SetCorrelationId(correlationId);
+                        }
+
+                        // Add to Serilog context for structured logging
+                        using (LogContext.PushProperty("CorrelationId", correlationId ?? "N/A"))
+                        {
+                            await ProcessEventAsync(@event, eventType, CancellationToken.None);
+                        }
+                    }
                     
                     // Acknowledge the message successfully processed
                     _channel.BasicAck(deliveryTag, false);

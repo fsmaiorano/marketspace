@@ -82,7 +82,8 @@ public class OrderEntity : Aggregate<OrderId>
         Address shippingAddress,
         Address billingAddress,
         Payment payment,
-        IEnumerable<OrderItemEntity>? items = null)
+        IEnumerable<OrderItemEntity>? items = null,
+        string? correlationId = null)
     {
         ArgumentNullException.ThrowIfNull(orderId, nameof(orderId));
         ArgumentNullException.ThrowIfNull(customerId, nameof(customerId));
@@ -109,7 +110,7 @@ public class OrderEntity : Aggregate<OrderId>
         }
 
         order.CalculateAndSetTotalAmount();
-        order.AddDomainEvent(new OrderCreatedDomainEvent(order));
+        order.AddDomainEvent(new OrderCreatedDomainEvent(order, correlationId));
 
         return order;
     }

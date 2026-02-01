@@ -10,7 +10,6 @@ public class CheckoutDataDto
     public CheckoutAddressDto Address { get; init; } = null!;
     public CheckoutPaymentDto Payment { get; init; } = null!;
     public string? CorrelationId { get; init; }
-    public string? IdempotencyKey { get; init; }
 }
 
 public class CheckoutAddressDto

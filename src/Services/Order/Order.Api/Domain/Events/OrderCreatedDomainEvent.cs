@@ -5,14 +5,20 @@ using Order.Api.Domain.Entities;
 
 namespace Order.Api.Domain.Events;
 
-public class OrderCreatedDomainEvent(OrderEntity Order) : IDomainEvent
+public class OrderCreatedDomainEvent : IDomainEvent
 {
+    public OrderEntity Order { get; }
+    public string? CorrelationId { get; }
     public DateTime OccurredAt { get; } = DateTime.UtcNow;
+
+    public OrderCreatedDomainEvent(OrderEntity order, string? correlationId = null)
+    {
+        Order = order;
+        CorrelationId = correlationId;
+    }
 
     public UniqueEntityId GetAggregateId()
     {
         return new UniqueEntityId(Order.Id.ToString());
     }
 }
-
-//TODO - refatorar para enviar um IntegrationEvent! nao enviar uma entidade

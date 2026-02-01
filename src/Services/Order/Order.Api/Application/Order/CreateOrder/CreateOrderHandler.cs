@@ -17,8 +17,9 @@ public sealed class CreateOrderHandler(
     {
         try
         {
-            logger.LogInformation(LogTypeEnum.Application, "Processing create order request for customer: {CustomerId}",
-                command.CustomerId);
+            logger.LogInformation(LogTypeEnum.Application, 
+                "Processing create order request for customer: {CustomerId}, CorrelationId: {CorrelationId}",
+                command.CustomerId, command.CorrelationId);
 
             OrderId orderId = OrderId.Of(Guid.CreateVersion7());
             Address shippingAddress = command.ShippingAddress.ToAddress();
@@ -32,7 +33,8 @@ public sealed class CreateOrderHandler(
                 shippingAddress: shippingAddress,
                 billingAddress: billingAddress,
                 payment: payment,
-                items: orderItems
+                items: orderItems,
+                correlationId: command.CorrelationId
             );
 
             int result = await repository.AddAsync(orderEntity);
@@ -45,11 +47,12 @@ public sealed class CreateOrderHandler(
             }
 
             logger.LogInformation(LogTypeEnum.Business,
-                "Order created successfully. OrderId: {OrderId}, CustomerId: {CustomerId}, TotalAmount: {TotalAmount}, ItemCount: {ItemCount}",
+                "Order created successfully. OrderId: {OrderId}, CustomerId: {CustomerId}, TotalAmount: {TotalAmount}, ItemCount: {ItemCount}, CorrelationId: {CorrelationId}",
                 orderEntity.Id.Value,
                 command.CustomerId,
                 orderEntity.TotalAmount.Value,
-                orderItems.Count);
+                orderItems.Count,
+                command.CorrelationId);
 
             return Result<CreateOrderResult>.Success(new CreateOrderResult(orderEntity.Id.Value));
         }

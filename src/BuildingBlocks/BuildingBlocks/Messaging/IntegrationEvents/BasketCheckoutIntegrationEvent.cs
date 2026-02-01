@@ -6,7 +6,6 @@ public class BasketCheckoutIntegrationEvent : IIntegrationEvent
 {
     public Guid EventId { get; init; } = Guid.NewGuid();
     public DateTime OccurredAt { get; init; } = DateTime.UtcNow;
-    public string? IdempotencyKey { get; init; }
     public string? CorrelationId { get; init; }
     
     // Order Data

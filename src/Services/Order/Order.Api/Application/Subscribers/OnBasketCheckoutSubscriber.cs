@@ -16,8 +16,8 @@ public class OnBasketCheckoutSubscriber(
     public async Task HandleAsync(BasketCheckoutIntegrationEvent @event, CancellationToken cancellationToken = default)
     {
         logger.LogInformation(LogTypeEnum.Application, 
-            "Received basket checkout event for customer: {CustomerId}, IdempotencyKey: {IdempotencyKey}",
-            @event.CustomerId, @event.IdempotencyKey);
+            "Received basket checkout event for customer: {CustomerId}, EventId: {EventId}, CorrelationId: {CorrelationId}",
+            @event.CustomerId, @event.EventId, @event.CorrelationId);
 
         // Map integration event to CreateOrderCommand
         CreateOrderCommand command = new()
@@ -58,12 +58,13 @@ public class OnBasketCheckoutSubscriber(
                 Quantity = item.Quantity,
                 Price = item.Price
             }).ToList(),
-            TotalAmount = @event.TotalPrice
+            TotalAmount = @event.TotalPrice,
+            CorrelationId = @event.CorrelationId
         };
 
         logger.LogInformation(LogTypeEnum.Application,
-            "Creating order for customer: {CustomerId}, TotalAmount: {TotalAmount}, ItemCount: {ItemCount}",
-            command.CustomerId, command.TotalAmount, command.Items.Count);
+            "Creating order for customer: {CustomerId}, TotalAmount: {TotalAmount}, ItemCount: {ItemCount}, CorrelationId: {CorrelationId}",
+            command.CustomerId, command.TotalAmount, command.Items.Count, command.CorrelationId);
 
         Result<CreateOrderResult> result = await createOrderHandler.HandleAsync(command);
 

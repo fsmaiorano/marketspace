@@ -3,11 +3,13 @@ using Basket.Api.Domain.Entities;
 using Basket.Api.Domain.Repositories;
 using BuildingBlocks;
 using BuildingBlocks.Loggers;
+using BuildingBlocks.Services.Correlation;
 
 namespace Basket.Api.Application.Basket.CheckoutBasket;
 
 public class CheckoutBasketHandler(
     IBasketDataRepository basketDataRepository,
+    ICorrelationIdService correlationIdService,
     IAppLogger<CheckoutBasketHandler> logger)
     : ICheckoutBasketHandler
 {
@@ -15,28 +17,26 @@ public class CheckoutBasketHandler(
     {
         try
         {
-            string correlationId = !string.IsNullOrWhiteSpace(command.RequestId)
-                ? command.RequestId!
-                : Guid.NewGuid().ToString();
+            // Get CorrelationId from the service (set by middleware or generate new one)
+            string correlationId = correlationIdService.GetCorrelationId();
 
-            string? idempotencyKey = !string.IsNullOrWhiteSpace(command.IdempotencyKey)
-                ? command.IdempotencyKey
-                : command.RequestId;
-
-            logger.LogInformation(LogTypeEnum.Application, "Starting checkout process for user: {Username}",
-                command.UserName);
+            logger.LogInformation(LogTypeEnum.Application, 
+                "Starting checkout process for user: {Username}, CorrelationId: {CorrelationId}",
+                command.UserName, correlationId);
 
             ShoppingCartEntity? basket = await basketDataRepository.GetCartAsync(command.UserName);
 
             if (basket is null || basket.Items.Count == 0)
             {
-                logger.LogWarning(LogTypeEnum.Application, "Basket not found or empty for user: {Username}",
-                    command.UserName);
+                logger.LogWarning(LogTypeEnum.Application, 
+                    "Basket not found or empty for user: {Username}, CorrelationId: {CorrelationId}",
+                    command.UserName, correlationId);
                 return Result<CheckoutBasketResult>.Failure("Basket is empty or does not exist.");
             }
 
-            logger.LogInformation(LogTypeEnum.Application, "Basket found with {ItemCount} items for user: {Username}",
-                basket.Items.Count, command.UserName);
+            logger.LogInformation(LogTypeEnum.Application, 
+                "Basket found with {ItemCount} items for user: {Username}, CorrelationId: {CorrelationId}",
+                basket.Items.Count, command.UserName, correlationId);
 
        
             CheckoutDataDto checkoutData = new()
@@ -61,8 +61,7 @@ public class CheckoutBasketHandler(
                     Cvv = command.Cvv,
                     PaymentMethod = command.PaymentMethod
                 },
-                CorrelationId = correlationId,
-                IdempotencyKey = idempotencyKey
+                CorrelationId = correlationId
             };
 
             await basketDataRepository.CheckoutAsync(command.UserName, checkoutData);
