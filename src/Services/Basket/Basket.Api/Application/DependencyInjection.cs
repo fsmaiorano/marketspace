@@ -6,7 +6,6 @@ using Basket.Api.Application.EventHandlers;
 using Basket.Api.Domain.Events;
 using Basket.Api.Domain.Repositories;
 using Basket.Api.Infrastructure.Data.Repositories;
-using Basket.Api.Infrastructure.Http.Repositories;
 using BuildingBlocks.Messaging;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using BuildingBlocks.Messaging.Interfaces;
@@ -23,8 +22,6 @@ public static class DependencyInjection
         services.AddScoped<IDeleteBasketHandler, DeleteBasketHandler>();
         services.AddScoped<IGetBasketByIdHandler, GetBasketByIdHandler>();
         services.AddScoped<ICheckoutBasketHandler, CheckoutBasketHandler>();
-
-        services.AddHttpClient<CheckoutHttpRepository>();
         
         string rabbitMqConnectionString = configuration.GetConnectionString("RabbitMq") 
                                           ?? throw new InvalidOperationException("RabbitMQ:ConnectionString is not configured");

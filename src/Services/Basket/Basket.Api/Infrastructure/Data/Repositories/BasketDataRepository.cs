@@ -1,3 +1,4 @@
+using Basket.Api.Application.Basket.CheckoutBasket.Dtos;
 using Basket.Api.Domain.Entities;
 using Basket.Api.Domain.Repositories;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
@@ -35,7 +36,7 @@ public class BasketDataRepository(BasketDbContext context, IDomainEventDispatche
         }
     }
 
-    public async Task<bool> CheckoutAsync(string username)
+    public async Task<bool> CheckoutAsync(string username, CheckoutDataDto checkoutData)
     {
         try
         {
@@ -45,7 +46,8 @@ public class BasketDataRepository(BasketDbContext context, IDomainEventDispatche
             if (cart == null)
                 return true;
 
-            cart.Checkout(cart);
+            cart.Checkout(checkoutData);
+            
             await eventDispatcher.DispatchAsync(cart.DomainEvents, CancellationToken.None);
             cart.ClearDomainEvents();
 

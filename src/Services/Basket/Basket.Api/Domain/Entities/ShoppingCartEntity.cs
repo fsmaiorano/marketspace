@@ -1,3 +1,4 @@
+using Basket.Api.Application.Basket.CheckoutBasket.Dtos;
 using Basket.Api.Domain.Events;
 using BuildingBlocks.Abstractions;
 using System.ComponentModel.DataAnnotations;
@@ -29,8 +30,9 @@ public class ShoppingCartEntity : Aggregate<string>
         return cart;
     }
 
-    public void Checkout(ShoppingCartEntity cart)
+    public void Checkout(CheckoutDataDto checkoutData)
     {
-        cart.AddDomainEvent(new BasketCheckoutDomainEvent(cart));
+        AddDomainEvent(new BasketCheckoutDomainEvent(this, checkoutData));
     }
 }
+
