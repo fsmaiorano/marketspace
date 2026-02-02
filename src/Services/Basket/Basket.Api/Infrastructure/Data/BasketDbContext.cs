@@ -24,7 +24,7 @@ public class BasketDbContext : DbContext, IBasketDbContext
     {
         // Apply configurations from assembly
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-        
+
         // Special handling for InMemory database - override the JSONB column type with a converter
         if (Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory")
         {
@@ -35,7 +35,7 @@ public class BasketDbContext : DbContext, IBasketDbContext
                     v => JsonSerializer.Deserialize<List<ShoppingCartItemEntity>>(v, (JsonSerializerOptions?)null) ?? new List<ShoppingCartItemEntity>()
                 );
         }
-        
+
         base.OnModelCreating(modelBuilder);
     }
 }

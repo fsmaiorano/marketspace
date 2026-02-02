@@ -2,7 +2,7 @@ namespace Order.Api.Domain.Enums;
 
 public enum OrderStatusEnum
 {
-    Pending = 1,
+    Created = 1,
     Processing = 2,
     Completed = 3,
     ReadyForDelivery = 4,

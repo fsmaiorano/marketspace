@@ -9,17 +9,16 @@ using Order.Api.Domain.Enums;
 namespace Order.Api.Application.Subscribers;
 
 public class OnBasketCheckoutSubscriber(
-    IAppLogger<OnBasketCheckoutSubscriber> logger, 
+    IAppLogger<OnBasketCheckoutSubscriber> logger,
     ICreateOrderHandler createOrderHandler)
     : IIntegrationEventHandler<BasketCheckoutIntegrationEvent>
 {
     public async Task HandleAsync(BasketCheckoutIntegrationEvent @event, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation(LogTypeEnum.Application, 
+        logger.LogInformation(LogTypeEnum.Application,
             "Received basket checkout event for customer: {CustomerId}, EventId: {EventId}, CorrelationId: {CorrelationId}",
             @event.CustomerId, @event.EventId, @event.CorrelationId);
 
-        // Map integration event to CreateOrderCommand
         CreateOrderCommand command = new()
         {
             CustomerId = @event.CustomerId,
@@ -52,12 +51,12 @@ public class OnBasketCheckoutSubscriber(
                 PaymentMethod = @event.Payment.PaymentMethod
             },
             Status = OrderStatusEnum.Pending,
-            Items = @event.Items.Select(item => new OrderItemDto
+            Items = [.. @event.Items.Select(item => new OrderItemDto
             {
                 CatalogId = item.CatalogId,
                 Quantity = item.Quantity,
                 Price = item.Price
-            }).ToList(),
+            })],
             TotalAmount = @event.TotalPrice,
             CorrelationId = @event.CorrelationId
         };

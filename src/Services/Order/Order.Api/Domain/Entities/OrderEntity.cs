@@ -11,7 +11,7 @@ public class OrderEntity : Aggregate<OrderId>
     public Address ShippingAddress { get; private set; } = null!;
     public Address BillingAddress { get; private set; } = null!;
     public Payment Payment { get; private set; } = null!;
-    public OrderStatusEnum Status { get; private set; } = OrderStatusEnum.Pending;
+    public OrderStatusEnum Status { get; private set; } = OrderStatusEnum.Created;
     public List<OrderItemEntity> Items { get; private set; } = [];
     public Price TotalAmount { get; private set; } = Price.Of(0);
 
