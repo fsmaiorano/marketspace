@@ -11,7 +11,7 @@ public class OnBasketCheckoutEventHandler(IAppLogger<OnBasketCheckoutEventHandle
 {
     public async Task HandleAsync(BasketCheckoutDomainEvent @event, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation(LogTypeEnum.Application, 
+        logger.LogInformation(LogTypeEnum.Application,
             "Basket checkout domain event received for user: {UserName}, CorrelationId: {CorrelationId}",
             @event.CheckoutData.UserName, @event.CheckoutData.CorrelationId);
 
@@ -48,18 +48,18 @@ public class OnBasketCheckoutEventHandler(IAppLogger<OnBasketCheckoutEventHandle
                 Cvv = @event.CheckoutData.Payment.Cvv,
                 PaymentMethod = @event.CheckoutData.Payment.PaymentMethod
             },
-            Items = @event.ShoppingCart.Items.Select(item => new OrderItemData
+            Items = [.. @event.ShoppingCart.Items.Select(item => new OrderItemData
             {
                 CatalogId = Guid.Parse(item.ProductId),
                 Quantity = item.Quantity,
                 Price = item.Price
-            }).ToList(),
+            })],
             TotalPrice = @event.ShoppingCart.TotalPrice
         };
-        
+
         await eventBus.PublishAsync(integrationEvent, cancellationToken);
 
-        logger.LogInformation(LogTypeEnum.Application, 
+        logger.LogInformation(LogTypeEnum.Application,
             "Basket checkout integration event published for customer: {CustomerId}, TotalPrice: {TotalPrice}, ItemCount: {ItemCount}, CorrelationId: {CorrelationId}",
             @event.CheckoutData.CustomerId, @event.ShoppingCart.TotalPrice, @event.ShoppingCart.Items.Count, @event.CheckoutData.CorrelationId);
     }
