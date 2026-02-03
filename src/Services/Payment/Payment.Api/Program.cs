@@ -3,6 +3,7 @@ using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
 using BuildingBlocks.Services.Correlation;
 using Payment.Api.Application;
+using Payment.Api.Endpoints;
 using Payment.Api.Infrastructure;
 using Payment.Api.Infrastructure.Data.Extensions;
 using Serilog;
@@ -43,6 +44,11 @@ app.UseSwaggerUI(options =>
 
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseExceptionHandler(options => { });
+
+CreatePaymentEndpoint.MapEndpoint(app);
+GetPaymentByIdEndpoint.MapEndpoint(app);
+UpdatePaymentEndpoint.MapEndpoint(app);
+DeletePaymentEndpoint.MapEndpoint(app);
 
 app.Run();
 

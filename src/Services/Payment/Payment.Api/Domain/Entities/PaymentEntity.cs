@@ -34,7 +34,7 @@ public class PaymentEntity : Aggregate<PaymentId>
         if (orderId == Guid.Empty)
             throw new ArgumentException("OrderId cannot be empty.", nameof(orderId));
 
-        var payment = new PaymentEntity
+        PaymentEntity payment = new PaymentEntity
         {
             Id = PaymentId.Of(Guid.NewGuid()),
             OrderId = orderId,
