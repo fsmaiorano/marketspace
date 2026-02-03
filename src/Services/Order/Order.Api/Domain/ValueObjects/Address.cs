@@ -9,13 +9,14 @@ public record Address
     public string Country { get; private set; } = null!;
     public string State { get; private set; } = null!;
     public string ZipCode { get; private set; } = null!;
+    public string Coordinates { get; private set; } = null!;
 
     protected Address()
     {
     }
 
     private Address(string firstName, string lastName, string emailAddress, string addressLine, string country,
-        string state, string zipCode)
+        string state, string zipCode, string coordinates)
     {
         FirstName = firstName;
         LastName = lastName;
@@ -24,10 +25,11 @@ public record Address
         Country = country;
         State = state;
         ZipCode = zipCode;
+        Coordinates = coordinates;
     }
 
     public static Address Of(string firstName, string lastName, string emailAddress, string addressLine,
-        string country, string state, string zipCode)
+        string country, string state, string zipCode, string coordinates)
     {
         ValidateInput(firstName, nameof(firstName));
         ValidateInput(emailAddress, nameof(emailAddress));
@@ -35,8 +37,9 @@ public record Address
         ValidateInput(country, nameof(country));
         ValidateInput(state, nameof(state));
         ValidateInput(zipCode, nameof(zipCode));
+        ValidateInput(coordinates, nameof(coordinates));
 
-        return new Address(firstName, lastName, emailAddress, addressLine, country, state, zipCode);
+        return new Address(firstName, lastName, emailAddress, addressLine, country, state, zipCode, coordinates);
     }
 
     public static Address FromString(string addressString)
@@ -45,15 +48,15 @@ public record Address
             throw new ArgumentException("Address string cannot be empty.", nameof(addressString));
 
         string[] parts = addressString.Split('|');
-        if (parts.Length != 7)
+        if (parts.Length != 8)
             throw new ArgumentException("Invalid address string format.", nameof(addressString));
 
-        return new Address(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]);
+        return new Address(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7]);
     }
 
     public override string ToString()
     {
-        return $"{FirstName}|{LastName}|{EmailAddress}|{AddressLine}|{Country}|{State}|{ZipCode}";
+        return $"{FirstName}|{LastName}|{EmailAddress}|{AddressLine}|{Country}|{State}|{ZipCode}|{Coordinates}";
     }
 
     private static void ValidateInput(string value, string parameterName)

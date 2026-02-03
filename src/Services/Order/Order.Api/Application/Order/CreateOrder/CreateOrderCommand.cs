@@ -10,7 +10,7 @@ public class CreateOrderCommand
     public AddressDto ShippingAddress { get; set; } = null!;
     public AddressDto BillingAddress { get; set; } = null!;
     public PaymentDto Payment { get; set; } = null!;
-    public OrderStatusEnum Status { get; set; } = OrderStatusEnum.Pending;
+    public OrderStatusEnum Status { get; set; } = OrderStatusEnum.Created;
     public List<OrderItemDto> Items { get; set; } = [];
     public decimal TotalAmount { get; set; } = 0.0m;
     public string? CorrelationId { get; set; }

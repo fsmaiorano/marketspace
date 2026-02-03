@@ -27,6 +27,7 @@ public class AddressData
     public string Country { get; init; } = null!;
     public string State { get; init; } = null!;
     public string ZipCode { get; init; } = null!;
+    public string Coordinates { get; init; } = null!;
 }
 
 public class PaymentData

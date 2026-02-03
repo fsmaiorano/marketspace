@@ -1,21 +1,14 @@
 using BuildingBlocks.Abstractions;
-using BuildingBlocks.Messaging.DomainEvents;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using Order.Api.Domain.Entities;
 
 namespace Order.Api.Domain.Events;
 
-public class OrderCreatedDomainEvent : IDomainEvent
+public class OrderCreatedDomainEvent(OrderEntity order, string? correlationId = null) : IDomainEvent
 {
-    public OrderEntity Order { get; }
-    public string? CorrelationId { get; }
+    public OrderEntity Order { get; } = order;
+    public string? CorrelationId { get; } = correlationId;
     public DateTime OccurredAt { get; } = DateTime.UtcNow;
-
-    public OrderCreatedDomainEvent(OrderEntity order, string? correlationId = null)
-    {
-        Order = order;
-        CorrelationId = correlationId;
-    }
 
     public UniqueEntityId GetAggregateId()
     {

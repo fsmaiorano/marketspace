@@ -1,5 +1,3 @@
-using Aspire.Hosting.Azure;
-using Aspire.Hosting.RabbitMQ;
 using Microsoft.Extensions.Configuration;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
@@ -53,6 +51,15 @@ IResourceBuilder<PostgresDatabaseResource> basketDb = builder
     .WithDataVolume()
     .WithHostPort(int.Parse(basketDbConfig["Port"]!))
     .AddDatabase(basketDbConfig["ConnectionName"]!);
+
+IConfigurationSection paymentDbConfig = postgresConfig.GetSection("Payment");
+IResourceBuilder<PostgresDatabaseResource> paymentDb = builder
+    .AddPostgres(paymentDbConfig["Name"]!, password: postgresPassword)
+    .WithEnvironment("POSTGRES_DB", paymentDbConfig["DatabaseName"]!)
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithDataVolume()
+    .WithHostPort(int.Parse(paymentDbConfig["Port"]!))
+    .AddDatabase(paymentDbConfig["ConnectionName"]!);
 
 // Message Broker
 IConfigurationSection rabbitMqConfig = config.GetSection("Aspire:MessageBrokers:RabbitMQ");
@@ -113,6 +120,7 @@ IResourceBuilder<ProjectResource> merchantApi = builder
 
 IConfigurationSection paymentConfig = config.GetSection("Aspire:Services:Payment");
 IResourceBuilder<ProjectResource> paymentApi = builder.AddProject<Projects.Payment_Api>(paymentConfig["ProjectName"]!)
+    .WithReference(paymentDb)
     .WaitFor(rabbitmq)
     .WithHttpEndpoint(port: int.Parse(paymentConfig["HttpPort"]!), name: "payment-http")
     .WithHttpsEndpoint(port: int.Parse(paymentConfig["HttpsPort"]!), name: "payment-https");

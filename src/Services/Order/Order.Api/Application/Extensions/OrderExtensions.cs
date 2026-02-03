@@ -15,7 +15,8 @@ public static class OrderExtensions
             country: addressDto.Country,
             zipCode: addressDto.ZipCode,
             emailAddress: addressDto.EmailAddress,
-            addressLine: addressDto.AddressLine
+            addressLine: addressDto.AddressLine,
+            coordinates: addressDto.Coordinates
         );
     }
 

@@ -38,12 +38,11 @@ public class CheckoutBasketHandler(
                 "Basket found with {ItemCount} items for user: {Username}, CorrelationId: {CorrelationId}",
                 basket.Items.Count, command.UserName, correlationId);
 
-       
-            CheckoutDataDto checkoutData = new()
+            // Create Address DTO only if address fields are provided
+            CheckoutAddressDto? address = null;
+            if (!string.IsNullOrEmpty(command.FirstName) || !string.IsNullOrEmpty(command.AddressLine))
             {
-                CustomerId = command.CustomerId,
-                UserName = command.UserName,
-                Address = new CheckoutAddressDto
+                address = new CheckoutAddressDto
                 {
                     FirstName = command.FirstName,
                     LastName = command.LastName,
@@ -51,16 +50,31 @@ public class CheckoutBasketHandler(
                     AddressLine = command.AddressLine,
                     Country = command.Country,
                     State = command.State,
-                    ZipCode = command.ZipCode
-                },
-                Payment = new CheckoutPaymentDto
+                    ZipCode = command.ZipCode,
+                    Coordinates = command.Coordinates
+                };
+            }
+
+            // Create Payment DTO only if payment fields are provided
+            CheckoutPaymentDto? payment = null;
+            if (!string.IsNullOrEmpty(command.CardName) || !string.IsNullOrEmpty(command.CardNumber))
+            {
+                payment = new CheckoutPaymentDto
                 {
                     CardName = command.CardName,
                     CardNumber = command.CardNumber,
                     Expiration = command.Expiration,
                     Cvv = command.Cvv,
                     PaymentMethod = command.PaymentMethod
-                },
+                };
+            }
+       
+            CheckoutDataDto checkoutData = new()
+            {
+                CustomerId = command.CustomerId,
+                UserName = command.UserName,
+                Address = address,
+                Payment = payment,
                 CorrelationId = correlationId
             };
 
