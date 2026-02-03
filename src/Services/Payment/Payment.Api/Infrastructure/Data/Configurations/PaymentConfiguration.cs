@@ -51,7 +51,6 @@ public class PaymentConfiguration : IEntityTypeConfiguration<PaymentEntity>
             .HasMaxLength(50);
 
         builder.Property(p => p.CreatedAt).IsRequired();
-        builder.Property(p => p.LastModifiedAt).IsRequired();
 
         builder.HasMany(p => p.Attempts)
             .WithOne()

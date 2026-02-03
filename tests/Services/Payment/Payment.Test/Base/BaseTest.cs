@@ -1,0 +1,64 @@
+using Bogus;
+using Microsoft.Extensions.DependencyInjection;
+using Payment.Api.Infrastructure.Data;
+using Payment.Test.Fixtures;
+
+namespace Payment.Test.Base;
+
+public abstract class BaseTest : IClassFixture<TestFixture>, IDisposable
+{
+    #region Fields and Properties
+
+    private readonly IServiceScope _scope;
+
+    private TestFixture Fixture { get; }
+
+    protected PaymentDbContext Context => _scope.ServiceProvider.GetRequiredService<PaymentDbContext>();
+
+    protected IPaymentDbContext DbContext => _scope.ServiceProvider.GetRequiredService<IPaymentDbContext>();
+
+    protected readonly Faker Faker;
+
+    protected HttpClient HttpClient { get; }
+
+    #endregion
+
+    protected BaseTest(TestFixture fixture)
+    {
+        Fixture = fixture;
+        _scope = fixture.Services.CreateScope();
+        HttpClient = fixture.CreateClient();
+        Faker = new Faker();
+
+        Context.Database.EnsureDeleted();
+        Context.Database.EnsureCreated();
+    }
+
+    #region HTTP Request Helpers
+
+    protected async Task<HttpResponseMessage> DoPost(string method, object request, string token = "",
+        string culture = "en-US")
+        => await Fixture.DoPost(method, request, token, culture);
+
+    protected async Task<HttpResponseMessage> DoGet(string method, string token = "", string culture = "en-US")
+        => await Fixture.DoGet(method, token, culture);
+
+    protected async Task<HttpResponseMessage> DoPut(string method, object request, string token = "",
+        string culture = "en-US")
+        => await Fixture.DoPut(method, request, token, culture);
+
+    protected async Task<HttpResponseMessage> DoPatch(string method, object request, string token = "",
+        string culture = "en-US")
+        => await Fixture.DoPatch(method, request, token, culture);
+
+    protected async Task<HttpResponseMessage> DoDelete(string method, string token = "", string culture = "en-US")
+        => await Fixture.DoDelete(method, token, culture);
+
+    #endregion
+
+    public void Dispose()
+    {
+        Context.Database.EnsureDeleted();
+        _scope.Dispose();
+    }
+}

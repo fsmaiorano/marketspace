@@ -6,6 +6,7 @@ using Order.Api.Application.Order.UpdateOrder;
 using Order.Api.Domain.Entities;
 using Order.Api.Domain.Enums;
 using Order.Api.Domain.ValueObjects;
+using OrderPayment = Order.Api.Domain.ValueObjects.Payment;
 
 namespace Builder;
 
@@ -62,10 +63,10 @@ public static class OrderBuilder
             ));
     }
 
-    public static Faker<Payment> CreatePaymentFaker()
+    public static Faker<OrderPayment> CreatePaymentFaker()
     {
-        return new Faker<Payment>()
-            .CustomInstantiator(f => Payment.Of(
+        return new Faker<OrderPayment>()
+            .CustomInstantiator(f => OrderPayment.Of(
                 cardNumber: f.Finance.CreditCardNumber(),
                 cardName: f.Name.FullName(),
                 expiration: f.Date.Future().ToString("MM/yy"),
@@ -154,7 +155,7 @@ public static class OrderBuilder
     public static Address GenerateAddress() =>
         CreateAddressFaker().Generate();
 
-    public static Payment GeneratePayment() =>
+    public static OrderPayment GeneratePayment() =>
         CreatePaymentFaker().Generate();
 
     public static AddressDto GenerateAddressDto() =>

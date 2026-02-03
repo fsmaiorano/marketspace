@@ -28,19 +28,6 @@ public class PaymentRepository(IPaymentDbContext dbContext, IDomainEventDispatch
     {
         ArgumentNullException.ThrowIfNull(payment, nameof(payment));
 
-        PaymentEntity storedEntity = await GetByIdAsync(payment.Id, cancellationToken: cancellationToken)
-                                   ?? throw new InvalidOperationException(
-                                       $"Payment with ID {payment.Id} not found.");
-
-        // For now, simpler update as PaymentEntity doesn't have a comprehensive Update method yet. 
-        // We rely on EF Core tracking or just updating the fields if passed.
-        // But since we are receiving an entity, we might need to attach it if it's detached.
-        // However, referencing OrderRepository logic: 
-        // it calls a static factory method Update to return a new or updated entity instance, then calls Update on context.
-        
-        // As PaymentEntity does not have Update method, I will use dbContext.Payments.Update(payment)
-        // assuming 'payment' object has the desired state.
-        
         dbContext.Payments.Update(payment);
         return await dbContext.SaveChangesAsync(cancellationToken);
     }
