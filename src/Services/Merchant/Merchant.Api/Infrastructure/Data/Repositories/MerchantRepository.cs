@@ -19,7 +19,7 @@ public class MerchantRepository(IMerchantDbContext dbContext) : IMerchantReposit
     {
         ArgumentNullException.ThrowIfNull(merchant, nameof(merchant));
 
-        MerchantEntity storedEntity = await GetByIdAsync(merchant.Id, cancellationToken: cancellationToken)
+        MerchantEntity storedEntity = await GetByIdAsync(merchant.Id, isTrackingEnabled: true, cancellationToken: cancellationToken)
                                       ?? throw new InvalidOperationException(
                                           $"Merchant with ID {merchant.Id} not found.");
 

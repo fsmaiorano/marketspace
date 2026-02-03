@@ -117,41 +117,33 @@ public class OrderEntity : Aggregate<OrderId>
         return order;
     }
 
-    public static OrderEntity Update(
-        OrderId orderId,
-        CustomerId customerId,
+    public void Update(
         Address shippingAddress,
         Address billingAddress,
         Payment payment,
         OrderStatusEnum status,
         IEnumerable<OrderItemEntity>? items = null)
     {
-        ArgumentNullException.ThrowIfNull(orderId, nameof(orderId));
-        ArgumentNullException.ThrowIfNull(customerId, nameof(customerId));
         ArgumentNullException.ThrowIfNull(shippingAddress, nameof(shippingAddress));
         ArgumentNullException.ThrowIfNull(billingAddress, nameof(billingAddress));
         ArgumentNullException.ThrowIfNull(payment, nameof(payment));
-        ArgumentNullException.ThrowIfNull(items, nameof(items));
 
-        if (orderId.Value == Guid.Empty)
-            throw new ArgumentException("OrderId cannot be empty.", nameof(orderId));
+        ShippingAddress = shippingAddress;
+        BillingAddress = billingAddress;
+        Payment = payment;
+        Status = status;
 
-        OrderEntity updatedOrder = new()
+        // Clear existing items and add new ones
+        ClearItems();
+        
+        if (items != null)
         {
-            Id = orderId,
-            CustomerId = customerId,
-            ShippingAddress = shippingAddress,
-            BillingAddress = billingAddress,
-            Payment = payment,
-            Status = status
-        };
-
-
-        foreach (OrderItemEntity orderItem in items)
-        {
-            updatedOrder.AddItem(orderId, orderItem);
+            foreach (OrderItemEntity orderItem in items)
+            {
+                AddItem(Id, orderItem);
+            }
         }
-
-        return updatedOrder;
+        
+        CalculateAndSetTotalAmount();
     }
 }
