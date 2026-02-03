@@ -26,9 +26,8 @@ namespace Payment.Api.Infrastructure.Data.Migrations
                     ProviderTransactionId = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     AuthorizationCode = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<string>(type: "text", nullable: true),
-                    LastModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    LastModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
@@ -48,7 +47,10 @@ namespace Payment.Api.Infrastructure.Data.Migrations
                     ProviderTransactionId = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     ResponseCode = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     ResponseMessage = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedBy = table.Column<string>(type: "text", nullable: true),
+                    LastModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -70,7 +72,10 @@ namespace Payment.Api.Infrastructure.Data.Migrations
                     Type = table.Column<string>(type: "text", nullable: false),
                     Amount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     ProviderTransactionId = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<string>(type: "text", nullable: true),
+                    LastModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -87,15 +92,20 @@ namespace Payment.Api.Infrastructure.Data.Migrations
                 name: "RiskAnalyses",
                 columns: table => new
                 {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     PaymentId = table.Column<Guid>(type: "uuid", nullable: false),
                     IpAddress = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     Country = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     Score = table.Column<int>(type: "integer", nullable: true),
-                    Decision = table.Column<string>(type: "text", nullable: false)
+                    Decision = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreatedBy = table.Column<string>(type: "text", nullable: true),
+                    LastModifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RiskAnalyses", x => x.PaymentId);
+                    table.PrimaryKey("PK_RiskAnalyses", x => x.Id);
                     table.ForeignKey(
                         name: "FK_RiskAnalyses_Payments_PaymentId",
                         column: x => x.PaymentId,
@@ -113,6 +123,12 @@ namespace Payment.Api.Infrastructure.Data.Migrations
                 name: "IX_PaymentTransactions_PaymentId",
                 table: "PaymentTransactions",
                 column: "PaymentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RiskAnalyses_PaymentId",
+                table: "RiskAnalyses",
+                column: "PaymentId",
+                unique: true);
         }
 
         /// <inheritdoc />

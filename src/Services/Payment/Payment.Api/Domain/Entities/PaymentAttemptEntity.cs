@@ -1,11 +1,12 @@
+using BuildingBlocks.Abstractions;
 using Payment.Api.Domain.Enums;
+using Payment.Api.Domain.ValueObjects;
 
 namespace Payment.Api.Domain.Entities;
 
-public class PaymentAttemptEntity
+public class PaymentAttemptEntity : Entity<PaymentAttemptId>
 {
-    public Guid Id { get; private set; }
-    public Guid PaymentId { get; private set; }
+    public PaymentId PaymentId { get; private set; }
 
     public int AttemptNumber { get; private set; }
     public PaymentAttemptStatus Status { get; private set; }
@@ -15,12 +16,9 @@ public class PaymentAttemptEntity
     public string? ResponseCode { get; private set; }
     public string? ResponseMessage { get; private set; }
 
-    public DateTime CreatedAt { get; private set; }
-
-    private PaymentAttemptEntity() { }
-    public PaymentAttemptEntity(Guid paymentId, int attemptNumber)
+    public PaymentAttemptEntity(PaymentId paymentId, int attemptNumber)
     {
-        Id = Guid.NewGuid();
+        Id = PaymentAttemptId.Of(Guid.NewGuid());
         PaymentId = paymentId;
         AttemptNumber = attemptNumber;
         Status = PaymentAttemptStatus.Started;

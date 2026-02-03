@@ -11,9 +11,10 @@ public class PaymentConfiguration : IEntityTypeConfiguration<PaymentEntity>
     {
         builder.ToTable("Payments");
 
-        builder.HasKey(p => p.Id);
-
-        builder.Property(p => p.Id).ValueGeneratedNever();
+        builder.HasKey(m => m.Id);
+        builder.Property(o => o.Id)
+            .HasConversion(orderId => orderId.Value,
+                dbId => PaymentId.Of(dbId));
 
         builder.Property(p => p.OrderId).IsRequired();
 
@@ -50,7 +51,7 @@ public class PaymentConfiguration : IEntityTypeConfiguration<PaymentEntity>
             .HasMaxLength(50);
 
         builder.Property(p => p.CreatedAt).IsRequired();
-        builder.Property(p => p.UpdatedAt).IsRequired();
+        builder.Property(p => p.LastModifiedAt).IsRequired();
 
         builder.HasMany(p => p.Attempts)
             .WithOne()

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Payment.Api.Domain.Entities;
+using Payment.Api.Domain.ValueObjects;
 
 namespace Payment.Api.Infrastructure.Data.Configurations;
 
@@ -10,7 +11,17 @@ public class RiskAnalysisConfiguration : IEntityTypeConfiguration<RiskAnalysisEn
     {
         builder.ToTable("RiskAnalyses");
 
-        builder.HasKey(r => r.PaymentId);
+        builder.HasKey(r => r.Id);
+        builder.Property(r => r.Id)
+            .HasConversion(
+                riskAnalysisId => riskAnalysisId.Value,
+                dbId => RiskAnalysisId.Of(dbId));
+
+        builder.Property(r => r.PaymentId)
+            .HasConversion(
+                paymentId => paymentId.Value,
+                dbId => PaymentId.Of(dbId))
+            .IsRequired();
 
         builder.Property(r => r.IpAddress)
             .HasMaxLength(50);

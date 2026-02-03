@@ -6,7 +6,6 @@ namespace Payment.Api.Domain.Entities;
 
 public class PaymentEntity : Aggregate<PaymentId>
 {
-    public Guid Id { get; private set; }
     public Guid OrderId { get; private set; }
 
     public decimal Amount { get; private set; }
@@ -21,27 +20,33 @@ public class PaymentEntity : Aggregate<PaymentId>
     public string? ProviderTransactionId { get; private set; }
     public string? AuthorizationCode { get; private set; }
 
-    public DateTime CreatedAt { get; private set; }
-    public DateTime UpdatedAt { get; private set; }
-
     // NAVIGATION
     public ICollection<PaymentAttemptEntity> Attempts { get; private set; } = new List<PaymentAttemptEntity>();
     public ICollection<PaymentTransactionEntity> Transactions { get; private set; } = new List<PaymentTransactionEntity>();
     public RiskAnalysisEntity? RiskAnalysis { get; private set; }
 
-    private PaymentEntity() { } // EF
-
-    public PaymentEntity(Guid orderId, decimal amount, string currency, PaymentMethod method, string provider)
+    public static PaymentEntity Create(Guid orderId, decimal amount, string currency, PaymentMethod method, string provider)
     {
-        Id = Guid.NewGuid();
-        OrderId = orderId;
-        Amount = amount;
-        Currency = currency;
-        Method = method;
-        Provider = provider;
-        Status = PaymentStatusEnum.Created;
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
+        ArgumentNullException.ThrowIfNull(currency, nameof(currency));
+        ArgumentNullException.ThrowIfNull(method, nameof(method));
+        ArgumentNullException.ThrowIfNull(provider, nameof(provider));
+
+        if (orderId == Guid.Empty)
+            throw new ArgumentException("OrderId cannot be empty.", nameof(orderId));
+
+        var payment = new PaymentEntity
+        {
+            Id = PaymentId.Of(Guid.NewGuid()),
+            OrderId = orderId,
+            Amount = amount,
+            Currency = currency,
+            Method = method,
+            Provider = provider,
+            Status = PaymentStatusEnum.Created,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        return payment;
     }
 
     public void MarkProcessing()
@@ -74,5 +79,5 @@ public class PaymentEntity : Aggregate<PaymentId>
     public void SetRisk(RiskAnalysisEntity risk)
         => RiskAnalysis = risk;
 
-    private void Touch() => UpdatedAt = DateTime.UtcNow;
+    private void Touch() => LastModifiedAt = DateTime.UtcNow;
 }
