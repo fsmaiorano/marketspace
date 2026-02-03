@@ -1,6 +1,6 @@
-using Basket.Api.Application.Basket.CheckoutBasket.Dtos;
 using Basket.Api.Domain.Entities;
 using Basket.Api.Domain.Repositories;
+using Basket.Api.Domain.ValueObjects;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -36,7 +36,7 @@ public class BasketDataRepository(BasketDbContext context, IDomainEventDispatche
         }
     }
 
-    public async Task<bool> CheckoutAsync(string username, CheckoutDataDto checkoutData)
+    public async Task<bool> CheckoutAsync(string username, CheckoutData checkoutData)
     {
         try
         {

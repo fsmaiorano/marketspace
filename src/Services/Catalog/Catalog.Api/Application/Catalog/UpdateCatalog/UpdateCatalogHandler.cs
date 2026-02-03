@@ -17,16 +17,23 @@ public sealed class UpdateCatalogHandler(
         {
             logger.LogInformation(LogTypeEnum.Application, "Processing update catalog request for: {CatalogId}", command.Id);
             
-            CatalogEntity catalogEntity = CatalogEntity.Create(
-                name: command.Name,
-                description: command.Description,
-                imageUrl: command.ImageUrl,
-                categories: command.Categories,
-                price: Price.Of(command.Price),
-                merchantId: command.MerchantId
-            );
+            // Buscar entidade existente rastreada
+            CatalogId catalogId = CatalogId.Of(command.Id);
+            CatalogEntity? catalogEntity = await repository.GetByIdAsync(catalogId, isTrackingEnabled: true, CancellationToken.None);
             
-            catalogEntity.Id = CatalogId.Of(command.Id);
+            if (catalogEntity == null)
+            {
+                logger.LogWarning(LogTypeEnum.Application, "Catalog not found for update: {CatalogId}", command.Id);
+                return Result<UpdateCatalogResult>.Failure($"Catalog with ID {command.Id} not found.");
+            }
+            
+            // Usar método de domínio para atualizar
+            catalogEntity.Update(
+                command.Name,
+                command.Categories,
+                command.Description,
+                command.ImageUrl,
+                Price.Of(command.Price));
 
             await repository.UpdateAsync(catalogEntity);
             

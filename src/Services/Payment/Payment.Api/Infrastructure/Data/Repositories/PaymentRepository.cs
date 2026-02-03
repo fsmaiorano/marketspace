@@ -10,12 +10,12 @@ public class PaymentRepository(IPaymentDbContext dbContext, IDomainEventDispatch
 {
     public async Task<int> AddAsync(PaymentEntity payment, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(payment, nameof(payment));
+        ArgumentNullException.ThrowIfNull(payment);
         await dbContext.Payments.AddAsync(payment, cancellationToken);
 
         int result = await dbContext.SaveChangesAsync(cancellationToken);
         
-        if(result <= 0) return result;
+        if (result <= 0) return result;
 
         await eventDispatcher.DispatchAsync(payment.DomainEvents, cancellationToken);
         payment.ClearDomainEvents();
@@ -25,7 +25,7 @@ public class PaymentRepository(IPaymentDbContext dbContext, IDomainEventDispatch
 
     public async Task<int> UpdateAsync(PaymentEntity payment, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(payment, nameof(payment));
+        ArgumentNullException.ThrowIfNull(payment);
 
         bool exists = await dbContext.Payments
             .AsNoTracking()
@@ -47,8 +47,8 @@ public class PaymentRepository(IPaymentDbContext dbContext, IDomainEventDispatch
 
     public async Task<int> RemoveAsync(PaymentId id, CancellationToken cancellationToken = default)
     {
-        PaymentEntity? storedEntity = await GetByIdAsync(id, cancellationToken: cancellationToken)
-                                    ?? throw new InvalidOperationException($"Payment with ID {id} not found.");
+        PaymentEntity storedEntity = await GetByIdAsync(id, isTrackingEnabled: true, cancellationToken)
+            ?? throw new InvalidOperationException($"Payment with ID {id} not found.");
 
         dbContext.Payments.Remove(storedEntity);
         return await dbContext.SaveChangesAsync(cancellationToken);
@@ -57,12 +57,10 @@ public class PaymentRepository(IPaymentDbContext dbContext, IDomainEventDispatch
     public async Task<PaymentEntity?> GetByIdAsync(PaymentId id, bool isTrackingEnabled = true,
         CancellationToken cancellationToken = default)
     {
-        IQueryable<PaymentEntity> query = dbContext.Payments.AsQueryable();
+        IQueryable<PaymentEntity> query = dbContext.Payments;
 
         if (!isTrackingEnabled)
-        {
             query = query.AsNoTracking();
-        }
 
         return await query
             .Include(p => p.Attempts)

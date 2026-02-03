@@ -17,14 +17,23 @@ public sealed class UpdateMerchantHandler(
         {
             logger.LogInformation(LogTypeEnum.Application, "Processing update merchant request for: {MerchantId}", command.Id);
             
-            MerchantEntity merchantEntity = MerchantEntity.Create(
+            // Buscar entidade existente rastreada
+            MerchantId merchantId = MerchantId.Of(command.Id);
+            MerchantEntity? merchantEntity = await repository.GetByIdAsync(merchantId, isTrackingEnabled: true, CancellationToken.None);
+            
+            if (merchantEntity == null)
+            {
+                logger.LogWarning(LogTypeEnum.Application, "Merchant not found for update: {MerchantId}", command.Id);
+                return Result<UpdateMerchantResult>.Failure($"Merchant with ID {command.Id} not found.");
+            }
+            
+            // Usar método de domínio para atualizar
+            merchantEntity.Update(
                 command.Name,
                 command.Description,
                 command.Address,
                 command.PhoneNumber,
                 Email.Of(command.Email));
-            
-            merchantEntity.Id = MerchantId.Of(command.Id);
 
             await repository.UpdateAsync(merchantEntity);
             
