@@ -32,7 +32,7 @@ public sealed class UpdateMerchantHandler(
                 command.Id, 
                 command.Name);
 
-            return Result<UpdateMerchantResult>.Success(new UpdateMerchantResult(true));
+            return Result<UpdateMerchantResult>.Success(new UpdateMerchantResult());
         }
         catch (Exception ex)
         {

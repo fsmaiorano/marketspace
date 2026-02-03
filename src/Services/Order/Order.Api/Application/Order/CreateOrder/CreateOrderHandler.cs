@@ -4,6 +4,7 @@ using Order.Api.Domain.Entities;
 using Order.Api.Domain.Repositories;
 using Order.Api.Domain.ValueObjects;
 using Order.Api.Application.Extensions;
+using Order.Api.Domain.Enums;
 
 namespace Order.Api.Application.Order.CreateOrder;
 
@@ -34,6 +35,7 @@ public sealed class CreateOrderHandler(
                 billingAddress: billingAddress,
                 payment: payment,
                 items: orderItems,
+                status: OrderStatusEnum.Created,
                 correlationId: command.CorrelationId
             );
 

@@ -19,3 +19,6 @@
 
     ------
     Criar sistema de OTP? Simulando push notification?
+
+
+Rever todos os CRUDS e REPOSITORIES para padronizar

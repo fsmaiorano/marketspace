@@ -40,4 +40,9 @@ public static class OrderExtensions
             price: Price.Of(orderItemDto.Price)
         );
     }
+
+    public static List<OrderItemEntity> ToOrderItems(this List<OrderItemDto> items, OrderId orderId)
+    {
+        return items.Select(item => orderId.ToOrderItemEntity(item)).ToList();
+    }
 }

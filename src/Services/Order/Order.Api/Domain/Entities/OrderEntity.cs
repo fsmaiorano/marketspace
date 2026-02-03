@@ -82,6 +82,7 @@ public class OrderEntity : Aggregate<OrderId>
         Address shippingAddress,
         Address billingAddress,
         Payment payment,
+        OrderStatusEnum? status,
         IEnumerable<OrderItemEntity>? items = null,
         string? correlationId = null)
     {
@@ -102,6 +103,7 @@ public class OrderEntity : Aggregate<OrderId>
             ShippingAddress = shippingAddress,
             BillingAddress = billingAddress,
             Payment = payment,
+            Status = status ?? OrderStatusEnum.Created
         };
 
         foreach (OrderItemEntity orderItem in items)

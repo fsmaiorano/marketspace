@@ -1,4 +1,3 @@
-using BuildingBlocks.Messaging.DomainEvents;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Order.Api.Domain.Entities;
@@ -15,12 +14,12 @@ public class OrderRepository(IOrderDbContext dbContext, IDomainEventDispatcher e
         await dbContext.Orders.AddAsync(order, cancellationToken);
 
         int result = await dbContext.SaveChangesAsync(cancellationToken);
-        
-        if(result <= 0) return result;
+
+        if (result <= 0) return result;
 
         await eventDispatcher.DispatchAsync(order.DomainEvents, cancellationToken);
         order.ClearDomainEvents();
-        
+
         return result;
     }
 
@@ -28,20 +27,24 @@ public class OrderRepository(IOrderDbContext dbContext, IDomainEventDispatcher e
     {
         ArgumentNullException.ThrowIfNull(order, nameof(order));
 
-        OrderEntity storedEntity = await GetByIdAsync(order.Id, cancellationToken: cancellationToken)
-                                   ?? throw new InvalidOperationException(
-                                       $"Order with ID {order.Id} not found.");
+        OrderEntity storedEntity =
+            await GetByIdAsync(order.Id, isTrackingEnabled: true, cancellationToken: cancellationToken)
+            ?? throw new InvalidOperationException(
+                $"Order with ID {order.Id} not found.");
 
-        OrderEntity updatedEntity = OrderEntity.Update(
-            order.Id,
-            order.CustomerId,
-            order.ShippingAddress,
-            order.BillingAddress,
-            order.Payment,
-            order.Status,
-            order.Items.Count > 0 ? order.Items : storedEntity.Items);
+        if (dbContext is not DbContext context)
+            throw new InvalidOperationException("DbContext is not available for updating entity.");
 
-        dbContext.Orders.Update(updatedEntity);
+        context.Entry(storedEntity).CurrentValues.SetValues(order);
+
+        if (order.Items.Count <= 0)
+            return await dbContext.SaveChangesAsync(cancellationToken);
+
+        dbContext.OrderItems.RemoveRange(storedEntity.Items);
+        storedEntity.Items.Clear();
+        foreach (OrderItemEntity item in order.Items)
+            storedEntity.Items.Add(item);
+
         return await dbContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -59,10 +62,13 @@ public class OrderRepository(IOrderDbContext dbContext, IDomainEventDispatcher e
         CancellationToken cancellationToken = default)
     {
         if (isTrackingEnabled)
-            return await dbContext.Orders.FirstOrDefaultAsync(m => m.Id.Equals(id),
-                cancellationToken: cancellationToken);
+            return await dbContext.Orders
+                .Include(o => o.Items)
+                .FirstOrDefaultAsync(m => m.Id.Equals(id),
+                    cancellationToken: cancellationToken);
 
         return await dbContext.Orders.AsNoTracking()
+            .Include(o => o.Items)
             .FirstOrDefaultAsync(m => m.Id.Equals(id), cancellationToken);
     }
 }

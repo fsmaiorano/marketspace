@@ -54,14 +54,13 @@ public class UpdateMerchantEndpointUnitTest(TestFixture fixture) : Base.BaseTest
 
         _mockHandler
             .Setup(h => h.HandleAsync(It.IsAny<UpdateMerchantCommand>()))
-            .ReturnsAsync(Result<UpdateMerchantResult>.Success(new UpdateMerchantResult(isSuccess: true)));
+            .ReturnsAsync(Result<UpdateMerchantResult>.Success(new UpdateMerchantResult()));
 
         UpdateMerchantCommand command = new() { Id = merchantId };
 
         Result<UpdateMerchantResult> response = await _mockHandler.Object.HandleAsync(command);
 
         response.IsSuccess.Should().BeTrue();
-        response.Data?.IsSuccess.Should().BeTrue();
     }
 
     [Fact]
@@ -73,7 +72,6 @@ public class UpdateMerchantEndpointUnitTest(TestFixture fixture) : Base.BaseTest
         await Context.SaveChangesAsync();
 
         UpdateMerchantCommand command = new()
-
         {
             Id = merchant.Id.Value,
             Name = "Updated Catalog Name",
@@ -87,6 +85,5 @@ public class UpdateMerchantEndpointUnitTest(TestFixture fixture) : Base.BaseTest
 
         UpdateMerchantResult? result = await response.Content.ReadFromJsonAsync<UpdateMerchantResult>();
         result.Should().NotBeNull();
-        result!.IsSuccess.Should().BeTrue();
     }
 }

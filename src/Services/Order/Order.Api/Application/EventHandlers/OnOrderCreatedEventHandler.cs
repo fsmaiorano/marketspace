@@ -32,7 +32,7 @@ public class OnOrderCreatedEventHandler(
         await eventBus.PublishAsync(integrationEvent, cancellationToken);
 
         logger.LogInformation(LogTypeEnum.Application,
-            "Order created integration event published. OrderId: {OrderId}, CustomerId: {CustomerId}, TotalAmount: {TotalAmount}, CorrelationId: {CorrelationId}",
+            $"Order created integration event published. OrderId: {@event.Order.Id}, CustomerId: {@event.Order.CustomerId}, TotalAmount: {@event.Order.TotalAmount}, CorrelationId: {@event.CorrelationId}",
             @event.Order.Id.Value, @event.Order.CustomerId.Value, @event.Order.TotalAmount.Value, @event.CorrelationId);
     }
 }
