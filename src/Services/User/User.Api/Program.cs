@@ -1,3 +1,4 @@
+using MarketSpace.ServiceDefaults;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -9,7 +10,6 @@ using User.Api.Data.Models;
 using User.Api.Endpoints;
 using User.Api.Extensions;
 using User.Api.Services;
-using MarketSpace.ServiceDefaults;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
