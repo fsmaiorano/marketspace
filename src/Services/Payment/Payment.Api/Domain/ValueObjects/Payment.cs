@@ -37,11 +37,11 @@ public record Payment
         if (string.IsNullOrWhiteSpace(paymentString))
             throw new ArgumentException("Payment string cannot be empty.", nameof(paymentString));
 
-        var parts = paymentString.Split('|');
+        string[] parts = paymentString.Split('|');
         if (parts.Length != 5)
             throw new ArgumentException("Invalid payment string format.", nameof(paymentString));
 
-        if (!int.TryParse(parts[4], out var paymentMethod))
+        if (!int.TryParse(parts[4], out int paymentMethod))
             throw new ArgumentException("Invalid payment method format.", nameof(paymentString));
 
         return new Payment(parts[0], parts[1], parts[2], parts[3], paymentMethod);
