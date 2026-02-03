@@ -7,27 +7,28 @@ public class CheckoutDataDto
 {
     public Guid CustomerId { get; init; }
     public string UserName { get; init; } = null!;
-    public CheckoutAddressDto Address { get; init; } = null!;
-    public CheckoutPaymentDto Payment { get; init; } = null!;
+    public CheckoutAddressDto? Address { get; init; }
+    public CheckoutPaymentDto? Payment { get; init; }
     public string? CorrelationId { get; init; }
 }
 
 public class CheckoutAddressDto
 {
-    public string FirstName { get; init; } = null!;
-    public string LastName { get; init; } = null!;
-    public string EmailAddress { get; init; } = null!;
-    public string AddressLine { get; init; } = null!;
-    public string Country { get; init; } = null!;
-    public string State { get; init; } = null!;
-    public string ZipCode { get; init; } = null!;
+    public string? FirstName { get; init; }
+    public string? LastName { get; init; }
+    public string? EmailAddress { get; init; }
+    public string? AddressLine { get; init; }
+    public string? Country { get; init; }
+    public string? State { get; init; }
+    public string? ZipCode { get; init; }
+    public string? Coordinates { get; set; }
 }
 
 public class CheckoutPaymentDto
 {
-    public string CardName { get; init; } = null!;
-    public string CardNumber { get; init; } = null!;
-    public string Expiration { get; init; } = null!;
-    public string Cvv { get; init; } = null!;
+    public string? CardName { get; init; }
+    public string? CardNumber { get; init; }
+    public string? Expiration { get; init; }
+    public string? Cvv { get; init; }
     public int PaymentMethod { get; init; }
 }

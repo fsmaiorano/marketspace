@@ -30,7 +30,8 @@ public class OnBasketCheckoutSubscriber(
                 AddressLine = @event.ShippingAddress.AddressLine,
                 Country = @event.ShippingAddress.Country,
                 State = @event.ShippingAddress.State,
-                ZipCode = @event.ShippingAddress.ZipCode
+                ZipCode = @event.ShippingAddress.ZipCode,
+                Coordinates =  @event.ShippingAddress.Coordinates
             },
             BillingAddress = new AddressDto
             {
@@ -40,7 +41,8 @@ public class OnBasketCheckoutSubscriber(
                 AddressLine = @event.BillingAddress.AddressLine,
                 Country = @event.BillingAddress.Country,
                 State = @event.BillingAddress.State,
-                ZipCode = @event.BillingAddress.ZipCode
+                ZipCode = @event.BillingAddress.ZipCode,
+                Coordinates =  @event.BillingAddress.Coordinates
             },
             Payment = new PaymentDto
             {
@@ -50,7 +52,7 @@ public class OnBasketCheckoutSubscriber(
                 Cvv = @event.Payment.Cvv,
                 PaymentMethod = @event.Payment.PaymentMethod
             },
-            Status = OrderStatusEnum.Pending,
+            Status = OrderStatusEnum.Created,
             Items = [.. @event.Items.Select(item => new OrderItemDto
             {
                 CatalogId = item.CatalogId,

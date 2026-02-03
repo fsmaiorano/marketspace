@@ -22,31 +22,33 @@ public class OnBasketCheckoutEventHandler(IAppLogger<OnBasketCheckoutEventHandle
             UserName = @event.CheckoutData.UserName,
             ShippingAddress = new AddressData
             {
-                FirstName = @event.CheckoutData.Address.FirstName,
-                LastName = @event.CheckoutData.Address.LastName,
-                EmailAddress = @event.CheckoutData.Address.EmailAddress,
-                AddressLine = @event.CheckoutData.Address.AddressLine,
-                Country = @event.CheckoutData.Address.Country,
-                State = @event.CheckoutData.Address.State,
-                ZipCode = @event.CheckoutData.Address.ZipCode
+                FirstName = @event.CheckoutData.Address?.FirstName ?? string.Empty,
+                LastName = @event.CheckoutData.Address?.LastName ?? string.Empty,
+                EmailAddress = @event.CheckoutData.Address?.EmailAddress ?? string.Empty,
+                AddressLine = @event.CheckoutData.Address?.AddressLine ?? string.Empty,
+                Country = @event.CheckoutData.Address?.Country ?? string.Empty,
+                State = @event.CheckoutData.Address?.State ?? string.Empty,
+                ZipCode = @event.CheckoutData.Address?.ZipCode ?? string.Empty,
+                Coordinates =  @event.CheckoutData.Address?.Coordinates ?? string.Empty,
             },
             BillingAddress = new AddressData
             {
-                FirstName = @event.CheckoutData.Address.FirstName,
-                LastName = @event.CheckoutData.Address.LastName,
-                EmailAddress = @event.CheckoutData.Address.EmailAddress,
-                AddressLine = @event.CheckoutData.Address.AddressLine,
-                Country = @event.CheckoutData.Address.Country,
-                State = @event.CheckoutData.Address.State,
-                ZipCode = @event.CheckoutData.Address.ZipCode
+                FirstName = @event.CheckoutData.Address?.FirstName ?? string.Empty,
+                LastName = @event.CheckoutData.Address?.LastName ?? string.Empty,
+                EmailAddress = @event.CheckoutData.Address?.EmailAddress ?? string.Empty,
+                AddressLine = @event.CheckoutData.Address?.AddressLine ?? string.Empty,
+                Country = @event.CheckoutData.Address?.Country ?? string.Empty,
+                State = @event.CheckoutData.Address?.State ?? string.Empty,
+                ZipCode = @event.CheckoutData.Address?.ZipCode ?? string.Empty,
+                Coordinates =  @event.CheckoutData.Address?.Coordinates ?? string.Empty,
             },
             Payment = new PaymentData
             {
-                CardName = @event.CheckoutData.Payment.CardName,
-                CardNumber = @event.CheckoutData.Payment.CardNumber,
-                Expiration = @event.CheckoutData.Payment.Expiration,
-                Cvv = @event.CheckoutData.Payment.Cvv,
-                PaymentMethod = @event.CheckoutData.Payment.PaymentMethod
+                CardName = @event.CheckoutData.Payment?.CardName ?? string.Empty,
+                CardNumber = @event.CheckoutData.Payment?.CardNumber ?? string.Empty,
+                Expiration = @event.CheckoutData.Payment?.Expiration ?? string.Empty,
+                Cvv = @event.CheckoutData.Payment?.Cvv ?? string.Empty,
+                PaymentMethod = @event.CheckoutData.Payment?.PaymentMethod ?? 0
             },
             Items = [.. @event.ShoppingCart.Items.Select(item => new OrderItemData
             {

@@ -7,19 +7,20 @@
 | Gateway       | 5004 - 5054 | 6004 - 6064       | 8080 - 8081   |
 | Merchant      | 5005 - 5055 | 6005 - 6065       | 8080 - 8081   |
 | User          | 5006 - 5066 | 6006 - 6066       | 8080 - 8081   |
+| Payment       | 5007 - 5067 | 6007 - 6067       | 8080 - 8081   |
 | WebApp        | 3000 - xxxx | 80 + 4001         | 4000          |
 | BFF           | 4000 - xxxx | 5100 - 5150       | 8080 - 8081   |
 
-
-| Others        | Local Env | Docker Env      | Docker Inside |
-|---------------|-----------|-----------------|---------------|
-| CatalogDb     | 5432      | 5432            | 5432          |
-| BasketDb      | 5433      | 5433            | 5433          |
-| DiscountDb    | Sqlite    | Sqlite          | Sqlite        |
-| OrderingDb    | 5435      | 5435            | 5435          |
-| MerchantDb    | 5436      | 5436            | 5436          |
-| UserDb        | 5437      | 5437            | 5437          |
-| RabbitMQ      | 5672      | 5672            | 5672          |
-| RabbitMQ Mgmt | 15672     | 15672           | 15672         |
-| Minio         | 9000      | 9000            | 9000          |
-| Minio Console | 9001      | 9001            | 9001          |
+| Others        | Local Env | Docker Env | Docker Inside |
+|---------------|-----------|------------|---------------|
+| CatalogDb     | 5432      | 5432       | 5432          |
+| BasketDb      | 5433      | 5433       | 5433          |
+| DiscountDb    | Sqlite    | Sqlite     | Sqlite        |
+| OrderingDb    | 5435      | 5435       | 5435          |
+| MerchantDb    | 5436      | 5436       | 5436          |
+| UserDb        | 5437      | 5437       | 5437          |
+| PaymentDb     | 5438      | 5438       | 5438          |
+| RabbitMQ      | 5672      | 5672       | 5672          |
+| RabbitMQ Mgmt | 15672     | 15672      | 15672         |
+| Minio         | 9000      | 9000       | 9000          |
+| Minio Console | 9001      | 9001       | 9001          |

@@ -9,4 +9,5 @@ public class AddressDto
     public string Country { get; set; } = null!;
     public string State { get; set; } = null!;
     public string ZipCode { get; set; } = null!;
+    public string Coordinates { get; set; } = null!;
 }

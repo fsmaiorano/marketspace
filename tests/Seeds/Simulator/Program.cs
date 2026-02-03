@@ -126,7 +126,10 @@ else
                 Username = targetUser.UserName!,
                 Items = catalogItems.Select(c => new ShoppingCartItemEntity
                 {
-                    ProductId = c.Id.Value.ToString(), ProductName = c.Name, Price = c.Price.Value, Quantity = 1
+                    ProductId = c.Id.Value.ToString(),
+                    ProductName = c.Name,
+                    Price = c.Price.Value,
+                    Quantity = 1
                 }).ToList()
             };
 
@@ -195,7 +198,8 @@ else
                     Expiration = faker.Date.Future().ToString("MM/yy"),
                     Cvv = faker.Random.Number(100, 999).ToString(),
                     PaymentMethod = 1,
-                    RequestId = Guid.NewGuid().ToString()
+                    RequestId = Guid.NewGuid().ToString(),
+                    Coordinates = $"{faker.Address.Latitude()},{faker.Address.Longitude()}"
                 };
 
                 Console.WriteLine($"   Posting checkout request to: {httpClient.BaseAddress}/basket/checkout");

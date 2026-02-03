@@ -13,7 +13,7 @@ public static class OrderBuilder
 {
     private static readonly OrderStatusEnum[] OrderStatuses =
     {
-        OrderStatusEnum.Pending, OrderStatusEnum.Processing, OrderStatusEnum.Completed,
+        OrderStatusEnum.Created, OrderStatusEnum.Processing, OrderStatusEnum.Completed,
         OrderStatusEnum.ReadyForDelivery, OrderStatusEnum.DeliveryInProgress, OrderStatusEnum.Delivered,
         OrderStatusEnum.Finalized, OrderStatusEnum.Cancelled, OrderStatusEnum.CancelledByCustomer
     };
@@ -57,7 +57,8 @@ public static class OrderBuilder
                 addressLine: f.Address.StreetAddress(),
                 country: f.Address.Country(),
                 state: f.Address.State(),
-                zipCode: f.Address.ZipCode()
+                zipCode: f.Address.ZipCode(),
+                coordinates: $"{f.Address.Latitude()},{f.Address.Longitude()}"
             ));
     }
 
@@ -82,6 +83,7 @@ public static class OrderBuilder
             .RuleFor(a => a.AddressLine, f => f.Address.StreetAddress())
             .RuleFor(a => a.Country, f => f.Address.Country())
             .RuleFor(a => a.State, f => f.Address.State())
+            .RuleFor(a => a.Coordinates, f => $"{f.Address.Latitude()},{f.Address.Longitude()}")
             .RuleFor(a => a.ZipCode, f => f.Address.ZipCode());
     }
 

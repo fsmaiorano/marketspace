@@ -1,43 +1,52 @@
+using BuildingBlocks.Exceptions;
 using BuildingBlocks.Loggers;
+using BuildingBlocks.Middlewares;
+using BuildingBlocks.Services.Correlation;
 using Payment.Api.Application;
+using Payment.Api.Infrastructure;
+using Payment.Api.Infrastructure.Data.Extensions;
+using Serilog;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplicationServices(builder.Configuration)
+    .AddInfrastructureServices(builder.Configuration)
     .AddCustomLoggers();
+
 builder.Services.AddOpenApi();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICorrelationIdService, CorrelationIdService>();
+
+builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+
+builder.Host.UseSerilog();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    await app.InitialiseDatabaseAsync();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
-string[] summaries = new[]
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+    options.RoutePrefix = string.Empty;
+});
 
-app.MapGet("/weatherforecast", () =>
-    {
-        WeatherForecast[] forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
-    })
-    .WithName("GetWeatherForecast");
+app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseExceptionHandler(options => { });
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+namespace Payment.Api
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    public partial class PaymentProgram;
 }
