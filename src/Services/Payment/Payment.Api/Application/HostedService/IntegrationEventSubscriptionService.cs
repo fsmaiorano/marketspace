@@ -1,4 +1,3 @@
-using BuildingBlocks.Messaging;
 using BuildingBlocks.Messaging.IntegrationEvents;
 using BuildingBlocks.Messaging.Interfaces;
 using Payment.Api.Application.Subscribers;

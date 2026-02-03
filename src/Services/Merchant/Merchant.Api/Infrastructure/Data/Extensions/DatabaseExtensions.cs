@@ -5,7 +5,7 @@ namespace Merchant.Api.Infrastructure.Data.Extensions;
 public static class DatabaseExtensions
 {
     private static readonly SemaphoreSlim _migrationLock = new(1, 1);
-    
+
     public static async Task InitialiseDatabaseAsync(this WebApplication app)
     {
         using IServiceScope scope = app.Services.CreateScope();
@@ -18,12 +18,28 @@ public static class DatabaseExtensions
             // Check if database exists and if migrations are needed
             if (context.Database.IsRelational())
             {
-                var pendingMigrations = (await context.Database.GetPendingMigrationsAsync()).ToList();
-                
+                // Ensure the database exists (but don't create schema yet)
+                // This will only create the database, not the tables
+                try
+                {
+                    bool canConnect = await context.Database.CanConnectAsync();
+                    if (!canConnect)
+                    {
+                        Console.WriteLine("Merchant: Database does not exist, will be created during migration.");
+                    }
+                }
+                catch (Exception)
+                {
+                    // Database doesn't exist, it will be created during migration
+                    Console.WriteLine("Merchant: Database will be created during migration.");
+                }
+
+                List<string> pendingMigrations = (await context.Database.GetPendingMigrationsAsync()).ToList();
+
                 if (pendingMigrations.Any())
                 {
                     Console.WriteLine($"Merchant: Applying {pendingMigrations.Count()} pending migration(s)...");
-                    
+
                     // Apply migrations with retry logic
                     int retries = 3;
                     while (retries > 0)
@@ -37,7 +53,8 @@ public static class DatabaseExtensions
                         catch (Exception ex) when (retries > 1)
                         {
                             retries--;
-                            Console.WriteLine($"Merchant migration attempt failed, retrying... ({retries} attempts left). Error: {ex.Message}");
+                            Console.WriteLine(
+                                $"Merchant migration attempt failed, retrying... ({retries} attempts left). Error: {ex.Message}");
                             await Task.Delay(TimeSpan.FromSeconds(2));
                         }
                     }

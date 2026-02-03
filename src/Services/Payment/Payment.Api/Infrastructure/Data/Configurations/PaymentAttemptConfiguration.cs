@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Payment.Api.Domain.Entities;
+using Payment.Api.Domain.ValueObjects;
 
 namespace Payment.Api.Infrastructure.Data.Configurations;
 
@@ -10,9 +11,10 @@ public class PaymentAttemptConfiguration : IEntityTypeConfiguration<PaymentAttem
     {
         builder.ToTable("PaymentAttempts");
 
-        builder.HasKey(a => a.Id);
-
-        builder.Property(a => a.Id).ValueGeneratedNever();
+        builder.HasKey(m => m.Id);
+        builder.Property(o => o.Id)
+            .HasConversion(orderId => orderId.Value,
+                dbId => PaymentAttemptId.Of(dbId));
 
         builder.Property(a => a.PaymentId).IsRequired();
 
@@ -33,8 +35,5 @@ public class PaymentAttemptConfiguration : IEntityTypeConfiguration<PaymentAttem
 
         builder.Property(a => a.ResponseMessage)
             .HasMaxLength(255);
-
-        builder.Property(a => a.CreatedAt).IsRequired();
     }
 }
-

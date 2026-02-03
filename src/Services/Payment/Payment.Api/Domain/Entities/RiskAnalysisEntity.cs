@@ -1,10 +1,12 @@
+using BuildingBlocks.Abstractions;
 using Payment.Api.Domain.Enums;
+using Payment.Api.Domain.ValueObjects;
 
 namespace Payment.Api.Domain.Entities;
 
-public class RiskAnalysisEntity
+public class RiskAnalysisEntity : Entity<RiskAnalysisId>
 {
-    public Guid PaymentId { get; private set; }
+    public PaymentId PaymentId { get; private set; }
 
     public string? IpAddress { get; private set; }
     public string? Country { get; private set; }
@@ -13,7 +15,7 @@ public class RiskAnalysisEntity
 
     private RiskAnalysisEntity() { }
 
-    public RiskAnalysisEntity(Guid paymentId, string? ip, string? country, int? score, RiskDecisionEnum decision)
+    public RiskAnalysisEntity(PaymentId paymentId, string? ip, string? country, int? score, RiskDecisionEnum decision)
     {
         PaymentId = paymentId;
         IpAddress = ip;

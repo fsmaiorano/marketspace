@@ -6,11 +6,7 @@ public record Payment
     public string CardName { get; init; } = null!;
     public string Expiration { get; init; } = null!;
     public string Cvv { get; init; } = null!;
-    public int PaymentMethod { get; set; } = 0!;
-
-    protected Payment()
-    {
-    }
+    public int PaymentMethod { get; init; } = 0!;
 
     private Payment(string cardNumber, string cardName, string expiration, string cvv, int paymentMethod)
     {
@@ -19,6 +15,11 @@ public record Payment
         Expiration = expiration;
         Cvv = cvv;
         PaymentMethod = paymentMethod;
+    }
+
+    public static Payment Create(string cardNumber, string cardName, string expiration, string cvv, int paymentMethod)
+    {
+        return Of(cardNumber, cardName, expiration, cvv, paymentMethod);
     }
 
     public static Payment Of(string cardNumber, string cardName, string expiration, string cvv, int paymentMethod)
