@@ -20,7 +20,7 @@ public class CatalogRepository(ICatalogDbContext dbContext) : ICatalogRepository
     {
         ArgumentNullException.ThrowIfNull(catalog, nameof(catalog));
 
-        CatalogEntity storedEntity = await GetByIdAsync(catalog.Id, cancellationToken: cancellationToken)
+        CatalogEntity storedEntity = await GetByIdAsync(catalog.Id, isTrackingEnabled: true, cancellationToken: cancellationToken)
                                      ?? throw new InvalidOperationException(
                                          $"Catalog with ID {catalog.Id} not found.");
 

@@ -32,20 +32,21 @@ public class OrderRepository(IOrderDbContext dbContext, IDomainEventDispatcher e
             ?? throw new InvalidOperationException(
                 $"Order with ID {order.Id} not found.");
 
-        if (dbContext is not DbContext context)
-            throw new InvalidOperationException("DbContext is not available for updating entity.");
+        storedEntity.Update(
+            order.ShippingAddress,
+            order.BillingAddress,
+            order.Payment,
+            order.Status,
+            order.Items);
 
-        context.Entry(storedEntity).CurrentValues.SetValues(order);
+        int result = await dbContext.SaveChangesAsync(cancellationToken);
 
-        if (order.Items.Count <= 0)
-            return await dbContext.SaveChangesAsync(cancellationToken);
+        if (result <= 0) return result;
 
-        dbContext.OrderItems.RemoveRange(storedEntity.Items);
-        storedEntity.Items.Clear();
-        foreach (OrderItemEntity item in order.Items)
-            storedEntity.Items.Add(item);
+        await eventDispatcher.DispatchAsync(storedEntity.DomainEvents, cancellationToken);
+        storedEntity.ClearDomainEvents();
 
-        return await dbContext.SaveChangesAsync(cancellationToken);
+        return result;
     }
 
     public async Task<int> RemoveAsync(OrderId id, CancellationToken cancellationToken = default)

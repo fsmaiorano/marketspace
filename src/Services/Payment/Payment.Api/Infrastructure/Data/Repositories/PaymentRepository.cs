@@ -1,4 +1,3 @@
-using BuildingBlocks.Messaging.DomainEvents;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Payment.Api.Domain.Entities;
@@ -28,8 +27,22 @@ public class PaymentRepository(IPaymentDbContext dbContext, IDomainEventDispatch
     {
         ArgumentNullException.ThrowIfNull(payment, nameof(payment));
 
+        bool exists = await dbContext.Payments
+            .AsNoTracking()
+            .AnyAsync(p => p.Id == payment.Id, cancellationToken);
+
+        if (!exists)
+            throw new InvalidOperationException($"Payment with ID {payment.Id} not found.");
+
         dbContext.Payments.Update(payment);
-        return await dbContext.SaveChangesAsync(cancellationToken);
+        int result = await dbContext.SaveChangesAsync(cancellationToken);
+
+        if (result <= 0) return result;
+
+        await eventDispatcher.DispatchAsync(payment.DomainEvents, cancellationToken);
+        payment.ClearDomainEvents();
+
+        return result;
     }
 
     public async Task<int> RemoveAsync(PaymentId id, CancellationToken cancellationToken = default)
