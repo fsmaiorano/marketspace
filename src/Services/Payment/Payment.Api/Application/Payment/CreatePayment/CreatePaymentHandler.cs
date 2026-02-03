@@ -22,7 +22,7 @@ public sealed class CreatePaymentHandler(
                 command.OrderId,
                 command.Amount,
                 command.Currency,
-                PaymentMethod.Of(command.Method),
+                PaymentMethod.Of(command.Method.ToString()),
                 command.Provider
              );
              

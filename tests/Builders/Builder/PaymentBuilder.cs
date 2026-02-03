@@ -37,7 +37,7 @@ public static class PaymentBuilder
             .RuleFor(c => c.OrderId, f => orderId == Guid.Empty ? f.Random.Guid() : orderId)
             .RuleFor(c => c.Amount, f => f.Finance.Amount(1, 1000))
             .RuleFor(c => c.Currency, f => f.PickRandom(Currencies))
-            .RuleFor(c => c.Method, f => f.PickRandom(Methods))
+            .RuleFor(c => c.Method, f => f.Random.Number(0, Methods.Length - 1))
             .RuleFor(c => c.Provider, f => f.PickRandom(Providers));
     }
 

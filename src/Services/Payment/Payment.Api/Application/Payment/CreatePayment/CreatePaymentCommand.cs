@@ -4,9 +4,9 @@ namespace Payment.Api.Application.Payment.CreatePayment;
 
 public class CreatePaymentCommand
 {
-    public Guid OrderId { get; set; }
-    public decimal Amount { get; set; }
-    public string Currency { get; set; } = string.Empty;
-    public string Method { get; set; } = string.Empty;
-    public string Provider { get; set; } = string.Empty;
+    public Guid OrderId { get; init; }
+    public decimal Amount { get; init; }
+    public string Currency { get; init; } = string.Empty;
+    public int Method { get; init; }
+    public string Provider { get; init; } = string.Empty;
 }
