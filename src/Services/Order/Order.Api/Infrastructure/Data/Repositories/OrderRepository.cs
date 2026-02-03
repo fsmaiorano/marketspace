@@ -10,7 +10,7 @@ public class OrderRepository(IOrderDbContext dbContext, IDomainEventDispatcher e
 {
     public async Task<int> AddAsync(OrderEntity order, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(order, nameof(order));
+        ArgumentNullException.ThrowIfNull(order);
         await dbContext.Orders.AddAsync(order, cancellationToken);
 
         int result = await dbContext.SaveChangesAsync(cancellationToken);
@@ -25,35 +25,22 @@ public class OrderRepository(IOrderDbContext dbContext, IDomainEventDispatcher e
 
     public async Task<int> UpdateAsync(OrderEntity order, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(order, nameof(order));
-
-        OrderEntity storedEntity =
-            await GetByIdAsync(order.Id, isTrackingEnabled: true, cancellationToken: cancellationToken)
-            ?? throw new InvalidOperationException(
-                $"Order with ID {order.Id} not found.");
-
-        storedEntity.Update(
-            order.ShippingAddress,
-            order.BillingAddress,
-            order.Payment,
-            order.Status,
-            order.Items);
+        ArgumentNullException.ThrowIfNull(order);
 
         int result = await dbContext.SaveChangesAsync(cancellationToken);
 
         if (result <= 0) return result;
 
-        await eventDispatcher.DispatchAsync(storedEntity.DomainEvents, cancellationToken);
-        storedEntity.ClearDomainEvents();
+        await eventDispatcher.DispatchAsync(order.DomainEvents, cancellationToken);
+        order.ClearDomainEvents();
 
         return result;
     }
 
     public async Task<int> RemoveAsync(OrderId id, CancellationToken cancellationToken = default)
     {
-        OrderEntity? storedEntity = await GetByIdAsync(id, cancellationToken: cancellationToken)
-                                    ?? throw new InvalidOperationException(
-                                        $"Order with ID {id} not found.");
+        OrderEntity storedEntity = await GetByIdAsync(id, isTrackingEnabled: true, cancellationToken)
+            ?? throw new InvalidOperationException($"Order with ID {id} not found.");
 
         dbContext.Orders.Remove(storedEntity);
         return await dbContext.SaveChangesAsync(cancellationToken);
@@ -62,14 +49,11 @@ public class OrderRepository(IOrderDbContext dbContext, IDomainEventDispatcher e
     public async Task<OrderEntity?> GetByIdAsync(OrderId id, bool isTrackingEnabled = true,
         CancellationToken cancellationToken = default)
     {
-        if (isTrackingEnabled)
-            return await dbContext.Orders
-                .Include(o => o.Items)
-                .FirstOrDefaultAsync(m => m.Id.Equals(id),
-                    cancellationToken: cancellationToken);
+        IQueryable<OrderEntity> query = dbContext.Orders.Include(o => o.Items);
 
-        return await dbContext.Orders.AsNoTracking()
-            .Include(o => o.Items)
-            .FirstOrDefaultAsync(m => m.Id.Equals(id), cancellationToken);
+        if (!isTrackingEnabled)
+            query = query.AsNoTracking();
+
+        return await query.FirstOrDefaultAsync(m => m.Id.Equals(id), cancellationToken);
     }
 }

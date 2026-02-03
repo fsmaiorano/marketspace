@@ -1,6 +1,6 @@
-using Basket.Api.Application.Basket.CheckoutBasket.Dtos;
 using Basket.Api.Domain.Entities;
 using Basket.Api.Domain.Repositories;
+using Basket.Api.Domain.ValueObjects;
 using BuildingBlocks;
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Services.Correlation;
@@ -38,45 +38,43 @@ public class CheckoutBasketHandler(
                 "Basket found with {ItemCount} items for user: {Username}, CorrelationId: {CorrelationId}",
                 basket.Items.Count, command.UserName, correlationId);
 
-            // Create Address DTO only if address fields are provided
-            CheckoutAddressDto? address = null;
+            // Create Address Value Object only if address fields are provided
+            CheckoutAddress? address = null;
             if (!string.IsNullOrEmpty(command.FirstName) || !string.IsNullOrEmpty(command.AddressLine))
             {
-                address = new CheckoutAddressDto
-                {
-                    FirstName = command.FirstName,
-                    LastName = command.LastName,
-                    EmailAddress = command.EmailAddress,
-                    AddressLine = command.AddressLine,
-                    Country = command.Country,
-                    State = command.State,
-                    ZipCode = command.ZipCode,
-                    Coordinates = command.Coordinates
-                };
+                address = CheckoutAddress.Create(
+                    command.FirstName,
+                    command.LastName,
+                    command.EmailAddress,
+                    command.AddressLine,
+                    command.Country,
+                    command.State,
+                    command.ZipCode,
+                    command.Coordinates
+                );
             }
 
-            // Create Payment DTO only if payment fields are provided
-            CheckoutPaymentDto? payment = null;
+            // Create Payment Value Object only if payment fields are provided
+            CheckoutPayment? payment = null;
             if (!string.IsNullOrEmpty(command.CardName) || !string.IsNullOrEmpty(command.CardNumber))
             {
-                payment = new CheckoutPaymentDto
-                {
-                    CardName = command.CardName,
-                    CardNumber = command.CardNumber,
-                    Expiration = command.Expiration,
-                    Cvv = command.Cvv,
-                    PaymentMethod = command.PaymentMethod
-                };
+                payment = CheckoutPayment.Create(
+                    command.CardName,
+                    command.CardNumber,
+                    command.Expiration,
+                    command.Cvv,
+                    command.PaymentMethod
+                );
             }
        
-            CheckoutDataDto checkoutData = new()
-            {
-                CustomerId = command.CustomerId,
-                UserName = command.UserName,
-                Address = address,
-                Payment = payment,
-                CorrelationId = correlationId
-            };
+            // Create CheckoutData Value Object
+            CheckoutData checkoutData = CheckoutData.Create(
+                command.CustomerId,
+                command.UserName,
+                address,
+                payment,
+                correlationId
+            );
 
             await basketDataRepository.CheckoutAsync(command.UserName, checkoutData);
             
