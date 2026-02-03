@@ -4,6 +4,7 @@ using Basket.Api.Infrastructure.Data.Repositories;
 using BuildingBlocks.Messaging.DomainEvents;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Npgsql;
 
 namespace Basket.Api.Infrastructure;
@@ -27,6 +28,7 @@ public static class DependencyInjection
             options.UseNpgsql(dataSource, npgsqlOptions =>
             {
                 npgsqlOptions.MigrationsAssembly(typeof(BasketDbContext).Assembly.FullName);
+                options.ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
             });
         });
 
