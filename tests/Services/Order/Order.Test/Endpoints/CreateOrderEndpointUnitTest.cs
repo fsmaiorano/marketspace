@@ -5,8 +5,6 @@ namespace Order.Test.Endpoints;
 
 public class CreateOrderEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fixture)
 {
-    private readonly Mock<ICreateOrderHandler> _mockHandler = new();
-
     [Fact]
     public async Task Returns_Ok_When_Order_Is_Created_Successfully()
     {

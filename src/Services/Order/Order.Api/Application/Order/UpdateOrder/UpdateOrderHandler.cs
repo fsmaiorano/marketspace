@@ -1,5 +1,6 @@
 using BuildingBlocks;
 using BuildingBlocks.Loggers;
+using Order.Api.Application.Extensions;
 using Order.Api.Domain.Entities;
 using Order.Api.Domain.Repositories;
 using Order.Api.Domain.ValueObjects;
@@ -7,7 +8,7 @@ using Order.Api.Domain.ValueObjects;
 namespace Order.Api.Application.Order.UpdateOrder;
 
 public sealed class UpdateOrderHandler(
-    IOrderRepository repository, 
+    IOrderRepository repository,
     IAppLogger<UpdateOrderHandler> logger)
     : IUpdateOrderHandler
 {
@@ -15,22 +16,29 @@ public sealed class UpdateOrderHandler(
     {
         try
         {
-            logger.LogInformation(LogTypeEnum.Application, "Processing update order request for: {OrderId}", command.Id);
-            
-            // OrderEntity orderEntity = OrderEntity.Create(
-            // );
-            //
-            // orderEntity.Id = OrderId.Of(command.Id);
-            //
-            // await repository.UpdateAsync(orderEntity);
-            
+            logger.LogInformation(LogTypeEnum.Application, "Processing update order request for: {OrderId}",
+                command.Id);
+
+            OrderId orderId = OrderId.Of(command.Id);
+            OrderEntity orderEntity = OrderEntity.Create(
+                orderId,
+                CustomerId.Of(command.CustomerId),
+                command.ShippingAddress.ToAddress(),
+                command.BillingAddress.ToAddress(),
+                command.Payment.ToPayment(),
+                command.Status,
+                command.Items.ToOrderItems(orderId));
+
+            await repository.UpdateAsync(orderEntity);
+
             logger.LogInformation(LogTypeEnum.Business, "Order updated successfully. OrderId: {OrderId}", command.Id);
 
-            return Result<UpdateOrderResult>.Success(new UpdateOrderResult(true));
+            return Result<UpdateOrderResult>.Success(new UpdateOrderResult());
         }
         catch (Exception ex)
         {
-            logger.LogError(LogTypeEnum.Exception, ex, "An error occurred while updating the order: {Command}", command);
+            logger.LogError(LogTypeEnum.Exception, ex, "An error occurred while updating the order: {Command}",
+                command);
             return Result<UpdateOrderResult>.Failure("An error occurred while updating the order.");
         }
     }

@@ -16,10 +16,26 @@ public class DeleteOrderEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fi
     private readonly Mock<IDeleteOrderHandler> _mockHandler = new();
 
     [Fact]
+    public async Task Can_Delete_Order_Endpoint()
+    {
+        OrderEntity? order = OrderBuilder.CreateOrderFaker().Generate();
+        
+        order.Id = OrderId.Of(Guid.CreateVersion7());
+
+        Context.Orders.Add(order);
+        await Context.SaveChangesAsync();
+
+        DeleteOrderCommand command = OrderBuilder.CreateDeleteOrderCommandFaker(order.Id.Value).Generate();
+        HttpRequestMessage request = new(HttpMethod.Delete, "/order") { Content = JsonContent.Create(command) };
+        HttpResponseMessage response = await HttpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+        DeleteOrderResult? result = await response.Content.ReadFromJsonAsync<DeleteOrderResult>();
+        result.Should().NotBeNull();
+    }
+    
+    [Fact]
     public async Task Returns_Ok_When_Order_Is_Deleted_Successfully()
     {
-        Guid orderId = Guid.CreateVersion7();
-
         DeleteOrderCommand command = OrderBuilder.CreateDeleteOrderCommandFaker().Generate();
         Result<DeleteOrderResult> result = Result<DeleteOrderResult>.Success(new DeleteOrderResult(true));
 
@@ -56,23 +72,5 @@ public class DeleteOrderEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fi
         Func<Task> act = async () => await _mockHandler.Object.HandleAsync(command);
         await act.Should().ThrowAsync<Exception>()
             .WithMessage("Unexpected error");
-    }
-
-    [Fact]
-    public async Task Can_Delete_Order_Endpoint()
-    {
-        OrderEntity? order = OrderBuilder.CreateOrderFaker().Generate();
-        
-        order.Id = OrderId.Of(Guid.CreateVersion7());
-
-        Context.Orders.Add(order);
-        await Context.SaveChangesAsync();
-
-        DeleteOrderCommand command = OrderBuilder.CreateDeleteOrderCommandFaker(order.Id.Value).Generate();
-        HttpRequestMessage request = new(HttpMethod.Delete, "/order") { Content = JsonContent.Create(command) };
-        HttpResponseMessage response = await HttpClient.SendAsync(request);
-        response.EnsureSuccessStatusCode();
-        DeleteOrderResult? result = await response.Content.ReadFromJsonAsync<DeleteOrderResult>();
-        result.Should().NotBeNull();
     }
 }

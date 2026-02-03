@@ -33,6 +33,7 @@ public static class OrderBuilder
                 shippingAddress: CreateAddressFaker().Generate(),
                 billingAddress: CreateAddressFaker().Generate(),
                 payment: CreatePaymentFaker().Generate(),
+                status: f.PickRandom(OrderStatuses),
                 items: CreateOrderItemFaker().Generate(f.Random.Int(1, 5))
             ));
     }
