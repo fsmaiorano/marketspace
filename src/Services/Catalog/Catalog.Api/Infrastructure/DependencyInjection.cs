@@ -23,6 +23,7 @@ public static class DependencyInjection
         {
             options.AddInterceptors(serviceProvider.GetRequiredService<ISaveChangesInterceptor>());
             options.UseNpgsql(connectionString);
+            options.ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
 
         services.AddHttpContextAccessor();
