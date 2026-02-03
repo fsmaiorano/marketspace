@@ -2,7 +2,7 @@ namespace Payment.Api.Domain.ValueObjects;
 
 public record PaymentId
 {
-    public Guid Value { get; set; }
+    public Guid Value { get; init; }
 
     private PaymentId(Guid value) => Value = value;
 
