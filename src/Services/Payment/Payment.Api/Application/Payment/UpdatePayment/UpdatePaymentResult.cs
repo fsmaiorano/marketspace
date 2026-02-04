@@ -1,6 +1,5 @@
 namespace Payment.Api.Application.Payment.UpdatePayment;
 
-public class UpdatePaymentResult(bool isSuccess)
+public class UpdatePaymentResult()
 {
-    public bool IsSuccess { get; init; } = isSuccess;
 }

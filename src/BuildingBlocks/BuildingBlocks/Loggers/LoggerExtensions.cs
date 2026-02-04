@@ -40,7 +40,7 @@ public static class LoggerExtensions
             builder.AddSerilog(dispose: true);
         });
 
-        services.AddScoped(typeof(IAppLogger<>), typeof(AppLogger<>));
+        services.AddSingleton(typeof(IAppLogger<>), typeof(AppLogger<>));
 
         return services;
     }

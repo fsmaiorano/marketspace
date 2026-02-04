@@ -19,17 +19,15 @@ public sealed class UpdateOrderHandler(
             logger.LogInformation(LogTypeEnum.Application, "Processing update order request for: {OrderId}",
                 command.Id);
 
-            // Buscar entidade existente rastreada
             OrderId orderId = OrderId.Of(command.Id);
             OrderEntity? orderEntity = await repository.GetByIdAsync(orderId, isTrackingEnabled: true, CancellationToken.None);
-            
+
             if (orderEntity == null)
             {
                 logger.LogWarning(LogTypeEnum.Application, "Order not found for update: {OrderId}", command.Id);
                 return Result<UpdateOrderResult>.Failure($"Order with ID {command.Id} not found.");
             }
-            
-            // Usar método de domínio para atualizar
+
             orderEntity.Update(
                 command.ShippingAddress.ToAddress(),
                 command.BillingAddress.ToAddress(),
