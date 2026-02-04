@@ -22,10 +22,14 @@ public class PaymentEntity : Aggregate<PaymentId>
 
     // NAVIGATION
     public ICollection<PaymentAttemptEntity> Attempts { get; private set; } = new List<PaymentAttemptEntity>();
-    public ICollection<PaymentTransactionEntity> Transactions { get; private set; } = new List<PaymentTransactionEntity>();
+
+    public ICollection<PaymentTransactionEntity> Transactions { get; private set; } =
+        new List<PaymentTransactionEntity>();
+
     public RiskAnalysisEntity? RiskAnalysis { get; private set; }
 
-    public static PaymentEntity Create(Guid orderId, decimal amount, string currency, PaymentMethod method, string provider)
+    public static PaymentEntity Create(Guid orderId, decimal amount, string currency, PaymentMethod method,
+        string provider)
     {
         ArgumentNullException.ThrowIfNull(currency, nameof(currency));
         ArgumentNullException.ThrowIfNull(method, nameof(method));
@@ -47,6 +51,12 @@ public class PaymentEntity : Aggregate<PaymentId>
         };
 
         return payment;
+    }
+
+    public void PatchStatus(PaymentStatusEnum status)
+    {
+        Status = status;
+        Touch();
     }
 
     public void MarkProcessing()

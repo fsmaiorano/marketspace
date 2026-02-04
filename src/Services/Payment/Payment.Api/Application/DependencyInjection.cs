@@ -1,6 +1,7 @@
 using BuildingBlocks.Messaging;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using BuildingBlocks.Messaging.Interfaces;
+using Payment.Api.Application.BackgroundService;
 using Payment.Api.Application.EventHandlers;
 using Payment.Api.Application.HostedService;
 using Payment.Api.Application.Payment.CreatePayment;
@@ -34,7 +35,9 @@ public static class DependencyInjection
             ILogger<EventBus> logger = sp.GetRequiredService<ILogger<EventBus>>();
             return new EventBus(sp, logger, rabbitMqConnectionString);
         });
-
+        
+        services.AddHostedService<PaymentProcessingBackgroundService>();
+        
         services.AddScoped<OnOrderCreatedSubscriber>();
         services.AddHostedService<IntegrationEventSubscriptionService>();
         services.AddScoped<IDomainEventHandler<PaymentStatusChangedDomainEvent>, OnPaymentStatusChangedEventHandler>();

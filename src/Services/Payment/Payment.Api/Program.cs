@@ -48,6 +48,7 @@ app.UseExceptionHandler(options => { });
 CreatePaymentEndpoint.MapEndpoint(app);
 GetPaymentByIdEndpoint.MapEndpoint(app);
 UpdatePaymentEndpoint.MapEndpoint(app);
+PatchPaymentStatusEndpoint.MapEndpoint(app);
 DeletePaymentEndpoint.MapEndpoint(app);
 
 app.Run();

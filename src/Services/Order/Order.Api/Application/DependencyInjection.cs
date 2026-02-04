@@ -6,6 +6,7 @@ using Order.Api.Application.HostedService;
 using Order.Api.Application.Order.CreateOrder;
 using Order.Api.Application.Order.DeleteOrder;
 using Order.Api.Application.Order.GetOrderById;
+using Order.Api.Application.Order.PatchOrderStatus;
 using Order.Api.Application.Order.UpdateOrder;
 using Order.Api.Application.Subscribers;
 using Order.Api.Domain.Events;
@@ -22,12 +23,13 @@ public static class DependencyInjection
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<ICreateOrderHandler, CreateOrderHandler>();
         services.AddScoped<IUpdateOrderHandler, UpdateOrderHandler>();
+        services.AddScoped<IPatchOrderStatusHandler, PatchOrderStatusHandler>();
         services.AddScoped<IDeleteOrderHandler, DeleteOrderHandler>();
         services.AddScoped<IGetOrderByIdHandler, GetOrderByIdHandler>();
-        
-        string rabbitMqConnectionString = configuration.GetConnectionString("RabbitMq") 
+
+        string rabbitMqConnectionString = configuration.GetConnectionString("RabbitMq")
                                           ?? throw new InvalidOperationException("RabbitMQ:ConnectionString is not configured");
-        
+
         services.AddSingleton<IEventBus>(sp =>
         {
             ILogger<EventBus> logger = sp.GetRequiredService<ILogger<EventBus>>();

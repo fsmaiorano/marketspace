@@ -59,7 +59,7 @@ public sealed class UpdatePaymentHandler(
                 "Payment updated successfully. PaymentId: {PaymentId}, Status: {Status}",
                 payment.Id.Value, payment.Status);
 
-            return Result<UpdatePaymentResult>.Success(new UpdatePaymentResult(true));
+            return Result<UpdatePaymentResult>.Success(new UpdatePaymentResult());
         }
         catch (Exception ex)
         {

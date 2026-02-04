@@ -21,4 +21,9 @@
     Criar sistema de OTP? Simulando push notification?
 
 
-Rever todos os CRUDS e REPOSITORIES para padronizar
+Após passar o payment gravar o created na base de dados,
+fazer um motor para buscar por ordem criada e enviar para payment.
+alterando o status da ordem para processing.
+
+
+criar os testes dos patchs order e payment

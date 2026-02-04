@@ -55,6 +55,7 @@ app.UseExceptionHandler(options => { });
 
 CreateOrderEndpoint.MapEndpoint(app);
 UpdateOrderEndpoint.MapEndpoint(app);
+PatchOrderStatusEndpoint.MapEndpoint(app);
 DeleteOrderEndpoint.MapEndpoint(app);
 GetOrderByIdEndpoint.MapEndpoint(app);
 

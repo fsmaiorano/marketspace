@@ -35,7 +35,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Application\Payment\" />
       <Folder Include="Domain/Entities/" />
       <Folder Include="Infrastructure/Data/Configurations/" />
     </ItemGroup>

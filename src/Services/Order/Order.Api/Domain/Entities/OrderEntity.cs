@@ -132,10 +132,10 @@ public class OrderEntity : Aggregate<OrderId>
         BillingAddress = billingAddress;
         Payment = payment;
         Status = status;
+        LastModifiedAt = DateTime.UtcNow;
 
-        // Clear existing items and add new ones
         ClearItems();
-        
+
         if (items != null)
         {
             foreach (OrderItemEntity orderItem in items)
@@ -143,7 +143,13 @@ public class OrderEntity : Aggregate<OrderId>
                 AddItem(Id, orderItem);
             }
         }
-        
+
         CalculateAndSetTotalAmount();
+    }
+
+    public void PatchStatus(OrderStatusEnum status)
+    {
+        Status = status;
+        LastModifiedAt = DateTime.UtcNow;
     }
 }
