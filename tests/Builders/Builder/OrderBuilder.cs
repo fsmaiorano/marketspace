@@ -2,6 +2,7 @@ using Bogus;
 using Order.Api.Application.Dto;
 using Order.Api.Application.Order.CreateOrder;
 using Order.Api.Application.Order.DeleteOrder;
+using Order.Api.Application.Order.PatchOrderStatus;
 using Order.Api.Application.Order.UpdateOrder;
 using Order.Api.Domain.Entities;
 using Order.Api.Domain.Enums;
@@ -136,6 +137,13 @@ public static class OrderBuilder
             .RuleFor(m => m.Status, f => f.PickRandom(OrderStatuses))
             .RuleFor(m => m.Items, f => CreateOrderItemDtoFaker().Generate(f.Random.Int(1, 5)))
             .RuleFor(c => c.TotalAmount, f => f.Finance.Amount(1, 5000, 2));
+    }
+
+    public static Faker<PatchOrderStatusCommand> CreatePatchOrderStatusCommandFaker(Guid? orderId = null)
+    {
+        return new Faker<PatchOrderStatusCommand>()
+            .RuleFor(m => m.Id, f => orderId ?? f.Random.Guid())
+            .RuleFor(m => m.Status, f => f.PickRandom(OrderStatuses));
     }
 
     public static Faker<DeleteOrderCommand> CreateDeleteOrderCommandFaker(Guid? orderId = null)
