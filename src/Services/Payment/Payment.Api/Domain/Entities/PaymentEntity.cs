@@ -68,7 +68,7 @@ public class PaymentEntity : Aggregate<PaymentId>
         existingPayment.Touch();
 
         existingPayment.AddDomainEvent(new PaymentStatusChangedDomainEvent(existingPayment));
-        
+
         return existingPayment;
     }
 
@@ -79,10 +79,53 @@ public class PaymentEntity : Aggregate<PaymentId>
         AddDomainEvent(new PaymentStatusChangedDomainEvent(this));
     }
 
+    public void MarkCreated()
+    {
+        Status = PaymentStatusEnum.Created;
+        Touch();
+        AddDomainEvent(new PaymentStatusChangedDomainEvent(this));
+    }
+
     public void MarkProcessing()
     {
         Status = PaymentStatusEnum.Processing;
         Touch();
+        AddDomainEvent(new PaymentStatusChangedDomainEvent(this));
+    }
+
+    public void MarkAuthorized()
+    {
+        Status = PaymentStatusEnum.Authorized;
+        Touch();
+        AddDomainEvent(new PaymentStatusChangedDomainEvent(this));
+    }
+
+    public void MarkCaptured()
+    {
+        Status = PaymentStatusEnum.Captured;
+        Touch();
+        AddDomainEvent(new PaymentStatusChangedDomainEvent(this));
+    }
+
+    public void MarkRefunded()
+    {
+        Status = PaymentStatusEnum.Refunded;
+        Touch();
+        AddDomainEvent(new PaymentStatusChangedDomainEvent(this));
+    }
+
+    public void MarkCancelled()
+    {
+        Status = PaymentStatusEnum.Cancelled;
+        Touch();
+        AddDomainEvent(new PaymentStatusChangedDomainEvent(this));
+    }
+
+    public void MarkFailed()
+    {
+        Status = PaymentStatusEnum.Failed;
+        Touch();
+        AddDomainEvent(new PaymentStatusChangedDomainEvent(this));
     }
 
     public void Approve(string transactionId, string? authCode)

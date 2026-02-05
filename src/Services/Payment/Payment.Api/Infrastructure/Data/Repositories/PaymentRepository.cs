@@ -70,6 +70,17 @@ public class PaymentRepository(IPaymentDbContext dbContext, IDomainEventDispatch
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
+    public async Task<IEnumerable<PaymentEntity>> GetByStatus(PaymentStatusEnum status, bool isTrackingEnabled = true,
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<PaymentEntity> query = dbContext.Payments.Where(p => p.Status == status);
+        
+        if (!isTrackingEnabled)
+            query = query.AsNoTracking();
+
+        return await query.Where(p => p.Status == status).ToListAsync(cancellationToken);
+    }
+
     public Task<IEnumerable<PaymentEntity>> GetAllCreatedPaymentsAsync(bool isTrackingEnabled = true,
         CancellationToken cancellationToken = default)
     {
