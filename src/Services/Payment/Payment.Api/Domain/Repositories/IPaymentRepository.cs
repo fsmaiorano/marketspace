@@ -11,4 +11,6 @@ public interface IPaymentRepository
 
     Task<PaymentEntity?> GetByIdAsync(PaymentId id, bool isTrackingEnabled = true,
         CancellationToken cancellationToken = default);
+    Task<IEnumerable<PaymentEntity>> GetAllCreatedPaymentsAsync(bool isTrackingEnabled = true, CancellationToken cancellationToken = default);
+    Task<int> PatchStatusAsync(PaymentEntity payment, CancellationToken cancellationToken = default);
 }

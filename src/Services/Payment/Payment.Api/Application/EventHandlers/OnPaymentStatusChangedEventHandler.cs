@@ -2,7 +2,6 @@ using BuildingBlocks.Loggers;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using BuildingBlocks.Messaging.IntegrationEvents;
 using BuildingBlocks.Messaging.Interfaces;
-using Payment.Api.Domain.Enums;
 using Payment.Api.Domain.Events;
 
 namespace Payment.Api.Application.EventHandlers;
@@ -15,20 +14,21 @@ public class OnPaymentStatusChangedEventHandler(
     public async Task HandleAsync(PaymentStatusChangedDomainEvent @event, CancellationToken cancellationToken = default)
     {
         logger.LogInformation(LogTypeEnum.Application,
-            "Payment status changed event received. CorrelationId: {@event.CorrelationId}", @event.CorrelationId);
+            "Payment status changed event received. CorrelationId: {CorrelationId}, Status: {Status}", 
+            @event.CorrelationId, @event.Payment.Status);
 
         PaymentStatusChangedIntegrationEvent integrationEvent = new()
         {
             CorrelationId = @event.CorrelationId,
             OrderId = @event.Payment.OrderId,
-            IsProcessing = @event.Payment.Status == PaymentStatusEnum.Processing,
-            IsAuthorized = @event.Payment.Status == PaymentStatusEnum.Authorized,
+            PaymentStatus = (int)@event.Payment.Status,
+            PaymentStatusName = @event.Payment.Status.ToString()
         };
 
         await eventBus.PublishAsync(integrationEvent, cancellationToken);
 
         logger.LogInformation(LogTypeEnum.Application,
-            $"Payment status changed integration event published. CorrelationId: {@event.CorrelationId}",
-            @event.CorrelationId);
+            "Payment status changed integration event published. CorrelationId: {CorrelationId}, PaymentStatus: {PaymentStatus}",
+            @event.CorrelationId, integrationEvent.PaymentStatus);
     }
 }

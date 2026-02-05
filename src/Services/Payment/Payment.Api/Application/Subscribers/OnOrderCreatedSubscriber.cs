@@ -3,7 +3,6 @@ using BuildingBlocks.Loggers;
 using BuildingBlocks.Messaging.IntegrationEvents;
 using BuildingBlocks.Messaging.IntegrationEvents.Interfaces;
 using Payment.Api.Application.Payment.CreatePayment;
-using Payment.Api.Domain.ValueObjects;
 
 namespace Payment.Api.Application.Subscribers;
 
@@ -18,7 +17,8 @@ public class OnOrderCreatedSubscriber(
             "Order created integration event received in Payment Service. OrderId: {OrderId}, CustomerId: {CustomerId}, TotalAmount: {TotalAmount}, CorrelationId: {CorrelationId}",
             @event.OrderId, @event.CustomerId, @event.TotalAmount, @event.CorrelationId);
 
-        CreatePaymentCommand command = new CreatePaymentCommand
+        CreatePaymentCommand command = new()
+
         {
             OrderId = @event.OrderId,
             Amount = @event.TotalAmount,
