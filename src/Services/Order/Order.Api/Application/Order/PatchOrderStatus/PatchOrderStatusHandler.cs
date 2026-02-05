@@ -33,7 +33,13 @@ public sealed class PatchOrderStatusHandler(IOrderRepository repository,
             }
 
             orderEntity.PatchStatus(command.Status);
-            await repository.UpdateAsync(orderEntity);
+            int result = await repository.UpdateAsync(orderEntity);
+            
+            if (result <= 0)
+                return Result<PatchOrderStatusResult>.Failure("Failed to update order status.");
+            
+            //implement here the logic to send email to customer
+            
             return Result<PatchOrderStatusResult>.Success(new PatchOrderStatusResult());
         }
         catch (Exception ex)
