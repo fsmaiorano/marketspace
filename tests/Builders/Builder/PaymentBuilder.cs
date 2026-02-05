@@ -1,5 +1,6 @@
 using Bogus;
 using Payment.Api.Application.Payment.CreatePayment;
+using Payment.Api.Application.Payment.PatchPaymentStatus;
 using Payment.Api.Application.Payment.UpdatePayment;
 using Payment.Api.Domain.Entities;
 using Payment.Api.Domain.Enums;
@@ -12,7 +13,7 @@ public static class PaymentBuilder
     private static readonly string[] Currencies = { "USD", "EUR", "BRL" };
     private static readonly string[] Methods = { "CreditCard", "DebitCard", "Cash" };
     private static readonly string[] Providers = { "Stripe", "PayPal", "Adyen" };
-    
+
     private static readonly PaymentStatusEnum[] PaymentStatuses =
     {
         PaymentStatusEnum.Created, PaymentStatusEnum.Processing, PaymentStatusEnum.Authorized,
@@ -49,5 +50,12 @@ public static class PaymentBuilder
             .RuleFor(c => c.StatusDetail, f => f.Lorem.Sentence())
             .RuleFor(c => c.ProviderTransactionId, f => f.Random.AlphaNumeric(10))
             .RuleFor(c => c.AuthorizationCode, f => f.Random.AlphaNumeric(6));
+    }
+
+    public static Faker<PatchPaymentStatusCommand> CreatePatchPaymentStatusCommandFaker(Guid? paymentId = null)
+    {
+        return new Faker<PatchPaymentStatusCommand>()
+            .RuleFor(m => m.Id, f => paymentId ?? f.Random.Guid())
+            .RuleFor(m => m.Status, f => f.PickRandom(PaymentStatuses));
     }
 }

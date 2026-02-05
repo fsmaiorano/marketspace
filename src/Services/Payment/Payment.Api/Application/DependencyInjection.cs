@@ -8,6 +8,7 @@ using Payment.Api.Application.Payment.CreatePayment;
 using Payment.Api.Application.Payment.DeletePayment;
 using Payment.Api.Application.Payment.GetPaymentById;
 using Payment.Api.Application.Payment.UpdatePayment;
+using Payment.Api.Application.Payment.PatchPaymentStatus;
 using Payment.Api.Application.Subscribers;
 using Payment.Api.Domain.Events;
 using Payment.Api.Domain.Repositories;
@@ -25,6 +26,7 @@ public static class DependencyInjection
         services.AddScoped<IGetPaymentByIdHandler, GetPaymentByIdHandler>();
         services.AddScoped<IUpdatePaymentHandler, UpdatePaymentHandler>();
         services.AddScoped<IDeletePaymentHandler, DeletePaymentHandler>();
+        services.AddScoped<IPatchPaymentStatusHandler, PatchPaymentStatusHandler>();
 
         string rabbitMqConnectionString = configuration.GetConnectionString("RabbitMq")
                                           ?? throw new InvalidOperationException(
@@ -35,9 +37,9 @@ public static class DependencyInjection
             ILogger<EventBus> logger = sp.GetRequiredService<ILogger<EventBus>>();
             return new EventBus(sp, logger, rabbitMqConnectionString);
         });
-        
+
         services.AddHostedService<PaymentProcessingBackgroundService>();
-        
+
         services.AddScoped<OnOrderCreatedSubscriber>();
         services.AddHostedService<IntegrationEventSubscriptionService>();
         services.AddScoped<IDomainEventHandler<PaymentStatusChangedDomainEvent>, OnPaymentStatusChangedEventHandler>();
