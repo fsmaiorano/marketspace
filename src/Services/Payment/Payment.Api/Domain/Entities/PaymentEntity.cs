@@ -1,5 +1,6 @@
 using BuildingBlocks.Abstractions;
 using Payment.Api.Domain.Enums;
+using Payment.Api.Domain.Events;
 using Payment.Api.Domain.ValueObjects;
 
 namespace Payment.Api.Domain.Entities;
@@ -21,10 +22,9 @@ public class PaymentEntity : Aggregate<PaymentId>
     public string? AuthorizationCode { get; private set; }
 
     // NAVIGATION
-    public ICollection<PaymentAttemptEntity> Attempts { get; private set; } = new List<PaymentAttemptEntity>();
+    public ICollection<PaymentAttemptEntity> Attempts { get; private set; } = [];
 
-    public ICollection<PaymentTransactionEntity> Transactions { get; private set; } =
-        new List<PaymentTransactionEntity>();
+    public ICollection<PaymentTransactionEntity> Transactions { get; private set; } = [];
 
     public RiskAnalysisEntity? RiskAnalysis { get; private set; }
 
@@ -38,7 +38,7 @@ public class PaymentEntity : Aggregate<PaymentId>
         if (orderId == Guid.Empty)
             throw new ArgumentException("OrderId cannot be empty.", nameof(orderId));
 
-        PaymentEntity payment = new PaymentEntity
+        PaymentEntity payment = new()
         {
             Id = PaymentId.Of(Guid.NewGuid()),
             OrderId = orderId,
@@ -53,10 +53,30 @@ public class PaymentEntity : Aggregate<PaymentId>
         return payment;
     }
 
+    public static PaymentEntity Update(PaymentEntity existingPayment, decimal amount, string currency,
+        PaymentMethod method, string provider)
+    {
+        ArgumentNullException.ThrowIfNull(existingPayment, nameof(existingPayment));
+        ArgumentNullException.ThrowIfNull(currency, nameof(currency));
+        ArgumentNullException.ThrowIfNull(method, nameof(method));
+        ArgumentNullException.ThrowIfNull(provider, nameof(provider));
+
+        existingPayment.Amount = amount;
+        existingPayment.Currency = currency;
+        existingPayment.Method = method;
+        existingPayment.Provider = provider;
+        existingPayment.Touch();
+
+        existingPayment.AddDomainEvent(new PaymentStatusChangedDomainEvent(existingPayment));
+        
+        return existingPayment;
+    }
+
     public void PatchStatus(PaymentStatusEnum status)
     {
         Status = status;
         Touch();
+        AddDomainEvent(new PaymentStatusChangedDomainEvent(this));
     }
 
     public void MarkProcessing()
