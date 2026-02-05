@@ -37,7 +37,7 @@ public class PaymentProcessingBackgroundService(
                 logger.LogInformation($"Processing payment with ID: {payment.Id}");
                 // In the future, add here the logic to risk, analysis, fraud detection, etc.
                 // For now, we just mark the payment as authorized
-                payment.MarkAuthorized(); 
+                payment.MarkCaptured(); 
                 
                 await repository.PatchStatusAsync(payment, stoppingToken);
                 await Task.Delay(1000, stoppingToken); // Simulate processing time
