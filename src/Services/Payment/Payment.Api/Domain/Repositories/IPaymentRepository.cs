@@ -1,4 +1,5 @@
 using Payment.Api.Domain.Entities;
+ using Payment.Api.Domain.Enums;
 using Payment.Api.Domain.ValueObjects;
 
 namespace Payment.Api.Domain.Repositories;
@@ -11,6 +12,6 @@ public interface IPaymentRepository
 
     Task<PaymentEntity?> GetByIdAsync(PaymentId id, bool isTrackingEnabled = true,
         CancellationToken cancellationToken = default);
-    Task<IEnumerable<PaymentEntity>> GetAllCreatedPaymentsAsync(bool isTrackingEnabled = true, CancellationToken cancellationToken = default);
+    Task<IEnumerable<PaymentEntity>> GetByStatus(PaymentStatusEnum status ,bool isTrackingEnabled = true, CancellationToken cancellationToken = default);
     Task<int> PatchStatusAsync(PaymentEntity payment, CancellationToken cancellationToken = default);
 }
