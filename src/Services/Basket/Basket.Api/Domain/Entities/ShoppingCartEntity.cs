@@ -2,6 +2,7 @@ using Basket.Api.Domain.Events;
 using Basket.Api.Domain.ValueObjects;
 using BuildingBlocks.Abstractions;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Basket.Api.Domain.Entities;
 
@@ -12,6 +13,15 @@ public class ShoppingCartEntity : Aggregate<string>
     public List<ShoppingCartItemEntity> Items { get; set; } = new();
 
     public decimal TotalPrice => Items.Sum(item => item.Price * item.Quantity);
+
+    [JsonConstructor]
+    public ShoppingCartEntity(string username, List<ShoppingCartItemEntity> items)
+    {
+        Username = username;
+        Items = items ?? new();
+    }
+
+    public ShoppingCartEntity() { } 
 
     public static ShoppingCartEntity Create(string username, List<ShoppingCartItemEntity> items)
     {

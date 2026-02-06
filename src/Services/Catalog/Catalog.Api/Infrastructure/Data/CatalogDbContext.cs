@@ -1,3 +1,4 @@
+using BuildingBlocks.Messaging.Outbox;
 using Catalog.Api.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
@@ -11,7 +12,7 @@ public interface ICatalogDbContext
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
 
-public class CatalogDbContext : DbContext, ICatalogDbContext
+public class CatalogDbContext : DbContext, ICatalogDbContext, IOutboxDbContext
 {
     public CatalogDbContext(DbContextOptions<CatalogDbContext> options)
         : base(options)
@@ -19,10 +20,12 @@ public class CatalogDbContext : DbContext, ICatalogDbContext
     }
 
     public DbSet<CatalogEntity> Catalogs => Set<CatalogEntity>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        modelBuilder.ApplyConfiguration(new OutboxMessageEntityTypeConfiguration());
         base.OnModelCreating(modelBuilder);
     }
 }

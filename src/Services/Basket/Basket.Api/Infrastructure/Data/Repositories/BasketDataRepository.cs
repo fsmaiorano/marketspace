@@ -1,12 +1,11 @@
 using Basket.Api.Domain.Entities;
 using Basket.Api.Domain.Repositories;
 using Basket.Api.Domain.ValueObjects;
-using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Basket.Api.Infrastructure.Data.Repositories;
 
-public class BasketDataRepository(BasketDbContext context, IDomainEventDispatcher eventDispatcher) : IBasketDataRepository
+public class BasketDataRepository(BasketDbContext context) : IBasketDataRepository
 {
     public async Task<ShoppingCartEntity> CreateCartAsync(ShoppingCartEntity cart)
     {
@@ -47,9 +46,6 @@ public class BasketDataRepository(BasketDbContext context, IDomainEventDispatche
                 return true;
 
             cart.Checkout(checkoutData);
-            
-            await eventDispatcher.DispatchAsync(cart.DomainEvents, CancellationToken.None);
-            cart.ClearDomainEvents();
 
             context.ShoppingCarts.Remove(cart);
             await context.SaveChangesAsync();

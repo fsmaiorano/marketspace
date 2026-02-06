@@ -14,21 +14,18 @@ public static class DatabaseExtensions
         using IServiceScope scope = app.Services.CreateScope();
         UserDbContext context = scope.ServiceProvider.GetRequiredService<UserDbContext>();
 
-        // Use semaphore to prevent multiple instances from migrating simultaneously
         await _migrationLock.WaitAsync();
         try
         {
-            // Check if database exists and if migrations are needed
             if (context.Database.IsRelational())
             {
-                var pendingMigrations = (await context.Database.GetPendingMigrationsAsync()).ToList();
+                List<string> pendingMigrations = (await context.Database.GetPendingMigrationsAsync()).ToList();
                 
                 if (pendingMigrations.Any())
                 {
                     Console.WriteLine($"User: Applying {pendingMigrations.Count()} pending migration(s)...");
                     
-                    // Apply migrations with retry logic
-                    int retries = 3;
+                    int retries = 10;
                     while (retries > 0)
                     {
                         try
@@ -41,7 +38,7 @@ public static class DatabaseExtensions
                         {
                             retries--;
                             Console.WriteLine($"User migration attempt failed, retrying... ({retries} attempts left). Error: {ex.Message}");
-                            await Task.Delay(TimeSpan.FromSeconds(2));
+                            await Task.Delay(TimeSpan.FromSeconds(5));
                         }
                     }
                 }
@@ -52,7 +49,6 @@ public static class DatabaseExtensions
             }
             else
             {
-                // For non-relational databases, ensure it's created
                 await context.Database.EnsureCreatedAsync();
                 Console.WriteLine("User non-relational database ensured.");
             }
@@ -70,45 +66,40 @@ public static class DatabaseExtensions
 
         Console.WriteLine("Database initialization completed successfully.");
 
-        // Initialize roles
         RoleManager<IdentityRole> roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-        // Ensure roles exist and remove duplicates that may have been created by multiple test factories
         foreach (string roleName in new[] { "Admin", "Member" })
         {
             string normalized = roleName.ToUpperInvariant();
             List<IdentityRole> roles = await roleManager.Roles.Where(r => r.NormalizedName == normalized).ToListAsync();
 
-            if (roles.Count == 0)
+            switch (roles.Count)
             {
-                Console.WriteLine($"Creating {roleName} role...");
-                await roleManager.CreateAsync(new IdentityRole(roleName));
-                continue;
-            }
+                case 0:
+                    Console.WriteLine($"Creating {roleName} role...");
+                    await roleManager.CreateAsync(new IdentityRole(roleName));
+                    continue;
+                case > 1:
+                    {
+                        Console.WriteLine($"Found {roles.Count} roles named '{roleName}' in DB; removing duplicates...");
+                        foreach (IdentityRole duplicate in roles.Skip(1))
+                        {
+                            await roleManager.DeleteAsync(duplicate);
+                        }
 
-            // If more than one role exists with the same normalized name, keep the first and delete the others.
-            if (roles.Count > 1)
-            {
-                Console.WriteLine($"Found {roles.Count} roles named '{roleName}' in DB; removing duplicates...");
-                foreach (IdentityRole duplicate in roles.Skip(1))
-                {
-                    await roleManager.DeleteAsync(duplicate);
-                }
+                        break;
+                    }
             }
         }
 
         Console.WriteLine("Role initialization completed successfully.");
 
-        // Initialize admin user
         UserManager<ApplicationUser> userManager =
             scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
         const string adminEmail = "admin@marketspace.com";
         const string adminPassword = "Password123!";
 
-        // Use a tolerant query against the Users DbSet to avoid SingleOrDefault exceptions
-        // when the InMemory provider contains duplicated entries (some test setups may create
-        // multiple WebApplicationFactory instances that share the same named InMemory database).
         string normalizedAdminEmail = userManager.NormalizeEmail(adminEmail);
         ApplicationUser? adminUser = await userManager.Users
             .FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedAdminEmail);

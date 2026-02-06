@@ -1,5 +1,6 @@
 using BuildingBlocks.Abstractions;
 using Order.Api.Domain.ValueObjects;
+using System.Text.Json.Serialization;
 
 namespace Order.Api.Domain.Entities;
 
@@ -9,6 +10,18 @@ public class OrderItemEntity : Aggregate<OrderItemId>
     public CatalogId CatalogId { get; private set; } = null!; //ProductId - TODO - Refactory
     public int Quantity { get; private set; } = 0;
     public Price Price { get; private set; } = null!;
+
+    public OrderItemEntity() { } 
+
+    [JsonConstructor]
+    public OrderItemEntity(OrderItemId id, OrderId orderId, CatalogId catalogId, int quantity, Price price)
+    {
+        Id = id;
+        OrderId = orderId;
+        CatalogId = catalogId;
+        Quantity = quantity;
+        Price = price;
+    }
 
     public static OrderItemEntity Create(
         OrderId? orderId,

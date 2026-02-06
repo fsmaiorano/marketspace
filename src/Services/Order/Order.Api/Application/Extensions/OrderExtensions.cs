@@ -11,11 +11,11 @@ public static class OrderExtensions
         return Address.Of(
             firstName: addressDto.FirstName,
             lastName: addressDto.LastName,
-            state: addressDto.State,
-            country: addressDto.Country,
-            zipCode: addressDto.ZipCode,
             emailAddress: addressDto.EmailAddress,
             addressLine: addressDto.AddressLine,
+            country: addressDto.Country,
+            state: addressDto.State,
+            zipCode: addressDto.ZipCode,
             coordinates: addressDto.Coordinates
         );
     }
@@ -26,8 +26,8 @@ public static class OrderExtensions
             cardNumber: paymentDto.CardNumber,
             cardName: paymentDto.CardName,
             expiration: paymentDto.Expiration,
-            paymentMethod: paymentDto.PaymentMethod,
-            cvv: paymentDto.Cvv
+            cvv: paymentDto.Cvv,
+            paymentMethod: paymentDto.PaymentMethod
         );
     }
 

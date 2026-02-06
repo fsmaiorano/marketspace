@@ -16,10 +16,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C38A8607-1
 	ProjectSection(SolutionItems) = preProject
 		docs\port-mapping.md = docs\port-mapping.md
 		docs\roadmap.md = docs\roadmap.md
-		docs\service-communication-architecture.md = docs\service-communication-architecture.md
+		docs\apply-migrations.sh = docs\apply-migrations.sh
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{16324693-9B2C-451C-B4B2-9833589E9FD9}"
+	ProjectSection(SolutionItems) = preProject
+		tests\SerializationTest.cs = tests\SerializationTest.cs
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{0F3DA1A4-A6D3-4215-87C7-2C44CF38DDFC}"
 EndProject

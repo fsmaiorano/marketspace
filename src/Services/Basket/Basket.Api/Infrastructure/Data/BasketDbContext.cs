@@ -1,4 +1,5 @@
 using Basket.Api.Domain.Entities;
+using BuildingBlocks.Messaging.Outbox;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using System.Text.Json;
@@ -11,7 +12,7 @@ public interface IBasketDbContext
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
 
-public class BasketDbContext : DbContext, IBasketDbContext
+public class BasketDbContext : DbContext, IBasketDbContext, IOutboxDbContext
 {
     public BasketDbContext(DbContextOptions<BasketDbContext> options)
         : base(options)
@@ -19,13 +20,13 @@ public class BasketDbContext : DbContext, IBasketDbContext
     }
 
     public DbSet<ShoppingCartEntity> ShoppingCarts => Set<ShoppingCartEntity>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Apply configurations from assembly
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        modelBuilder.ApplyConfiguration(new OutboxMessageEntityTypeConfiguration());
 
-        // Special handling for InMemory database - override the JSONB column type with a converter
         if (Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory")
         {
             modelBuilder.Entity<ShoppingCartEntity>()

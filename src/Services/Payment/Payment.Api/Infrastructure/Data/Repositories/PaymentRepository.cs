@@ -1,4 +1,3 @@
-using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Payment.Api.Domain.Entities;
 using Payment.Api.Domain.Enums;
@@ -7,7 +6,7 @@ using Payment.Api.Domain.ValueObjects;
 
 namespace Payment.Api.Infrastructure.Data.Repositories;
 
-public class PaymentRepository(IPaymentDbContext dbContext, IDomainEventDispatcher eventDispatcher) : IPaymentRepository
+public class PaymentRepository(IPaymentDbContext dbContext) : IPaymentRepository
 {
     public async Task<int> AddAsync(PaymentEntity payment, CancellationToken cancellationToken = default)
     {
@@ -15,11 +14,6 @@ public class PaymentRepository(IPaymentDbContext dbContext, IDomainEventDispatch
         await dbContext.Payments.AddAsync(payment, cancellationToken);
 
         int result = await dbContext.SaveChangesAsync(cancellationToken);
-
-        if (result <= 0) return result;
-
-        await eventDispatcher.DispatchAsync(payment.DomainEvents, cancellationToken);
-        payment.ClearDomainEvents();
 
         return result;
     }
@@ -38,10 +32,6 @@ public class PaymentRepository(IPaymentDbContext dbContext, IDomainEventDispatch
         dbContext.Payments.Update(payment);
         int result = await dbContext.SaveChangesAsync(cancellationToken);
 
-        if (result <= 0) return result;
-
-        // await eventDispatcher.DispatchAsync(payment.DomainEvents, cancellationToken);
-        // payment.ClearDomainEvents();
 
         return result;
     }
@@ -105,13 +95,9 @@ public class PaymentRepository(IPaymentDbContext dbContext, IDomainEventDispatch
             throw new InvalidOperationException($"Payment with ID {payment.Id} not found.");
 
         payment.PatchStatus(payment.Status);
+        dbContext.Payments.Update(payment);
         int result = await dbContext.SaveChangesAsync(cancellationToken);
         
-        if (result <= 0) return result;
-
-        await eventDispatcher.DispatchAsync(payment.DomainEvents, cancellationToken);
-        payment.ClearDomainEvents();
-
         return result;
     }
 }

@@ -60,7 +60,7 @@ public sealed class CreateOrderHandler(
         }
         catch (Exception ex)
         {
-            logger.LogError(LogTypeEnum.Exception, ex,
+             logger.LogError(LogTypeEnum.Exception, ex,
                 "An error occurred while creating the order for customer: {CustomerId}", command.CustomerId);
             return Result<CreateOrderResult>.Failure($"An error occurred while creating the order: {ex.Message}");
         }

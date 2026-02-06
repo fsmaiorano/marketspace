@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Order.Api.Domain.ValueObjects;
 
 public record CatalogId
@@ -6,11 +8,13 @@ public record CatalogId
 
     private CatalogId(Guid value) => Value = value;
 
+    [JsonConstructor]
+    public CatalogId() { }
+
     public static CatalogId Of(Guid value)
     {
-        if (value == Guid.Empty)
-            throw new ArgumentException("CatalogId cannot be empty.", nameof(value));
-
-        return new CatalogId(value);
+        return value == Guid.Empty
+            ? throw new ArgumentException("CatalogId cannot be empty.", nameof(value))
+            : new CatalogId(value);
     }
 }

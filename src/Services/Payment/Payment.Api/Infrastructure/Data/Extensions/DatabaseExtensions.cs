@@ -11,15 +11,11 @@ public static class DatabaseExtensions
         using IServiceScope scope = app.Services.CreateScope();
         PaymentDbContext context = scope.ServiceProvider.GetRequiredService<PaymentDbContext>();
 
-        // Use semaphore to prevent multiple instances from migrating simultaneously
         await _migrationLock.WaitAsync();
         try
         {
-            // Check if database exists and if migrations are needed
             if (context.Database.IsRelational())
             {
-                // Ensure the database exists (but don't create schema yet)
-                // This will only create the database, not the tables
                 try
                 {
                     bool canConnect = await context.Database.CanConnectAsync();
@@ -30,7 +26,6 @@ public static class DatabaseExtensions
                 }
                 catch (Exception)
                 {
-                    // Database doesn't exist, it will be created during migration
                     Console.WriteLine("Payment: Database will be created during migration.");
                 }
 
@@ -40,8 +35,7 @@ public static class DatabaseExtensions
                 {
                     Console.WriteLine($"Payment: Applying {pendingMigrations.Count()} pending migration(s)...");
 
-                    // Apply migrations with retry logic
-                    int retries = 3;
+                    int retries = 10;
                     while (retries > 0)
                     {
                         try
@@ -55,7 +49,7 @@ public static class DatabaseExtensions
                             retries--;
                             Console.WriteLine(
                                 $"Payment migration attempt failed, retrying... ({retries} attempts left). Error: {ex.Message}");
-                            await Task.Delay(TimeSpan.FromSeconds(2));
+                            await Task.Delay(TimeSpan.FromSeconds(5));
                         }
                     }
                 }
@@ -66,7 +60,6 @@ public static class DatabaseExtensions
             }
             else
             {
-                // For non-relational databases, ensure it's created
                 await context.Database.EnsureCreatedAsync();
                 Console.WriteLine("Payment non-relational database ensured.");
             }
