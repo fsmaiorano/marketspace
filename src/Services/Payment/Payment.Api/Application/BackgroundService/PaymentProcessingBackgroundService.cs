@@ -27,7 +27,6 @@ public class PaymentProcessingBackgroundService(
                 logger.LogInformation($"Processing payment with ID: {payment.Id}");
                 payment.MarkProcessing();
                 await repository.PatchStatusAsync(payment, stoppingToken);
-                await Task.Delay(1000, stoppingToken); // Simulate processing time
             }
 
             IEnumerable<PaymentEntity> processingPayments = await repository.GetByStatus(PaymentStatusEnum.Processing,
@@ -40,7 +39,6 @@ public class PaymentProcessingBackgroundService(
                 payment.MarkCaptured(); 
                 
                 await repository.PatchStatusAsync(payment, stoppingToken);
-                await Task.Delay(1000, stoppingToken); // Simulate processing time
             }
         }
         catch

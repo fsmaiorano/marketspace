@@ -35,7 +35,7 @@
 
     <ItemGroup>
       <Folder Include="Application/Order/PatchOrderStatus/" />
-      <Folder Include="Infrastructure\Data\Migrations\" />
+      <Folder Include="Infrastructure/Data/Migrations/" />
     </ItemGroup>
 
 </Project>
