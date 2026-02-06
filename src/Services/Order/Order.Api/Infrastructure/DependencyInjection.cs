@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Order.Api.Infrastructure.Data;
 using Order.Api.Infrastructure.Data.Interceptors;
 
+using BuildingBlocks.Messaging.Outbox;
+
 namespace Order.Api.Infrastructure;
 
 public static class DependencyInjection
@@ -18,10 +20,12 @@ public static class DependencyInjection
                                       "Database connection string is not configured.");
 
         services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
+        services.AddOutbox<OrderDbContext>();
 
         services.AddDbContext<OrderDbContext>((serviceProvider, options) =>
         {
             options.AddInterceptors(serviceProvider.GetRequiredService<ISaveChangesInterceptor>());
+            options.AddInterceptors(serviceProvider.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>());
             options.UseNpgsql(connectionString);
             options.ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
         });

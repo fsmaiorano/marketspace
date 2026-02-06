@@ -33,6 +33,22 @@ namespace Catalog.Api.Infrastructure.Data.Migrations
                     table.PrimaryKey("PK_Catalogs", x => x.Id);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "OutboxMessages",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    OccurredOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Type = table.Column<string>(type: "text", nullable: false),
+                    Content = table.Column<string>(type: "text", nullable: false),
+                    ProcessedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Error = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OutboxMessages", x => x.Id);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Catalogs_Id",
                 table: "Catalogs",
@@ -45,6 +61,9 @@ namespace Catalog.Api.Infrastructure.Data.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Catalogs");
+
+            migrationBuilder.DropTable(
+                name: "OutboxMessages");
         }
     }
 }

@@ -1,3 +1,4 @@
+using BuildingBlocks.Messaging.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Payment.Api.Domain.Entities;
 using System.Reflection;
@@ -14,7 +15,7 @@ public interface IPaymentDbContext
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
 
-public class PaymentDbContext : DbContext, IPaymentDbContext
+public class PaymentDbContext : DbContext, IPaymentDbContext, IOutboxDbContext
 {
     public PaymentDbContext(DbContextOptions<PaymentDbContext> options)
         : base(options)
@@ -25,10 +26,12 @@ public class PaymentDbContext : DbContext, IPaymentDbContext
     public DbSet<PaymentAttemptEntity> PaymentAttempts => Set<PaymentAttemptEntity>();
     public DbSet<PaymentTransactionEntity> PaymentTransactions => Set<PaymentTransactionEntity>();
     public DbSet<RiskAnalysisEntity> RiskAnalysis => Set<RiskAnalysisEntity>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        modelBuilder.ApplyConfiguration(new OutboxMessageEntityTypeConfiguration());
         base.OnModelCreating(modelBuilder);
     }
 }

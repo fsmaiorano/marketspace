@@ -12,7 +12,7 @@ using Order.Api.Infrastructure.Data;
 namespace Order.Api.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(OrderDbContext))]
-    [Migration("20260201200702_Init")]
+    [Migration("20260206010656_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -24,6 +24,33 @@ namespace Order.Api.Infrastructure.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("BuildingBlocks.Messaging.Outbox.OutboxMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Error")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("OccurredOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ProcessedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("OutboxMessages", (string)null);
+                });
 
             modelBuilder.Entity("Order.Api.Domain.Entities.OrderEntity", b =>
                 {

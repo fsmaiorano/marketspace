@@ -19,6 +19,37 @@ public class OnBasketCheckoutSubscriber(
             "Received basket checkout event for customer: {CustomerId}, EventId: {EventId}, CorrelationId: {CorrelationId}",
             @event.CustomerId, @event.EventId, @event.CorrelationId);
 
+        // Log detailed address data to debug deserialization
+        logger.LogInformation(LogTypeEnum.Application,
+            "ShippingAddress - FirstName: {FirstName}, LastName: {LastName}, Email: {Email}, AddressLine: {AddressLine}, Country: {Country}, State: {State}, ZipCode: {ZipCode}, Coordinates: {Coordinates}",
+            @event.ShippingAddress?.FirstName ?? "NULL",
+            @event.ShippingAddress?.LastName ?? "NULL",
+            @event.ShippingAddress?.EmailAddress ?? "NULL",
+            @event.ShippingAddress?.AddressLine ?? "NULL",
+            @event.ShippingAddress?.Country ?? "NULL",
+            @event.ShippingAddress?.State ?? "NULL",
+            @event.ShippingAddress?.ZipCode ?? "NULL",
+            @event.ShippingAddress?.Coordinates ?? "NULL");
+
+        logger.LogInformation(LogTypeEnum.Application,
+            "BillingAddress - FirstName: {FirstName}, LastName: {LastName}, Email: {Email}, AddressLine: {AddressLine}, Country: {Country}, State: {State}, ZipCode: {ZipCode}, Coordinates: {Coordinates}",
+            @event.BillingAddress?.FirstName ?? "NULL",
+            @event.BillingAddress?.LastName ?? "NULL",
+            @event.BillingAddress?.EmailAddress ?? "NULL",
+            @event.BillingAddress?.AddressLine ?? "NULL",
+            @event.BillingAddress?.Country ?? "NULL",
+            @event.BillingAddress?.State ?? "NULL",
+            @event.BillingAddress?.ZipCode ?? "NULL",
+            @event.BillingAddress?.Coordinates ?? "NULL");
+
+        if (@event.ShippingAddress == null || @event.BillingAddress == null || @event.Payment == null)
+        {
+            logger.LogError(LogTypeEnum.Application, null,
+                "Cannot create order: missing required data. ShippingAddress: {HasShipping}, BillingAddress: {HasBilling}, Payment: {HasPayment}",
+                @event.ShippingAddress != null, @event.BillingAddress != null, @event.Payment != null);
+            return;
+        }
+
         CreateOrderCommand command = new()
         {
             CustomerId = @event.CustomerId,

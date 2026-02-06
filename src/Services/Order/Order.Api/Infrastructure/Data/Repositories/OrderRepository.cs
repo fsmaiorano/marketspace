@@ -1,4 +1,3 @@
-using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Order.Api.Domain.Entities;
 using Order.Api.Domain.Repositories;
@@ -6,7 +5,7 @@ using Order.Api.Domain.ValueObjects;
 
 namespace Order.Api.Infrastructure.Data.Repositories;
 
-public class OrderRepository(IOrderDbContext dbContext, IDomainEventDispatcher eventDispatcher) : IOrderRepository
+public class OrderRepository(IOrderDbContext dbContext) : IOrderRepository
 {
     public async Task<int> AddAsync(OrderEntity order, CancellationToken cancellationToken = default)
     {
@@ -14,11 +13,6 @@ public class OrderRepository(IOrderDbContext dbContext, IDomainEventDispatcher e
         await dbContext.Orders.AddAsync(order, cancellationToken);
 
         int result = await dbContext.SaveChangesAsync(cancellationToken);
-
-        if (result <= 0) return result;
-
-        await eventDispatcher.DispatchAsync(order.DomainEvents, cancellationToken);
-        order.ClearDomainEvents();
 
         return result;
     }
@@ -29,10 +23,6 @@ public class OrderRepository(IOrderDbContext dbContext, IDomainEventDispatcher e
 
         int result = await dbContext.SaveChangesAsync(cancellationToken);
 
-        if (result <= 0) return result;
-
-        await eventDispatcher.DispatchAsync(order.DomainEvents, cancellationToken);
-        order.ClearDomainEvents();
 
         return result;
     }

@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Order.Api.Domain.ValueObjects;
 
 public record Address
@@ -15,7 +17,8 @@ public record Address
     {
     }
 
-    private Address(string firstName, string lastName, string emailAddress, string addressLine, string country,
+    [JsonConstructor]
+    public Address(string firstName, string lastName, string emailAddress, string addressLine, string country,
         string state, string zipCode, string coordinates)
     {
         FirstName = firstName;
@@ -48,10 +51,9 @@ public record Address
             throw new ArgumentException("Address string cannot be empty.", nameof(addressString));
 
         string[] parts = addressString.Split('|');
-        if (parts.Length != 8)
-            throw new ArgumentException("Invalid address string format.", nameof(addressString));
-
-        return new Address(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7]);
+        return parts.Length != 8
+            ? throw new ArgumentException("Invalid address string format.", nameof(addressString))
+            : new Address(parts[0], parts[1], parts[2], parts[3], parts[4], parts[5], parts[6], parts[7]);
     }
 
     public override string ToString()

@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Order.Api.Domain.ValueObjects;
 
 public record Payment
@@ -12,7 +14,8 @@ public record Payment
     {
     }
 
-    private Payment(string cardNumber, string cardName, string expiration, string cvv, int paymentMethod)
+    [JsonConstructor]
+    public Payment(string cardNumber, string cardName, string expiration, string cvv, int paymentMethod)
     {
         CardNumber = cardNumber;
         CardName = cardName;

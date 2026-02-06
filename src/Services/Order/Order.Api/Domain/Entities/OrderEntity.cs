@@ -2,6 +2,7 @@ using BuildingBlocks.Abstractions;
 using Order.Api.Domain.Enums;
 using Order.Api.Domain.Events;
 using Order.Api.Domain.ValueObjects;
+using System.Text.Json.Serialization;
 
 namespace Order.Api.Domain.Entities;
 
@@ -45,6 +46,20 @@ public class OrderEntity : Aggregate<OrderId>
 
     public OrderEntity()
     {
+    }
+
+    [JsonConstructor]
+    public OrderEntity(OrderId id, CustomerId customerId, Address shippingAddress, Address billingAddress, 
+        Payment payment, OrderStatusEnum status, List<OrderItemEntity> items, Price totalAmount)
+    {
+        Id = id;
+        CustomerId = customerId;
+        ShippingAddress = shippingAddress;
+        BillingAddress = billingAddress;
+        Payment = payment;
+        Status = status;
+        Items = items ?? [];
+        TotalAmount = totalAmount;
     }
 
     private void UpdateItemQuantity(OrderId orderId, int quantity)

@@ -195,9 +195,12 @@ public class EventBus : IEventBus, IDisposable
                 _logger.LogDebug("Received event {EventType} from RabbitMQ with CorrelationId: {CorrelationId}", 
                     eventType.Name, correlationId ?? "N/A");
 
+                _logger.LogDebug("Raw message content: {Message}", message);
+
                 TEvent? @event = JsonSerializer.Deserialize<TEvent>(message, new JsonSerializerOptions
                 {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    PropertyNameCaseInsensitive = true
                 });
 
                 if (@event != null)

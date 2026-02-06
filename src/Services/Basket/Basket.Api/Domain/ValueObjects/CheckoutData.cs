@@ -1,8 +1,7 @@
+using System.Text.Json.Serialization;
+
 namespace Basket.Api.Domain.ValueObjects;
 
-/// <summary>
-/// Value Object representing checkout data - Domain layer
-/// </summary>
 public class CheckoutData
 {
     public Guid CustomerId { get; private set; }
@@ -11,7 +10,18 @@ public class CheckoutData
     public CheckoutPayment? Payment { get; private set; }
     public string? CorrelationId { get; private set; }
 
-    private CheckoutData() { } // For EF Core
+    private CheckoutData() { }
+
+    [JsonConstructor]
+    public CheckoutData(Guid customerId, string userName, CheckoutAddress? address, CheckoutPayment? payment,
+        string? correlationId)
+    {
+        CustomerId = customerId;
+        UserName = userName;
+        Address = address;
+        Payment = payment;
+        CorrelationId = correlationId;
+    }
 
     public static CheckoutData Create(
         Guid customerId,
@@ -26,14 +36,7 @@ public class CheckoutData
         if (string.IsNullOrWhiteSpace(userName))
             throw new ArgumentException("UserName is required.", nameof(userName));
 
-        return new CheckoutData
-        {
-            CustomerId = customerId,
-            UserName = userName,
-            Address = address,
-            Payment = payment,
-            CorrelationId = correlationId
-        };
+        return new CheckoutData(customerId, userName, address, payment, correlationId);
     }
 }
 
@@ -53,6 +56,20 @@ public class CheckoutAddress
 
     private CheckoutAddress() { } // For EF Core
 
+    [JsonConstructor]
+    public CheckoutAddress(string? firstName, string? lastName, string? emailAddress, string? addressLine,
+        string? country, string? state, string? zipCode, string? coordinates)
+    {
+        FirstName = firstName;
+        LastName = lastName;
+        EmailAddress = emailAddress;
+        AddressLine = addressLine;
+        Country = country;
+        State = state;
+        ZipCode = zipCode;
+        Coordinates = coordinates;
+    }
+
     public static CheckoutAddress Create(
         string? firstName,
         string? lastName,
@@ -63,17 +80,8 @@ public class CheckoutAddress
         string? zipCode,
         string? coordinates = null)
     {
-        return new CheckoutAddress
-        {
-            FirstName = firstName,
-            LastName = lastName,
-            EmailAddress = emailAddress,
-            AddressLine = addressLine,
-            Country = country,
-            State = state,
-            ZipCode = zipCode,
-            Coordinates = coordinates
-        };
+        return new CheckoutAddress(firstName, lastName, emailAddress, addressLine, country, state, zipCode,
+            coordinates);
     }
 }
 
@@ -90,6 +98,16 @@ public class CheckoutPayment
 
     private CheckoutPayment() { } // For EF Core
 
+    [JsonConstructor]
+    public CheckoutPayment(string? cardName, string? cardNumber, string? expiration, string? cvv, int paymentMethod)
+    {
+        CardName = cardName;
+        CardNumber = cardNumber;
+        Expiration = expiration;
+        Cvv = cvv;
+        PaymentMethod = paymentMethod;
+    }
+
     public static CheckoutPayment Create(
         string? cardName,
         string? cardNumber,
@@ -97,13 +115,6 @@ public class CheckoutPayment
         string? cvv,
         int paymentMethod)
     {
-        return new CheckoutPayment
-        {
-            CardName = cardName,
-            CardNumber = cardNumber,
-            Expiration = expiration,
-            Cvv = cvv,
-            PaymentMethod = paymentMethod
-        };
+        return new CheckoutPayment(cardName, cardNumber, expiration, cvv, paymentMethod);
     }
 }

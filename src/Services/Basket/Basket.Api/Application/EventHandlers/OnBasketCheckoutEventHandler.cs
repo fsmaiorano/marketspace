@@ -59,6 +59,14 @@ public class OnBasketCheckoutEventHandler(IAppLogger<OnBasketCheckoutEventHandle
             TotalPrice = @event.ShoppingCart.TotalPrice
         };
 
+        logger.LogInformation(LogTypeEnum.Application,
+            "Publishing BasketCheckoutIntegrationEvent - ShippingAddress: FirstName={FirstName}, LastName={LastName}, Email={Email}, AddressLine={AddressLine}, Country={Country}",
+            integrationEvent.ShippingAddress.FirstName,
+            integrationEvent.ShippingAddress.LastName,
+            integrationEvent.ShippingAddress.EmailAddress,
+            integrationEvent.ShippingAddress.AddressLine,
+            integrationEvent.ShippingAddress.Country);
+
         await eventBus.PublishAsync(integrationEvent, cancellationToken);
 
         logger.LogInformation(LogTypeEnum.Application,

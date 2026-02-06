@@ -1,3 +1,4 @@
+using BuildingBlocks.Messaging.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Order.Api.Domain.Entities;
 using System.Reflection;
@@ -12,7 +13,7 @@ public interface IOrderDbContext
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
 
-public class OrderDbContext : DbContext, IOrderDbContext
+public class OrderDbContext : DbContext, IOrderDbContext, IOutboxDbContext
 {
     public OrderDbContext(DbContextOptions<OrderDbContext> options)
         : base(options)
@@ -21,10 +22,12 @@ public class OrderDbContext : DbContext, IOrderDbContext
 
     public DbSet<OrderEntity> Orders => Set<OrderEntity>();
     public DbSet<OrderItemEntity> OrderItems => Set<OrderItemEntity>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        modelBuilder.ApplyConfiguration(new OutboxMessageEntityTypeConfiguration());
         base.OnModelCreating(modelBuilder);
     }
 }

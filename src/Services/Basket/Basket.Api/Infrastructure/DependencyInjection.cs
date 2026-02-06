@@ -3,6 +3,7 @@ using Basket.Api.Infrastructure.Data;
 using Basket.Api.Infrastructure.Data.Repositories;
 using BuildingBlocks.Messaging.DomainEvents;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
+using BuildingBlocks.Messaging.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Npgsql;
@@ -23,8 +24,11 @@ public static class DependencyInjection
         dataSourceBuilder.EnableDynamicJson();
         NpgsqlDataSource dataSource = dataSourceBuilder.Build();
 
-        services.AddDbContext<BasketDbContext>(options =>
+        services.AddOutbox<BasketDbContext>();
+
+        services.AddDbContext<BasketDbContext>((serviceProvider, options) =>
         {
+            options.AddInterceptors(serviceProvider.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>());
             options.UseNpgsql(dataSource, npgsqlOptions =>
             {
                 npgsqlOptions.MigrationsAssembly(typeof(BasketDbContext).Assembly.FullName);

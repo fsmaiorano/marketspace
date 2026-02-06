@@ -17,7 +17,6 @@ public class CheckoutBasketHandler(
     {
         try
         {
-            // Get CorrelationId from the service (set by middleware or generate new one)
             string correlationId = correlationIdService.GetCorrelationId();
 
             logger.LogInformation(LogTypeEnum.Application, 
