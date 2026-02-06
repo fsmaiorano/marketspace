@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Payment.Api.Domain.ValueObjects;
 
 public record PaymentId
@@ -5,6 +7,9 @@ public record PaymentId
     public Guid Value { get; init; }
 
     private PaymentId(Guid value) => Value = value;
+
+    [JsonConstructor]
+    public PaymentId() { }
 
     public static PaymentId Of(Guid value)
     {

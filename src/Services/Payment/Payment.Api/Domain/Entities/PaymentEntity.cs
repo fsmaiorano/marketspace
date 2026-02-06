@@ -2,6 +2,7 @@ using BuildingBlocks.Abstractions;
 using Payment.Api.Domain.Enums;
 using Payment.Api.Domain.Events;
 using Payment.Api.Domain.ValueObjects;
+using System.Text.Json.Serialization;
 
 namespace Payment.Api.Domain.Entities;
 
@@ -27,6 +28,32 @@ public class PaymentEntity : Aggregate<PaymentId>
     public ICollection<PaymentTransactionEntity> Transactions { get; private set; } = [];
 
     public RiskAnalysisEntity? RiskAnalysis { get; private set; }
+
+    public PaymentEntity()
+    {
+    }
+
+    [JsonConstructor]
+    public PaymentEntity(PaymentId id, Guid orderId, decimal amount, string currency, 
+        PaymentStatusEnum status, string? statusDetail, PaymentMethod method, string provider,
+        string? providerTransactionId, string? authorizationCode,
+        ICollection<PaymentAttemptEntity>? attempts, ICollection<PaymentTransactionEntity>? transactions,
+        RiskAnalysisEntity? riskAnalysis)
+    {
+        Id = id;
+        OrderId = orderId;
+        Amount = amount;
+        Currency = currency;
+        Status = status;
+        StatusDetail = statusDetail;
+        Method = method;
+        Provider = provider;
+        ProviderTransactionId = providerTransactionId;
+        AuthorizationCode = authorizationCode;
+        Attempts = attempts ?? [];
+        Transactions = transactions ?? [];
+        RiskAnalysis = riskAnalysis;
+    }
 
     public static PaymentEntity Create(Guid orderId, decimal amount, string currency, PaymentMethod method,
         string provider)
