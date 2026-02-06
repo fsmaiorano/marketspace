@@ -1,12 +1,16 @@
+using System.Text.Json.Serialization;
 using Payment.Api.Domain.Enums;
 
 namespace Payment.Api.Domain.ValueObjects;
 
 public record PaymentMethod
 {
-    public string Value { get; set; }
+    public string Value { get; set; } = string.Empty;
 
     private PaymentMethod(string value) => Value = value;
+
+    [JsonConstructor]
+    public PaymentMethod() { }
 
     public static PaymentMethod Of(string value)
     {

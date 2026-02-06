@@ -37,7 +37,6 @@ public class CheckoutBasketHandler(
                 "Basket found with {ItemCount} items for user: {Username}, CorrelationId: {CorrelationId}",
                 basket.Items.Count, command.UserName, correlationId);
 
-            // Create Address Value Object only if address fields are provided
             CheckoutAddress? address = null;
             if (!string.IsNullOrEmpty(command.FirstName) || !string.IsNullOrEmpty(command.AddressLine))
             {
@@ -53,7 +52,6 @@ public class CheckoutBasketHandler(
                 );
             }
 
-            // Create Payment Value Object only if payment fields are provided
             CheckoutPayment? payment = null;
             if (!string.IsNullOrEmpty(command.CardName) || !string.IsNullOrEmpty(command.CardNumber))
             {
@@ -66,7 +64,6 @@ public class CheckoutBasketHandler(
                 );
             }
        
-            // Create CheckoutData Value Object
             CheckoutData checkoutData = CheckoutData.Create(
                 command.CustomerId,
                 command.UserName,

@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Payment.Api.Domain.ValueObjects;
 
 public class RiskAnalysisId
@@ -5,6 +7,9 @@ public class RiskAnalysisId
     public Guid Value { get; init; }
 
     private RiskAnalysisId(Guid value) => Value = value;
+
+    [JsonConstructor]
+    public RiskAnalysisId() { }
 
     public static RiskAnalysisId Of(Guid value)
     {

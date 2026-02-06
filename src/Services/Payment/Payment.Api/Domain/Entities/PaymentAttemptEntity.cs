@@ -1,6 +1,7 @@
 using BuildingBlocks.Abstractions;
 using Payment.Api.Domain.Enums;
 using Payment.Api.Domain.ValueObjects;
+using System.Text.Json.Serialization;
 
 namespace Payment.Api.Domain.Entities;
 
@@ -15,6 +16,25 @@ public class PaymentAttemptEntity : Entity<PaymentAttemptId>
     public string? ProviderTransactionId { get; private set; }
     public string? ResponseCode { get; private set; }
     public string? ResponseMessage { get; private set; }
+
+    public PaymentAttemptEntity()
+    {
+    }
+
+    [JsonConstructor]
+    public PaymentAttemptEntity(PaymentAttemptId id, PaymentId paymentId, int attemptNumber, 
+        PaymentAttemptStatus status, string? statusDetail, string? providerTransactionId,
+        string? responseCode, string? responseMessage)
+    {
+        Id = id;
+        PaymentId = paymentId;
+        AttemptNumber = attemptNumber;
+        Status = status;
+        StatusDetail = statusDetail;
+        ProviderTransactionId = providerTransactionId;
+        ResponseCode = responseCode;
+        ResponseMessage = responseMessage;
+    }
 
     public PaymentAttemptEntity(PaymentId paymentId, int attemptNumber)
     {

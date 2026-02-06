@@ -42,23 +42,21 @@ public class OutboxProcessor<TDbContext>(
             .ToListAsync(stoppingToken);
 
         if (messages.Count == 0)
-        {
             return;
-        }
 
         foreach (OutboxMessage message in messages)
         {
             try
             {
                 logger.LogInformation("Processing outbox message {Id} of type {Type}", message.Id, message.Type);
-                
+
                 Type? type = Type.GetType(message.Type);
                 if (type == null)
                 {
                     logger.LogError("Could not resolve type {Type}", message.Type);
                     message.Error = $"Could not resolve type {message.Type}";
                     message.ProcessedOn = DateTime.UtcNow;
-                     continue;
+                    continue;
                 }
 
                 logger.LogDebug("Message content: {Content}", message.Content);
@@ -73,14 +71,14 @@ public class OutboxProcessor<TDbContext>(
                 object? domainEventObj = JsonSerializer.Deserialize(message.Content, type, jsonOptions);
                 if (domainEventObj is not IDomainEvent domainEvent)
                 {
-                    logger.LogError("Message {Id} is not a valid domain event. Deserialized object type: {ObjectType}", 
+                    logger.LogError("Message {Id} is not a valid domain event. Deserialized object type: {ObjectType}",
                         message.Id, domainEventObj?.GetType().Name ?? "null");
                     message.Error = "Invalid domain event";
                     message.ProcessedOn = DateTime.UtcNow;
                     continue;
                 }
 
-                logger.LogInformation("Dispatching domain event {EventType} from message {MessageId}", 
+                logger.LogInformation("Dispatching domain event {EventType} from message {MessageId}",
                     domainEvent.GetType().Name, message.Id);
 
                 await dispatcher.DispatchAsync(domainEvent, stoppingToken);
@@ -90,7 +88,7 @@ public class OutboxProcessor<TDbContext>(
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to process message {Id}. Error: {Error}, StackTrace: {StackTrace}", 
+                logger.LogError(ex, "Failed to process message {Id}. Error: {Error}, StackTrace: {StackTrace}",
                     message.Id, ex.Message, ex.StackTrace);
                 message.Error = $"{ex.Message} | {ex.StackTrace}";
                 message.ProcessedOn = DateTime.UtcNow;
@@ -100,4 +98,3 @@ public class OutboxProcessor<TDbContext>(
         await dbContext.SaveChangesAsync(stoppingToken);
     }
 }
-
