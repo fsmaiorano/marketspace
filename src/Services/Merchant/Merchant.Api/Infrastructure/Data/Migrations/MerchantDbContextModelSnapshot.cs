@@ -22,6 +22,24 @@ namespace Merchant.Api.Infrastructure.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("BuildingBlocks.Messaging.Idempotency.ProcessedEvent", b =>
+                {
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<DateTime>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("EventId");
+
+                    b.ToTable("ProcessedEvents", (string)null);
+                });
+
             modelBuilder.Entity("BuildingBlocks.Messaging.Outbox.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")

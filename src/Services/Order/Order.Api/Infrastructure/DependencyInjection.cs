@@ -1,5 +1,6 @@
 using BuildingBlocks.Messaging.DomainEvents;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
+using BuildingBlocks.Messaging.Idempotency;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Order.Api.Infrastructure.Data;
@@ -21,6 +22,7 @@ public static class DependencyInjection
 
         services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
         services.AddOutbox<OrderDbContext>();
+        services.AddIdempotency<OrderDbContext>();
 
         services.AddDbContext<OrderDbContext>((serviceProvider, options) =>
         {

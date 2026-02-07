@@ -1,5 +1,6 @@
 using System.Reflection;
 using BuildingBlocks.Messaging.Outbox;
+using BuildingBlocks.Messaging.Idempotency;
 using Microsoft.EntityFrameworkCore;
 
 namespace Merchant.Api.Infrastructure.Data;
@@ -25,6 +26,7 @@ public class MerchantDbContext : DbContext, IMerchantDbContext, IOutboxDbContext
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         modelBuilder.ApplyConfiguration(new OutboxMessageEntityTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new ProcessedEventConfiguration());
         base.OnModelCreating(modelBuilder);
     }
 }

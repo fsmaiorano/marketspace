@@ -1,6 +1,7 @@
 using BuildingBlocks.Messaging.DomainEvents;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using BuildingBlocks.Messaging.Outbox;
+using BuildingBlocks.Messaging.Idempotency;
 using Catalog.Api.Infrastructure.Data;
 using Catalog.Api.Infrastructure.Data.Interceptors;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,7 @@ public static class DependencyInjection
 
         services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
         services.AddOutbox<CatalogDbContext>();
+        services.AddIdempotency<CatalogDbContext>();
 
         services.AddDbContext<CatalogDbContext>((serviceProvider, options) =>
         {

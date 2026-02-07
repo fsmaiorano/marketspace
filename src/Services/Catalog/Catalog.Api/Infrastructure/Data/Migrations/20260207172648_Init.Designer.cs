@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Catalog.Api.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(CatalogDbContext))]
-    [Migration("20260206010615_Init")]
+    [Migration("20260207172648_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -24,6 +24,24 @@ namespace Catalog.Api.Infrastructure.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("BuildingBlocks.Messaging.Idempotency.ProcessedEvent", b =>
+                {
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<DateTime>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("EventId");
+
+                    b.ToTable("ProcessedEvents", (string)null);
+                });
 
             modelBuilder.Entity("BuildingBlocks.Messaging.Outbox.OutboxMessage", b =>
                 {

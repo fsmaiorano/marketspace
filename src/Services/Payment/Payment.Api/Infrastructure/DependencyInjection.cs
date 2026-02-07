@@ -1,5 +1,6 @@
 using BuildingBlocks.Messaging.DomainEvents;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
+using BuildingBlocks.Messaging.Idempotency;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Payment.Api.Infrastructure.Data;
@@ -23,6 +24,7 @@ public static class DependencyInjection
 
         services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
         services.AddOutbox<PaymentDbContext>();
+        services.AddIdempotency<PaymentDbContext>();
 
         services.AddDbContext<PaymentDbContext>((serviceProvider, options) =>
         {

@@ -1,3 +1,4 @@
+using BuildingBlocks.Messaging.Idempotency;
 using BuildingBlocks.Messaging.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Order.Api.Domain.Entities;
@@ -28,6 +29,7 @@ public class OrderDbContext : DbContext, IOrderDbContext, IOutboxDbContext
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         modelBuilder.ApplyConfiguration(new OutboxMessageEntityTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new ProcessedEventConfiguration());
         base.OnModelCreating(modelBuilder);
     }
 }

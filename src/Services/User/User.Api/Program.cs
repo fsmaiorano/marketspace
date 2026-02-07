@@ -10,6 +10,7 @@ using User.Api.Data.Models;
 using User.Api.Endpoints;
 using User.Api.Extensions;
 using User.Api.Services;
+using BuildingBlocks.Messaging.Idempotency;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,8 @@ builder.Services.AddDbContext<UserDbContext>(options =>
     else
         options.UseNpgsql(builder.Configuration.GetConnectionString("userdb"));
 });
+
+builder.Services.AddIdempotency<UserDbContext>();
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     {
