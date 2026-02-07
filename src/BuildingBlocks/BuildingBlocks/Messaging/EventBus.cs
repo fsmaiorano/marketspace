@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using BuildingBlocks.Messaging.Idempotency;
 using BuildingBlocks.Messaging.IntegrationEvents.Interfaces;
 using BuildingBlocks.Messaging.Interfaces;
 using BuildingBlocks.Services.Correlation;
@@ -208,6 +209,8 @@ public class EventBus : IEventBus, IDisposable
                     // Set CorrelationId in scope before processing
                     using (IServiceScope scope = _serviceProvider.CreateScope())
                     {
+                        var idempotencyService = scope.ServiceProvider.GetService<IIdempotencyService>();
+                        
                         if (!string.IsNullOrWhiteSpace(correlationId))
                         {
                             ICorrelationIdService? correlationIdService = 
@@ -218,7 +221,17 @@ public class EventBus : IEventBus, IDisposable
                         // Add to Serilog context for structured logging
                         using (LogContext.PushProperty("CorrelationId", correlationId ?? "N/A"))
                         {
-                            await ProcessEventAsync(@event, eventType, CancellationToken.None);
+                            if (idempotencyService != null)
+                            {
+                                await idempotencyService.ExecuteAsync(@event.EventId, eventType.Name, async (ct) =>
+                                {
+                                    await ProcessEventAsync(@event, eventType, scope.ServiceProvider, ct);
+                                }, CancellationToken.None);
+                            }
+                            else
+                            {
+                                await ProcessEventAsync(@event, eventType, scope.ServiceProvider, CancellationToken.None);
+                            }
                         }
                     }
                     
@@ -252,7 +265,7 @@ public class EventBus : IEventBus, IDisposable
             queueName, deadLetterQueueName);
     }
 
-    private async Task ProcessEventAsync<TEvent>(TEvent @event, Type eventType, CancellationToken cancellationToken)
+    private async Task ProcessEventAsync<TEvent>(TEvent @event, Type eventType, IServiceProvider serviceProvider, CancellationToken cancellationToken)
         where TEvent : class, IIntegrationEvent
     {
         if (!_handlers.TryGetValue(eventType, out List<Type>? handlerTypes))
@@ -261,12 +274,11 @@ public class EventBus : IEventBus, IDisposable
             return;
         }
 
-        using IServiceScope scope = _serviceProvider.CreateScope();
         List<Task> tasks = new List<Task>();
 
         foreach (Type handlerType in handlerTypes)
         {
-            object? handler = scope.ServiceProvider.GetService(handlerType);
+            object? handler = serviceProvider.GetService(handlerType);
             if (handler is null)
             {
                 _logger.LogWarning("Handler {HandlerType} not found in service provider", handlerType.Name);

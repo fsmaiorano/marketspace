@@ -4,6 +4,7 @@ using Basket.Api.Infrastructure.Data.Repositories;
 using BuildingBlocks.Messaging.DomainEvents;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using BuildingBlocks.Messaging.Outbox;
+using BuildingBlocks.Messaging.Idempotency;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Npgsql;
@@ -25,6 +26,7 @@ public static class DependencyInjection
         NpgsqlDataSource dataSource = dataSourceBuilder.Build();
 
         services.AddOutbox<BasketDbContext>();
+        services.AddIdempotency<BasketDbContext>();
 
         services.AddDbContext<BasketDbContext>((serviceProvider, options) =>
         {

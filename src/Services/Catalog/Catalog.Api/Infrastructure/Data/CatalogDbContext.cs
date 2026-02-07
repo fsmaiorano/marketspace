@@ -1,3 +1,4 @@
+using BuildingBlocks.Messaging.Idempotency;
 using BuildingBlocks.Messaging.Outbox;
 using Catalog.Api.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +27,7 @@ public class CatalogDbContext : DbContext, ICatalogDbContext, IOutboxDbContext
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         modelBuilder.ApplyConfiguration(new OutboxMessageEntityTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new ProcessedEventConfiguration());
         base.OnModelCreating(modelBuilder);
     }
 }

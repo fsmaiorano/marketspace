@@ -1,5 +1,6 @@
 using Basket.Api.Domain.Entities;
 using BuildingBlocks.Messaging.Outbox;
+using BuildingBlocks.Messaging.Idempotency;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using System.Text.Json;
@@ -26,6 +27,7 @@ public class BasketDbContext : DbContext, IBasketDbContext, IOutboxDbContext
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         modelBuilder.ApplyConfiguration(new OutboxMessageEntityTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new ProcessedEventConfiguration());
 
         if (Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory")
         {
@@ -40,4 +42,3 @@ public class BasketDbContext : DbContext, IBasketDbContext, IOutboxDbContext
         base.OnModelCreating(modelBuilder);
     }
 }
-

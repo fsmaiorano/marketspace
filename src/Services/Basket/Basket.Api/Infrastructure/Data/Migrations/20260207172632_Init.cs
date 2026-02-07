@@ -30,6 +30,19 @@ namespace Basket.Api.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ProcessedEvents",
+                columns: table => new
+                {
+                    EventId = table.Column<Guid>(type: "uuid", nullable: false),
+                    EventType = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    ProcessedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProcessedEvents", x => x.EventId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ShoppingCarts",
                 columns: table => new
                 {
@@ -52,6 +65,9 @@ namespace Basket.Api.Infrastructure.Data.Migrations
         {
             migrationBuilder.DropTable(
                 name: "OutboxMessages");
+
+            migrationBuilder.DropTable(
+                name: "ProcessedEvents");
 
             migrationBuilder.DropTable(
                 name: "ShoppingCarts");

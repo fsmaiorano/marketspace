@@ -1,3 +1,4 @@
+using BuildingBlocks.Messaging.Idempotency;
 using BuildingBlocks.Messaging.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Payment.Api.Domain.Entities;
@@ -32,6 +33,7 @@ public class PaymentDbContext : DbContext, IPaymentDbContext, IOutboxDbContext
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         modelBuilder.ApplyConfiguration(new OutboxMessageEntityTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new ProcessedEventConfiguration());
         base.OnModelCreating(modelBuilder);
     }
 }

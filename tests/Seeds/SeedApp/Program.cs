@@ -1,4 +1,6 @@
-﻿using User.Api.Data;
+﻿using Microsoft.AspNetCore.Identity;
+using User.Api.Data;
+using User.Api.Data.Models;
 
 Console.WriteLine("===========================================");
 Console.WriteLine("MarketSpace Seed Application");
@@ -9,10 +11,14 @@ Console.WriteLine("  - docker compose up -d");
 Console.WriteLine();
 
 // Using real database connections from docker-compose
-const string merchantConnectionString = "Server=localhost;Port=5436;Database=MerchantDb;User Id=postgres;Password=postgres;Include Error Detail=true";
-const string catalogConnectionString = "Server=localhost;Port=5432;Database=CatalogDb;User Id=postgres;Password=postgres;Include Error Detail=true";
-const string basketConnectionString = "Server=localhost;Port=5433;Database=BasketDb;User Id=postgres;Password=postgres;Include Error Detail=true";
-const string userConnectionString = "Server=localhost;Port=5437;Database=UserDb;User Id=postgres;Password=postgres;Include Error Detail=true";
+const string merchantConnectionString =
+    "Server=localhost;Port=5436;Database=MerchantDb;User Id=postgres;Password=postgres;Include Error Detail=true";
+const string catalogConnectionString =
+    "Server=localhost;Port=5432;Database=CatalogDb;User Id=postgres;Password=postgres;Include Error Detail=true";
+const string basketConnectionString =
+    "Server=localhost;Port=5433;Database=BasketDb;User Id=postgres;Password=postgres;Include Error Detail=true";
+const string userConnectionString =
+    "Server=localhost;Port=5437;Database=UserDb;User Id=postgres;Password=postgres;Include Error Detail=true";
 const string minioEndpoint = "localhost:9000";
 const string minioAccessKey = "admin";
 const string minioSecretKey = "admin123";
@@ -60,6 +66,14 @@ Console.WriteLine("Creating User database schema...");
 await userDbContext.Database.EnsureCreatedAsync();
 Console.WriteLine("User database schema created successfully!");
 
+var exits = userDbContext.Users.Where(u => u.UserName == "user@example.com");
+
+if (!exits.Any())
+{
+    ApplicationUser user = new() { UserName = "user@example.com", Email = "Password123!" };
+    userDbContext.Users.Add(user);
+    await userDbContext.SaveChangesAsync();
+}
 
 const int createMerchantCounter = 20;
 
@@ -123,11 +137,12 @@ for (int i = 0; i < createdMerchants.Count; i++)
 {
     ShoppingCartEntity shoppingCart =
         BasketBuilder.CreateShoppingCartFaker(username: createdMerchants.ElementAt(i).Name);
-    
+
     createdShoppingCarts.Add(shoppingCart);
     basketDbContext.ShoppingCarts.Add(shoppingCart);
     await basketDbContext.SaveChangesAsync();
-    Console.WriteLine($"Shopping cart created for user: {createdMerchants.ElementAt(i).Name} with {shoppingCart.Items.Count} items");
+    Console.WriteLine(
+        $"Shopping cart created for user: {createdMerchants.ElementAt(i).Name} with {shoppingCart.Items.Count} items");
 }
 
 Console.WriteLine("\n✅ Seeding completed successfully!");

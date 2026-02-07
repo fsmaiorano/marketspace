@@ -1,3 +1,4 @@
+using BuildingBlocks.Messaging.Idempotency;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,8 @@ public class UserDbContext : IdentityDbContext<ApplicationUser, IdentityRole, st
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.ApplyConfiguration(new ProcessedEventConfiguration());
 
         builder.Entity<RefreshToken>()
             .HasIndex(rt => rt.Token)
