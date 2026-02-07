@@ -94,7 +94,6 @@ public class PaymentRepository(IPaymentDbContext dbContext) : IPaymentRepository
         if (!exists)
             throw new InvalidOperationException($"Payment with ID {payment.Id} not found.");
 
-        payment.PatchStatus(payment.Status);
         dbContext.Payments.Update(payment);
         int result = await dbContext.SaveChangesAsync(cancellationToken);
         

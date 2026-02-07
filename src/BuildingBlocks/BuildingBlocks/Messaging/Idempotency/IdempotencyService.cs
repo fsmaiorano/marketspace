@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace BuildingBlocks.Messaging.Idempotency;
 
@@ -14,11 +15,13 @@ public class IdempotencyService<TContext> : IIdempotencyService where TContext :
     public async Task ExecuteAsync(Guid eventId, string eventName, Func<CancellationToken, Task> handler, CancellationToken cancellationToken = default)
     {
         // Use ExecutionStrategy to handle transient failures and ensure transaction commit
-        var strategy = _context.Database.CreateExecutionStrategy();
+        IExecutionStrategy strategy = _context.Database.CreateExecutionStrategy();
         
         await strategy.ExecuteAsync(async () =>
         {
-            using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+            _context.ChangeTracker.Clear();
+
+            await using IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
             
             bool exists = await _context.Set<ProcessedEvent>()
                 .AnyAsync(pe => pe.EventId == eventId, cancellationToken);
@@ -32,7 +35,7 @@ public class IdempotencyService<TContext> : IIdempotencyService where TContext :
 
             await handler(cancellationToken);
 
-            var processedEvent = new ProcessedEvent
+            ProcessedEvent processedEvent = new ProcessedEvent
             {
                 EventId = eventId,
                 ProcessedAt = DateTime.UtcNow,
