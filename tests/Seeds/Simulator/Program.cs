@@ -15,8 +15,7 @@ const string targetUserEmail = "user@example.com";
 const bool doCheckout = true;
 // ======================================
 
-Faker faker = new Bogus.Faker();
-
+Faker faker = new();
 // Using real database connections from docker-compose
 const string merchantConnectionString =
     "Server=localhost;Port=5436;Database=MerchantDb;User Id=postgres;Password=postgres;Include Error Detail=true";
@@ -73,6 +72,17 @@ Console.WriteLine("Basket database schema created successfully!");
 Console.WriteLine("Creating User database schema...");
 await userDbContext.Database.EnsureCreatedAsync();
 Console.WriteLine("User database schema created successfully!");
+
+ApplicationUser? user = await userDbContext.Users.FirstOrDefaultAsync(u => u.UserName == targetUserEmail);
+
+if (user is null)
+{
+    Console.WriteLine("Creating admin user...");
+    user = new ApplicationUser { UserName = targetUserEmail, Email = targetUserEmail, EmailConfirmed = true, PasswordHash = "Password123!"};
+    userDbContext.Users.Add(user);
+    await userDbContext.SaveChangesAsync();
+}
+
 
 // ======================================
 // Checkout Simulation
