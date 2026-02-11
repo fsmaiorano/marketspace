@@ -78,7 +78,10 @@ ApplicationUser? user = await userDbContext.Users.FirstOrDefaultAsync(u => u.Use
 if (user is null)
 {
     Console.WriteLine("Creating admin user...");
-    user = new ApplicationUser { UserName = targetUserEmail, Email = targetUserEmail, EmailConfirmed = true, PasswordHash = "Password123!"};
+    user = new ApplicationUser
+    {
+        UserName = targetUserEmail, Email = targetUserEmail, EmailConfirmed = true, PasswordHash = "Password123!"
+    };
     userDbContext.Users.Add(user);
     await userDbContext.SaveChangesAsync();
 }
@@ -91,148 +94,128 @@ Console.WriteLine("\n===========================================");
 Console.WriteLine("Starting Checkout Simulation");
 Console.WriteLine("===========================================");
 
-// Find the specific merchant/user by email
-ApplicationUser? targetUser = await userDbContext.Users
-    .FirstOrDefaultAsync(m => m.Email == targetUserEmail);
 
-if (targetUser == null)
+Console.WriteLine($"✅ Found target merchant: {user.UserName} ({user.Email})");
+
+// Check if a shopping cart exists for this user
+ShoppingCartEntity? existingCart = await basketDbContext.ShoppingCarts
+    .FirstOrDefaultAsync(sc => sc.Username == user.UserName);
+
+if (existingCart == null)
 {
-    Console.WriteLine($"⚠️  Warning: No merchant found with email '{targetUserEmail}'");
-    Console.WriteLine("Please update the 'targetUserEmail' variable to match an existing merchant's email.");
-    Console.WriteLine("\nAvailable merchant emails:");
-    List<MerchantEntity> allMerchants = await merchantDbContext.Merchants.Take(5).ToListAsync();
-    foreach (MerchantEntity merchant in allMerchants)
+    Console.WriteLine($"⚠️  No shopping cart found for user: {user.UserName}");
+    Console.WriteLine("Creating a new shopping cart with catalog items...");
+
+    // Get some catalog items to add to the cart
+    List<CatalogEntity> catalogItems = await catalogDbContext.Catalogs
+        .Take(3)
+        .ToListAsync();
+
+    if (catalogItems.Count == 0)
     {
-        Console.WriteLine($"  - {merchant.Email} ({merchant.Name})");
+        Console.WriteLine("⚠️  No catalog items found for this merchant. Cannot proceed with checkout.");
+    }
+    else
+    {
+        // Create a new shopping cart
+        existingCart = new ShoppingCartEntity
+        {
+            Username = user.UserName!,
+            Items = catalogItems.Select(c => new ShoppingCartItemEntity
+            {
+                ProductId = c.Id.Value.ToString(), ProductName = c.Name, Price = c.Price.Value, Quantity = 1
+            }).ToList()
+        };
+
+        basketDbContext.ShoppingCarts.Add(existingCart);
+        await basketDbContext.SaveChangesAsync();
+        Console.WriteLine($"✅ Created shopping cart with {existingCart.Items.Count} items");
     }
 }
 else
 {
-    Console.WriteLine($"✅ Found target merchant: {targetUser.UserName} ({targetUser.Email})");
+    Console.WriteLine($"✅ Found existing shopping cart with {existingCart.Items.Count} items");
+}
 
-    // Check if a shopping cart exists for this user
-    ShoppingCartEntity? existingCart = await basketDbContext.ShoppingCarts
-        .FirstOrDefaultAsync(sc => sc.Username == targetUser.UserName);
+if (existingCart is { Items.Count: > 0 })
+{
+    Console.WriteLine("\n📦 Shopping Cart Details:");
+    Console.WriteLine($"   User: {existingCart.Username}");
+    Console.WriteLine($"   Items: {existingCart.Items.Count}");
+    Console.WriteLine($"   Total Price: ${existingCart.TotalPrice:F2}");
 
-    if (existingCart == null)
+    Console.WriteLine("\n   Items in cart:");
+    foreach (ShoppingCartItemEntity item in existingCart.Items)
     {
-        Console.WriteLine($"⚠️  No shopping cart found for user: {targetUser.UserName}");
-        Console.WriteLine("Creating a new shopping cart with catalog items...");
+        Console.WriteLine(
+            $"     - {item.ProductName} (x{item.Quantity}) @ ${item.Price:F2} = ${item.Price * item.Quantity:F2}");
+    }
 
-        // Get some catalog items to add to the cart
-        List<CatalogEntity> catalogItems = await catalogDbContext.Catalogs
-            .Take(3)
-            .ToListAsync();
+    Console.WriteLine("\n🛒 Ready for checkout!");
+    Console.WriteLine("To proceed with checkout, you would need to:");
+    Console.WriteLine("  1. Use the Basket API endpoint: POST /basket/checkout");
+    Console.WriteLine($"  2. With username: {existingCart.Username}");
+    Console.WriteLine($"  3. Total amount: ${existingCart.TotalPrice:F2}");
+    Console.WriteLine("\nThe shopping cart is now persisted in the database and ready for checkout via the API.");
 
-        if (catalogItems.Count == 0)
+    if (doCheckout)
+    {
+        Console.WriteLine("\n🚀 Proceeding with checkout...");
+
+        try
         {
-            Console.WriteLine("⚠️  No catalog items found for this merchant. Cannot proceed with checkout.");
-        }
-        else
-        {
-            // Create a new shopping cart
-            existingCart = new ShoppingCartEntity
+            using HttpClient httpClient = new();
+            httpClient.BaseAddress = new Uri("http://localhost:5001");
+            httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+
+            if (string.IsNullOrWhiteSpace(user.FirstName) || string.IsNullOrWhiteSpace(user.LastName))
             {
-                Username = targetUser.UserName!,
-                Items = catalogItems.Select(c => new ShoppingCartItemEntity
-                {
-                    ProductId = c.Id.Value.ToString(),
-                    ProductName = c.Name,
-                    Price = c.Price.Value,
-                    Quantity = 1
-                }).ToList()
+                user.FirstName = faker.Person.FirstName;
+                user.LastName = faker.Person.LastName;
+                await userDbContext.SaveChangesAsync();
+            }
+
+            var checkoutCommand = new
+            {
+                UserName = existingCart.Username,
+                CustomerId = user.Id,
+                TotalPrice = existingCart.TotalPrice,
+                FirstName = user.FirstName ?? "John",
+                LastName = user.LastName ?? "Doe",
+                EmailAddress = user.Email,
+                AddressLine = faker.Address.StreetAddress(),
+                Country = faker.Address.Country(),
+                State = faker.Address.State(),
+                ZipCode = faker.Address.ZipCode(),
+                CardName = $"{user.FirstName} {user.LastName}",
+                CardNumber = faker.Finance.CreditCardNumber(),
+                Expiration = faker.Date.Future().ToString("MM/yy"),
+                Cvv = faker.Random.Number(100, 999).ToString(),
+                PaymentMethod = 1,
+                RequestId = Guid.NewGuid().ToString(),
+                Coordinates = $"{faker.Address.Latitude()},{faker.Address.Longitude()}"
             };
 
-            basketDbContext.ShoppingCarts.Add(existingCart);
-            await basketDbContext.SaveChangesAsync();
-            Console.WriteLine($"✅ Created shopping cart with {existingCart.Items.Count} items");
-        }
-    }
-    else
-    {
-        Console.WriteLine($"✅ Found existing shopping cart with {existingCart.Items.Count} items");
-    }
+            Console.WriteLine($"   Posting checkout request to: {httpClient.BaseAddress}/basket/checkout");
+            HttpResponseMessage response = await httpClient.PostAsJsonAsync("/basket/checkout", checkoutCommand);
 
-    if (existingCart is { Items.Count: > 0 })
-    {
-        Console.WriteLine("\n📦 Shopping Cart Details:");
-        Console.WriteLine($"   User: {existingCart.Username}");
-        Console.WriteLine($"   Items: {existingCart.Items.Count}");
-        Console.WriteLine($"   Total Price: ${existingCart.TotalPrice:F2}");
-
-        Console.WriteLine("\n   Items in cart:");
-        foreach (ShoppingCartItemEntity item in existingCart.Items)
-        {
-            Console.WriteLine(
-                $"     - {item.ProductName} (x{item.Quantity}) @ ${item.Price:F2} = ${item.Price * item.Quantity:F2}");
-        }
-
-        Console.WriteLine("\n🛒 Ready for checkout!");
-        Console.WriteLine("To proceed with checkout, you would need to:");
-        Console.WriteLine("  1. Use the Basket API endpoint: POST /basket/checkout");
-        Console.WriteLine($"  2. With username: {existingCart.Username}");
-        Console.WriteLine($"  3. Total amount: ${existingCart.TotalPrice:F2}");
-        Console.WriteLine("\nThe shopping cart is now persisted in the database and ready for checkout via the API.");
-
-        if (doCheckout)
-        {
-            Console.WriteLine("\n🚀 Proceeding with checkout...");
-
-            try
+            if (response.IsSuccessStatusCode)
             {
-                using HttpClient httpClient = new();
-                httpClient.BaseAddress = new Uri("http://localhost:5001");
-                httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-
-                if (string.IsNullOrWhiteSpace(targetUser.FirstName) || string.IsNullOrWhiteSpace(targetUser.LastName))
-                {
-                    targetUser.FirstName = faker.Person.FirstName;
-                    targetUser.LastName = faker.Person.LastName;
-                    await userDbContext.SaveChangesAsync();
-                }
-
-                var checkoutCommand = new
-                {
-                    UserName = existingCart.Username,
-                    CustomerId = targetUser.Id,
-                    TotalPrice = existingCart.TotalPrice,
-                    FirstName = targetUser.FirstName ?? "John",
-                    LastName = targetUser.LastName ?? "Doe",
-                    EmailAddress = targetUser.Email,
-                    AddressLine = faker.Address.StreetAddress(),
-                    Country = faker.Address.Country(),
-                    State = faker.Address.State(),
-                    ZipCode = faker.Address.ZipCode(),
-                    CardName = $"{targetUser.FirstName} {targetUser.LastName}",
-                    CardNumber = faker.Finance.CreditCardNumber(),
-                    Expiration = faker.Date.Future().ToString("MM/yy"),
-                    Cvv = faker.Random.Number(100, 999).ToString(),
-                    PaymentMethod = 1,
-                    RequestId = Guid.NewGuid().ToString(),
-                    Coordinates = $"{faker.Address.Latitude()},{faker.Address.Longitude()}"
-                };
-
-                Console.WriteLine($"   Posting checkout request to: {httpClient.BaseAddress}/basket/checkout");
-                HttpResponseMessage response = await httpClient.PostAsJsonAsync("/basket/checkout", checkoutCommand);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    string responseContent = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine("✅ Checkout completed successfully!");
-                    Console.WriteLine($"   Response: {responseContent}");
-                }
-                else
-                {
-                    string errorContent = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"❌ Checkout failed with status code: {response.StatusCode}");
-                    Console.WriteLine($"   Error: {errorContent}");
-                }
+                string responseContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine("✅ Checkout completed successfully!");
+                Console.WriteLine($"   Response: {responseContent}");
             }
-            catch (Exception ex)
+            else
             {
-                Console.WriteLine($"❌ Exception during checkout: {ex.Message}");
-                Console.WriteLine($"   Make sure the Basket API is running on http://localhost:5001");
+                string errorContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"❌ Checkout failed with status code: {response.StatusCode}");
+                Console.WriteLine($"   Error: {errorContent}");
             }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Exception during checkout: {ex.Message}");
+            Console.WriteLine($"   Make sure the Basket API is running on http://localhost:5001");
         }
     }
 }
