@@ -2,11 +2,11 @@ namespace Payment.Api.Domain.ValueObjects;
 
 public record Payment
 {
-    public string CardNumber { get; init; } = null!;
-    public string CardName { get; init; } = null!;
-    public string Expiration { get; init; } = null!;
-    public string Cvv { get; init; } = null!;
-    public int PaymentMethod { get; init; } = 0!;
+    private string CardNumber { get; init; } = null!;
+    private string CardName { get; init; } = null!;
+    private string Expiration { get; init; } = null!;
+    private string Cvv { get; init; } = null!;
+    private int PaymentMethod { get; init; } = 0!;
 
     private Payment(string cardNumber, string cardName, string expiration, string cvv, int paymentMethod)
     {
@@ -22,7 +22,7 @@ public record Payment
         return Of(cardNumber, cardName, expiration, cvv, paymentMethod);
     }
 
-    public static Payment Of(string cardNumber, string cardName, string expiration, string cvv, int paymentMethod)
+    private static Payment Of(string cardNumber, string cardName, string expiration, string cvv, int paymentMethod)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(cardNumber, "Card number cannot be empty.");
         ArgumentException.ThrowIfNullOrWhiteSpace(cardName, "Card name cannot be empty.");
@@ -41,10 +41,9 @@ public record Payment
         if (parts.Length != 5)
             throw new ArgumentException("Invalid payment string format.", nameof(paymentString));
 
-        if (!int.TryParse(parts[4], out int paymentMethod))
-            throw new ArgumentException("Invalid payment method format.", nameof(paymentString));
-
-        return new Payment(parts[0], parts[1], parts[2], parts[3], paymentMethod);
+        return !int.TryParse(parts[4], out int paymentMethod)
+            ? throw new ArgumentException("Invalid payment method format.", nameof(paymentString))
+            : new Payment(parts[0], parts[1], parts[2], parts[3], paymentMethod);
     }
 
     public override string ToString()
