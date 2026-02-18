@@ -50,7 +50,7 @@ public class CatalogRepository(ICatalogDbContext dbContext) : ICatalogRepository
 
         int totalItems = await query.CountAsync(cancellationToken);
         List<CatalogEntity> items = await query
-            .Skip((pagination.PageIndex - 1) * pagination.PageSize)
+            .Skip(Math.Max(0, (pagination.PageIndex - 1) * pagination.PageSize))
             .Take(pagination.PageSize)
             .ToListAsync(cancellationToken);
 
