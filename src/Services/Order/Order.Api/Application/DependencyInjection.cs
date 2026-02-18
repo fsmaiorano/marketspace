@@ -1,5 +1,6 @@
 using BuildingBlocks.Messaging;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
+using BuildingBlocks.Messaging.Extensions;
 using BuildingBlocks.Messaging.Interfaces;
 using Order.Api.Application.EventHandlers;
 using Order.Api.Application.HostedService;
@@ -27,14 +28,7 @@ public static class DependencyInjection
         services.AddScoped<IDeleteOrderHandler, DeleteOrderHandler>();
         services.AddScoped<IGetOrderByIdHandler, GetOrderByIdHandler>();
 
-        string rabbitMqConnectionString = configuration.GetConnectionString("RabbitMq")
-                                          ?? throw new InvalidOperationException("RabbitMQ:ConnectionString is not configured");
-
-        services.AddSingleton<IEventBus>(sp =>
-        {
-            ILogger<EventBus> logger = sp.GetRequiredService<ILogger<EventBus>>();
-            return new EventBus(sp, logger, rabbitMqConnectionString);
-        });
+        services.AddEventBus(configuration);
 
         services.AddScoped<OnBasketCheckoutSubscriber>();
         services.AddScoped<OnPaymentStatusChangedSubscriber>();

@@ -1,5 +1,6 @@
 using BuildingBlocks.Messaging;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
+using BuildingBlocks.Messaging.Extensions;
 using BuildingBlocks.Messaging.Interfaces;
 using Payment.Api.Application.BackgroundService;
 using Payment.Api.Application.EventHandlers;
@@ -26,17 +27,9 @@ public static class DependencyInjection
         services.AddScoped<IGetPaymentByIdHandler, GetPaymentByIdHandler>();
         services.AddScoped<IUpdatePaymentHandler, UpdatePaymentHandler>();
         services.AddScoped<IDeletePaymentHandler, DeletePaymentHandler>();
-        services.AddScoped<IPatchPaymentStatusHandler, PatchPaymentStatusHandler>();
+        services.AddScoped<IPaymentRepository, PaymentRepository>();
 
-        string rabbitMqConnectionString = configuration.GetConnectionString("RabbitMq")
-                                          ?? throw new InvalidOperationException(
-                                              "RabbitMQ:ConnectionString is not configured");
-
-        services.AddSingleton<IEventBus>(sp =>
-        {
-            ILogger<EventBus> logger = sp.GetRequiredService<ILogger<EventBus>>();
-            return new EventBus(sp, logger, rabbitMqConnectionString);
-        });
+        services.AddEventBus(configuration);
 
         services.AddHostedService<PaymentProcessingBackgroundService>();
 
