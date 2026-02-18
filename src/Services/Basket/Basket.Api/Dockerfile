@@ -8,6 +8,8 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/BuildingBlocks/BuildingBlocks/BuildingBlocks.csproj", "src/BuildingBlocks/BuildingBlocks/"]
+COPY ["src/BuildingBlocks/BuildingBlocks.Storage/BuildingBlocks.Storage.csproj", "src/BuildingBlocks/BuildingBlocks.Storage/"]
+COPY ["infra/MarketSpace.ServiceDefaults/MarketSpace.ServiceDefaults.csproj", "infra/MarketSpace.ServiceDefaults/"]
 COPY ["src/Services/Basket/Basket.Api/Basket.Api.csproj", "src/Services/Basket/Basket.Api/"]
 RUN dotnet restore "src/Services/Basket/Basket.Api/Basket.Api.csproj"
 COPY . .

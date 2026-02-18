@@ -8,6 +8,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/BuildingBlocks/BuildingBlocks/BuildingBlocks.csproj", "src/BuildingBlocks/BuildingBlocks/"]
+COPY ["infra/MarketSpace.ServiceDefaults/MarketSpace.ServiceDefaults.csproj", "infra/MarketSpace.ServiceDefaults/"]
 COPY ["src/Edges/BackendForFrontend.Api/BackendForFrontend.Api.csproj", "src/Edges/BackendForFrontend.Api/"]
 RUN dotnet restore "src/Edges/BackendForFrontend.Api/BackendForFrontend.Api.csproj"
 COPY . .

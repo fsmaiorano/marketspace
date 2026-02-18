@@ -31,13 +31,17 @@ public class PaymentProcessingBackgroundService(
 
             IEnumerable<PaymentEntity> processingPayments = await repository.GetByStatus(PaymentStatusEnum.Processing,
                 isTrackingEnabled: true, stoppingToken);
+
+            if (processingPayments is null || !processingPayments.Any())
+                return;
+
             foreach (PaymentEntity payment in processingPayments)
             {
                 logger.LogInformation($"Processing payment with ID: {payment.Id}");
                 // In the future, add here the logic to risk, analysis, fraud detection, etc.
                 // For now, we just mark the payment as authorized
-                payment.MarkCaptured(); 
-                
+                payment.MarkCaptured();
+
                 await repository.PatchStatusAsync(payment, stoppingToken);
             }
         }
