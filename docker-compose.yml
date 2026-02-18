@@ -15,11 +15,7 @@ services:
       - marketspace
   
   basketdb:
-    image: mongo:latest
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_basket_data:/data/db
+    image: postgres:18
     networks:
       - marketspace
   
@@ -32,6 +28,11 @@ services:
       - marketspace
 
   merchantdb:
+    image: postgres:18
+    networks:
+      - marketspace
+
+  paymentdb:
     image: postgres:18
     networks:
       - marketspace
@@ -88,6 +89,17 @@ services:
       dockerfile: ./src/Services/Merchant/Merchant.Api/Dockerfile
     networks:
       - marketspace
+
+  payment.api:
+    image: ${DOCKER_REGISTRY-}paymentapi
+    depends_on:
+      - paymentdb
+      - messagebroker
+    build:
+      context: .
+      dockerfile: ./src/Services/Payment/Payment.Api/Dockerfile
+    networks:
+      - marketspace
   
   user.api:
     image: ${DOCKER_REGISTRY-}userapi
@@ -95,7 +107,7 @@ services:
       - userdb
     build:
       context: .
-      dockerfile: ./src/Services/User/Dockerfile
+      dockerfile: ./src/Services/User/User.Api/Dockerfile
     networks:
       - marketspace
   
@@ -104,14 +116,6 @@ services:
     build:
       context: .
       dockerfile: ./src/Edges/BackendForFrontend.Api/Dockerfile
-    networks:
-      - marketspace
-  
-  webapp:
-    image: ${DOCKER_REGISTRY-}webapp
-    build:
-      context: .
-      dockerfile: ./uis/WebApp/Dockerfile
     networks:
       - marketspace
 
@@ -125,5 +129,6 @@ volumes:
   postgres_order:
   postgres_merchant:
   postgres_basket:
+  postgres_payment:
   minio_data:
   webapp:

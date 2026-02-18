@@ -28,7 +28,7 @@ services:
     environment:
       - MINIO_ROOT_USER=admin
       - MINIO_ROOT_PASSWORD=admin123
-      - MINIO_DEFAULT_BUCKETS=food-delivery-catalog
+      - MINIO_DEFAULT_BUCKETS=catalog-bucket
     restart: always
     ports:
       - "9000:9000"
@@ -78,7 +78,18 @@ services:
       - "5436:5432"
     volumes:
       - postgres_merchant:/var/lib/postgresql
-  
+
+  paymentdb:
+    container_name: paymentdb
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=PaymentDb
+    restart: always
+    ports:
+      - "5438:5432"
+    volumes:
+      - postgres_payment:/var/lib/postgresql
   catalog.api:
     container_name: catalogapi
     environment:
@@ -86,6 +97,10 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
       - ConnectionStrings__Database=Server=catalogdb;Port=5432;Database=CatalogDb;User Id=postgres;Password=postgres;;Include Error Detail=true;
+      - Storage__Minio__Endpoint=minio:9000
+      - Storage__Minio__AccessKey=admin
+      - Storage__Minio__SecretKey=admin123
+      - Storage__Minio__BucketName=catalog-bucket
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=password
     depends_on:
@@ -105,14 +120,15 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
       - ConnectionStrings__basketdb=Server=basketdb;Port=5432;Database=BasketDb;User Id=postgres;Password=postgres;Include Error Detail=true;
+      - ConnectionStrings__RabbitMq=amqp://guest:guest@messagebroker:5672/
       - GrpcSettings__DiscountUrl=https://discountgrpc:8081
-      - MessageBroker__Host=amqp://ecommerce-mq:5672
       - MessageBroker__UserName=guest
       - MessageBroker__Password=guest
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=password
     depends_on:
       - basketdb
+      - messagebroker
     ports:
       - "6001:8080"
       - "6061:8081"
@@ -127,7 +143,7 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
       - ConnectionStrings__Database=Server=orderdb;Port=5432;Database=OrderDb;User Id=postgres;Password=postgres;;Include Error Detail=true;
-      - MessageBroker__Host=amqp://ecommerce-mq:5672
+      - ConnectionStrings__RabbitMq=amqp://guest:guest@messagebroker:5672/
       - MessageBroker__UserName=guest
       - MessageBroker__Password=guest
       - FeatureManagement__OrderFullfilment=false
@@ -136,6 +152,8 @@ services:
     restart: unless-stopped
     depends_on:
       orderdb:
+        condition: service_started
+      messagebroker:
         condition: service_started
     ports:
       - "6003:8080"
@@ -163,6 +181,29 @@ services:
     volumes:
       - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
       - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
+
+  payment.api:
+    container_name: paymentapi
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ConnectionStrings__Database=Server=paymentdb;Port=5432;Database=PaymentDb;User Id=postgres;Password=postgres;;Include Error Detail=true;
+      - ConnectionStrings__RabbitMq=amqp://guest:guest@messagebroker:5672/
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+    restart: unless-stopped
+    depends_on:
+      paymentdb:
+        condition: service_started
+      messagebroker:
+        condition: service_started
+    ports:
+      - "6007:8080"
+      - "6067:8081"
+    volumes:
+      - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
+      - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
   
   user.api:
     container_name: userapi
@@ -184,8 +225,8 @@ services:
       userdb:
         condition: service_started
     ports:
-      - "7005:8080"
-      - "7065:8081"
+      - "6006:8080"
+      - "6066:8081"
     volumes:
       - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
       - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
@@ -201,6 +242,7 @@ services:
       - Services__BasketService__BaseUrl=https://basketapi:8081
       - Services__OrderService__BaseUrl=https://orderapi:8081
       - Services__UserService__BaseUrl=https://userapi:8081
+      - Services__PaymentService__BaseUrl=https://paymentapi:8081
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=password
     restart: unless-stopped
@@ -215,28 +257,14 @@ services:
         condition: service_started
       user.api:
         condition: service_started
+      payment.api:
+        condition: service_started
     ports:
-      - "5001:8080"
-      - "5051:8081"
+      - "5100:8080"
+      - "5150:8081"
     volumes:
       - ${HOME}/.aspnet/https:/home/app/.aspnet/https:ro
       - ${HOME}/.aspnet/https:/root/.aspnet/https:ro
-  
-  webapp:
-    container_name: webapp
-    environment:
-      - NODE_ENV=production
-      - PORT=4000
-      - API_BASE_URL=http://backendforfrontendpi:8080
-      - USER_SERVICE_URL=http://userapi:8080
-      - NODE_TLS_REJECT_UNAUTHORIZED=0
-    depends_on:
-      - backendforfrontend.api
-      - user.api
-    restart: always
-    ports:
-      - "80:4000"
-      - "4001:4000"
 
 volumes:
   postgres_catalog:
@@ -244,4 +272,5 @@ volumes:
   postgres_merchant:
   postgres_order:
   postgres_basket:
+  postgres_payment:
   minio_data:

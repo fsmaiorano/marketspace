@@ -8,18 +8,18 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/BuildingBlocks/BuildingBlocks/BuildingBlocks.csproj", "src/BuildingBlocks/BuildingBlocks/"]
-COPY ["src/Services/User/User.csproj", "src/Services/User/"]
-RUN dotnet restore "src/Services/User/User.csproj"
+COPY ["infra/MarketSpace.ServiceDefaults/MarketSpace.ServiceDefaults.csproj", "infra/MarketSpace.ServiceDefaults/"]
+COPY ["src/Services/User/User.Api/User.Api.csproj", "src/Services/User/User.Api/"]
+RUN dotnet restore "src/Services/User/User.Api/User.Api.csproj"
 COPY . .
-WORKDIR "/src/src/Services/User"
-RUN dotnet build "./User.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/src/Services/User/User.Api"
+RUN dotnet build "./User.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./User.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./User.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "User.dll"]
-
