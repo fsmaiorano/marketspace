@@ -9,7 +9,7 @@ public abstract class PeriodicBackgroundService<T>(TimeSpan interval, IAppLogger
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using PeriodicTimer timer = new PeriodicTimer(interval);
+        using PeriodicTimer timer = new(interval);
 
         try
         {
