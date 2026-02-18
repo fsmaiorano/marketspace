@@ -1,6 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-    <Sdk Name="Aspire.AppHost.Sdk" Version="9.0.0"/>
+<Project Sdk="Aspire.AppHost.Sdk/13.1.1">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -12,20 +10,19 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Aspire.Hosting.AppHost" Version="13.1.0" />
-        <PackageReference Include="Aspire.Hosting.Azure.ServiceBus" Version="13.1.0" />
-        <PackageReference Include="Aspire.Hosting.MongoDB" Version="13.1.0" />
-        <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.1.0" />
-        <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.1.0" />
+        <PackageReference Include="Aspire.Hosting.Azure.ServiceBus" Version="13.1.1" />
+        <PackageReference Include="Aspire.Hosting.MongoDB" Version="13.1.1" />
+        <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.1.1" />
+        <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.1.1" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src/Services/Catalog/Catalog.Api/Catalog.Api.csproj"/>
-        <ProjectReference Include="..\..\src/Services/Basket/Basket.Api/Basket.Api.csproj"/>
-        <ProjectReference Include="..\..\src/Services/Order/Order.Api/Order.Api.csproj"/>
-        <ProjectReference Include="..\..\src/Services/Merchant/Merchant.Api/Merchant.Api.csproj"/>
-        <ProjectReference Include="..\..\src/Services/User/User.Api/User.Api.csproj"/>
-        <ProjectReference Include="..\..\src/Edges/BackendForFrontend.Api/BackendForFrontend.Api.csproj"/>
+        <ProjectReference Include="..\..\src/Services/Catalog/Catalog.Api/Catalog.Api.csproj" />
+        <ProjectReference Include="..\..\src/Services/Basket/Basket.Api/Basket.Api.csproj" />
+        <ProjectReference Include="..\..\src/Services/Order/Order.Api/Order.Api.csproj" />
+        <ProjectReference Include="..\..\src/Services/Merchant/Merchant.Api/Merchant.Api.csproj" />
+        <ProjectReference Include="..\..\src/Services/User/User.Api/User.Api.csproj" />
+        <ProjectReference Include="..\..\src/Edges/BackendForFrontend.Api/BackendForFrontend.Api.csproj" />
         <ProjectReference Include="..\..\src\Services\Payment\Payment.Api\Payment.Api.csproj" />
     </ItemGroup>
 

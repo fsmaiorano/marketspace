@@ -8,7 +8,7 @@ using Basket.Api.Domain.Repositories;
 using Basket.Api.Infrastructure.Data.Repositories;
 using BuildingBlocks.Messaging;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
-using BuildingBlocks.Messaging.Interfaces;
+using BuildingBlocks.Messaging.Extensions;
 
 namespace Basket.Api.Application;
 
@@ -23,14 +23,7 @@ public static class DependencyInjection
         services.AddScoped<IGetBasketByIdHandler, GetBasketByIdHandler>();
         services.AddScoped<ICheckoutBasketHandler, CheckoutBasketHandler>();
         
-        string rabbitMqConnectionString = configuration.GetConnectionString("RabbitMq") 
-                                          ?? throw new InvalidOperationException("RabbitMQ:ConnectionString is not configured");
-        
-        services.AddSingleton<IEventBus>(sp =>
-        {
-            ILogger<EventBus> logger = sp.GetRequiredService<ILogger<EventBus>>();
-            return new EventBus(sp, logger, rabbitMqConnectionString);
-        });
+        services.AddEventBus(configuration);
 
         services.AddScoped<IDomainEventHandler<BasketCheckoutDomainEvent>, OnBasketCheckoutEventHandler>();
 
