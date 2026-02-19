@@ -21,4 +21,4 @@ RUN dotnet publish "src/Services/User/User.Api/User.Api.csproj" -c $BUILD_CONFIG
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "User.dll"]
+ENTRYPOINT ["dotnet", "User.Api.dll"]
