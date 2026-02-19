@@ -12,12 +12,11 @@ COPY ["infra/MarketSpace.ServiceDefaults/MarketSpace.ServiceDefaults.csproj", "i
 COPY ["src/Edges/BackendForFrontend.Api/BackendForFrontend.Api.csproj", "src/Edges/BackendForFrontend.Api/"]
 RUN dotnet restore "src/Edges/BackendForFrontend.Api/BackendForFrontend.Api.csproj"
 COPY . .
-WORKDIR "/src/src/Edges/BackendForFrontend.Api"
-RUN dotnet build "./BackendForFrontend.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "src/Edges/BackendForFrontend.Api/BackendForFrontend.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./BackendForFrontend.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "src/Edges/BackendForFrontend.Api/BackendForFrontend.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

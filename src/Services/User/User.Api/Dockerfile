@@ -12,12 +12,11 @@ COPY ["infra/MarketSpace.ServiceDefaults/MarketSpace.ServiceDefaults.csproj", "i
 COPY ["src/Services/User/User.Api/User.Api.csproj", "src/Services/User/User.Api/"]
 RUN dotnet restore "src/Services/User/User.Api/User.Api.csproj"
 COPY . .
-WORKDIR "/src/src/Services/User/User.Api"
-RUN dotnet build "./User.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "src/Services/User/User.Api/User.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./User.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "src/Services/User/User.Api/User.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

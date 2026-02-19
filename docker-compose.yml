@@ -1,39 +1,39 @@
 services:
   userdb:
-    image: postgres:18
+    image: postgres
     networks:
       - marketspace
 
   catalogdb:
-    image: postgres:18
+    image: postgres
     networks:
       - marketspace
-  
+
   minio:
     image: minio/minio:latest
     networks:
       - marketspace
-  
+
   basketdb:
-    image: postgres:18
+    image: postgres
     networks:
       - marketspace
-  
+
   #  distributedcache:
   #    image: redis:latest
-  
+
   orderdb:
-    image: postgres:18
+    image: postgres
     networks:
       - marketspace
 
   merchantdb:
-    image: postgres:18
+    image: postgres
     networks:
       - marketspace
 
   paymentdb:
-    image: postgres:18
+    image: postgres
     networks:
       - marketspace
 
@@ -44,7 +44,7 @@ services:
       - "15672:15672"
     networks:
       - marketspace
-  
+
   catalog.api:
     image: ${DOCKER_REGISTRY-}catalogapi
     depends_on:
@@ -54,7 +54,7 @@ services:
       dockerfile: ./src/Services/Catalog/Catalog.Api/Dockerfile
     networks:
       - marketspace
-  
+
   basket.api:
     image: ${DOCKER_REGISTRY-}basketapi
     depends_on:
@@ -64,13 +64,13 @@ services:
       dockerfile: ./src/Services/Basket/Basket.Api/Dockerfile
     networks:
       - marketspace
-  
+
   #  discount.grpc:
   #    image: ${DOCKER_REGISTRY-}discountgrpc
   #    build:
   #      context: .
   #      dockerfile: ./src/Services/Discount/Discount.Grpc/Dockerfile
-  #  
+  #
   order.api:
     image: ${DOCKER_REGISTRY-}orderapi
     depends_on:
@@ -100,7 +100,7 @@ services:
       dockerfile: ./src/Services/Payment/Payment.Api/Dockerfile
     networks:
       - marketspace
-  
+
   user.api:
     image: ${DOCKER_REGISTRY-}userapi
     depends_on:
@@ -110,7 +110,7 @@ services:
       dockerfile: ./src/Services/User/User.Api/Dockerfile
     networks:
       - marketspace
-  
+
   backendforfrontend.api:
     image: ${DOCKER_REGISTRY-}backendforfrontendapi
     build:
@@ -131,4 +131,3 @@ volumes:
   postgres_basket:
   postgres_payment:
   minio_data:
-  webapp:

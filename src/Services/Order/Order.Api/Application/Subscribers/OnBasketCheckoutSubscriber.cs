@@ -19,7 +19,6 @@ public class OnBasketCheckoutSubscriber(
             "Received basket checkout event for customer: {CustomerId}, EventId: {EventId}, CorrelationId: {CorrelationId}",
             @event.CustomerId, @event.EventId, @event.CorrelationId);
 
-        // Log detailed address data to debug deserialization
         logger.LogInformation(LogTypeEnum.Application,
             "ShippingAddress - FirstName: {FirstName}, LastName: {LastName}, Email: {Email}, AddressLine: {AddressLine}, Country: {Country}, State: {State}, ZipCode: {ZipCode}, Coordinates: {Coordinates}",
             @event.ShippingAddress?.FirstName ?? "NULL",
