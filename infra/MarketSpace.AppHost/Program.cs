@@ -1,7 +1,10 @@
+using Aspire.Hosting.Docker;
 using Microsoft.Extensions.Configuration;
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 ConfigurationManager config = builder.Configuration;
+
+IResourceBuilder<DockerComposeEnvironmentResource> compose = builder.AddDockerComposeEnvironment("compose");
 
 // Databases - Postgres
 IConfigurationSection postgresConfig = config.GetSection("Aspire:Databases:Postgres");
@@ -10,6 +13,7 @@ IResourceBuilder<ParameterResource> postgresPassword = builder.AddParameter("pos
 IConfigurationSection catalogDbConfig = postgresConfig.GetSection("Catalog");
 IResourceBuilder<PostgresDatabaseResource> catalogDb = builder
     .AddPostgres(catalogDbConfig["Name"]!, password: postgresPassword)
+    .PublishAsDockerComposeService((service, resource) => { })
     .WithEnvironment("POSTGRES_DB", catalogDbConfig["DatabaseName"]!)
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume()
@@ -19,6 +23,7 @@ IResourceBuilder<PostgresDatabaseResource> catalogDb = builder
 IConfigurationSection orderDbConfig = postgresConfig.GetSection("Order");
 IResourceBuilder<PostgresDatabaseResource> orderDb = builder
     .AddPostgres(orderDbConfig["Name"]!, password: postgresPassword)
+    .PublishAsDockerComposeService((service, resource) => { })
     .WithEnvironment("POSTGRES_DB", orderDbConfig["DatabaseName"]!)
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume()
@@ -28,6 +33,7 @@ IResourceBuilder<PostgresDatabaseResource> orderDb = builder
 IConfigurationSection merchantDbConfig = postgresConfig.GetSection("Merchant");
 IResourceBuilder<PostgresDatabaseResource> merchantDb = builder
     .AddPostgres(merchantDbConfig["Name"]!, password: postgresPassword)
+    .PublishAsDockerComposeService((service, resource) => { })
     .WithEnvironment("POSTGRES_DB", merchantDbConfig["DatabaseName"]!)
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume()
@@ -37,6 +43,7 @@ IResourceBuilder<PostgresDatabaseResource> merchantDb = builder
 IConfigurationSection userDbConfig = postgresConfig.GetSection("User");
 IResourceBuilder<PostgresDatabaseResource> userDb = builder
     .AddPostgres(userDbConfig["Name"]!, password: postgresPassword)
+    .PublishAsDockerComposeService((service, resource) => { })
     .WithEnvironment("POSTGRES_DB", userDbConfig["DatabaseName"]!)
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume()
@@ -46,6 +53,7 @@ IResourceBuilder<PostgresDatabaseResource> userDb = builder
 IConfigurationSection basketDbConfig = postgresConfig.GetSection("Basket");
 IResourceBuilder<PostgresDatabaseResource> basketDb = builder
     .AddPostgres(basketDbConfig["Name"]!, password: postgresPassword)
+    .PublishAsDockerComposeService((service, resource) => { })
     .WithEnvironment("POSTGRES_DB", basketDbConfig["DatabaseName"]!)
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume()
@@ -55,6 +63,7 @@ IResourceBuilder<PostgresDatabaseResource> basketDb = builder
 IConfigurationSection paymentDbConfig = postgresConfig.GetSection("Payment");
 IResourceBuilder<PostgresDatabaseResource> paymentDb = builder
     .AddPostgres(paymentDbConfig["Name"]!, password: postgresPassword)
+    .PublishAsDockerComposeService((service, resource) => { })
     .WithEnvironment("POSTGRES_DB", paymentDbConfig["DatabaseName"]!)
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume()
@@ -64,6 +73,8 @@ IResourceBuilder<PostgresDatabaseResource> paymentDb = builder
 // Message Broker
 IConfigurationSection rabbitMqConfig = config.GetSection("Aspire:MessageBrokers:RabbitMQ");
 IResourceBuilder<ContainerResource> rabbitmq = builder.AddContainer(rabbitMqConfig["Name"]!, "rabbitmq", "management")
+    .PublishAsDockerComposeService((service, resource) => { })
+    .WithLifetime(ContainerLifetime.Persistent)
     .WithEnvironment("RABBITMQ_DEFAULT_USER", "guest")
     .WithEnvironment("RABBITMQ_DEFAULT_PASS", "guest")
     .WithEnvironment("RABBITMQ_DEFAULT_VHOST", "/")
@@ -74,6 +85,7 @@ IResourceBuilder<ContainerResource> rabbitmq = builder.AddContainer(rabbitMqConf
 IConfigurationSection minioConfig = config.GetSection("Aspire:Storage:Minio");
 IResourceBuilder<ContainerResource> minio = builder
     .AddContainer(minioConfig["ContainerName"]!, minioConfig["Image"]!, minioConfig["Tag"]!)
+    .PublishAsDockerComposeService((service, resource) => { })
     .WithHttpEndpoint(port: int.Parse(minioConfig["ApiPort"]!), targetPort: int.Parse(minioConfig["ApiPort"]!),
         name: "minio-api")
     .WithHttpEndpoint(port: int.Parse(minioConfig["ConsolePort"]!), targetPort: int.Parse(minioConfig["ConsolePort"]!),
@@ -87,6 +99,7 @@ IResourceBuilder<ContainerResource> minio = builder
 // Microservices
 IConfigurationSection catalogConfig = config.GetSection("Aspire:Services:Catalog");
 IResourceBuilder<ProjectResource> catalogApi = builder.AddProject<Projects.Catalog_Api>(catalogConfig["ProjectName"]!)
+    .PublishAsDockerComposeService((service, resource) => { })
     .WithReference(catalogDb)
     .WithEnvironment("Storage__Minio__Endpoint", minioConfig["Endpoint"]!)
     .WithEnvironment("Storage__Minio__AccessKey", minioConfig["RootUser"]!)
@@ -97,6 +110,7 @@ IResourceBuilder<ProjectResource> catalogApi = builder.AddProject<Projects.Catal
 
 IConfigurationSection basketConfig = config.GetSection("Aspire:Services:Basket");
 IResourceBuilder<ProjectResource> basketApi = builder.AddProject<Projects.Basket_Api>(basketConfig["ProjectName"]!)
+    .PublishAsDockerComposeService((service, resource) => { })
     .WithReference(basketDb)
     .WaitFor(rabbitmq)
     .WithHttpEndpoint(port: int.Parse(basketConfig["HttpPort"]!), name: "basket-http")
@@ -104,6 +118,7 @@ IResourceBuilder<ProjectResource> basketApi = builder.AddProject<Projects.Basket
 
 IConfigurationSection orderConfig = config.GetSection("Aspire:Services:Order");
 IResourceBuilder<ProjectResource> orderApi = builder.AddProject<Projects.Order_Api>(orderConfig["ProjectName"]!)
+    .PublishAsDockerComposeService((service, resource) => { })
     .WithReference(orderDb)
     .WaitFor(rabbitmq)
     .WithEnvironment("ConnectionStrings__RabbitMQ", $"amqp://guest:guest@localhost:{rabbitMqConfig["Port"]!}/")
@@ -113,6 +128,7 @@ IResourceBuilder<ProjectResource> orderApi = builder.AddProject<Projects.Order_A
 IConfigurationSection merchantConfig = config.GetSection("Aspire:Services:Merchant");
 IResourceBuilder<ProjectResource> merchantApi = builder
     .AddProject<Projects.Merchant_Api>(merchantConfig["ProjectName"]!)
+    .PublishAsDockerComposeService((service, resource) => { })
     .WithReference(merchantDb)
     .WaitFor(rabbitmq)
     .WithHttpEndpoint(port: int.Parse(merchantConfig["HttpPort"]!), name: "merchant-http")
@@ -120,6 +136,7 @@ IResourceBuilder<ProjectResource> merchantApi = builder
 
 IConfigurationSection paymentConfig = config.GetSection("Aspire:Services:Payment");
 IResourceBuilder<ProjectResource> paymentApi = builder.AddProject<Projects.Payment_Api>(paymentConfig["ProjectName"]!)
+    .PublishAsDockerComposeService((service, resource) => { })
     .WithReference(paymentDb)
     .WaitFor(rabbitmq)
     .WithHttpEndpoint(port: int.Parse(paymentConfig["HttpPort"]!), name: "payment-http")
@@ -127,6 +144,7 @@ IResourceBuilder<ProjectResource> paymentApi = builder.AddProject<Projects.Payme
 
 IConfigurationSection userConfig = config.GetSection("Aspire:Services:User");
 IResourceBuilder<ProjectResource> userApi = builder.AddProject<Projects.User_Api>(userConfig["ProjectName"]!)
+    .PublishAsDockerComposeService((service, resource) => { })
     .WithReference(userDb)
     .WaitFor(rabbitmq)
     .WithHttpEndpoint(port: int.Parse(userConfig["HttpPort"]!), name: "user-http")
@@ -135,6 +153,8 @@ IResourceBuilder<ProjectResource> userApi = builder.AddProject<Projects.User_Api
 // BFF
 IConfigurationSection bffConfig = config.GetSection("Aspire:Services:BFF");
 IResourceBuilder<ProjectResource> _ = builder.AddProject<Projects.BackendForFrontend_Api>(bffConfig["ProjectName"]!)
+    .PublishAsDockerComposeService((service, resource) => { })
+    .WaitFor(rabbitmq)
     .WithReference(catalogApi)
     .WithReference(basketApi)
     .WithReference(orderApi)
