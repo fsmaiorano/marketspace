@@ -13,12 +13,11 @@ COPY ["infra/MarketSpace.ServiceDefaults/MarketSpace.ServiceDefaults.csproj", "i
 COPY ["src/Services/Basket/Basket.Api/Basket.Api.csproj", "src/Services/Basket/Basket.Api/"]
 RUN dotnet restore "src/Services/Basket/Basket.Api/Basket.Api.csproj"
 COPY . .
-WORKDIR "/src/src/Services/Basket/Basket.Api"
-RUN dotnet build "./Basket.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "src/Services/Basket/Basket.Api/Basket.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Basket.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "src/Services/Basket/Basket.Api/Basket.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

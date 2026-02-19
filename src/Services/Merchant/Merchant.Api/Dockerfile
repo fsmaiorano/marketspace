@@ -12,12 +12,11 @@ COPY ["infra/MarketSpace.ServiceDefaults/MarketSpace.ServiceDefaults.csproj", "i
 COPY ["src/Services/Merchant/Merchant.Api/Merchant.Api.csproj", "src/Services/Merchant/Merchant.Api/"]
 RUN dotnet restore "src/Services/Merchant/Merchant.Api/Merchant.Api.csproj"
 COPY . .
-WORKDIR "/src/src/Services/Merchant/Merchant.Api"
-RUN dotnet build "./Merchant.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "src/Services/Merchant/Merchant.Api/Merchant.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Merchant.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "src/Services/Merchant/Merchant.Api/Merchant.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
