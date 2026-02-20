@@ -8,10 +8,14 @@ using Catalog.Api.Domain.Repositories;
 
 namespace Catalog.Api.Application.Catalog.GetCatalog;
 
-public class GetCatalogHandler(
+public record GetCatalogQuery(PaginationRequest Pagination);
+
+public record GetCatalogResult(int PageIndex, int PageSize, long Count, List<CatalogDto> Products);
+
+public class GetCatalog(
     ICatalogRepository repository,
-    IAppLogger<GetCatalogHandler> logger,
-    IMinioBucket minioBucket) : IGetCatalogHandler
+    IAppLogger<GetCatalog> logger,
+    IMinioBucket minioBucket) 
 {
     public async Task<Result<GetCatalogResult>> HandleAsync(GetCatalogQuery query)
     {

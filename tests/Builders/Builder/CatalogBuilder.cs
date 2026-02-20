@@ -33,14 +33,16 @@ public static class CatalogBuilder
     public static Faker<CreateCatalogCommand> CreateCreateCatalogCommandFaker(string email = "")
     {
         return new Faker<CreateCatalogCommand>()
-            .CustomInstantiator(f => new CreateCatalogCommand(
-                name: f.Company.CompanyName(),
-                description: f.Lorem.Sentence(),
-                imageUrl: f.Image.PicsumUrl(800, 600),
-                price: f.Finance.Amount(1, 1000, 2),
-                categories: f.PickRandom(ProductCategories, f.Random.Int(1, 10)).ToList(),
-                merchantId: f.Random.Guid()
-            ));
+            .CustomInstantiator(f => new CreateCatalogCommand
+            {
+                Name = f.Company.CompanyName(),
+                Description = f.Lorem.Sentence(),
+                ImageUrl = f.Image.PicsumUrl(800, 600),
+                MerchantId = f.Random.Guid(),
+                Price = Price.Of(f.Finance.Amount(1, 1000, 2)),
+                Categories = f.PickRandom(ProductCategories, f.Random.Int(1, 10)).ToList()
+            });
+
     }
 
     public static Faker<UpdateCatalogCommand> CreateUpdateCatalogCommandFaker(Guid? id = null, string email = "")
@@ -56,7 +58,7 @@ public static class CatalogBuilder
     public static Faker<DeleteCatalogCommand> CreateDeleteCatalogCommandFaker(Guid? id = null)
     {
         return new Faker<DeleteCatalogCommand>()
-            .RuleFor(m => m.Id, f => id ?? f.Random.Guid());
+            .CustomInstantiator(f => new DeleteCatalogCommand(id ?? f.Random.Guid()));
     }
 
     public static CatalogEntity GenerateCatalog(string email = "") =>

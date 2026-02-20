@@ -4,7 +4,6 @@ using Catalog.Api.Application.Catalog.DeleteCatalog;
 using Catalog.Api.Application.Catalog.GetCatalog;
 using Catalog.Api.Application.Catalog.GetCatalogById;
 using Catalog.Api.Application.Catalog.UpdateCatalog;
-using Catalog.Api.Application.Config;
 using Catalog.Api.Domain.Repositories;
 using Catalog.Api.Infrastructure.Data.Repositories;
 using Minio;
@@ -16,12 +15,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplicationServices(this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.Configure<StorageSettings>(
-            configuration.GetSection("Storage:Minio"));
-
-        // Only register production MinIO services if a test or other caller hasn't already
-        // provided an implementation (tests typically register a mock).
-        if (!services.Any(s => s.ServiceType == typeof(IMinioBucket)))
+        if (services.All(s => s.ServiceType != typeof(IMinioBucket)))
         {
             IMinioClient? minio = new MinioClient()
                 .WithEndpoint(configuration.GetSection("Storage:Minio:Endpoint").Value)
@@ -34,13 +28,13 @@ public static class DependencyInjection
         }
 
         services.AddScoped<ICatalogRepository, CatalogRepository>();
-        
-        services.AddScoped<ICreateCatalogHandler, CreateCatalogHandler>();
+
+        services.AddScoped<CreateCatalog>();
         services.AddScoped<IUpdateCatalogHandler, UpdateCatalogHandler>();
-        services.AddScoped<IDeleteCatalogHandler, DeleteCatalogHandler>();
-        services.AddScoped<IGetCatalogByIdHandler, GetCatalogByIdHandler>();
-        services.AddScoped<IGetCatalogHandler, GetCatalogHandler>();
-        
+        services.AddScoped<DeleteCatalog>();
+        services.AddScoped<GetCatalogById>();
+        services.AddScoped<GetCatalog>();
+
         return services;
     }
 }

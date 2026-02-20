@@ -1,27 +1,38 @@
 using BuildingBlocks;
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Storage.Minio;
-using Catalog.Api.Application.Config;
 using Catalog.Api.Domain.Entities;
 using Catalog.Api.Domain.Repositories;
 using Catalog.Api.Domain.ValueObjects;
-using Microsoft.Extensions.Options;
-using Minio;
 
 namespace Catalog.Api.Application.Catalog.CreateCatalog;
 
-public sealed class CreateCatalogHandler(
+public record CreateCatalogCommand
+{
+    public required string Name { get; init; }
+    public required string Description { get; init; }
+    public required string ImageUrl { get; init; }
+    public required Price Price { get; init; }
+
+    public IReadOnlyList<string> Categories { get; init; } = [];
+
+    public required Guid MerchantId { get; init; }
+}
+
+public record CreateCatalogResult();
+
+public sealed class CreateCatalog(
     ICatalogRepository repository,
-    IAppLogger<CreateCatalogHandler> logger,
+    IAppLogger<CreateCatalog> logger,
     IMinioBucket minioBucket
 )
-    : ICreateCatalogHandler
 {
     public async Task<Result<CreateCatalogResult>> HandleAsync(CreateCatalogCommand command)
     {
         try
         {
-            logger.LogInformation(LogTypeEnum.Application, "Processing create catalog request for: {Name}", command.Name);
+            logger.LogInformation(LogTypeEnum.Application, "Processing create catalog request for: {Name}",
+                command.Name);
 
             (string objectName, string _) = await minioBucket.SendImageAsync(command.ImageUrl);
 
@@ -36,7 +47,7 @@ public sealed class CreateCatalogHandler(
                 description: command.Description,
                 imageUrl: objectName,
                 categories: command.Categories,
-                price: Price.Of(command.Price),
+                price: Price.Of(command.Price.Value),
                 merchantId: command.MerchantId
             );
 
@@ -44,20 +55,24 @@ public sealed class CreateCatalogHandler(
 
             if (result <= 0)
             {
-                logger.LogError(LogTypeEnum.Application, null, "Failed to persist catalog to database: {Command}", command);
+                logger.LogError(LogTypeEnum.Application, null, "Failed to persist catalog to database: {Command}",
+                    command);
                 return Result<CreateCatalogResult>.Failure("Failed to create catalog.");
             }
 
-            logger.LogInformation(LogTypeEnum.Business, "Catalog created successfully. CatalogId: {CatalogId}, Name: {Name}, Price: {Price}, MerchantId: {MerchantId}",
+            logger.LogInformation(LogTypeEnum.Business,
+                "Catalog created successfully. CatalogId: {CatalogId}, Name: {Name}, Price: {Price}, MerchantId: {MerchantId}",
                 catalogEntity.Id,
                 command.Name,
                 command.Price,
                 command.MerchantId);
-            return Result<CreateCatalogResult>.Success(new CreateCatalogResult(catalogEntity.Id.Value));
+
+            return Result<CreateCatalogResult>.Success(new CreateCatalogResult());
         }
         catch (Exception ex)
         {
-            logger.LogError(LogTypeEnum.Exception, ex, "An error occurred while creating the catalog: {Command}", command);
+            logger.LogError(LogTypeEnum.Exception, ex, "An error occurred while creating the catalog: {Command}",
+                command);
             return Result<CreateCatalogResult>.Failure($"An error occurred while creating the catalog: {ex.Message}");
         }
     }

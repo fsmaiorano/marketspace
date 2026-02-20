@@ -1,10 +1,15 @@
+using System.Text.Json.Serialization;
+
 namespace Catalog.Api.Domain.ValueObjects;
 
 public record Price
 {
-    public decimal Value { get; }
+    public decimal Value { get; set; }
 
     private Price(decimal value) => Value = decimal.Round(value, 2, MidpointRounding.AwayFromZero);
+
+    [JsonConstructor]
+    public Price() { }
 
     public static Price Of(decimal value)
     {

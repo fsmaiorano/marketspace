@@ -8,9 +8,8 @@ public record MerchantId
 
     public static MerchantId Of(Guid value)
     {
-        if (value == Guid.Empty)
-            throw new ArgumentException("MerchantId cannot be empty.", nameof(value));
-
-        return new MerchantId(value);
+        return value == Guid.Empty
+            ? throw new ArgumentException("MerchantId cannot be empty.", nameof(value))
+            : new MerchantId(value);
     }
 }
