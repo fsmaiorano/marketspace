@@ -9,11 +9,11 @@ namespace Builder;
 public static class BasketBuilder
 {
     private static readonly string[] ProductNames =
-    {
+    [
         "Wireless Headphones", "Gaming Mouse", "Coffee Mug", "Bluetooth Speaker", "Phone Case", "Laptop Stand",
         "Water Bottle", "Desk Lamp", "Notebook", "Pen Set", "USB Cable", "Power Bank", "Screen Protector",
         "Keyboard", "Mouse Pad", "Tablet", "Camera", "Backpack"
-    };
+    ];
 
     public static Faker<ShoppingCartEntity> CreateShoppingCartFaker(string username = "",
         ShoppingCartEntity[]? products = null)
@@ -26,7 +26,7 @@ public static class BasketBuilder
             });
     }
 
-    public static Faker<ShoppingCartItemEntity> CreateShoppingCartItemFaker(ShoppingCartEntity[]? products = null)
+    private static Faker<ShoppingCartItemEntity> CreateShoppingCartItemFaker(ShoppingCartEntity[]? products = null)
     {
         return new Faker<ShoppingCartItemEntity>()
             .CustomInstantiator(f =>
@@ -59,22 +59,20 @@ public static class BasketBuilder
     {
         return new Faker<CreateBasketCommand>()
             .CustomInstantiator(f => new CreateBasketCommand
-            {
-                Username = !string.IsNullOrEmpty(username) ? username : f.Internet.UserName(),
-                Items = CreateShoppingCartItemDtoFaker().Generate(f.Random.Int(1, 3))
-            });
+            (
+                !string.IsNullOrEmpty(username) ? username : f.Internet.UserName(),
+                CreateShoppingCartItemDtoFaker().Generate(f.Random.Int(1, 3))
+            ));
     }
 
     public static Faker<DeleteBasketCommand> CreateDeleteBasketCommandFaker(string username = "")
     {
         return new Faker<DeleteBasketCommand>()
             .CustomInstantiator(f => new DeleteBasketCommand
-            {
-                Username = !string.IsNullOrEmpty(username) ? username : f.Internet.UserName()
-            });
+                (!string.IsNullOrEmpty(username) ? username : f.Internet.UserName()));
     }
 
-    public static Faker<ShoppingCartItemDto> CreateShoppingCartItemDtoFaker()
+    private static Faker<ShoppingCartItemDto> CreateShoppingCartItemDtoFaker()
     {
         return new Faker<ShoppingCartItemDto>()
             .CustomInstantiator(f => new ShoppingCartItemDto

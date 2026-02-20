@@ -9,9 +9,9 @@ public static class DeleteBasketEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapDelete("/basket/{username}",
-                async ([FromRoute] string username, [FromServices] IDeleteBasketHandler handler) =>
+                async ([FromRoute] string username, [FromServices] DeleteBasket handler) =>
                 {
-                    DeleteBasketCommand command = new() { Username = username };
+                    DeleteBasketCommand command = new(Username: username);
                     Result<DeleteBasketResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess
                         ? Results.Ok(result)

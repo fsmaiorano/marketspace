@@ -8,9 +8,9 @@ namespace Basket.Api.Domain.Entities;
 
 public class ShoppingCartEntity : Aggregate<string>
 {
-    [Key] public string Username { get; set; } = null!;
+    [Key] public string Username { get; init; } = null!;
 
-    public List<ShoppingCartItemEntity> Items { get; set; } = new();
+    public List<ShoppingCartItemEntity> Items { get; set; } = [];
 
     public decimal TotalPrice => Items.Sum(item => item.Price * item.Quantity);
 
@@ -18,7 +18,7 @@ public class ShoppingCartEntity : Aggregate<string>
     public ShoppingCartEntity(string username, List<ShoppingCartItemEntity> items)
     {
         Username = username;
-        Items = items ?? new();
+        Items = items ?? [];
     }
 
     public ShoppingCartEntity() { } 
@@ -28,7 +28,7 @@ public class ShoppingCartEntity : Aggregate<string>
         if (string.IsNullOrWhiteSpace(username))
             throw new ArgumentException("Username is required.", nameof(username));
 
-        if (items == null || !items.Any())
+        if (items == null || items.Count == 0)
             throw new ArgumentException("Items cannot be null or empty.", nameof(items));
 
         return new ShoppingCartEntity { Username = username, Items = items };

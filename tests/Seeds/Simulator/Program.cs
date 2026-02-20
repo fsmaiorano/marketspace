@@ -80,9 +80,9 @@ if (user is null)
     Console.WriteLine("Creating admin user...");
     user = new ApplicationUser
     {
-        UserName = targetUserEmail, Email = targetUserEmail, EmailConfirmed = true, PasswordHash = "Password123!"
+        UserName = "user", Email = "user@example.com", EmailConfirmed = true, PasswordHash = "Password123!"
     };
-    userDbContext.Users.Add(user);
+    await userDbContext.Users.AddAsync(user);
     await userDbContext.SaveChangesAsync();
 }
 

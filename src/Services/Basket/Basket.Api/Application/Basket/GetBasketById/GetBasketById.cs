@@ -6,17 +6,24 @@ using BuildingBlocks.Loggers;
 
 namespace Basket.Api.Application.Basket.GetBasketById;
 
-public class GetBasketByIdHandler(
-    IBasketDataRepository dataRepository, 
-    IAppLogger<GetBasketByIdHandler> logger)
-    : IGetBasketByIdHandler
+public record GetBasketByIdQuery(string Username);
+
+public class GetBasketByIdResult(ShoppingCartDto shoppingCart)
+{
+    public ShoppingCartDto ShoppingCart { get; init; } = shoppingCart;
+};
+
+public class GetBasketById(
+    IBasketDataRepository dataRepository,
+    IAppLogger<GetBasketById> logger)
 {
     public async Task<Result<GetBasketByIdResult>> HandleAsync(GetBasketByIdQuery query)
     {
         try
         {
-            logger.LogInformation(LogTypeEnum.Application, "Processing get basket request for user: {Username}", query.Username);
-            
+            logger.LogInformation(LogTypeEnum.Application, "Processing get basket request for user: {Username}",
+                query.Username);
+
             ShoppingCartEntity? shoppingCart = await dataRepository.GetCartAsync(query.Username);
 
             if (shoppingCart is null)
@@ -36,7 +43,6 @@ public class GetBasketByIdHandler(
             };
 
             GetBasketByIdResult result = new(cartDto);
-
             return Result<GetBasketByIdResult>.Success(result);
         }
         catch (Exception ex)

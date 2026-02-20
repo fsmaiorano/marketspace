@@ -9,7 +9,7 @@ public static class CreateBasketEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("/basket",
-                async ([FromBody] CreateBasketCommand command, [FromServices] ICreateBasketHandler handler) =>
+                async ([FromBody] CreateBasketCommand command, [FromServices] CreateBasket handler) =>
                 {
                     Result<CreateBasketResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess

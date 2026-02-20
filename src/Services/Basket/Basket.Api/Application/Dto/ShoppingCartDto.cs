@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace Basket.Api.Application.Dto;
 
 public class ShoppingCartDto

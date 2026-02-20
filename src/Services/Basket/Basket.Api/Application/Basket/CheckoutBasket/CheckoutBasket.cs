@@ -7,11 +7,31 @@ using BuildingBlocks.Services.Correlation;
 
 namespace Basket.Api.Application.Basket.CheckoutBasket;
 
-public class CheckoutBasketHandler(
+public record CheckoutBasketCommand(
+    string UserName,
+    Guid CustomerId,
+    string? FirstName,
+    string? LastName,
+    string? EmailAddress,
+    string? AddressLine,
+    string? Country,
+    string? State,
+    string? ZipCode,
+    string? Coordinates,
+    string? CardName,
+    string? CardNumber,
+    string? Expiration,
+    string? Cvv,
+    int PaymentMethod
+);
+
+public record CheckoutBasketResult();
+
+public class CheckoutBasket(
     IBasketDataRepository basketDataRepository,
     ICorrelationIdService correlationIdService,
-    IAppLogger<CheckoutBasketHandler> logger)
-    : ICheckoutBasketHandler
+    IAppLogger<CheckoutBasket> logger)
+
 {
     public async Task<Result<CheckoutBasketResult>> HandleAsync(CheckoutBasketCommand command)
     {
@@ -19,7 +39,7 @@ public class CheckoutBasketHandler(
         {
             string correlationId = correlationIdService.GetCorrelationId();
 
-            logger.LogInformation(LogTypeEnum.Application, 
+            logger.LogInformation(LogTypeEnum.Application,
                 "Starting checkout process for user: {Username}, CorrelationId: {CorrelationId}",
                 command.UserName, correlationId);
 
@@ -27,13 +47,13 @@ public class CheckoutBasketHandler(
 
             if (basket is null || basket.Items.Count == 0)
             {
-                logger.LogWarning(LogTypeEnum.Application, 
+                logger.LogWarning(LogTypeEnum.Application,
                     "Basket not found or empty for user: {Username}, CorrelationId: {CorrelationId}",
                     command.UserName, correlationId);
                 return Result<CheckoutBasketResult>.Failure("Basket is empty or does not exist.");
             }
 
-            logger.LogInformation(LogTypeEnum.Application, 
+            logger.LogInformation(LogTypeEnum.Application,
                 "Basket found with {ItemCount} items for user: {Username}, CorrelationId: {CorrelationId}",
                 basket.Items.Count, command.UserName, correlationId);
 
@@ -63,7 +83,7 @@ public class CheckoutBasketHandler(
                     command.PaymentMethod
                 );
             }
-       
+
             CheckoutData checkoutData = CheckoutData.Create(
                 command.CustomerId,
                 command.UserName,
@@ -73,8 +93,7 @@ public class CheckoutBasketHandler(
             );
 
             await basketDataRepository.CheckoutAsync(command.UserName, checkoutData);
-            
-            return Result<CheckoutBasketResult>.Success(new CheckoutBasketResult(true));
+            return Result<CheckoutBasketResult>.Success(new CheckoutBasketResult());
         }
         catch (Exception ex)
         {
@@ -84,4 +103,3 @@ public class CheckoutBasketHandler(
         }
     }
 }
-
