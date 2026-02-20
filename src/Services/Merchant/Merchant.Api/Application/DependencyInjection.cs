@@ -13,10 +13,12 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddScoped<IMerchantRepository, MerchantRepository>();
-        services.AddScoped<ICreateMerchantHandler, CreateMerchantHandler>();
-        services.AddScoped<IUpdateMerchantHandler, UpdateMerchantHandler>();
-        services.AddScoped<IDeleteMerchantHandler, DeleteMerchantHandler>();
-        services.AddScoped<IGetMerchantByIdHandler, GetMerchantByIdHandler>();
+        
+        services.AddScoped<CreateMerchant>();
+        services.AddScoped<UpdateMerchant>();
+        services.AddScoped<DeleteMerchant>();
+        services.AddScoped<GetMerchantById>();
+        
         return services;
     }
 }

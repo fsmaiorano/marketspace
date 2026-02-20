@@ -1,89 +1,35 @@
-using Builder;
-using BuildingBlocks;
-using FluentAssertions;
-using Merchant.Api.Application.Merchant.UpdateMerchant;
-using Merchant.Api.Domain.Entities;
-using Merchant.Test.Base;
 using Merchant.Test.Fixtures;
-using Moq;
-using System.Net.Http.Json;
 
 namespace Merchant.Test.Endpoints;
 
 public class UpdateMerchantEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fixture)
 {
-    private readonly Mock<IUpdateMerchantHandler> _mockHandler = new();
-
     [Fact]
-    public async Task Returns_Failure_When_Merchant_Not_Found()
-    {
-        Guid merchantId = Guid.CreateVersion7();
-
-        _mockHandler
-            .Setup(h => h.HandleAsync(It.IsAny<UpdateMerchantCommand>()))
-            .ReturnsAsync(Result<UpdateMerchantResult>.Failure("Catalog not found."));
-
-        UpdateMerchantCommand command = new() { Id = merchantId };
-
-        Result<UpdateMerchantResult> response = await _mockHandler.Object.HandleAsync(command);
-
-        response.IsSuccess.Should().BeFalse();
-        response.Error.Should().Be("Catalog not found.");
-    }
-
-    [Fact]
-    public async Task Returns_Failure_When_Exception_Occurs()
-    {
-        Guid merchantId = Guid.CreateVersion7();
-
-        _mockHandler
-            .Setup(h => h.HandleAsync(It.IsAny<UpdateMerchantCommand>()))
-            .ThrowsAsync(new Exception("Unexpected error"));
-
-        UpdateMerchantCommand command = new() { Id = merchantId };
-
-        Func<Task> act = async () => await _mockHandler.Object.HandleAsync(command);
-
-        await act.Should().ThrowAsync<Exception>().WithMessage("Unexpected error");
-    }
-
-    [Fact]
-    public async Task Returns_Success_When_Merchant_Updated()
-    {
-        Guid merchantId = Guid.CreateVersion7();
-
-        _mockHandler
-            .Setup(h => h.HandleAsync(It.IsAny<UpdateMerchantCommand>()))
-            .ReturnsAsync(Result<UpdateMerchantResult>.Success(new UpdateMerchantResult()));
-
-        UpdateMerchantCommand command = new() { Id = merchantId };
-
-        Result<UpdateMerchantResult> response = await _mockHandler.Object.HandleAsync(command);
-
-        response.IsSuccess.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task Can_Update_Merchant_Endpoint()
+    public async Task Returns_Ok_When_Merchant_Is_Updated_Successfully()
     {
         MerchantEntity? merchant = MerchantBuilder.CreateMerchantFaker().Generate();
-
         Context.Merchants.Add(merchant);
         await Context.SaveChangesAsync();
 
         UpdateMerchantCommand command = new()
         {
             Id = merchant.Id.Value,
-            Name = "Updated Catalog Name",
-            Description = "Updated Description",
+            Name = $"{merchant.Name}_Updated",
+            Description = merchant.Description,
             Email = merchant.Email.Value,
-            Address = merchant.Address,
-            PhoneNumber = merchant.PhoneNumber
+            PhoneNumber = merchant.PhoneNumber,
+            Address = merchant.Address
         };
 
-        HttpResponseMessage response = await DoPut("/merchant", command);
+        HttpResponseMessage response = await DoPut($"/merchant", command);
+        Result<UpdateMerchantResult>? result = await response.Content.ReadFromJsonAsync<Result<UpdateMerchantResult>>();
+        
+        Context.ChangeTracker.Clear();
+        MerchantEntity? updatedMerchant = await Context.Merchants.FindAsync(merchant.Id);
 
-        UpdateMerchantResult? result = await response.Content.ReadFromJsonAsync<UpdateMerchantResult>();
-        result.Should().NotBeNull();
+        result?.IsSuccess.Should().BeTrue();
+        result?.Data.Should().NotBeNull();
+        updatedMerchant.Should().NotBeNull();
+        updatedMerchant.Name.Should().Be(command.Name);
     }
 }

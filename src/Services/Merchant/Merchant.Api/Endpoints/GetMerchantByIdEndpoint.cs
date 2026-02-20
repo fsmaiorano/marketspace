@@ -7,7 +7,7 @@ public static class GetMerchantByIdEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/merchant/{id:guid}", async ([FromRoute] Guid id, [FromServices] IGetMerchantByIdHandler handler) =>
+        app.MapGet("/merchant/{id:guid}", async ([FromRoute] Guid id, [FromServices] GetMerchantById handler) =>
             {
                 GetMerchantByIdQuery query = new(id);
                 Result<GetMerchantByIdResult> result = await handler.HandleAsync(query);

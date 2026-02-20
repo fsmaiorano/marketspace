@@ -6,7 +6,7 @@ namespace Catalog.Api.Domain.Entities;
 public class CatalogEntity : Aggregate<CatalogId>
 {
     public string Name { get; private set; } = string.Empty;
-    public List<string> Categories { get; set; } = [];
+    public List<string> Categories { get; private set; } = [];
     public string Description { get; private set; } = string.Empty;
     public string ImageUrl { get; private set; } = string.Empty;
     public Price Price { get; private set; } = null!;
@@ -25,23 +25,19 @@ public class CatalogEntity : Aggregate<CatalogId>
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Name is required.", nameof(name));
 
-        if (categories == null)
-            throw new ArgumentNullException(nameof(categories));
-
         if (string.IsNullOrWhiteSpace(description))
             throw new ArgumentException("Description is required.", nameof(description));
 
         if (string.IsNullOrWhiteSpace(imageUrl))
             throw new ArgumentException("ImageUrl is required.", nameof(imageUrl));
 
-        if (price == null)
-            throw new ArgumentNullException(nameof(price));
-
         if (merchantId == Guid.Empty)
             throw new ArgumentException("MerchantId cannot be empty.", nameof(merchantId));
+        
+        ArgumentNullException.ThrowIfNull(categories);
+        ArgumentNullException.ThrowIfNull(price);
 
         CatalogEntity entity = new()
-
         {
             Name = name,
             Description = description,
@@ -55,7 +51,7 @@ public class CatalogEntity : Aggregate<CatalogId>
         return entity;
     }
 
-    public void AddCategory(string category)
+    private void AddCategory(string category)
     {
         if (string.IsNullOrWhiteSpace(category))
             throw new ArgumentException("Category cannot be null or empty.", nameof(category));
@@ -66,7 +62,7 @@ public class CatalogEntity : Aggregate<CatalogId>
         }
     }
 
-    public void RemoveCategory(string category)
+    private void RemoveCategory(string category)
     {
         if (string.IsNullOrWhiteSpace(category))
             throw new ArgumentException("Category cannot be null or empty.", nameof(category));
@@ -74,18 +70,89 @@ public class CatalogEntity : Aggregate<CatalogId>
         Categories.Remove(category);
     }
 
-    public void Update(
-        string name,
-        IEnumerable<string> categories,
-        string description,
-        string imageUrl,
-        Price price)
+    private void ClearCategories() => Categories.Clear();
+
+    private void ChangeName(string name)
     {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Name is required.", nameof(name));
+
+        if (Name == name)
+            return;
+
         Name = name;
+    }
+
+    private void ChangeDescription(string description)
+    {
+        if (string.IsNullOrWhiteSpace(description))
+            throw new ArgumentException("Description is required.", nameof(description));
+
+        if (Description == description)
+            return;
+
         Description = description;
+    }
+
+    private void ChangeImageUrl(string imageUrl)
+    {
+        if (string.IsNullOrWhiteSpace(imageUrl))
+            throw new ArgumentException("ImageUrl is required.", nameof(imageUrl));
+
+        if (ImageUrl == imageUrl)
+            return;
+
         ImageUrl = imageUrl;
+    }
+
+    private void ChangePrice(Price price)
+    {
+        if (Price == price)
+            return;
+
         Price = price;
-        Categories = new List<string>(categories.Distinct());
-        UpdatedAt = DateTimeOffset.UtcNow;
+    }
+
+    private void ChangeMerchantId(Guid merchantId)
+    {
+        if (MerchantId == merchantId)
+            return;
+
+        MerchantId = merchantId;
+    }
+
+    private void Touch() => UpdatedAt = DateTimeOffset.UtcNow;
+
+    public void Update(
+        string? name,
+        IEnumerable<string>? categories,
+        string? description,
+        string? imageUrl,
+        Price? price,
+        Guid? merchantId = null)
+    {
+        if (name is not null)
+            ChangeName(name);
+
+        if (categories is not null)
+        {
+            ClearCategories();
+            foreach (string category in categories)
+                AddCategory(category);
+        }
+
+        if (description is not null)
+            ChangeDescription(description);
+
+        if (imageUrl is not null)
+            ChangeImageUrl(imageUrl);
+
+        if (price is not null)
+            ChangePrice(price);
+
+        if (merchantId is not null)
+            ChangeMerchantId(merchantId.Value);
+
+        Touch();
     }
 }

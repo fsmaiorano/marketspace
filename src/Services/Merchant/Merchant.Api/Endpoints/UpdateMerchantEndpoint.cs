@@ -8,7 +8,7 @@ public static class UpdateMerchantEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPut("/merchant",
-                async ([FromBody] UpdateMerchantCommand command, [FromServices] IUpdateMerchantHandler handler) =>
+                async ([FromBody] UpdateMerchantCommand command, [FromServices] UpdateMerchant handler) =>
                 {
                     Result<UpdateMerchantResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess

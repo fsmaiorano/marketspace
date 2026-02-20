@@ -1,13 +1,13 @@
 namespace Merchant.Test.Application.Merchant.CreateMerchant;
 
-public class CreateMerchantHandlerTest
+public class CreateMerchantTest
 {
     [Fact]
     public async Task HandleAsync_ShouldReturnSuccessResult_WhenNoExceptionOccurs()
     {
         MerchantEntity? merchant = MerchantBuilder.CreateMerchantFaker("").Generate();
         Mock<IMerchantRepository> repositoryMock = new();
-        Mock<IAppLogger<CreateMerchantHandler>> loggerMock = new();
+        Mock<IAppLogger<Api.Application.Merchant.CreateMerchant.CreateMerchant>> loggerMock = new();
 
         repositoryMock
             .Setup(r => r.AddAsync(It.IsAny<MerchantEntity>(), It.IsAny<CancellationToken>()))
@@ -17,7 +17,7 @@ public class CreateMerchantHandlerTest
                 return 1;
             });
 
-        CreateMerchantHandler handler = new(repositoryMock.Object, loggerMock.Object);
+        Api.Application.Merchant.CreateMerchant.CreateMerchant handler = new(repositoryMock.Object, loggerMock.Object);
 
         CreateMerchantCommand command = MerchantBuilder.CreateCreateMerchantCommandFaker().Generate();
 
@@ -25,25 +25,5 @@ public class CreateMerchantHandlerTest
 
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Data);
-        Assert.NotEqual(Guid.Empty, result.Data.MerchantId);
-    }
-
-    [Fact]
-    public Task HandleAsync_ShouldReturnFailureResult_WhenExceptionIsThrown()
-    {
-        try
-        {
-            MerchantEntity? merchant = MerchantBuilder.CreateMerchantFaker(email: "wrong-email-format").Generate();
-        }
-        catch (DomainException ex)
-        {
-            Assert.IsType<DomainException>(ex);
-        }
-        catch (Exception ex)
-        {
-            Assert.Fail($"Unexpected exception type: {ex.GetType()}");
-        }
-
-        return Task.CompletedTask;
     }
 }

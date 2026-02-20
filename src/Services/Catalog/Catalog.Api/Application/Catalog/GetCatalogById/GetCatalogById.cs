@@ -11,20 +11,18 @@ namespace Catalog.Api.Application.Catalog.GetCatalogById;
 
 public record GetCatalogByIdQuery(Guid Id);
 
-public class GetCatalogByIdResult
-{
-    public Guid Id { get; init; } = Guid.Empty;
-    public string Name { get; init; } = string.Empty;
-    public string Description { get; init; } = string.Empty;
-    public string ImageUrl { get; init; } = string.Empty;
-    public decimal Price { get; init; } = 0.0m;
-    
-    [JsonPropertyName("categories")]
-    public IReadOnlyList<string> Categories { get; init; } = [];
-    public Guid MerchantId { get; init; } = Guid.Empty;
-    public DateTimeOffset CreatedAt { get; init; }
-    public DateTimeOffset? UpdatedAt { get; init; }
-}
+public record GetCatalogByIdResult(
+    Guid Id,
+    string Name,
+    string Description,
+    string ImageUrl,
+    decimal Price,
+    [property: JsonPropertyName("categories")]
+    IReadOnlyList<string> Categories,
+    Guid MerchantId,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset? UpdatedAt
+);
 
 public class GetCatalogById(
     ICatalogRepository repository,
@@ -35,28 +33,31 @@ public class GetCatalogById(
     {
         try
         {
-            logger.LogInformation(LogTypeEnum.Application, "Processing get catalog by ID request for: {CatalogId}", query.Id);
+            logger.LogInformation(LogTypeEnum.Application, "Processing get catalog by ID request for: {CatalogId}",
+                query.Id);
 
-            CatalogId catalogId = CatalogId.Of(query.Id);
-
-            CatalogEntity? catalog = await repository.GetByIdAsync(catalogId, isTrackingEnabled: false);
+            CatalogEntity? catalog = await repository.GetByIdAsync(CatalogId.Of(query.Id), isTrackingEnabled: false);
 
             if (catalog is null)
                 return Result<GetCatalogByIdResult>.Failure($"Catalog with ID {query.Id} not found.");
 
-            var x = await minioBucket.GetImageAsync(catalog.ImageUrl);
-            var y = await minioBucket.GetImageToDownload(catalog.ImageUrl);
+            string? getImage = await minioBucket.GetImageAsync(catalog.ImageUrl);
+            string getImageToDownload = await minioBucket.GetImageToDownload(catalog.ImageUrl);
+            
+            Console.WriteLine(getImage);
+            Console.WriteLine(getImageToDownload);
 
-            GetCatalogByIdResult result = new()
-
-            {
-                Id = catalog.Id.Value,
-                Name = catalog.Name,
-                Description = catalog.Description,
-                ImageUrl = catalog.ImageUrl,
-                Price = catalog.Price.Value,
-                Categories = new ReadOnlyCollection<string>(catalog.Categories.ToList())
-            };
+            GetCatalogByIdResult result = new(
+                Id: catalog.Id.Value,
+                Name: catalog.Name,
+                Description: catalog.Description,
+                ImageUrl: catalog.ImageUrl,
+                Price: catalog.Price.Value,
+                Categories: new ReadOnlyCollection<string>(catalog.Categories),
+                MerchantId: catalog.MerchantId,
+                CreatedAt: catalog.CreatedAt,
+                UpdatedAt: catalog.UpdatedAt
+            );
 
             return Result<GetCatalogByIdResult>.Success(result);
         }

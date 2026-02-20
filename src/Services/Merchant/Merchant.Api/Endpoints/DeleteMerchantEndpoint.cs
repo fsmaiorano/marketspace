@@ -8,9 +8,9 @@ public static class DeleteMerchantEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapDelete("/merchant/{merchantId}",
-                async ([FromRoute] string merchantId, [FromServices] IDeleteMerchantHandler handler) =>
+                async ([FromRoute] string merchantId, [FromServices] DeleteMerchant handler) =>
                 {
-                    DeleteMerchantCommand command = new() { Id = Guid.Parse(merchantId) };
+                    DeleteMerchantCommand command = new(Guid.Parse(merchantId));
                     Result<DeleteMerchantResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess
                         ? Results.Ok(result)

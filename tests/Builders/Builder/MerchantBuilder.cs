@@ -31,9 +31,8 @@ public static class MerchantBuilder
                 f => string.IsNullOrWhiteSpace(email) ? "marketspace@marketspace.com" : email);
     }
 
-    public static Faker<DeleteMerchantCommand> CreateDeleteMerchantCommandFaker(Guid id = default)
+    public static DeleteMerchantCommand CreateDeleteMerchantCommandFaker(Guid id = default)
     {
-        return new Faker<DeleteMerchantCommand>()
-            .RuleFor(m => m.Id, f => id == Guid.Empty ? f.Random.Guid() : id);
+        return new DeleteMerchantCommand(id == Guid.Empty ? Guid.NewGuid() : id);
     }
 }
