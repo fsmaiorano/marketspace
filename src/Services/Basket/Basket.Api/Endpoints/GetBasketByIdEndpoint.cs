@@ -9,7 +9,7 @@ public static class GetBasketByIdEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet("/basket/{username}",
-                async ([FromRoute] string username, [FromServices] IGetBasketByIdHandler handler) =>
+                async ([FromRoute] string username, [FromServices] GetBasketById handler) =>
                 {
                     GetBasketByIdQuery query = new(username);
                     Result<GetBasketByIdResult> result = await handler.HandleAsync(query);

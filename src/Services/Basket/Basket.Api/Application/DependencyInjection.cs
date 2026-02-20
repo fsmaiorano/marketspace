@@ -17,12 +17,13 @@ public static class DependencyInjection
     public static IServiceCollection AddApplicationServices(this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddScoped<IBasketDataRepository, BasketDataRepository>();
-        services.AddScoped<ICreateBasketHandler, CreateBasketHandler>();
-        services.AddScoped<IDeleteBasketHandler, DeleteBasketHandler>();
-        services.AddScoped<IGetBasketByIdHandler, GetBasketByIdHandler>();
-        services.AddScoped<ICheckoutBasketHandler, CheckoutBasketHandler>();
+        services.AddScoped<CreateBasket>();
+        services.AddScoped<DeleteBasket>();
+        services.AddScoped<GetBasketById>();
+        services.AddScoped<CheckoutBasket>();
         
+        services.AddScoped<IBasketDataRepository, BasketDataRepository>();
+
         services.AddEventBus(configuration);
 
         services.AddScoped<IDomainEventHandler<BasketCheckoutDomainEvent>, OnBasketCheckoutEventHandler>();

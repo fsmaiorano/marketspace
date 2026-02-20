@@ -1,8 +1,3 @@
-using Bogus;
-using Microsoft.Extensions.DependencyInjection;
-using Basket.Api.Infrastructure.Data;
-using Basket.Test.Fixtures;
-
 namespace Basket.Test.Base;
 
 public abstract class BaseTest : IClassFixture<TestFixture>, IDisposable

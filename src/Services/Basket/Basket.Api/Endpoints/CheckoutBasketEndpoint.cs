@@ -9,9 +9,9 @@ public static class CheckoutBasketEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("/basket/checkout",
-                async ([FromBody] CheckoutBasketCommand command, [FromServices] ICheckoutBasketHandler handler) =>
+                async ([FromBody] CheckoutBasketCommand command, [FromServices] CheckoutBasket usecase) =>
                 {
-                    Result<CheckoutBasketResult> result = await handler.HandleAsync(command);
+                    Result<CheckoutBasketResult> result = await usecase.HandleAsync(command);
                     return result.IsSuccess
                         ? Results.Ok(result)
                         : Results.BadRequest(result.Error);

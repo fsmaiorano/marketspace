@@ -1,12 +1,3 @@
-using Basket.Api.Application.Basket.CreateBasket;
-using Basket.Api.Application.Dto;
-using Basket.Test.Base;
-using Basket.Test.Fixtures;
-using Builder;
-using BuildingBlocks;
-using System.Net;
-using System.Net.Http.Json;
-
 namespace Basket.Test.Endpoints;
 
 public class CreateBasketEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fixture)

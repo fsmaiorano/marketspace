@@ -16,9 +16,7 @@ public interface IBasketDbContext
 public class BasketDbContext : DbContext, IBasketDbContext, IOutboxDbContext
 {
     public BasketDbContext(DbContextOptions<BasketDbContext> options)
-        : base(options)
-    {
-    }
+        : base(options) { }
 
     public DbSet<ShoppingCartEntity> ShoppingCarts => Set<ShoppingCartEntity>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();

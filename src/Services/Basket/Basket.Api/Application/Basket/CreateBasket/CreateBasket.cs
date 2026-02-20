@@ -6,19 +6,25 @@ using BuildingBlocks.Loggers;
 
 namespace Basket.Api.Application.Basket.CreateBasket;
 
-public sealed class CreateBasketHandler(
+public record CreateBasketCommand(
+    string Username,
+    IReadOnlyList<ShoppingCartItemDto> Items
+);
+
+public record CreateBasketResult(ShoppingCartDto ShoppingCart);
+
+public sealed class CreateBasket(
     IBasketDataRepository dataRepository,
-    IAppLogger<CreateBasketHandler> logger)
-    : ICreateBasketHandler
+    IAppLogger<CreateBasket> logger)
 {
     public async Task<Result<CreateBasketResult>> HandleAsync(CreateBasketCommand command)
     {
         try
         {
-            logger.LogInformation(LogTypeEnum.Application, "Processing create basket request for user: {Username}", command.Username);
+            logger.LogInformation(LogTypeEnum.Application, "Processing create basket request for user: {Username}",
+                command.Username);
 
             ShoppingCartEntity cartEntity = new()
-
             {
                 Username = command.Username,
                 Items = command.Items.Select(item => new ShoppingCartItemEntity
@@ -32,7 +38,8 @@ public sealed class CreateBasketHandler(
 
             ShoppingCartEntity result = await dataRepository.CreateCartAsync(cartEntity);
 
-            logger.LogInformation(LogTypeEnum.Business, "Basket created successfully. Username: {Username}, ItemCount: {ItemCount}",
+            logger.LogInformation(LogTypeEnum.Business,
+                "Basket created successfully. Username: {Username}, ItemCount: {ItemCount}",
                 cartEntity.Username,
                 cartEntity.Items.Count);
 
@@ -52,7 +59,8 @@ public sealed class CreateBasketHandler(
         }
         catch (Exception ex)
         {
-            logger.LogError(LogTypeEnum.Exception, ex, "An error occurred while creating the basket: {Command}", command);
+            logger.LogError(LogTypeEnum.Exception, ex, "An error occurred while creating the basket: {Command}",
+                command);
             return Result<CreateBasketResult>.Failure($"An error occurred while creating the basket: {ex.Message}");
         }
     }
