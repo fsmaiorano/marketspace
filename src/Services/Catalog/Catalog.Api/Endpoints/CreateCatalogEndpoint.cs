@@ -9,7 +9,7 @@ public static class CreateCatalogEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("/catalog",
-                async ([FromBody] CreateCatalogCommand command, [FromServices] ICreateCatalogHandler handler) =>
+                async ([FromBody] CreateCatalogCommand command, [FromServices] CreateCatalog handler) =>
                 {
                     Result<CreateCatalogResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess

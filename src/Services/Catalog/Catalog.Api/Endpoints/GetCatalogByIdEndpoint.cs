@@ -9,7 +9,7 @@ public static class GetCatalogByIdEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/catalog/{id:guid}", async ([FromRoute] Guid id, [FromServices] IGetCatalogByIdHandler handler) =>
+        app.MapGet("/catalog/{id:guid}", async ([FromRoute] Guid id, [FromServices] GetCatalogById handler) =>
             {
                 GetCatalogByIdQuery query = new(id);
                 Result<GetCatalogByIdResult> result = await handler.HandleAsync(query);

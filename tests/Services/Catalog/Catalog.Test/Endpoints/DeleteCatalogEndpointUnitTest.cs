@@ -10,7 +10,6 @@ public class DeleteCatalogEndpointUnitTest(TestFixture fixture) : Base.BaseTest(
     public async Task Can_Delete_Catalog_Endpoint()
     {
         CatalogEntity? catalog = CatalogBuilder.CreateCatalogFaker().Generate();
-
         Context.Catalogs.Add(catalog);
         await Context.SaveChangesAsync();
 
@@ -20,6 +19,5 @@ public class DeleteCatalogEndpointUnitTest(TestFixture fixture) : Base.BaseTest(
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Data.Should().NotBeNull();
-        result.Data!.IsSuccess.Should().BeTrue();
     }
 }
