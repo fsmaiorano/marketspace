@@ -5,16 +5,20 @@ using Merchant.Api.Domain.ValueObjects;
 
 namespace Merchant.Api.Application.Merchant.GetMerchantById;
 
-public class GetMerchantByIdHandler(
+public record GetMerchantByIdQuery(Guid Id);
+
+public record GetMerchantByIdResult(Guid Id, string Name, string Email, string PhoneNumber, string Address);
+
+public class GetMerchantById(
     IMerchantRepository repository,
-    IAppLogger<GetMerchantByIdHandler> logger)
-    : IGetMerchantByIdHandler
+    IAppLogger<GetMerchantById> logger)
 {
     public async Task<Result<GetMerchantByIdResult>> HandleAsync(GetMerchantByIdQuery query)
     {
         try
         {
-            logger.LogInformation(LogTypeEnum.Application, "Processing get merchant by ID request for: {MerchantId}", query.Id);
+            logger.LogInformation(LogTypeEnum.Application, "Processing get merchant by ID request for: {MerchantId}",
+                query.Id);
 
             MerchantId merchantId = MerchantId.Of(query.Id);
 
@@ -26,14 +30,12 @@ public class GetMerchantByIdHandler(
                 return Result<GetMerchantByIdResult>.Failure($"Catalog with ID {query.Id} not found.");
             }
 
-            GetMerchantByIdResult result = new()
-            {
-                Id = merchant.Id.Value,
-                Name = merchant.Name,
-                Email = merchant.Email.Value,
-                PhoneNumber = merchant.PhoneNumber,
-                Address = merchant.Address
-            };
+            GetMerchantByIdResult result = new GetMerchantByIdResult(
+                merchant.Id.Value,
+                merchant.Name,
+                merchant.Email.Value,
+                merchant.PhoneNumber,
+                merchant.Address);
 
             return Result<GetMerchantByIdResult>.Success(result);
         }

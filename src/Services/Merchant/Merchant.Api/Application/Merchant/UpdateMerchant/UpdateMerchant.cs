@@ -1,4 +1,3 @@
-using BuildingBlocks;
 using BuildingBlocks.Loggers;
 using Merchant.Api.Domain.Entities;
 using Merchant.Api.Domain.Repositories;
@@ -6,10 +5,21 @@ using Merchant.Api.Domain.ValueObjects;
 
 namespace Merchant.Api.Application.Merchant.UpdateMerchant;
 
-public sealed class UpdateMerchantHandler(
+public record UpdateMerchantCommand
+{
+    public required Guid Id { get; init; }
+    public string? Name { get; init; } 
+    public string? Description { get; init; } 
+    public string? Address { get; init; } 
+    public string? PhoneNumber { get; init; } 
+    public string? Email { get; init; } 
+}
+
+public record UpdateMerchantResult();
+
+public sealed class UpdateMerchant(
     IMerchantRepository repository, 
-    IAppLogger<UpdateMerchantHandler> logger)
-    : IUpdateMerchantHandler
+    IAppLogger<UpdateMerchant> logger)
 {
     public async Task<Result<UpdateMerchantResult>> HandleAsync(UpdateMerchantCommand command)
     {
@@ -17,7 +27,6 @@ public sealed class UpdateMerchantHandler(
         {
             logger.LogInformation(LogTypeEnum.Application, "Processing update merchant request for: {MerchantId}", command.Id);
             
-            // Buscar entidade existente rastreada
             MerchantId merchantId = MerchantId.Of(command.Id);
             MerchantEntity? merchantEntity = await repository.GetByIdAsync(merchantId, isTrackingEnabled: true, CancellationToken.None);
             

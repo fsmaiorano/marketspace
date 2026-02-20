@@ -30,7 +30,7 @@ public static class DependencyInjection
         services.AddScoped<ICatalogRepository, CatalogRepository>();
 
         services.AddScoped<CreateCatalog>();
-        services.AddScoped<IUpdateCatalogHandler, UpdateCatalogHandler>();
+        services.AddScoped<UpdateCatalog>();
         services.AddScoped<DeleteCatalog>();
         services.AddScoped<GetCatalogById>();
         services.AddScoped<GetCatalog>();

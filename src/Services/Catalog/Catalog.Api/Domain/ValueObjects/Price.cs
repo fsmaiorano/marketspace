@@ -15,8 +15,8 @@ public record Price
     {
         if (value < 0)
             throw new ArgumentException("Price cannot be negative.", nameof(value));
-        if (decimal.Round(value, 2) != value)
-            throw new ArgumentException("Price must have at most 2 decimal places.", nameof(value));
-        return new Price(value);
+        return decimal.Round(value, 2) != value
+            ? throw new ArgumentException("Price must have at most 2 decimal places.", nameof(value))
+            : new Price(value);
     }
 }

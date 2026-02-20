@@ -2,22 +2,22 @@ using Merchant.Api.Application.Merchant.DeleteMerchant;
 
 namespace Merchant.Test.Application.Merchant.DeleteMerchant;
 
-public class DeleteMerchantHandlerTest
+public class DeleteMerchantTest
 {
     [Fact]
     public async Task HandleAsync_ShouldReturnSuccessResult_WhenNoExceptionOccurs()
     {
         MerchantEntity? merchant = MerchantBuilder.CreateMerchantFaker("").Generate();
         Mock<IMerchantRepository> repositoryMock = new();
-        Mock<IAppLogger<DeleteMerchantHandler>> loggerMock = new();
+        Mock<IAppLogger<Api.Application.Merchant.DeleteMerchant.DeleteMerchant>> loggerMock = new();
 
         repositoryMock
             .Setup(r => r.RemoveAsync(It.IsAny<MerchantId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(1);
 
-        DeleteMerchantHandler handler = new(repositoryMock.Object, loggerMock.Object);
+        Api.Application.Merchant.DeleteMerchant.DeleteMerchant handler = new(repositoryMock.Object, loggerMock.Object);
 
-        DeleteMerchantCommand command = MerchantBuilder.CreateDeleteMerchantCommandFaker().Generate();
+        DeleteMerchantCommand command = MerchantBuilder.CreateDeleteMerchantCommandFaker();
 
         Result<DeleteMerchantResult> result = await handler.HandleAsync(command);
 

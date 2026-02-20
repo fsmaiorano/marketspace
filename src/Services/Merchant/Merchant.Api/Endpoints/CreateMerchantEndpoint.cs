@@ -8,7 +8,7 @@ public static class CreateMerchantEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/merchant", async ([FromBody] CreateMerchantCommand command, [FromServices] ICreateMerchantHandler handler) =>
+        app.MapPost("/merchant", async ([FromBody] CreateMerchantCommand command, [FromServices] CreateMerchant handler) =>
             {
                 Result<CreateMerchantResult> result = await handler.HandleAsync(command);
                 return result.IsSuccess

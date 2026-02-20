@@ -9,7 +9,7 @@ public static class UpdateCatalogEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPut("/catalog",
-                async ([FromBody] UpdateCatalogCommand command, [FromServices] IUpdateCatalogHandler handler) =>
+                async ([FromBody] UpdateCatalogCommand command, [FromServices] UpdateCatalog handler) =>
                 {
                     Result<UpdateCatalogResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess
