@@ -49,7 +49,7 @@ public class OrderEntity : Aggregate<OrderId>
     }
 
     [JsonConstructor]
-    public OrderEntity(OrderId id, CustomerId customerId, Address shippingAddress, Address billingAddress, 
+    public OrderEntity(OrderId id, CustomerId customerId, Address shippingAddress, Address billingAddress,
         Payment payment, OrderStatusEnum status, List<OrderItemEntity> items, Price totalAmount)
     {
         Id = id;
@@ -132,39 +132,80 @@ public class OrderEntity : Aggregate<OrderId>
         return order;
     }
 
-    public void Update(
-        Address shippingAddress,
-        Address billingAddress,
-        Payment payment,
-        OrderStatusEnum status,
-        IEnumerable<OrderItemEntity>? items = null)
+    private void ChangeShippingAddress(Address shippingAddress)
     {
         ArgumentNullException.ThrowIfNull(shippingAddress, nameof(shippingAddress));
-        ArgumentNullException.ThrowIfNull(billingAddress, nameof(billingAddress));
-        ArgumentNullException.ThrowIfNull(payment, nameof(payment));
+
+        if (ShippingAddress == shippingAddress)
+            return;
 
         ShippingAddress = shippingAddress;
+    }
+
+    private void ChangeBillingAddress(Address billingAddress)
+    {
+        ArgumentNullException.ThrowIfNull(billingAddress, nameof(billingAddress));
+
+        if (BillingAddress == billingAddress)
+            return;
+
         BillingAddress = billingAddress;
+    }
+
+    private void ChangePayment(Payment payment)
+    {
+        ArgumentNullException.ThrowIfNull(payment, nameof(payment));
+
+        if (Payment == payment)
+            return;
+
         Payment = payment;
+    }
+
+    private void ChangeStatus(OrderStatusEnum status)
+    {
+        if (Status == status)
+            return;
+
         Status = status;
-        LastModifiedAt = DateTime.UtcNow;
+    }
 
-        ClearItems();
+    private void Touch() => LastModifiedAt = DateTime.UtcNow;
 
-        if (items != null)
+    public void Update(
+        Address? shippingAddress = null,
+        Address? billingAddress = null,
+        Payment? payment = null,
+        OrderStatusEnum? status = null,
+        IEnumerable<OrderItemEntity>? items = null)
+    {
+        if (shippingAddress is not null)
+            ChangeShippingAddress(shippingAddress);
+
+        if (billingAddress is not null)
+            ChangeBillingAddress(billingAddress);
+
+        if (payment is not null)
+            ChangePayment(payment);
+
+        if (status is not null)
+            ChangeStatus(status.Value);
+
+        if (items is not null)
         {
+            ClearItems();
             foreach (OrderItemEntity orderItem in items)
-            {
                 AddItem(Id, orderItem);
-            }
+
+            CalculateAndSetTotalAmount();
         }
 
-        CalculateAndSetTotalAmount();
+        Touch();
     }
 
     public void PatchStatus(OrderStatusEnum status)
     {
-        Status = status;
-        LastModifiedAt = DateTime.UtcNow;
+        ChangeStatus(status);
+        Touch();
     }
 }

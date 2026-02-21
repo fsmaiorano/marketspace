@@ -1,7 +1,5 @@
-using BuildingBlocks.Messaging;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using BuildingBlocks.Messaging.Extensions;
-using BuildingBlocks.Messaging.Interfaces;
 using Order.Api.Application.EventHandlers;
 using Order.Api.Application.HostedService;
 using Order.Api.Application.Order.CreateOrder;
