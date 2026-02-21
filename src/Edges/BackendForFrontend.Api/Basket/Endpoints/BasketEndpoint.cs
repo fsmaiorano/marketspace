@@ -17,6 +17,7 @@ public static class BasketEndpoint
                         ? Results.Ok(result)
                         : Results.NotFound(result.Error);
                 })
+            .RequireAuthorization()
             .WithName("CreateBasket")
             .WithTags("Basket")
             .Produces(StatusCodes.Status200OK)
@@ -31,6 +32,7 @@ public static class BasketEndpoint
                         ? Results.Ok(result)
                         : Results.NotFound(result.Error);
                 })
+            .RequireAuthorization()
             .WithName("GetBasketByUsername")
             .WithTags("Basket")
             .Produces(StatusCodes.Status200OK)
@@ -45,6 +47,7 @@ public static class BasketEndpoint
                         ? Results.Ok(result)
                         : Results.NotFound(result.Error);
                 })
+            .RequireAuthorization()
             .WithName("DeleteBasket")
             .WithTags("Basket")
             .Produces(StatusCodes.Status200OK)
@@ -59,6 +62,7 @@ public static class BasketEndpoint
                         ? Results.Ok(result)
                         : Results.NotFound(result.Error);
                 })
+            .RequireAuthorization()
             .WithName("CheckoutBasket")
             .WithTags("Basket")
             .Produces(StatusCodes.Status200OK)

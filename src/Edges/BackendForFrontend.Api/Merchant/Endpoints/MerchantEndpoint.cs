@@ -15,6 +15,7 @@ public static class MerchantEndpoint
                     Result<CreateMerchantResponse> result = await usecase.CreateMerchantAsync(request);
                     return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
                 })
+            .RequireAuthorization()
             .WithName("CreateMerchant")
             .WithTags("Merchant")
             .Produces(StatusCodes.Status200OK)
@@ -27,6 +28,7 @@ public static class MerchantEndpoint
                     Result<GetMerchantByIdResponse> result = await usecase.GetMerchantByIdAsync(merchantId);
                     return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
                 })
+            .RequireAuthorization()
             .WithName("GetMerchantById")
             .WithTags("Merchant")
             .Produces(StatusCodes.Status200OK)
@@ -41,6 +43,7 @@ public static class MerchantEndpoint
                     Result<UpdateMerchantResponse> result = await usecase.UpdateMerchantAsync(request);
                     return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
                 })
+            .RequireAuthorization()
             .WithName("UpdateMerchant")
             .WithTags("Merchant")
             .Produces(StatusCodes.Status200OK)
@@ -53,6 +56,7 @@ public static class MerchantEndpoint
                     Result<DeleteMerchantResponse> result = await usecase.DeleteMerchantAsync(merchantId);
                     return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
                 })
+            .RequireAuthorization()
             .WithName("DeleteMerchant")
             .WithTags("Merchant")
             .Produces(StatusCodes.Status200OK)

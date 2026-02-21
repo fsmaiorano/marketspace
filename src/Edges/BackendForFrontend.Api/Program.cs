@@ -13,6 +13,9 @@ using BuildingBlocks.Middlewares;
 using MarketSpace.ServiceDefaults;
 using Serilog;
 using Serilog.Extensions.Hosting;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +35,40 @@ builder.Services.AddOrderServices(builder.Configuration);
 builder.Services.AddCustomLoggers();
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+
+IConfigurationSection jwtConfig = builder.Configuration.GetSection("Jwt");
+string? issuer = jwtConfig["Issuer"];
+string? audience = jwtConfig["Audience"];
+string? secretKey = jwtConfig["Key"];
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = issuer,
+        ValidAudience = audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!)),
+        ClockSkew = TimeSpan.Zero
+    };
+    options.Events = new JwtBearerEvents
+    {
+        OnAuthenticationFailed = context =>
+        {
+            context.Response.StatusCode = 401;
+            context.Response.ContentType = "application/json";
+            return context.Response.WriteAsync("{\"error\":\"Invalid or expired token\"}");
+        }
+    };
+});
 
 builder.Host.UseSerilog();
 builder.Services.AddSingleton<DiagnosticContext>();
@@ -70,6 +107,8 @@ app.UseSwaggerUI(options =>
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseExceptionHandler(options => { });
 app.UseCors("CorsPolicy");
+app.UseAuthentication();
+app.UseAuthorization();
 
 MerchantEndpoint.MapEndpoint(app);
 BasketEndpoint.MapEndpoint(app);

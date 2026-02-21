@@ -18,6 +18,7 @@ public static class CatalogEndpoint
                         ? Results.Ok(result)
                         : Results.BadRequest(result.Error);
                 })
+            .RequireAuthorization()
             .WithName("CreateCatalog")
             .WithTags("Catalog")
             .Produces(StatusCodes.Status200OK)
@@ -32,6 +33,7 @@ public static class CatalogEndpoint
                         ? Results.Ok(result)
                         : Results.BadRequest(result.Error);
                 })
+            .RequireAuthorization()
             .WithName("GetCatalogById")
             .WithTags("Catalog")
             .Produces(StatusCodes.Status200OK)
@@ -47,6 +49,7 @@ public static class CatalogEndpoint
                         ? Results.Ok(result)
                         : Results.BadRequest(result.Error);
                 })
+            .RequireAuthorization()
             .WithName("GetCatalog")
             .WithTags("Catalog")
             .Produces<string>(StatusCodes.Status200OK)
@@ -62,6 +65,7 @@ public static class CatalogEndpoint
                         ? Results.Ok(result)
                         : Results.BadRequest(result.Error);
                 })
+            .RequireAuthorization()
             .WithName("UpdateCatalog")
             .WithTags("Catalog")
             .Produces(StatusCodes.Status200OK)
@@ -76,6 +80,7 @@ public static class CatalogEndpoint
                         ? Results.Ok(result)
                         : Results.BadRequest(result.Error);
                 })
+            .RequireAuthorization()
             .WithName("DeleteCatalog")
             .WithTags("Catalog")
             .Produces(StatusCodes.Status200OK)

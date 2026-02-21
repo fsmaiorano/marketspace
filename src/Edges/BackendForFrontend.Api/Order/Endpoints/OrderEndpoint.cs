@@ -15,6 +15,7 @@ public static class OrderEndpoint
                     Result<CreateOrderResponse> result = await usecase.CreateOrderAsync(request);
                     return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
                 })
+            .RequireAuthorization()
             .WithName("CreateOrder")
             .WithTags("Order")
             .Produces(StatusCodes.Status200OK)
@@ -27,6 +28,7 @@ public static class OrderEndpoint
                     Result<GetOrderResponse> result = await usecase.GetOrderByIdAsync(orderId);
                     return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
                 })
+            .RequireAuthorization()
             .WithName("GetOrderById")
             .WithTags("Order")
             .Produces(StatusCodes.Status200OK)
@@ -39,6 +41,7 @@ public static class OrderEndpoint
                     Result<GetOrderListResponse> result = await usecase.GetOrdersByCustomerIdAsync(customerId);
                     return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
                 })
+            .RequireAuthorization()
             .WithName("GetOrdersByCustomerId")
             .WithTags("Order")
             .Produces(StatusCodes.Status200OK)
@@ -53,6 +56,7 @@ public static class OrderEndpoint
                     Result<UpdateOrderResponse> result = await usecase.UpdateOrderAsync(request);
                     return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
                 })
+            .RequireAuthorization()
             .WithName("UpdateOrder")
             .WithTags("Order")
             .Produces(StatusCodes.Status200OK)
@@ -65,6 +69,7 @@ public static class OrderEndpoint
                     Result<DeleteOrderResponse> result = await usecase.DeleteOrderAsync(orderId);
                     return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
                 })
+            .RequireAuthorization()
             .WithName("DeleteOrder")
             .WithTags("Order")
             .Produces(StatusCodes.Status200OK)
