@@ -8,10 +8,23 @@ using System.Collections.ObjectModel;
 
 namespace Order.Api.Application.Order.GetOrderById;
 
-public class GetOrderByIdHandler(
+public record GetOrderByIdQuery(Guid Id); 
+
+public record GetOrderByIdResult
+{
+    public Guid Id { get; init; }
+    public Guid CustomerId { get; init; }
+    public string Status { get; init; } = string.Empty;
+    public decimal TotalAmount { get; init; }
+    public AddressDto ShippingAddress { get; init; } = null!;
+    public AddressDto BillingAddress { get; init; } = null!;
+    public PaymentSummaryDto Payment { get; init; } = null!;
+    public IReadOnlyList<OrderItemDto> Items { get; init; } = [];
+}
+
+public class GetOrderById(
     IOrderRepository repository,
-    IAppLogger<GetOrderByIdHandler> logger)
-    : IGetOrderByIdHandler
+    IAppLogger<GetOrderById> logger)
 {
     public async Task<Result<GetOrderByIdResult>> HandleAsync(GetOrderByIdQuery query)
     {

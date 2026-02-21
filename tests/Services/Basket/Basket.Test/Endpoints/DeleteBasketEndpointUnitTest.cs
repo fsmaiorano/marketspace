@@ -2,17 +2,13 @@ namespace Basket.Test.Endpoints;
 
 public class DeleteBasketEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fixture)
 {
-    private readonly TestFixture _fixture = fixture;
-
     [Fact]
     public async Task Returns_Ok_When_Basket_Is_Deleted_Successfully()
     {
-        ShoppingCartEntity fakerEntity = BasketBuilder.CreateShoppingCartFaker().Generate();
-        _fixture.BasketDbContext.ShoppingCarts.Add(fakerEntity);
-        await _fixture.BasketDbContext.SaveChangesAsync();
+        ShoppingCartEntity basket = await fixture.CreateBasket();
         
-        DeleteBasketCommand command = BasketBuilder.CreateDeleteBasketCommandFaker(fakerEntity.Username).Generate();
-        HttpResponseMessage response = await _fixture.DoDelete($"/basket/{command.Username}");
+        DeleteBasketCommand command = BasketBuilder.CreateDeleteBasketCommandFaker(basket.Username).Generate();
+        HttpResponseMessage response = await DoDelete($"/basket/{command.Username}");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         

@@ -1,5 +1,3 @@
-using Catalog.Api.Domain.ValueObjects;
-using Catalog.Test.Base;
 using Catalog.Test.Fixtures;
 
 namespace Catalog.Test.Endpoints;
@@ -9,9 +7,7 @@ public class DeleteCatalogEndpointUnitTest(TestFixture fixture) : Base.BaseTest(
     [Fact]
     public async Task Can_Delete_Catalog_Endpoint()
     {
-        CatalogEntity? catalog = CatalogBuilder.CreateCatalogFaker().Generate();
-        Context.Catalogs.Add(catalog);
-        await Context.SaveChangesAsync();
+        CatalogEntity catalog = await fixture.CreateCatalog();
 
         DeleteCatalogCommand command = CatalogBuilder.CreateDeleteCatalogCommandFaker(catalog.Id.Value).Generate();
         HttpResponseMessage response = await DoDelete($"/catalog/{command.Id}");

@@ -10,7 +10,7 @@ namespace Order.Api.Application.Subscribers;
 
 public class OnBasketCheckoutSubscriber(
     IAppLogger<OnBasketCheckoutSubscriber> logger,
-    ICreateOrderHandler createOrderHandler)
+    CreateOrder createOrder)
     : IIntegrationEventHandler<BasketCheckoutIntegrationEvent>
 {
     public async Task HandleAsync(BasketCheckoutIntegrationEvent @event, CancellationToken cancellationToken = default)
@@ -52,28 +52,30 @@ public class OnBasketCheckoutSubscriber(
         CreateOrderCommand command = new()
         {
             CustomerId = @event.CustomerId,
-            ShippingAddress = new AddressDto
-            {
-                FirstName = @event.ShippingAddress.FirstName,
-                LastName = @event.ShippingAddress.LastName,
-                EmailAddress = @event.ShippingAddress.EmailAddress,
-                AddressLine = @event.ShippingAddress.AddressLine,
-                Country = @event.ShippingAddress.Country,
-                State = @event.ShippingAddress.State,
-                ZipCode = @event.ShippingAddress.ZipCode,
-                Coordinates =  @event.ShippingAddress.Coordinates
-            },
-            BillingAddress = new AddressDto
-            {
-                FirstName = @event.BillingAddress.FirstName,
-                LastName = @event.BillingAddress.LastName,
-                EmailAddress = @event.BillingAddress.EmailAddress,
-                AddressLine = @event.BillingAddress.AddressLine,
-                Country = @event.BillingAddress.Country,
-                State = @event.BillingAddress.State,
-                ZipCode = @event.BillingAddress.ZipCode,
-                Coordinates =  @event.BillingAddress.Coordinates
-            },
+            ShippingAddress =
+                new AddressDto
+                {
+                    FirstName = @event.ShippingAddress.FirstName,
+                    LastName = @event.ShippingAddress.LastName,
+                    EmailAddress = @event.ShippingAddress.EmailAddress,
+                    AddressLine = @event.ShippingAddress.AddressLine,
+                    Country = @event.ShippingAddress.Country,
+                    State = @event.ShippingAddress.State,
+                    ZipCode = @event.ShippingAddress.ZipCode,
+                    Coordinates = @event.ShippingAddress.Coordinates
+                },
+            BillingAddress =
+                new AddressDto
+                {
+                    FirstName = @event.BillingAddress.FirstName,
+                    LastName = @event.BillingAddress.LastName,
+                    EmailAddress = @event.BillingAddress.EmailAddress,
+                    AddressLine = @event.BillingAddress.AddressLine,
+                    Country = @event.BillingAddress.Country,
+                    State = @event.BillingAddress.State,
+                    ZipCode = @event.BillingAddress.ZipCode,
+                    Coordinates = @event.BillingAddress.Coordinates
+                },
             Payment = new PaymentDto
             {
                 CardName = @event.Payment.CardName,
@@ -83,12 +85,11 @@ public class OnBasketCheckoutSubscriber(
                 PaymentMethod = @event.Payment.PaymentMethod
             },
             Status = OrderStatusEnum.Created,
-            Items = [.. @event.Items.Select(item => new OrderItemDto
-            {
-                CatalogId = item.CatalogId,
-                Quantity = item.Quantity,
-                Price = item.Price
-            })],
+            Items =
+            [
+                .. @event.Items.Select(item =>
+                    new OrderItemDto { CatalogId = item.CatalogId, Quantity = item.Quantity, Price = item.Price })
+            ],
             TotalAmount = @event.TotalPrice,
             CorrelationId = @event.CorrelationId
         };
@@ -97,15 +98,9 @@ public class OnBasketCheckoutSubscriber(
             "Creating order for customer: {CustomerId}, TotalAmount: {TotalAmount}, ItemCount: {ItemCount}, CorrelationId: {CorrelationId}",
             command.CustomerId, command.TotalAmount, command.Items.Count, command.CorrelationId);
 
-        Result<CreateOrderResult> result = await createOrderHandler.HandleAsync(command);
+        Result<CreateOrderResult> result = await createOrder.HandleAsync(command);
 
-        if (result.IsSuccess)
-        {
-            logger.LogInformation(LogTypeEnum.Business,
-                "Order created successfully. OrderId: {OrderId}, CustomerId: {CustomerId}",
-                result.Data?.OrderId, command.CustomerId);
-        }
-        else
+        if (!result.IsSuccess)
         {
             logger.LogError(LogTypeEnum.Business, null,
                 "Failed to create order for customer: {CustomerId}. Error: {Error}",
@@ -113,4 +108,3 @@ public class OnBasketCheckoutSubscriber(
         }
     }
 }
-

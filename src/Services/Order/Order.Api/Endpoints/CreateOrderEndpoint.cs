@@ -9,7 +9,7 @@ public static class CreateOrderEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("/order",
-                async ([FromBody] CreateOrderCommand command, [FromServices] ICreateOrderHandler handler) =>
+                async ([FromBody] CreateOrderCommand command, [FromServices] CreateOrder handler) =>
                 {
                     Result<CreateOrderResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess

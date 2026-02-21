@@ -1,5 +1,6 @@
 using BuildingBlocks;
 using BuildingBlocks.Loggers;
+using Order.Api.Application.Dto;
 using Order.Api.Domain.Entities;
 using Order.Api.Domain.Repositories;
 using Order.Api.Domain.ValueObjects;
@@ -8,17 +9,30 @@ using Order.Api.Domain.Enums;
 
 namespace Order.Api.Application.Order.CreateOrder;
 
-public sealed class CreateOrderHandler(
+public record CreateOrderCommand
+{
+    public Guid CustomerId { get; init; } = Guid.Empty;
+    public AddressDto ShippingAddress { get; init; } = null!;
+    public AddressDto BillingAddress { get; init; } = null!;
+    public PaymentDto Payment { get; init; } = null!;
+    public OrderStatusEnum Status { get; init; } = OrderStatusEnum.Created;
+    public List<OrderItemDto> Items { get; init; } = [];
+    public decimal TotalAmount { get; init; } = 0.0m;
+    public string? CorrelationId { get; init; }
+}
+
+public record CreateOrderResult();
+
+public sealed class CreateOrder(
     IOrderRepository repository,
-    IAppLogger<CreateOrderHandler> logger
+    IAppLogger<CreateOrder> logger
 )
-    : ICreateOrderHandler
 {
     public async Task<Result<CreateOrderResult>> HandleAsync(CreateOrderCommand command)
     {
         try
         {
-            logger.LogInformation(LogTypeEnum.Application, 
+            logger.LogInformation(LogTypeEnum.Application,
                 "Processing create order request for customer: {CustomerId}, CorrelationId: {CorrelationId}",
                 command.CustomerId, command.CorrelationId);
 
@@ -56,11 +70,11 @@ public sealed class CreateOrderHandler(
                 orderItems.Count,
                 command.CorrelationId);
 
-            return Result<CreateOrderResult>.Success(new CreateOrderResult(orderEntity.Id.Value));
+            return Result<CreateOrderResult>.Success(new CreateOrderResult());
         }
         catch (Exception ex)
         {
-             logger.LogError(LogTypeEnum.Exception, ex,
+            logger.LogError(LogTypeEnum.Exception, ex,
                 "An error occurred while creating the order for customer: {CustomerId}", command.CustomerId);
             return Result<CreateOrderResult>.Failure($"An error occurred while creating the order: {ex.Message}");
         }

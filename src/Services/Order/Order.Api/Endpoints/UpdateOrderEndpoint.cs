@@ -9,7 +9,7 @@ public static class UpdateOrderEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPut("/order",
-                async ([FromBody] UpdateOrderCommand command, [FromServices] IUpdateOrderHandler handler) =>
+                async ([FromBody] UpdateOrderCommand command, [FromServices] UpdateOrder handler) =>
                 {
                     Result<UpdateOrderResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess

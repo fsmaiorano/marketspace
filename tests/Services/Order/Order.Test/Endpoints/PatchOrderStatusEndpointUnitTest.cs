@@ -8,10 +8,7 @@ public class PatchOrderStatusEndpointUnitTest(TestFixture fixture) : Base.BaseTe
     [Fact]
     public async Task Can_Patch_Order_Status_Endpoint()
     {
-        OrderEntity? order = OrderBuilder.CreateOrderFaker().Generate();
-
-        Context.Orders.Add(order);
-        await Context.SaveChangesAsync();
+        OrderEntity? order = await fixture.CreateOrder();
 
         PatchOrderStatusCommand command = OrderBuilder.CreatePatchOrderStatusCommandFaker(order.Id.Value).Generate();
 

@@ -9,10 +9,7 @@ public class UpdateCatalogEndpointUnitTest(TestFixture fixture) : Base.BaseTest(
     [Fact]
     public async Task Returns_Success_When_Catalog_Is_Updated()
     {
-        CatalogEntity? catalog = CatalogBuilder.CreateCatalogFaker().Generate();
-        catalog.Id = CatalogId.Of(Guid.NewGuid());
-        Context.Catalogs.Add(catalog);
-        await Context.SaveChangesAsync();
+        CatalogEntity? catalog = await fixture.CreateCatalog();
 
         UpdateCatalogCommand command = new()
         {

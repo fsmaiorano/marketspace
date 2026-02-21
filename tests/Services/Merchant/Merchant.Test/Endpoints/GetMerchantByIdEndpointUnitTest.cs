@@ -8,9 +8,7 @@ public class GetMerchantByIdEndpointUnitTest(TestFixture fixture) : Base.BaseTes
     [Fact]
     public async Task Returns_Ok_When_Merchant_Exists()
     {
-        MerchantEntity? merchant = MerchantBuilder.CreateMerchantFaker().Generate();
-        Context.Merchants.Add(merchant);
-        await Context.SaveChangesAsync();
+        MerchantEntity? merchant = await fixture.CreateMerchant();
 
         GetMerchantByIdQuery query = new(merchant.Id.Value);
         HttpResponseMessage response = await DoGet($"/merchant/{query.Id}");

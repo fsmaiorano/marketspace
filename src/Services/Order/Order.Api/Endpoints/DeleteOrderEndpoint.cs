@@ -8,9 +8,10 @@ public static class DeleteOrderEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapDelete("/order",
-                async ([FromBody] DeleteOrderCommand command, [FromServices] IDeleteOrderHandler handler) =>
+        app.MapDelete("/order/{id}",
+                async ([FromRoute] string id, [FromServices] DeleteOrder handler) =>
                 {
+                    DeleteOrderCommand command = new (Guid.Parse(id));
                     Result<DeleteOrderResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess
                         ? Results.Ok(result)
