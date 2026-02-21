@@ -7,10 +7,14 @@ using Payment.Api.Domain.ValueObjects;
 
 namespace Payment.Api.Application.Payment.GetPaymentById;
 
-public sealed class GetPaymentByIdHandler(
+public record GetPaymentByIdQuery(Guid Id);
+
+public record GetPaymentByIdResult(PaymentDto Payment);
+
+public sealed class GetPaymentById(
     IPaymentRepository repository,
-    IAppLogger<GetPaymentByIdHandler> logger
-) : IGetPaymentByIdHandler
+    IAppLogger<GetPaymentById> logger
+)
 {
     public async Task<Result<GetPaymentByIdResult>> HandleAsync(GetPaymentByIdQuery query)
     {
@@ -43,7 +47,7 @@ public sealed class GetPaymentByIdHandler(
                 LastModifiedAt = payment.LastModifiedAt
             };
 
-            return Result<GetPaymentByIdResult>.Success(new GetPaymentByIdResult { Payment = paymentDto });
+            return Result<GetPaymentByIdResult>.Success(new GetPaymentByIdResult(paymentDto));
         }
         catch (Exception ex)
         {

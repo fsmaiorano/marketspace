@@ -80,94 +80,181 @@ public class PaymentEntity : Aggregate<PaymentId>
         return payment;
     }
 
-    public static PaymentEntity Update(PaymentEntity existingPayment, decimal amount, string currency,
-        PaymentMethod method, string provider)
+    private void ChangeAmount(decimal amount)
     {
-        ArgumentNullException.ThrowIfNull(existingPayment, nameof(existingPayment));
+        if (Amount == amount)
+            return;
+
+        Amount = amount;
+    }
+
+    private void ChangeCurrency(string currency)
+    {
         ArgumentNullException.ThrowIfNull(currency, nameof(currency));
+
+        if (Currency == currency)
+            return;
+
+        Currency = currency;
+    }
+
+    private void ChangeMethod(PaymentMethod method)
+    {
         ArgumentNullException.ThrowIfNull(method, nameof(method));
+
+        if (Method == method)
+            return;
+
+        Method = method;
+    }
+
+    private void ChangeProvider(string provider)
+    {
         ArgumentNullException.ThrowIfNull(provider, nameof(provider));
 
-        existingPayment.Amount = amount;
-        existingPayment.Currency = currency;
-        existingPayment.Method = method;
-        existingPayment.Provider = provider;
-        existingPayment.Touch();
+        if (Provider == provider)
+            return;
 
-        existingPayment.AddDomainEvent(new PaymentStatusChangedDomainEvent(existingPayment));
+        Provider = provider;
+    }
 
-        return existingPayment;
+    private void ChangeProviderTransactionId(string? providerTransactionId)
+    {
+        if (ProviderTransactionId == providerTransactionId)
+            return;
+
+        ProviderTransactionId = providerTransactionId;
+    }
+
+    private void ChangeAuthorizationCode(string? authorizationCode)
+    {
+        if (AuthorizationCode == authorizationCode)
+            return;
+
+        AuthorizationCode = authorizationCode;
+    }
+
+    private void ChangeStatus(PaymentStatusEnum status, bool addEvent = true)
+    {
+        if (Status == status)
+            return;
+
+        Status = status;
+
+        if (addEvent)
+            AddDomainEvent(new PaymentStatusChangedDomainEvent(this));
+    }
+
+    private void ChangeStatusDetail(string? detail)
+    {
+        if (StatusDetail == detail)
+            return;
+
+        StatusDetail = detail;
+    }
+
+    private void Touch() => LastModifiedAt = DateTime.UtcNow;
+
+    public void Update(
+        decimal? amount = null,
+        string? currency = null,
+        PaymentMethod? method = null,
+        string? provider = null,
+        string? providerTransactionId = null,
+        string? authorizationCode = null,
+        PaymentStatusEnum? status = null,
+        string? statusDetail = null)
+    {
+        if (amount is not null)
+            ChangeAmount(amount.Value);
+
+        if (currency is not null)
+            ChangeCurrency(currency);
+
+        if (method is not null)
+            ChangeMethod(method);
+
+        if (provider is not null)
+            ChangeProvider(provider);
+
+        if (providerTransactionId is not null)
+            ChangeProviderTransactionId(providerTransactionId);
+
+        if (authorizationCode is not null)
+            ChangeAuthorizationCode(authorizationCode);
+
+        if (status is not null)
+            ChangeStatus(status.Value);
+
+        if (statusDetail is not null)
+            ChangeStatusDetail(statusDetail);
+
+        Touch();
     }
 
     public void PatchStatus(PaymentStatusEnum status)
     {
-        Status = status;
+        ChangeStatus(status);
         Touch();
-        AddDomainEvent(new PaymentStatusChangedDomainEvent(this));
     }
 
     public void MarkCreated()
     {
-        Status = PaymentStatusEnum.Created;
+        ChangeStatus(PaymentStatusEnum.Created);
         Touch();
-        AddDomainEvent(new PaymentStatusChangedDomainEvent(this));
     }
 
     public void MarkProcessing()
     {
-        Status = PaymentStatusEnum.Processing;
+        ChangeStatus(PaymentStatusEnum.Processing);
         Touch();
-        AddDomainEvent(new PaymentStatusChangedDomainEvent(this));
     }
 
     public void MarkAuthorized()
     {
-        Status = PaymentStatusEnum.Authorized;
+        ChangeStatus(PaymentStatusEnum.Authorized);
         Touch();
-        AddDomainEvent(new PaymentStatusChangedDomainEvent(this));
     }
 
     public void MarkCaptured()
     {
-        Status = PaymentStatusEnum.Captured;
+        ChangeStatus(PaymentStatusEnum.Captured);
         Touch();
-        AddDomainEvent(new PaymentStatusChangedDomainEvent(this));
     }
 
     public void MarkRefunded()
     {
-        Status = PaymentStatusEnum.Refunded;
+        ChangeStatus(PaymentStatusEnum.Refunded);
         Touch();
-        AddDomainEvent(new PaymentStatusChangedDomainEvent(this));
     }
 
     public void MarkCancelled()
     {
-        Status = PaymentStatusEnum.Cancelled;
+        ChangeStatus(PaymentStatusEnum.Cancelled);
         Touch();
-        AddDomainEvent(new PaymentStatusChangedDomainEvent(this));
     }
 
     public void MarkFailed()
     {
-        Status = PaymentStatusEnum.Failed;
+        ChangeStatus(PaymentStatusEnum.Failed);
         Touch();
-        AddDomainEvent(new PaymentStatusChangedDomainEvent(this));
     }
 
     public void Approve(string transactionId, string? authCode)
     {
-        Status = PaymentStatusEnum.Authorized;
-        ProviderTransactionId = transactionId;
-        AuthorizationCode = authCode;
+        ChangeStatus(PaymentStatusEnum.Authorized, addEvent: false);
+        ChangeProviderTransactionId(transactionId);
+        ChangeAuthorizationCode(authCode);
         Touch();
+        AddDomainEvent(new PaymentStatusChangedDomainEvent(this));
     }
 
     public void Fail(string detail)
     {
-        Status = PaymentStatusEnum.Failed;
-        StatusDetail = detail;
+        ChangeStatus(PaymentStatusEnum.Failed, addEvent: false);
+        ChangeStatusDetail(detail);
         Touch();
+        AddDomainEvent(new PaymentStatusChangedDomainEvent(this));
     }
 
     public void AddAttempt(PaymentAttemptEntity attempt)
@@ -178,6 +265,4 @@ public class PaymentEntity : Aggregate<PaymentId>
 
     public void SetRisk(RiskAnalysisEntity risk)
         => RiskAnalysis = risk;
-
-    private void Touch() => LastModifiedAt = DateTime.UtcNow;
 }

@@ -49,5 +49,73 @@ public class PaymentAttemptEntity : Entity<PaymentAttemptId>
     {
         Status = status;
         StatusDetail = detail;
+        Touch();
+    }
+
+    private void ChangeStatus(PaymentAttemptStatus status)
+    {
+        if (Status == status)
+            return;
+
+        Status = status;
+    }
+
+    private void ChangeStatusDetail(string? detail)
+    {
+        if (StatusDetail == detail)
+            return;
+
+        StatusDetail = detail;
+    }
+
+    private void ChangeProviderTransactionId(string? providerTransactionId)
+    {
+        if (ProviderTransactionId == providerTransactionId)
+            return;
+
+        ProviderTransactionId = providerTransactionId;
+    }
+
+    private void ChangeResponseCode(string? responseCode)
+    {
+        if (ResponseCode == responseCode)
+            return;
+
+        ResponseCode = responseCode;
+    }
+
+    private void ChangeResponseMessage(string? responseMessage)
+    {
+        if (ResponseMessage == responseMessage)
+            return;
+
+        ResponseMessage = responseMessage;
+    }
+
+    private void Touch() => LastModifiedAt = DateTime.UtcNow;
+
+    public void Update(
+        PaymentAttemptStatus? status = null,
+        string? statusDetail = null,
+        string? providerTransactionId = null,
+        string? responseCode = null,
+        string? responseMessage = null)
+    {
+        if (status is not null)
+            ChangeStatus(status.Value);
+
+        if (statusDetail is not null)
+            ChangeStatusDetail(statusDetail);
+
+        if (providerTransactionId is not null)
+            ChangeProviderTransactionId(providerTransactionId);
+
+        if (responseCode is not null)
+            ChangeResponseCode(responseCode);
+
+        if (responseMessage is not null)
+            ChangeResponseMessage(responseMessage);
+
+        Touch();
     }
 }

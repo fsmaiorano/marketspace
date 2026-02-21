@@ -38,4 +38,47 @@ public class PaymentTransactionEntity : Entity<PaymentTransactionId>
         ProviderTransactionId = providerTransactionId;
         CreatedAt = DateTime.UtcNow;
     }
+
+    private void ChangeType(PaymentTransactionTypeEnum type)
+    {
+        if (Type == type)
+            return;
+
+        Type = type;
+    }
+
+    private void ChangeAmount(decimal amount)
+    {
+        if (Amount == amount)
+            return;
+
+        Amount = amount;
+    }
+
+    private void ChangeProviderTransactionId(string? providerTransactionId)
+    {
+        if (ProviderTransactionId == providerTransactionId)
+            return;
+
+        ProviderTransactionId = providerTransactionId;
+    }
+
+    private void Touch() => LastModifiedAt = DateTime.UtcNow;
+
+    public void Update(
+        PaymentTransactionTypeEnum? type = null,
+        decimal? amount = null,
+        string? providerTransactionId = null)
+    {
+        if (type is not null)
+            ChangeType(type.Value);
+
+        if (amount is not null)
+            ChangeAmount(amount.Value);
+
+        if (providerTransactionId is not null)
+            ChangeProviderTransactionId(providerTransactionId);
+
+        Touch();
+    }
 }

@@ -7,10 +7,21 @@ using Payment.Api.Domain.ValueObjects;
 
 namespace Payment.Api.Application.Payment.UpdatePayment;
 
-public sealed class UpdatePaymentHandler(
+public record UpdatePaymentCommand
+{
+    public Guid Id { get; set; }
+    public PaymentStatusEnum Status { get; set; }
+    public string? StatusDetail { get; set; }
+    public string? ProviderTransactionId { get; set; }
+    public string? AuthorizationCode { get; set; }
+}
+
+public record UpdatePaymentResult();
+
+public sealed class UpdatePayment(
     IPaymentRepository repository,
-    IAppLogger<UpdatePaymentHandler> logger
-) : IUpdatePaymentHandler
+    IAppLogger<UpdatePayment> logger
+)
 {
     public async Task<Result<UpdatePaymentResult>> HandleAsync(UpdatePaymentCommand command)
     {
@@ -42,6 +53,12 @@ public sealed class UpdatePaymentHandler(
                 case PaymentStatusEnum.Processing:
                     payment.MarkProcessing();
                     break;
+                case PaymentStatusEnum.Created:
+                case PaymentStatusEnum.Captured:
+                case PaymentStatusEnum.Rejected:
+                case PaymentStatusEnum.Cancelled:
+                case PaymentStatusEnum.Refunded:
+                case PaymentStatusEnum.Chargeback:
                 default:
                     break;
             }

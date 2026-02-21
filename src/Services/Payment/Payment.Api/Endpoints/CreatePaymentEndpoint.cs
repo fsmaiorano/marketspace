@@ -9,7 +9,7 @@ public static class CreatePaymentEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("/payment",
-                async ([FromBody] CreatePaymentCommand command, [FromServices] ICreatePaymentHandler handler) =>
+                async ([FromBody] CreatePaymentCommand command, [FromServices] CreatePayment handler) =>
                 {
                     Result<CreatePaymentResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess

@@ -9,7 +9,7 @@ public static class UpdatePaymentEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPut("/payment",
-                async ([FromBody] UpdatePaymentCommand command, [FromServices] IUpdatePaymentHandler handler) =>
+                async ([FromBody] UpdatePaymentCommand command, [FromServices] UpdatePayment handler) =>
                 {
                     Result<UpdatePaymentResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess
