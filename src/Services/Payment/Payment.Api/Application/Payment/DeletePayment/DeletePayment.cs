@@ -5,10 +5,14 @@ using Payment.Api.Domain.ValueObjects;
 
 namespace Payment.Api.Application.Payment.DeletePayment;
 
-public sealed class DeletePaymentHandler(
+public record DeletePaymentCommand(Guid Id);
+
+public record DeletePaymentResult(bool Success);
+
+public sealed class DeletePayment(
     IPaymentRepository repository,
-    IAppLogger<DeletePaymentHandler> logger
-) : IDeletePaymentHandler
+    IAppLogger<DeletePayment> logger
+) 
 {
     public async Task<Result<DeletePaymentResult>> HandleAsync(DeletePaymentCommand command)
     {

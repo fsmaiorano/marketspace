@@ -8,10 +8,11 @@ public static class DeletePaymentEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapDelete("/payment/{id:guid}",
-                async ([FromRoute] Guid id, [FromServices] IDeletePaymentHandler handler) =>
+        app.MapDelete("/payment/{id}",
+                async ([FromRoute] string id, [FromServices] DeletePayment handler) =>
                 {
-                    Result<DeletePaymentResult> result = await handler.HandleAsync(new DeletePaymentCommand(id));
+                    Result<DeletePaymentResult> result =
+                        await handler.HandleAsync(new DeletePaymentCommand(Guid.Parse(id)));
                     return result.IsSuccess
                         ? Results.Ok(result)
                         : Results.BadRequest(result.Error);

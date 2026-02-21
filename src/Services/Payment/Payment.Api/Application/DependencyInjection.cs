@@ -23,10 +23,10 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddScoped<IPaymentRepository, PaymentRepository>();
-        services.AddScoped<ICreatePaymentHandler, CreatePaymentHandler>();
-        services.AddScoped<IGetPaymentByIdHandler, GetPaymentByIdHandler>();
-        services.AddScoped<IUpdatePaymentHandler, UpdatePaymentHandler>();
-        services.AddScoped<IDeletePaymentHandler, DeletePaymentHandler>();
+        services.AddScoped<CreatePayment>();
+        services.AddScoped<GetPaymentById>();
+        services.AddScoped<UpdatePayment>();
+        services.AddScoped<DeletePayment>();
         services.AddScoped<IPaymentRepository, PaymentRepository>();
 
         services.AddEventBus(configuration);

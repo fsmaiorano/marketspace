@@ -7,9 +7,17 @@ using Payment.Api.Domain.ValueObjects;
 
 namespace Payment.Api.Application.Payment.PatchPaymentStatus;
 
-public sealed class PatchPaymentStatusHandler(
+public record PatchPaymentStatusCommand
+{
+    public required Guid Id { get; init; }
+    public required PaymentStatusEnum Status { get; init; }
+}
+
+public record PatchPaymentStatusResult();
+
+public sealed class PatchPaymentStatus(
     IPaymentRepository repository,
-    IAppLogger<PatchPaymentStatusHandler> logger) : IPatchPaymentStatusHandler
+    IAppLogger<PatchPaymentStatus> logger)
 {
     public async Task<Result<PatchPaymentStatusResult>> HandleAsync(PatchPaymentStatusCommand command)
     {

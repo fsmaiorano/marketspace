@@ -8,10 +8,10 @@ public static class GetPaymentByIdEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/payment/{id:guid}",
-                async ([FromRoute] Guid id, [FromServices] IGetPaymentByIdHandler handler) =>
+        app.MapGet("/payment/{id}",
+                async ([FromRoute] string id, [FromServices] GetPaymentById handler) =>
                 {
-                    Result<GetPaymentByIdResult> result = await handler.HandleAsync(new GetPaymentByIdQuery(id));
+                    Result<GetPaymentByIdResult> result = await handler.HandleAsync(new GetPaymentByIdQuery(Guid.Parse(id)));
                     return result.IsSuccess
                         ? Results.Ok(result)
                         : Results.NotFound(result.Error);

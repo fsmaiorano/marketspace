@@ -10,7 +10,7 @@ public static class PatchPaymentStatusEndpoint
     {
         app.MapPatch("/payment/status",
                 async ([FromBody] PatchPaymentStatusCommand command,
-                    [FromServices] IPatchPaymentStatusHandler handler) =>
+                    [FromServices] PatchPaymentStatus handler) =>
                 {
                     Result<PatchPaymentStatusResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess

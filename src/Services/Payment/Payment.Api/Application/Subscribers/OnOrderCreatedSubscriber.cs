@@ -8,7 +8,7 @@ namespace Payment.Api.Application.Subscribers;
 
 public class OnOrderCreatedSubscriber(
     IAppLogger<OnOrderCreatedSubscriber> logger,
-    ICreatePaymentHandler createPaymentHandler)
+    CreatePayment createPaymentHandler)
     : IIntegrationEventHandler<OrderCreatedIntegrationEvent>
 {
     public async Task HandleAsync(OrderCreatedIntegrationEvent @event, CancellationToken cancellationToken = default)
@@ -18,7 +18,6 @@ public class OnOrderCreatedSubscriber(
             @event.OrderId, @event.CustomerId, @event.TotalAmount, @event.CorrelationId);
 
         CreatePaymentCommand command = new()
-
         {
             OrderId = @event.OrderId,
             Amount = @event.TotalAmount,
@@ -29,13 +28,7 @@ public class OnOrderCreatedSubscriber(
 
         Result<CreatePaymentResult> result = await createPaymentHandler.HandleAsync(command);
 
-        if (result.IsSuccess)
-        {
-            logger.LogInformation(LogTypeEnum.Business,
-                $"Payment created successfully. PaymentId: {result.Data?.PaymentId}",
-                result.Data?.PaymentId, command.OrderId);
-        }
-        else
+        if (!result.IsSuccess)
         {
             logger.LogError(LogTypeEnum.Business, null,
                 "Failed to create payment for order: {CustomerId}. Error: {Error}",

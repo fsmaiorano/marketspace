@@ -36,4 +36,59 @@ public class RiskAnalysisEntity : Entity<RiskAnalysisId>
         Score = score;
         Decision = decision;
     }
+
+    private void ChangeIpAddress(string? ip)
+    {
+        if (IpAddress == ip)
+            return;
+
+        IpAddress = ip;
+    }
+
+    private void ChangeCountry(string? country)
+    {
+        if (Country == country)
+            return;
+
+        Country = country;
+    }
+
+    private void ChangeScore(int? score)
+    {
+        if (Score == score)
+            return;
+
+        Score = score;
+    }
+
+    private void ChangeDecision(RiskDecisionEnum decision)
+    {
+        if (Decision == decision)
+            return;
+
+        Decision = decision;
+    }
+
+    private void Touch() => LastModifiedAt = DateTime.UtcNow;
+
+    public void Update(
+        string? ipAddress = null,
+        string? country = null,
+        int? score = null,
+        RiskDecisionEnum? decision = null)
+    {
+        if (ipAddress is not null)
+            ChangeIpAddress(ipAddress);
+
+        if (country is not null)
+            ChangeCountry(country);
+
+        if (score is not null)
+            ChangeScore(score);
+
+        if (decision is not null)
+            ChangeDecision(decision.Value);
+
+        Touch();
+    }
 }

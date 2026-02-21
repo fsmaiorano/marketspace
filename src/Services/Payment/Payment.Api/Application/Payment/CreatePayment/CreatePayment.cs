@@ -6,10 +6,21 @@ using Payment.Api.Domain.ValueObjects;
 
 namespace Payment.Api.Application.Payment.CreatePayment;
 
-public sealed class CreatePaymentHandler(
+public record CreatePaymentCommand
+{
+    public Guid OrderId { get; init; }
+    public decimal Amount { get; init; }
+    public string Currency { get; init; } = string.Empty;
+    public int Method { get; init; }
+    public string Provider { get; init; } = string.Empty;
+}
+
+public record CreatePaymentResult();
+
+public sealed class CreatePayment(
     IPaymentRepository repository,
-    IAppLogger<CreatePaymentHandler> logger
-) : ICreatePaymentHandler
+    IAppLogger<CreatePayment> logger
+) 
 {
     public async Task<Result<CreatePaymentResult>> HandleAsync(CreatePaymentCommand command)
     {
@@ -39,7 +50,7 @@ public sealed class CreatePaymentHandler(
                 "Payment created successfully. PaymentId: {PaymentId}, OrderId: {OrderId}", 
                 payment.Id.Value, command.OrderId);
                 
-             return Result<CreatePaymentResult>.Success(new CreatePaymentResult(payment.Id.Value));
+             return Result<CreatePaymentResult>.Success(new CreatePaymentResult());
         }
         catch(Exception ex)
         {
