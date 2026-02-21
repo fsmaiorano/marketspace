@@ -17,11 +17,7 @@ public class GetCatalogEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fix
     {
         const int createCatalogCount = 5;
         for (int i = 0; i < createCatalogCount; i++)
-        {
-            CatalogEntity? catalog = CatalogBuilder.CreateCatalogFaker().Generate();
-            catalog.Id = CatalogId.Of(Guid.CreateVersion7());
-            Context.Catalogs.Add(catalog);
-        }
+            await fixture.CreateCatalog();
 
         await Context.SaveChangesAsync();
 

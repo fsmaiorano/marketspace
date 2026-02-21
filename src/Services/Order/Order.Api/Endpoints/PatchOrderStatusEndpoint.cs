@@ -10,7 +10,7 @@ public static class PatchOrderStatusEndpoint
     {
         app.MapPatch("/order/status",
                 async ([FromBody] PatchOrderStatusCommand command,
-                    [FromServices] IPatchOrderStatusHandler handler) =>
+                    [FromServices] PatchOrderStatus handler) =>
                 {
                     Result<PatchOrderStatusResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess

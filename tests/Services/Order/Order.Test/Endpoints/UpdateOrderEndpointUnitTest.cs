@@ -1,4 +1,3 @@
-using Order.Api.Domain.ValueObjects;
 using Order.Test.Fixtures;
 
 namespace Order.Test.Endpoints;
@@ -8,12 +7,7 @@ public class UpdateOrderEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fi
     [Fact]
     public async Task Can_Update_Order_Endpoint()
     {
-        OrderEntity? order = OrderBuilder.CreateOrderFaker().Generate();
-
-        order.Id = OrderId.Of(Guid.CreateVersion7());
-
-        Context.Orders.Add(order);
-        await Context.SaveChangesAsync();
+        OrderEntity? order = await fixture.CreateOrder();
 
         UpdateOrderCommand command = OrderBuilder.CreateUpdateOrderCommandFaker(order.Id.Value).Generate();
         HttpResponseMessage response = await DoPut("/order", command);

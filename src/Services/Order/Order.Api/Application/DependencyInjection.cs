@@ -22,11 +22,11 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddScoped<IOrderRepository, OrderRepository>();
-        services.AddScoped<ICreateOrderHandler, CreateOrderHandler>();
-        services.AddScoped<IUpdateOrderHandler, UpdateOrderHandler>();
-        services.AddScoped<IPatchOrderStatusHandler, PatchOrderStatusHandler>();
-        services.AddScoped<IDeleteOrderHandler, DeleteOrderHandler>();
-        services.AddScoped<IGetOrderByIdHandler, GetOrderByIdHandler>();
+        services.AddScoped<CreateOrder>();
+        services.AddScoped<UpdateOrder>();
+        services.AddScoped<PatchOrderStatus>();
+        services.AddScoped<DeleteOrder>();
+        services.AddScoped<GetOrderById>();
 
         services.AddEventBus(configuration);
 

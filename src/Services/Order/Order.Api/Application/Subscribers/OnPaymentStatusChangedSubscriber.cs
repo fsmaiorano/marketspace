@@ -9,9 +9,10 @@ namespace Order.Api.Application.Subscribers;
 
 public class OnPaymentStatusChangedSubscriber(
     IAppLogger<OnPaymentStatusChangedSubscriber> logger,
-    IPatchOrderStatusHandler patchOrderStatusHandler) : IIntegrationEventHandler<PaymentStatusChangedIntegrationEvent>
+    PatchOrderStatus patchOrderStatusHandler) : IIntegrationEventHandler<PaymentStatusChangedIntegrationEvent>
 {
-    public async Task HandleAsync(PaymentStatusChangedIntegrationEvent @event, CancellationToken cancellationToken = default)
+    public async Task HandleAsync(PaymentStatusChangedIntegrationEvent @event,
+        CancellationToken cancellationToken = default)
     {
         logger.LogInformation(LogTypeEnum.Application,
             "Payment status changed event received. OrderId: {OrderId}, PaymentStatus: {PaymentStatus} ({PaymentStatusName})",
@@ -23,8 +24,7 @@ public class OnPaymentStatusChangedSubscriber(
 
             await patchOrderStatusHandler.HandleAsync(new PatchOrderStatusCommand
             {
-                Id = @event.OrderId,
-                Status = orderStatus
+                Id = @event.OrderId, Status = orderStatus
             });
 
             logger.LogInformation(LogTypeEnum.Application,

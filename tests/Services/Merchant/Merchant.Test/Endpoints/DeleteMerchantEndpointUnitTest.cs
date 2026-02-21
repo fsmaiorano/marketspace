@@ -8,9 +8,7 @@ public class DeleteMerchantEndpointUnitTest(TestFixture fixture) : Base.BaseTest
     [Fact]
     public async Task Returns_Ok_When_Merchant_Is_Deleted_Successfully()
     {
-        MerchantEntity? merchant = MerchantBuilder.CreateMerchantFaker().Generate();
-        Context.Merchants.Add(merchant);
-        await Context.SaveChangesAsync();
+        MerchantEntity? merchant = await fixture.CreateMerchant();
         
         DeleteMerchantCommand command = MerchantBuilder.CreateDeleteMerchantCommandFaker(merchant.Id.Value);
         HttpResponseMessage response = await DoDelete($"/merchant/{command.Id}");

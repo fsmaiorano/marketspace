@@ -5,10 +5,13 @@ using Order.Api.Domain.ValueObjects;
 
 namespace Order.Api.Application.Order.DeleteOrder;
 
-public class DeleteOrderHandler(
+public record DeleteOrderCommand(Guid Id);
+  
+public record DeleteOrderResult();
+
+public class DeleteOrder(
     IOrderRepository repository, 
-    IAppLogger<DeleteOrderHandler> logger)
-    : IDeleteOrderHandler
+    IAppLogger<DeleteOrder> logger)
 {
     public async Task<Result<DeleteOrderResult>> HandleAsync(DeleteOrderCommand command)
     {
@@ -21,7 +24,7 @@ public class DeleteOrderHandler(
             await repository.RemoveAsync(orderId);
             
             logger.LogInformation(LogTypeEnum.Business, "Order deleted successfully. OrderId: {OrderId}", command.Id);
-            return Result<DeleteOrderResult>.Success(new DeleteOrderResult(true));
+            return Result<DeleteOrderResult>.Success(new DeleteOrderResult());
         }
         catch (Exception ex)
         {

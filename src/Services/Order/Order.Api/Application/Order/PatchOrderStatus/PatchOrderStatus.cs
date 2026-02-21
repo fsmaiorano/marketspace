@@ -7,8 +7,17 @@ using Order.Api.Domain.ValueObjects;
 
 namespace Order.Api.Application.Order.PatchOrderStatus;
 
-public sealed class PatchOrderStatusHandler(IOrderRepository repository,
-    IAppLogger<PatchOrderStatusHandler> logger) : IPatchOrderStatusHandler
+public record PatchOrderStatusCommand
+{
+    public required Guid Id { get; init; }
+    public required OrderStatusEnum Status { get; init; }
+}
+
+public record PatchOrderStatusResult();
+
+public sealed class PatchOrderStatus(
+    IOrderRepository repository,
+    IAppLogger<PatchOrderStatus> logger)
 {
     public async Task<Result<PatchOrderStatusResult>> HandleAsync(PatchOrderStatusCommand command)
     {
@@ -18,11 +27,13 @@ public sealed class PatchOrderStatusHandler(IOrderRepository repository,
                 command.Status);
 
             OrderId orderId = OrderId.Of(command.Id);
-            OrderEntity? orderEntity = await repository.GetByIdAsync(orderId, isTrackingEnabled: true, CancellationToken.None);
+            OrderEntity? orderEntity =
+                await repository.GetByIdAsync(orderId, isTrackingEnabled: true, CancellationToken.None);
 
             if (orderEntity == null)
             {
-                logger.LogWarning(LogTypeEnum.Application, "Order not found for patching status: {OrderId}", command.Id);
+                logger.LogWarning(LogTypeEnum.Application, "Order not found for patching status: {OrderId}",
+                    command.Id);
                 return Result<PatchOrderStatusResult>.Failure($"Order with ID {command.Id} not found.");
             }
 
@@ -34,13 +45,10 @@ public sealed class PatchOrderStatusHandler(IOrderRepository repository,
 
             orderEntity.PatchStatus(command.Status);
             int result = await repository.UpdateAsync(orderEntity);
-            
-            if (result <= 0)
-                return Result<PatchOrderStatusResult>.Failure("Failed to update order status.");
-            
-            //implement here the logic to send email to customer
-            
-            return Result<PatchOrderStatusResult>.Success(new PatchOrderStatusResult());
+
+            return result <= 0
+                ? Result<PatchOrderStatusResult>.Failure("Failed to update order status.")
+                : Result<PatchOrderStatusResult>.Success(new PatchOrderStatusResult());
         }
         catch (Exception ex)
         {
@@ -50,4 +58,3 @@ public sealed class PatchOrderStatusHandler(IOrderRepository repository,
         }
     }
 }
-

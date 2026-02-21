@@ -1,16 +1,31 @@
 using BuildingBlocks;
 using BuildingBlocks.Loggers;
+using Order.Api.Application.Dto;
 using Order.Api.Application.Extensions;
 using Order.Api.Domain.Entities;
+using Order.Api.Domain.Enums;
 using Order.Api.Domain.Repositories;
 using Order.Api.Domain.ValueObjects;
 
 namespace Order.Api.Application.Order.UpdateOrder;
 
-public sealed class UpdateOrderHandler(
+public record UpdateOrderCommand
+{
+    public Guid Id { get; set; } = Guid.Empty;
+    public Guid CustomerId { get; set; } = Guid.Empty;
+    public AddressDto ShippingAddress { get; set; } = null!;
+    public AddressDto BillingAddress { get; set; } = null!;
+    public PaymentDto Payment { get; set; } = null!;
+    public OrderStatusEnum Status { get; set; } = OrderStatusEnum.Created;
+    public List<OrderItemDto> Items { get; set; } = [];
+    public decimal TotalAmount { get; set; } = 0.0m;
+}
+
+public record UpdateOrderResult();
+
+public sealed class UpdateOrder(
     IOrderRepository repository,
-    IAppLogger<UpdateOrderHandler> logger)
-    : IUpdateOrderHandler
+    IAppLogger<UpdateOrder> logger)
 {
     public async Task<Result<UpdateOrderResult>> HandleAsync(UpdateOrderCommand command)
     {
@@ -20,7 +35,8 @@ public sealed class UpdateOrderHandler(
                 command.Id);
 
             OrderId orderId = OrderId.Of(command.Id);
-            OrderEntity? orderEntity = await repository.GetByIdAsync(orderId, isTrackingEnabled: true, CancellationToken.None);
+            OrderEntity? orderEntity =
+                await repository.GetByIdAsync(orderId, isTrackingEnabled: true, CancellationToken.None);
 
             if (orderEntity == null)
             {

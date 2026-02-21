@@ -7,9 +7,7 @@ public class UpdateMerchantEndpointUnitTest(TestFixture fixture) : Base.BaseTest
     [Fact]
     public async Task Returns_Ok_When_Merchant_Is_Updated_Successfully()
     {
-        MerchantEntity? merchant = MerchantBuilder.CreateMerchantFaker().Generate();
-        Context.Merchants.Add(merchant);
-        await Context.SaveChangesAsync();
+        MerchantEntity? merchant = await fixture.CreateMerchant();
 
         UpdateMerchantCommand command = new()
         {
