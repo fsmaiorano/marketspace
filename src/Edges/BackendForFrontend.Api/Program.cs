@@ -10,6 +10,7 @@ using BackendForFrontend.Api.Order.Endpoints;
 using BuildingBlocks.Exceptions;
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
+using BuildingBlocks.Authentication;
 using MarketSpace.ServiceDefaults;
 using Serilog;
 using Serilog.Extensions.Hosting;
@@ -36,39 +37,7 @@ builder.Services.AddCustomLoggers();
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
-IConfigurationSection jwtConfig = builder.Configuration.GetSection("Jwt");
-string? issuer = jwtConfig["Issuer"];
-string? audience = jwtConfig["Audience"];
-string? secretKey = jwtConfig["Key"];
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = issuer,
-        ValidAudience = audience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!)),
-        ClockSkew = TimeSpan.Zero
-    };
-    options.Events = new JwtBearerEvents
-    {
-        OnAuthenticationFailed = context =>
-        {
-            context.Response.StatusCode = 401;
-            context.Response.ContentType = "application/json";
-            return context.Response.WriteAsync("{\"error\":\"Invalid or expired token\"}");
-        }
-    };
-});
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Host.UseSerilog();
 builder.Services.AddSingleton<DiagnosticContext>();
@@ -105,6 +74,7 @@ app.UseSwaggerUI(options =>
 });
 
 app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseMiddleware<JwtTokenMiddleware>();
 app.UseExceptionHandler(options => { });
 app.UseCors("CorsPolicy");
 app.UseAuthentication();

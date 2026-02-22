@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.3" />
         <PackageReference Include="Microsoft.AspNetCore.Diagnostics.Middleware" Version="10.2.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.2" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.2" />
@@ -20,9 +21,5 @@
         <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
         <PackageReference Include="Serilog.Settings.Configuration" Version="10.0.0" />
         <PackageReference Include="Serilog.Formatting.Compact" Version="3.0.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Authentication\" />
     </ItemGroup>
 </Project>
