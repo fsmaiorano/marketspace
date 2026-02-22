@@ -44,6 +44,7 @@ public static class JwtAuthenticationExtensions
                 }
             };
         });
+        services.AddAuthorization();
         return services;
     }
 }
