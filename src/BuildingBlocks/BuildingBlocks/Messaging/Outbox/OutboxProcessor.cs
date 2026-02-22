@@ -44,7 +44,7 @@ public class OutboxProcessor<TDbContext>(
             List<OutboxMessage> messages = await dbContext.OutboxMessages
                 .Where(m => m.ProcessedOn == null)
                 .Take(20)
-                .ToListAsync(stoppingToken);
+                .ToListAsync(stoppingToken) ?? [];
 
             foreach (OutboxMessage message in messages)
             {

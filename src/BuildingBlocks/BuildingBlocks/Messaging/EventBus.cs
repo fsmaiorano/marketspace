@@ -73,7 +73,7 @@ public class EventBus : IEventBus, IAsyncDisposable, IDisposable
 
         byte[] body = Encoding.UTF8.GetBytes(message);
 
-        var properties = new BasicProperties
+        BasicProperties properties = new BasicProperties
         {
             ContentType = "application/json",
             DeliveryMode = DeliveryModes.Persistent,
@@ -213,7 +213,7 @@ public class EventBus : IEventBus, IAsyncDisposable, IDisposable
                     // Set CorrelationId in scope before processing
                     using (IServiceScope scope = _serviceProvider.CreateScope())
                     {
-                        var idempotencyService = scope.ServiceProvider.GetService<IIdempotencyService>();
+                        IIdempotencyService? idempotencyService = scope.ServiceProvider.GetService<IIdempotencyService>();
 
                         if (!string.IsNullOrWhiteSpace(correlationId))
                         {

@@ -8,14 +8,9 @@ namespace BuildingBlocks.Loggers;
 /// Automatically adds LogType as a structured property for filtering and categorization.
 /// </summary>
 /// <typeparam name="T">The type associated with the logger</typeparam>
-public sealed class AppLogger<T> : IAppLogger<T>
+public sealed class AppLogger<T>(ILogger<T> logger) : IAppLogger<T>
 {
-    private readonly ILogger<T> _logger;
-
-    public AppLogger(ILogger<T> logger)
-    {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
+    private readonly ILogger<T> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public void LogInformation(LogTypeEnum logTypeEnum, string messageTemplate, params object?[] propertyValues)
     {
