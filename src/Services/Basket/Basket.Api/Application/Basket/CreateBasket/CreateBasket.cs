@@ -1,8 +1,9 @@
-using Basket.Api.Application.Dto;
 using Basket.Api.Domain.Entities;
 using Basket.Api.Domain.Repositories;
+using Basket.Api.Endpoints.Dto;
 using BuildingBlocks;
 using BuildingBlocks.Loggers;
+using ShoppingCartEntity = Basket.Api.Domain.Entities.ShoppingCartEntity;
 
 namespace Basket.Api.Application.Basket.CreateBasket;
 
@@ -11,7 +12,7 @@ public record CreateBasketCommand(
     IReadOnlyList<ShoppingCartItemDto> Items
 );
 
-public record CreateBasketResult(ShoppingCartDto ShoppingCart);
+public record CreateBasketResult(ShoppingCartEntity ShoppingCart);
 
 public sealed class CreateBasket(
     IBasketDataRepository dataRepository,
@@ -36,26 +37,14 @@ public sealed class CreateBasket(
                 }).ToList(),
             };
 
-            ShoppingCartEntity result = await dataRepository.CreateCartAsync(cartEntity);
+            ShoppingCartEntity shoppingCart = await dataRepository.CreateCartAsync(cartEntity);
 
             logger.LogInformation(LogTypeEnum.Business,
                 "Basket created successfully. Username: {Username}, ItemCount: {ItemCount}",
                 cartEntity.Username,
                 cartEntity.Items.Count);
-
-            ShoppingCartDto cartDto = new()
-            {
-                Username = result.Username,
-                Items = result.Items.Select(item => new ShoppingCartItemDto
-                {
-                    ProductId = item.ProductId,
-                    ProductName = item.ProductName,
-                    Quantity = item.Quantity,
-                    Price = item.Price
-                }).ToList()
-            };
-
-            return Result<CreateBasketResult>.Success(new CreateBasketResult(cartDto));
+         
+            return Result<CreateBasketResult>.Success(new CreateBasketResult(shoppingCart));
         }
         catch (Exception ex)
         {

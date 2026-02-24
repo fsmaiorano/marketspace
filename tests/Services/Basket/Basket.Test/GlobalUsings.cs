@@ -5,7 +5,6 @@ global using Basket.Api;
 global using Basket.Api.Application.Basket.CreateBasket;
 global using Basket.Api.Application.Basket.DeleteBasket;
 global using Basket.Api.Application.Basket.GetBasketById;
-global using Basket.Api.Application.Dto;
 global using Basket.Api.Domain.Entities;
 global using Basket.Api.Domain.Repositories;
 global using Basket.Api.Infrastructure.Data;

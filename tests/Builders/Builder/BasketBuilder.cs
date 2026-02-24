@@ -1,6 +1,6 @@
 ﻿using Basket.Api.Application.Basket.CreateBasket;
 using Basket.Api.Application.Basket.DeleteBasket;
-using Basket.Api.Application.Dto;
+using Basket.Api.Endpoints.Dto;
 using Basket.Api.Domain.Entities;
 using Bogus;
 

@@ -1,4 +1,6 @@
 using Basket.Api.Application.Basket.CheckoutBasket;
+using Basket.Api.Domain.Entities;
+using Basket.Api.Endpoints.Dto;
 using BuildingBlocks;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,6 +14,7 @@ public static class CheckoutBasketEndpoint
                 async ([FromBody] CheckoutBasketCommand command, [FromServices] CheckoutBasket usecase) =>
                 {
                     Result<CheckoutBasketResult> result = await usecase.HandleAsync(command);
+
                     return result.IsSuccess
                         ? Results.Ok(result)
                         : Results.BadRequest(result.Error);

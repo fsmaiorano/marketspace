@@ -1,4 +1,5 @@
 using Basket.Api.Application.Basket.GetBasketById;
+using Basket.Api.Endpoints.Dto;
 using BuildingBlocks;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,9 +14,18 @@ public static class GetBasketByIdEndpoint
                 {
                     GetBasketByIdQuery query = new(username);
                     Result<GetBasketByIdResult> result = await handler.HandleAsync(query);
-                    return result.IsSuccess
-                        ? Results.Ok(result)
-                        : Results.NotFound(result.Error);
+
+                    return result is { IsSuccess: true, Data.ShoppingCart: not null }
+                        ? Results.Ok(new ShoppingCartDto
+                        {
+                            Username = result.Data.ShoppingCart.Username,
+                            Items = result.Data.ShoppingCart.Items?
+                                .Select(item => new ShoppingCartItemDto
+                                {
+                                    ProductId = item.ProductId, Quantity = item.Quantity, Price = item.Price
+                                }).ToList() ?? []
+                        })
+                        : Results.BadRequest(result.Error ?? "Unknown error");
                 })
             .WithName("GetBasketById")
             .WithTags("Basket")

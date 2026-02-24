@@ -1,4 +1,5 @@
 using Basket.Api.Application.Basket.CreateBasket;
+using Basket.Api.Endpoints.Dto;
 using BuildingBlocks;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,9 +13,18 @@ public static class CreateBasketEndpoint
                 async ([FromBody] CreateBasketCommand command, [FromServices] CreateBasket handler) =>
                 {
                     Result<CreateBasketResult> result = await handler.HandleAsync(command);
-                    return result.IsSuccess
-                        ? Results.Ok(result)
-                        : Results.BadRequest(result.Error);
+
+                    return result is { IsSuccess: true, Data.ShoppingCart: not null }
+                        ? Results.Ok(new ShoppingCartDto
+                        {
+                            Username = result.Data.ShoppingCart.Username,
+                            Items = result.Data.ShoppingCart.Items?
+                                .Select(item => new ShoppingCartItemDto
+                                {
+                                    ProductId = item.ProductId, Quantity = item.Quantity, Price = item.Price
+                                }).ToList() ?? []
+                        })
+                        : Results.BadRequest(result.Error ?? "Unknown error");
                 })
             .WithName("CreateBasket")
             .WithTags("Basket")

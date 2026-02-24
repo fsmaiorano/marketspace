@@ -1,4 +1,4 @@
-namespace Basket.Api.Application.Dto;
+namespace Basket.Api.Endpoints.Dto;
 
 public class ShoppingCartDto
 {
