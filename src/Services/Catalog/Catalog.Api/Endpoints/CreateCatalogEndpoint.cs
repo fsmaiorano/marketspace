@@ -14,12 +14,12 @@ public static class CreateCatalogEndpoint
                 {
                     Result<CreateCatalogResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess
-                        ? Results.Ok()
+                        ? Results.Created()
                         : Results.BadRequest(result.Error);
                 })
             .WithName("CreateCatalog")
             .WithTags("Catalog")
-            .Produces<CreateCatalogResult>(StatusCodes.Status200OK)
+            .Produces<CreateCatalogResult>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
     }

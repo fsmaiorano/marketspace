@@ -1,4 +1,5 @@
 using Catalog.Test.Fixtures;
+using System.Net;
 
 namespace Catalog.Test.Endpoints;
 
@@ -9,6 +10,6 @@ public class CreateCatalogEndpointUnitTest(TestFixture fixture) : Base.BaseTest(
     {
         CreateCatalogCommand command = CatalogBuilder.CreateCreateCatalogCommandFaker().Generate();
         HttpResponseMessage response = await DoPost("/catalog", command);
-        Assert.True(response.IsSuccessStatusCode);
+        Assert.True(HttpStatusCode.Created.Equals(response.StatusCode));
     }
 }

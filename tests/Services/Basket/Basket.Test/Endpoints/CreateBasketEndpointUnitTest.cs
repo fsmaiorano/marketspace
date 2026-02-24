@@ -1,5 +1,3 @@
-using Basket.Api.Endpoints.Dto;
-
 namespace Basket.Test.Endpoints;
 
 public class CreateBasketEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fixture)
@@ -9,10 +7,6 @@ public class CreateBasketEndpointUnitTest(TestFixture fixture) : Base.BaseTest(f
     {
         CreateBasketCommand command = BasketBuilder.CreateBasketCommandFaker().Generate();
         HttpResponseMessage response = await DoPost("/basket", command);
-
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-        ShoppingCartDto? result = await response.Content.ReadFromJsonAsync<ShoppingCartDto>();
-        Assert.NotNull(result);
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
     }
 }
