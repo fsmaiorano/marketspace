@@ -1,3 +1,5 @@
+using Basket.Api.Endpoints.Dto;
+
 namespace Basket.Test.Endpoints;
 
 public class GetBasketByIdEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fixture)
@@ -10,8 +12,9 @@ public class GetBasketByIdEndpointUnitTest(TestFixture fixture) : Base.BaseTest(
         HttpResponseMessage response = await DoGet($"/basket/{basket.Username}");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Result<GetBasketByIdResult>? result = await response.Content.ReadFromJsonAsync<Result<GetBasketByIdResult>>();
+        ShoppingCartDto? result = await response.Content.ReadFromJsonAsync<ShoppingCartDto>();
         Assert.NotNull(result);
-        Assert.True(result.IsSuccess);
+        Assert.NotEmpty(result.Items);
+        Assert.Equal(basket.Username, result.Username);
     }
 }
