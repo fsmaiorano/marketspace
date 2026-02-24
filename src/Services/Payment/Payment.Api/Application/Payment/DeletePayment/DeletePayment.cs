@@ -7,7 +7,7 @@ namespace Payment.Api.Application.Payment.DeletePayment;
 
 public record DeletePaymentCommand(Guid Id);
 
-public record DeletePaymentResult(bool Success);
+public record DeletePaymentResult();
 
 public sealed class DeletePayment(
     IPaymentRepository repository,
@@ -33,7 +33,7 @@ public sealed class DeletePayment(
             logger.LogInformation(LogTypeEnum.Business,
                "Payment deleted successfully. PaymentId: {PaymentId}", command.Id);
 
-            return Result<DeletePaymentResult>.Success(new DeletePaymentResult(true));
+            return Result<DeletePaymentResult>.Success(new DeletePaymentResult());
         }
         catch(Exception ex)
         {
