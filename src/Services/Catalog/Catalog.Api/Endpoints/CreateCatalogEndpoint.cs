@@ -1,5 +1,6 @@
 using BuildingBlocks;
 using Catalog.Api.Application.Catalog.CreateCatalog;
+using Catalog.Api.Endpoints.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Catalog.Api.Endpoints;
@@ -13,7 +14,7 @@ public static class CreateCatalogEndpoint
                 {
                     Result<CreateCatalogResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess
-                        ? Results.Ok(result)
+                        ? Results.Ok()
                         : Results.BadRequest(result.Error);
                 })
             .WithName("CreateCatalog")

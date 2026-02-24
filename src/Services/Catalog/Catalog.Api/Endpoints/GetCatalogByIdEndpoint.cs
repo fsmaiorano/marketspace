@@ -1,5 +1,6 @@
 using BuildingBlocks;
 using Catalog.Api.Application.Catalog.GetCatalogById;
+using Catalog.Api.Endpoints.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
@@ -13,8 +14,19 @@ public static class GetCatalogByIdEndpoint
             {
                 GetCatalogByIdQuery query = new(id);
                 Result<GetCatalogByIdResult> result = await handler.HandleAsync(query);
-                return result.IsSuccess
-                    ? Results.Ok(result)
+                return result is { IsSuccess: true, Data: not null }
+                    ? Results.Ok(new CatalogDto()
+                    {
+                        Id = result.Data.Id,
+                        Name = result.Data.Name,
+                        Price = result.Data.Price,
+                        ImageUrl = result.Data.ImageUrl,
+                        MerchantId = result.Data.MerchantId,
+                        Description = result.Data.Description,
+                        Categories = result.Data!.Categories.ToList(),
+                        CreatedAt = result.Data.CreatedAt,
+                        UpdatedAt = result.Data.UpdatedAt
+                    })
                     : Results.NotFound(result.Error);
             })
             .WithName("GetCatalogById")

@@ -1,4 +1,4 @@
-namespace Catalog.Api.Application.Dtos;
+namespace Catalog.Api.Endpoints.Dtos;
 
 public class CatalogDto
 {

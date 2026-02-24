@@ -9,7 +9,6 @@ public class CreateCatalogEndpointUnitTest(TestFixture fixture) : Base.BaseTest(
     {
         CreateCatalogCommand command = CatalogBuilder.CreateCreateCatalogCommandFaker().Generate();
         HttpResponseMessage response = await DoPost("/catalog", command);
-        Result<CreateCatalogResult>? result = await response.Content.ReadFromJsonAsync<Result<CreateCatalogResult>>();
-        result?.Data.Should().NotBeNull();
+        Assert.True(response.IsSuccessStatusCode);
     }
 }

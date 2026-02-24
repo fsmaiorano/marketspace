@@ -10,11 +10,6 @@ public class DeleteBasketEndpointUnitTest(TestFixture fixture) : Base.BaseTest(f
         DeleteBasketCommand command = BasketBuilder.CreateDeleteBasketCommandFaker(basket.Username).Generate();
         HttpResponseMessage response = await DoDelete($"/basket/{command.Username}");
 
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        
-        Result<DeleteBasketResult>? result = await response.Content.ReadFromJsonAsync<Result<DeleteBasketResult>>();
-        Assert.NotNull(result);
-        Assert.True(result.IsSuccess);
-        Assert.NotNull(result.Data);
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
 }

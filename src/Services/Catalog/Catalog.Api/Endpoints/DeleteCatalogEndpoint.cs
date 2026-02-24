@@ -14,7 +14,7 @@ public static class DeleteCatalogEndpoint
                     DeleteCatalogCommand command = new(Guid.Parse(catalogId));
                     Result<DeleteCatalogResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess
-                        ? Results.Ok(result)
+                        ? Results.NoContent()
                         : Results.BadRequest(result.Error);
                 })
             .WithName("DeleteCatalog")

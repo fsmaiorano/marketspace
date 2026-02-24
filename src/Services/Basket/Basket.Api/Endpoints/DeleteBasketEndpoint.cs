@@ -14,7 +14,7 @@ public static class DeleteBasketEndpoint
                     DeleteBasketCommand command = new(Username: username);
                     Result<DeleteBasketResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess
-                        ? Results.Ok(result)
+                        ? Results.NoContent()
                         : Results.BadRequest(result.Error);
                 })
             .WithName("DeleteBasket")
