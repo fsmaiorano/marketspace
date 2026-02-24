@@ -49,6 +49,7 @@ public sealed class CreateMerchant(
                 merchantEntity.Id,
                 command.Name,
                 command.Email);
+            
             return Result<CreateMerchantResult>.Success(new CreateMerchantResult());
         }
         catch (Exception ex)
