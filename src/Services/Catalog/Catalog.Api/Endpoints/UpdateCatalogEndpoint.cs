@@ -13,7 +13,7 @@ public static class UpdateCatalogEndpoint
                 {
                     Result<UpdateCatalogResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess
-                        ? Results.Ok(result)
+                        ? Results.NoContent()
                         : Results.BadRequest(result.Error);
                 })
             .WithName("UpdateCatalog")

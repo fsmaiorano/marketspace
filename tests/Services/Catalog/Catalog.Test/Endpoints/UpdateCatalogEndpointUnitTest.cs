@@ -1,6 +1,7 @@
 using Catalog.Api.Application.Catalog.UpdateCatalog;
 using Catalog.Api.Domain.ValueObjects;
 using Catalog.Test.Fixtures;
+using System.Net;
 
 namespace Catalog.Test.Endpoints;
 
@@ -23,10 +24,7 @@ public class UpdateCatalogEndpointUnitTest(TestFixture fixture) : Base.BaseTest(
         };
 
         HttpResponseMessage response = await DoPut("/catalog", command);
-        Result<UpdateCatalogResult>? result = await response.Content.ReadFromJsonAsync<Result<UpdateCatalogResult>>();
-
-        result?.IsSuccess.Should().BeTrue();
-        result?.Data.Should().NotBeNull();
+        Assert.True(response.StatusCode.Equals(HttpStatusCode.NoContent));
 
         Context.ChangeTracker.Clear();
         CatalogEntity? updatedCatalog = await Context.Catalogs.FindAsync(catalog.Id);

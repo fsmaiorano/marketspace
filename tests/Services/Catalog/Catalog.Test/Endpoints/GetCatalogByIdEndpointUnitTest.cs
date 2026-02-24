@@ -1,5 +1,4 @@
-using Catalog.Api.Domain.ValueObjects;
-using Catalog.Test.Base;
+using Catalog.Api.Endpoints.Dtos;
 using Catalog.Test.Fixtures;
 
 namespace Catalog.Test.Endpoints;
@@ -12,10 +11,11 @@ public class GetCatalogByIdEndpointUnitTest(TestFixture fixture) : Base.BaseTest
         CatalogEntity catalog = await fixture.CreateCatalog();
       
         using HttpResponseMessage response = await DoGet($"/catalog/{catalog.Id.Value}");
-        Result<GetCatalogByIdResult>? result = await response.Content.ReadFromJsonAsync<Result<GetCatalogByIdResult>>();
+        CatalogDto? result = await response.Content.ReadFromJsonAsync<CatalogDto>();
         
         result.Should().NotBeNull();
-        result.IsSuccess.Should().BeTrue();
-        result.Data.Should().NotBeNull();
+        result!.Id.Should().Be(catalog.Id.Value);
+        result.Name.Should().Be(catalog.Name);
+        result.Description.Should().Be(catalog.Description);
     }
 }

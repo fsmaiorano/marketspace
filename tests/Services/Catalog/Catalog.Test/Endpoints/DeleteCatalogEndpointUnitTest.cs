@@ -1,4 +1,5 @@
 using Catalog.Test.Fixtures;
+using System.Net;
 
 namespace Catalog.Test.Endpoints;
 
@@ -11,9 +12,6 @@ public class DeleteCatalogEndpointUnitTest(TestFixture fixture) : Base.BaseTest(
 
         DeleteCatalogCommand command = CatalogBuilder.CreateDeleteCatalogCommandFaker(catalog.Id.Value).Generate();
         HttpResponseMessage response = await DoDelete($"/catalog/{command.Id}");
-        Result<DeleteCatalogResult>? result = await response.Content.ReadFromJsonAsync<Result<DeleteCatalogResult>>();
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeTrue();
-        result.Data.Should().NotBeNull();
+        Assert.True(response.StatusCode.Equals(HttpStatusCode.NoContent));
     }
 }

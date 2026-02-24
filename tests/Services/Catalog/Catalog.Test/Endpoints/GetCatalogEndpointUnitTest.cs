@@ -1,12 +1,6 @@
-using Builder;
-using BuildingBlocks;
-using Catalog.Api.Application.Catalog.GetCatalog;
-using Catalog.Api.Domain.Entities;
-using Catalog.Api.Domain.ValueObjects;
-using Catalog.Test.Base;
+using BuildingBlocks.Pagination;
+using Catalog.Api.Endpoints.Dtos;
 using Catalog.Test.Fixtures;
-using FluentAssertions;
-using System.Net.Http.Json;
 
 namespace Catalog.Test.Endpoints;
 
@@ -23,8 +17,8 @@ public class GetCatalogEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fix
 
         HttpResponseMessage response = await DoGet("/catalog?PageIndex=1&PageSize=10");
         response.EnsureSuccessStatusCode();
-        Result<GetCatalogResult>? responseResult =
-            await response.Content.ReadFromJsonAsync<Result<GetCatalogResult>>();
+        PaginatedResult<CatalogDto>? responseResult =
+            await response.Content.ReadFromJsonAsync<PaginatedResult<CatalogDto>>();
         responseResult?.Data.Should().NotBeNull();
     }
 }

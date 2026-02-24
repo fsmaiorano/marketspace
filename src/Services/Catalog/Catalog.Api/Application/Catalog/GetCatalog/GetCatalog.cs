@@ -2,9 +2,9 @@ using BuildingBlocks;
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Pagination;
 using BuildingBlocks.Storage.Minio;
-using Catalog.Api.Application.Dtos;
 using Catalog.Api.Domain.Entities;
 using Catalog.Api.Domain.Repositories;
+using Catalog.Api.Endpoints.Dtos;
 
 namespace Catalog.Api.Application.Catalog.GetCatalog;
 
