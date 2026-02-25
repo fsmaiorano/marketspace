@@ -12,13 +12,13 @@ public static class CreateOrderEndpoint
                 async ([FromBody] CreateOrderCommand command, [FromServices] CreateOrder handler) =>
                 {
                     Result<CreateOrderResult> result = await handler.HandleAsync(command);
-                    return result.IsSuccess
-                        ? Results.Ok(result)
-                        : Results.BadRequest(result.Error);
+                    return result is { IsSuccess: true, Data: not null }
+                        ? Results.Created()
+                        : Results.BadRequest(result.Error ?? "Unknown error");
                 })
             .WithName("CreateOrder")
             .WithTags("Order")
-            .Produces<CreateOrderResult>(StatusCodes.Status200OK)
+            .Produces<CreateOrderResult>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
     }

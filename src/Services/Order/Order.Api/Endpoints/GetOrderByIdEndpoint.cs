@@ -1,6 +1,7 @@
 using BuildingBlocks;
 using Order.Api.Application.Order.GetOrderById;
 using Microsoft.AspNetCore.Mvc;
+using Order.Api.Endpoints.Dto;
 
 namespace Order.Api.Endpoints;
 
@@ -12,8 +13,15 @@ public static class GetOrderByIdEndpoint
             {
                 GetOrderByIdQuery query = new(Guid.Parse(id));
                 Result<GetOrderByIdResult> result = await handler.HandleAsync(query);
-                return result.IsSuccess
-                    ? Results.Ok(result)
+                return result is { IsSuccess: true, Data: not null }
+                    ? Results.Ok(new OrderDto()
+                    {
+                        Id = result.Data.Order.Id.Value,
+                        CustomerId = result.Data.Order.CustomerId.Value,
+                        TotalAmount = result.Data.Order.TotalAmount.Value,
+                        Status = result.Data.Order.Status.ToString(),
+                        CreatedAt = result.Data.Order.CreatedAt!.Value,
+                    })
                     : Results.NotFound(result.Error);
             })
             .WithName("GetOrderById")

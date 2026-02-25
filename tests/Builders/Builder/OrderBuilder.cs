@@ -1,5 +1,4 @@
 using Bogus;
-using Order.Api.Application.Dto;
 using Order.Api.Application.Order.CreateOrder;
 using Order.Api.Application.Order.DeleteOrder;
 using Order.Api.Application.Order.PatchOrderStatus;
@@ -7,6 +6,7 @@ using Order.Api.Application.Order.UpdateOrder;
 using Order.Api.Domain.Entities;
 using Order.Api.Domain.Enums;
 using Order.Api.Domain.ValueObjects;
+using Order.Api.Endpoints.Dto;
 using OrderPayment = Order.Api.Domain.ValueObjects.Payment;
 
 namespace Builder;

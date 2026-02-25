@@ -1,6 +1,6 @@
-namespace Order.Api.Application.Dto;
+namespace Order.Api.Domain.Entities;
 
-public class PaymentDto
+public class PaymentEntity
 {
     public string CardNumber { get; init; } = null!;
     public string CardName { get; init; } = null!;

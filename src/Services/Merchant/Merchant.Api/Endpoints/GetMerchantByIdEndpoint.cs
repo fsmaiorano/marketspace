@@ -15,13 +15,13 @@ public static class GetMerchantByIdEndpoint
                 return result is { IsSuccess: true, Data: not null }
                     ? Results.Ok(new MerchantDto()
                     {
-                        Name = result.Data.Name,
-                        Description = result.Data.Description,
-                        Email = result.Data.Email,
-                        PhoneNumber = result.Data.PhoneNumber,
-                        Address = result.Data.Address,
-                        CreatedAt = result.Data.CreatedAt,
-                        UpdatedAt = result.Data.UpdatedAt
+                        Name = result.Data.Merchant.Name,
+                        Description = result.Data.Merchant.Description,
+                        Email = result.Data.Merchant.Email.Value,
+                        PhoneNumber = result.Data.Merchant.PhoneNumber,
+                        Address = result.Data.Merchant.Address,
+                        CreatedAt = result.Data.Merchant.CreatedAt,
+                        UpdatedAt = result.Data.Merchant.UpdatedAt
                     })
                     : Results.NotFound(result.Error);
             })

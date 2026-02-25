@@ -7,15 +7,7 @@ namespace Merchant.Api.Application.Merchant.GetMerchantById;
 
 public record GetMerchantByIdQuery(Guid Id);
 
-public record GetMerchantByIdResult(
-    Guid Id,
-    string Name,
-    string Description,
-    string Email,
-    string PhoneNumber,
-    string Address,
-    DateTimeOffset CreatedAt,
-    DateTimeOffset? UpdatedAt);
+public record GetMerchantByIdResult(MerchantEntity Merchant);
 
 public class GetMerchantById(
     IMerchantRepository repository,
@@ -32,23 +24,9 @@ public class GetMerchantById(
 
             MerchantEntity? merchant = await repository.GetByIdAsync(merchantId, isTrackingEnabled: false);
 
-            if (merchant is null)
-            {
-                logger.LogInformation(LogTypeEnum.Application, "Merchant with ID {MerchantId} not found.", query.Id);
-                return Result<GetMerchantByIdResult>.Failure($"Catalog with ID {query.Id} not found.");
-            }
-
-            GetMerchantByIdResult result = new GetMerchantByIdResult(
-                merchant.Id.Value,
-                merchant.Name,
-                merchant.Description,
-                merchant.Email.Value,
-                merchant.PhoneNumber,
-                merchant.Address,
-                merchant.CreatedAt,
-                merchant.UpdatedAt);
-
-            return Result<GetMerchantByIdResult>.Success(result);
+            return merchant is not null
+                ? Result<GetMerchantByIdResult>.Success(new GetMerchantByIdResult(merchant))
+                : Result<GetMerchantByIdResult>.Failure($"Catalog with ID {query.Id} not found.");
         }
         catch (Exception ex)
         {

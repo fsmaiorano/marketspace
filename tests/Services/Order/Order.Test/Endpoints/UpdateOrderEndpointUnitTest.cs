@@ -1,4 +1,5 @@
 using Order.Test.Fixtures;
+using System.Net;
 
 namespace Order.Test.Endpoints;
 
@@ -11,8 +12,6 @@ public class UpdateOrderEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fi
 
         UpdateOrderCommand command = OrderBuilder.CreateUpdateOrderCommandFaker(order.Id.Value).Generate();
         HttpResponseMessage response = await DoPut("/order", command);
-        Result<UpdateOrderResult>? result = await response.Content.ReadFromJsonAsync<Result<UpdateOrderResult>>();
-        result?.IsSuccess.Should().BeTrue();
-        result?.Data.Should().NotBeNull();
+        Assert.True(response.StatusCode.Equals(HttpStatusCode.NoContent));
     }
 }
