@@ -12,13 +12,13 @@ public static class UpdatePaymentEndpoint
                 async ([FromBody] UpdatePaymentCommand command, [FromServices] UpdatePayment handler) =>
                 {
                     Result<UpdatePaymentResult> result = await handler.HandleAsync(command);
-                    return result.IsSuccess
-                        ? Results.Ok(result)
+                    return result is { IsSuccess: true, Data: not null }
+                        ? Results.Ok()
                         : Results.BadRequest(result.Error);
                 })
             .WithName("UpdatePayment")
             .WithTags("Payment")
-            .Produces<Result<UpdatePaymentResult>>(StatusCodes.Status200OK)
+            .Produces<Result<UpdatePaymentResult>>(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
     }

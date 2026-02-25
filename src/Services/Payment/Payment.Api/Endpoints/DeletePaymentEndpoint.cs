@@ -14,12 +14,12 @@ public static class DeletePaymentEndpoint
                     Result<DeletePaymentResult> result =
                         await handler.HandleAsync(new DeletePaymentCommand(Guid.Parse(id)));
                     return result.IsSuccess
-                        ? Results.Ok(result)
+                        ? Results.NoContent()
                         : Results.BadRequest(result.Error);
                 })
             .WithName("DeletePayment")
             .WithTags("Payment")
-            .Produces<Result<DeletePaymentResult>>(StatusCodes.Status200OK)
+            .Produces<Result<DeletePaymentResult>>(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
     }

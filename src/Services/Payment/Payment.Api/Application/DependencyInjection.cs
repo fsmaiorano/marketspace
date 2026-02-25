@@ -1,7 +1,5 @@
-using BuildingBlocks.Messaging;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using BuildingBlocks.Messaging.Extensions;
-using BuildingBlocks.Messaging.Interfaces;
 using Payment.Api.Application.BackgroundService;
 using Payment.Api.Application.EventHandlers;
 using Payment.Api.Application.HostedService;
@@ -27,6 +25,7 @@ public static class DependencyInjection
         services.AddScoped<GetPaymentById>();
         services.AddScoped<UpdatePayment>();
         services.AddScoped<DeletePayment>();
+        services.AddScoped<PatchPaymentStatus>();
         services.AddScoped<IPaymentRepository, PaymentRepository>();
 
         services.AddEventBus(configuration);

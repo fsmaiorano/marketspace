@@ -1,6 +1,5 @@
 using BuildingBlocks;
 using BuildingBlocks.Loggers;
-using Payment.Api.Application.Dto;
 using Payment.Api.Domain.Entities;
 using Payment.Api.Domain.Repositories;
 using Payment.Api.Domain.ValueObjects;
@@ -9,7 +8,7 @@ namespace Payment.Api.Application.Payment.GetPaymentById;
 
 public record GetPaymentByIdQuery(Guid Id);
 
-public record GetPaymentByIdResult(PaymentDto Payment);
+public record GetPaymentByIdResult(PaymentEntity Payment);
 
 public sealed class GetPaymentById(
     IPaymentRepository repository,
@@ -25,29 +24,9 @@ public sealed class GetPaymentById(
 
             PaymentEntity? payment = await repository.GetByIdAsync(PaymentId.Of(query.Id), isTrackingEnabled: false);
 
-            if (payment == null)
-            {
-                logger.LogWarning(LogTypeEnum.Application,
-                    "Payment not found: {PaymentId}", query.Id);
-                return Result<GetPaymentByIdResult>.Failure("Payment not found.");
-            }
-
-            PaymentDto paymentDto = new()
-            {
-                Id = payment.Id.Value,
-                OrderId = payment.OrderId,
-                Amount = payment.Amount,
-                Currency = payment.Currency,
-                Status = payment.Status.ToString(),
-                Method = payment.Method.Value,
-                Provider = payment.Provider,
-                ProviderTransactionId = payment.ProviderTransactionId,
-                AuthorizationCode = payment.AuthorizationCode,
-                CreatedAt = payment.CreatedAt!.Value,
-                LastModifiedAt = payment.LastModifiedAt
-            };
-
-            return Result<GetPaymentByIdResult>.Success(new GetPaymentByIdResult(paymentDto));
+            return payment == null
+                ? Result<GetPaymentByIdResult>.Failure("Payment not found.")
+                : Result<GetPaymentByIdResult>.Success(new GetPaymentByIdResult(payment));
         }
         catch (Exception ex)
         {
