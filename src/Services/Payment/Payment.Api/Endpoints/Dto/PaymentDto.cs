@@ -1,4 +1,4 @@
-namespace Payment.Api.Application.Dto;
+namespace Payment.Api.Endpoints.Dto;
 
 public class PaymentDto
 {

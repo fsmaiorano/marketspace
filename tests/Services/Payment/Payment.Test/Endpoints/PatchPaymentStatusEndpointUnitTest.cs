@@ -1,5 +1,6 @@
 using Payment.Api.Application.Payment.PatchPaymentStatus;
 using Payment.Test.Fixtures;
+using System.Net;
 
 namespace Payment.Test.Endpoints;
 
@@ -13,17 +14,17 @@ public class PatchPaymentStatusEndpointUnitTest(TestFixture fixture) : Base.Base
         Context.Payments.Add(Payment);
         await Context.SaveChangesAsync();
 
-        PatchPaymentStatusCommand command = PaymentBuilder.CreatePatchPaymentStatusCommandFaker(Payment.Id.Value).Generate();
+        PatchPaymentStatusCommand command =
+            PaymentBuilder.CreatePatchPaymentStatusCommandFaker(Payment.Id.Value).Generate();
 
         HttpResponseMessage response = await DoPatch("/Payment/status", command);
-        Result<PatchPaymentStatusResult>? result = await response.Content.ReadFromJsonAsync<Result<PatchPaymentStatusResult>>();
+       
+        Assert.True(response.StatusCode.Equals(HttpStatusCode.NoContent));
 
         PaymentEntity? updatedPayment = await Context.Payments
             .AsNoTracking()
             .FirstOrDefaultAsync(o => o.Id == Payment.Id);
 
-        result?.IsSuccess.Should().BeTrue();
-        result?.Data.Should().NotBeNull();
         updatedPayment?.Status.Should().Be(command.Status);
     }
 }
