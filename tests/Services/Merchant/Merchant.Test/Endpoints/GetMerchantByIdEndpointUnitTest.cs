@@ -1,4 +1,5 @@
 using Merchant.Api.Application.Merchant.GetMerchantById;
+using Merchant.Api.Endpoints.Dto;
 using Merchant.Test.Fixtures;
 
 namespace Merchant.Test.Endpoints;
@@ -12,10 +13,9 @@ public class GetMerchantByIdEndpointUnitTest(TestFixture fixture) : Base.BaseTes
 
         GetMerchantByIdQuery query = new(merchant.Id.Value);
         HttpResponseMessage response = await DoGet($"/merchant/{query.Id}");
-        Result<GetMerchantByIdResult>? result =
-            await response.Content.ReadFromJsonAsync<Result<GetMerchantByIdResult>>();
+        MerchantDto? result =
+            await response.Content.ReadFromJsonAsync<MerchantDto>();
 
-        result?.IsSuccess.Should().BeTrue();
-        result?.Data.Should().NotBeNull();
+        Assert.NotNull(result);
     }
 }

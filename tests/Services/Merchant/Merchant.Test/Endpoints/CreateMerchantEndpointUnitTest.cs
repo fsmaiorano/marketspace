@@ -1,4 +1,5 @@
 using Merchant.Test.Fixtures;
+using System.Net;
 
 namespace Merchant.Test.Endpoints;
 
@@ -9,8 +10,6 @@ public class CreateMerchantEndpointUnitTest(TestFixture fixture) : Base.BaseTest
     {
         CreateMerchantCommand command = MerchantBuilder.CreateCreateMerchantCommandFaker().Generate();
         HttpResponseMessage response = await DoPost("/merchant", command);
-        Result<CreateMerchantResult>? result = await response.Content.ReadFromJsonAsync<Result<CreateMerchantResult>>();
-        result?.IsSuccess.Should().BeTrue();
-        result?.Data.Should().NotBeNull();
+        Assert.True(response.StatusCode.Equals(HttpStatusCode.Created));
     }
 }
