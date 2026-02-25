@@ -1,5 +1,4 @@
 using Bogus;
-using User.Api.Data.Models;
 using User.Api.Models;
 
 namespace Builder;

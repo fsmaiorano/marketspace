@@ -1,11 +1,12 @@
 using BuildingBlocks.Exceptions;
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
+using BuildingBlocks.Services;
 using BuildingBlocks.Services.Correlation;
 using Payment.Api.Application;
 using Payment.Api.Endpoints;
 using Payment.Api.Infrastructure;
-using Payment.Api.Infrastructure.Data.Extensions;
+using Payment.Api.Infrastructure.Data;
 using Serilog;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -30,7 +31,7 @@ WebApplication app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    await app.InitialiseDatabaseAsync();
+    await app.InitialiseDatabaseAsync<PaymentDbContext>();
 }
 
 //app.UseHttpsRedirection();

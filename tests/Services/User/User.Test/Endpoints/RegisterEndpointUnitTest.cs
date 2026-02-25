@@ -1,7 +1,6 @@
 using Builder;
 using System.Net;
 using System.Net.Http.Json;
-using User.Api.Data.Models;
 using User.Api.Models;
 using User.Test.Base;
 using User.Test.Fixtures;

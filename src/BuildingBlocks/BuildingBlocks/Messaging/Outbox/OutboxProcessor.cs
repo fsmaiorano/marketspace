@@ -41,10 +41,16 @@ public class OutboxProcessor<TDbContext>(
 
         await strategy.ExecuteAsync(async () =>
         {
-            List<OutboxMessage> messages = await dbContext.OutboxMessages
+            List<OutboxMessage>? messages = await dbContext.OutboxMessages
                 .Where(m => m.ProcessedOn == null)
                 .Take(20)
                 .ToListAsync(stoppingToken) ?? [];
+
+            if (messages is null)
+            {
+                logger.LogInformation("No outbox messages to process at this time.");
+                return;
+            }
 
             foreach (OutboxMessage message in messages)
             {

@@ -1,12 +1,13 @@
 using BuildingBlocks.Exceptions;
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
+using BuildingBlocks.Services;
 using BuildingBlocks.Services.Correlation;
 using MarketSpace.ServiceDefaults;
 using Merchant.Api.Application;
 using Merchant.Api.Endpoints;
 using Merchant.Api.Infrastructure;
-using Merchant.Api.Infrastructure.Data.Extensions;
+using Merchant.Api.Infrastructure.Data;
 using Serilog;
 using Serilog.Extensions.Hosting;
 
@@ -39,7 +40,7 @@ app.MapDefaultEndpoints();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    await app.InitialiseDatabaseAsync();
+    await app.InitialiseDatabaseAsync<MerchantDbContext>();
 }
 
 // app.UseHttpsRedirection();

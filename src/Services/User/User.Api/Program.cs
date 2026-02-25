@@ -1,16 +1,12 @@
-using MarketSpace.ServiceDefaults;
-using User.Api.Application;
-using User.Api.Infrastructure;
-using User.Api.Extensions;
-using User.Api.Endpoints;
+using BuildingBlocks.Services;
+using User.Api.Data;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
 builder.Services
-    .AddApplicationServices(builder.Configuration)
-    .AddInfrastructureServices(builder.Configuration);
+    .AddServices(builder.Configuration);
 
 WebApplication app = builder.Build();
 
@@ -24,7 +20,7 @@ app.UseSwaggerUI(options =>
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    await app.InitialiseDatabaseAsync();
+    await app.InitialiseDatabaseAsync<UserDbContext>();
 }
 
 app.UseCors();
@@ -39,5 +35,7 @@ app.Run();
 
 namespace User.Api.Api
 {
-    public partial class UserProgram { }
+    public partial class UserProgram
+    {
+    }
 }

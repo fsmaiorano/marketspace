@@ -1,0 +1,7 @@
+Removed deprecated DatabaseExtensions.cs files from:
+- src/Services/Merchant/Merchant.Api/Infrastructure/Data/Extensions/DatabaseExtensions.cs
+- src/Services/Payment/Payment.Api/Infrastructure/Data/Extensions/DatabaseExtensions.cs
+- src/Services/Order/Order.Api/Infrastructure/Data/Extensions/DatabaseExtensions.cs
+- src/Services/Catalog/Catalog.Api/Infrastructure/Data/Extensions/DatabaseExtensions.cs
+- src/Services/User/User.Api/Extensions/DatabaseExtensions.cs
+

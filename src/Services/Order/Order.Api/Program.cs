@@ -1,12 +1,13 @@
 using BuildingBlocks.Exceptions;
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
+using BuildingBlocks.Services;
 using BuildingBlocks.Services.Correlation;
 using MarketSpace.ServiceDefaults;
 using Order.Api.Application;
 using Order.Api.Endpoints;
 using Order.Api.Infrastructure;
-using Order.Api.Infrastructure.Data.Extensions;
+using Order.Api.Infrastructure.Data;
 using Serilog;
 using Serilog.Extensions.Hosting;
 using RabbitMQ.Client;
@@ -38,7 +39,7 @@ app.MapDefaultEndpoints();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    await app.InitialiseDatabaseAsync();
+    await app.InitialiseDatabaseAsync<OrderDbContext>();
 }
 
 // app.UseHttpsRedirection();

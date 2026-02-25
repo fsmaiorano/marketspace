@@ -1,10 +1,11 @@
 using Basket.Api.Application;
 using Basket.Api.Endpoints;
 using Basket.Api.Infrastructure;
-using Basket.Api.Infrastructure.Data.Extensions;
+using Basket.Api.Infrastructure.Data;
 using BuildingBlocks.Exceptions;
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
+using BuildingBlocks.Services;
 using BuildingBlocks.Services.Correlation;
 using MarketSpace.ServiceDefaults;
 using Serilog;
@@ -36,7 +37,7 @@ app.MapDefaultEndpoints();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    await app.InitialiseDatabaseAsync();
+    await app.InitialiseDatabaseAsync<BasketDbContext>();
 }
 
 // app.UseHttpsRedirection();

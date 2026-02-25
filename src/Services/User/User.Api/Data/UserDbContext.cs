@@ -1,9 +1,3 @@
-using BuildingBlocks.Messaging.Idempotency;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using User.Api.Data.Models;
-
 namespace User.Api.Data;
 
 public class UserDbContext : IdentityDbContext<ApplicationUser, IdentityRole, string>

@@ -1,15 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using User.Api.Data;
-using User.Api.Data.Models;
-using User.Api.Models;
-
 namespace User.Api.Services;
 
 public class JwtSettings
@@ -19,6 +7,13 @@ public class JwtSettings
     public string Audience { get; set; } = null!;
     public int AccessTokenExpirationMinutes { get; set; }
     public int RefreshTokenExpirationDays { get; set; }
+}
+
+public interface ITokenService
+{
+    Task<AuthResponse> CreateTokensAsync(ApplicationUser user, string ipAddress);
+    Task<AuthResponse?> RefreshAsync(string accessToken, string refreshToken, string ipAddress);
+    Task RevokeRefreshTokenAsync(string refreshToken, string ipAddress);
 }
 
 public class TokenService(

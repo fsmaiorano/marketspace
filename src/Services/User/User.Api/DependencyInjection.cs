@@ -1,18 +1,10 @@
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using User.Api.Data;
-using User.Api.Data.Models;
-using User.Api.Services;
-using BuildingBlocks.Messaging.Idempotency;
 
-namespace User.Api.Infrastructure;
+namespace User.Api;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services,
+    public static IServiceCollection AddServices(this IServiceCollection services,
         IConfiguration configuration)
     {
         string? connectionString = configuration.GetConnectionString("DefaultConnection");
@@ -27,6 +19,8 @@ public static class DependencyInjection
         services.AddIdempotency<UserDbContext>();
 
         services.AddHttpContextAccessor();
+
+        services.AddScoped<ITokenService, TokenService>();
 
         services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {

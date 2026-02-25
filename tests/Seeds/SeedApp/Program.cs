@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using User.Api.Data;
-using User.Api.Data.Models;
+using User.Api.Models;
 
 Console.WriteLine("===========================================");
 Console.WriteLine("MarketSpace Seed Application");

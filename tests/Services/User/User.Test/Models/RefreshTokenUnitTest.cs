@@ -1,5 +1,5 @@
 using Builder;
-using User.Api.Data.Models;
+using User.Api.Models;
 
 namespace User.Test.Models;
 

@@ -1,7 +1,6 @@
 using Bogus;
 using Microsoft.Extensions.DependencyInjection;
 using User.Api.Data;
-using User.Api.Data.Models;
 using User.Api.Models;
 using User.Api.Services;
 using User.Test.Fixtures;
