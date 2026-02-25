@@ -12,13 +12,13 @@ public static class DeleteMerchantEndpoint
                 {
                     DeleteMerchantCommand command = new(Guid.Parse(merchantId));
                     Result<DeleteMerchantResult> result = await handler.HandleAsync(command);
-                    return result.IsSuccess
-                        ? Results.Ok(result)
+                    return result is { IsSuccess: true, Data: not null }
+                        ? Results.NoContent()
                         : Results.BadRequest(result.Error);
                 })
             .WithName("DeleteMerchant")
             .WithTags("Merchant")
-            .Produces<DeleteMerchantResult>(StatusCodes.Status200OK)
+            .Produces<DeleteMerchantResult>(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
     }

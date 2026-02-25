@@ -1,4 +1,5 @@
 using Merchant.Api.Application.Merchant.GetMerchantById;
+using Merchant.Api.Endpoints.Dto;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Merchant.Api.Endpoints;
@@ -11,8 +12,17 @@ public static class GetMerchantByIdEndpoint
             {
                 GetMerchantByIdQuery query = new(id);
                 Result<GetMerchantByIdResult> result = await handler.HandleAsync(query);
-                return result.IsSuccess
-                    ? Results.Ok(result)
+                return result is { IsSuccess: true, Data: not null }
+                    ? Results.Ok(new MerchantDto()
+                    {
+                        Name = result.Data.Name,
+                        Description = result.Data.Description,
+                        Email = result.Data.Email,
+                        PhoneNumber = result.Data.PhoneNumber,
+                        Address = result.Data.Address,
+                        CreatedAt = result.Data.CreatedAt,
+                        UpdatedAt = result.Data.UpdatedAt
+                    })
                     : Results.NotFound(result.Error);
             })
             .WithName("GetMerchantById")

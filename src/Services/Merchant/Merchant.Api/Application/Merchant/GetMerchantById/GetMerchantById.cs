@@ -7,7 +7,15 @@ namespace Merchant.Api.Application.Merchant.GetMerchantById;
 
 public record GetMerchantByIdQuery(Guid Id);
 
-public record GetMerchantByIdResult(Guid Id, string Name, string Email, string PhoneNumber, string Address);
+public record GetMerchantByIdResult(
+    Guid Id,
+    string Name,
+    string Description,
+    string Email,
+    string PhoneNumber,
+    string Address,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset? UpdatedAt);
 
 public class GetMerchantById(
     IMerchantRepository repository,
@@ -33,9 +41,12 @@ public class GetMerchantById(
             GetMerchantByIdResult result = new GetMerchantByIdResult(
                 merchant.Id.Value,
                 merchant.Name,
+                merchant.Description,
                 merchant.Email.Value,
                 merchant.PhoneNumber,
-                merchant.Address);
+                merchant.Address,
+                merchant.CreatedAt,
+                merchant.UpdatedAt);
 
             return Result<GetMerchantByIdResult>.Success(result);
         }

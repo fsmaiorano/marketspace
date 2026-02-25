@@ -11,13 +11,13 @@ public static class UpdateMerchantEndpoint
                 async ([FromBody] UpdateMerchantCommand command, [FromServices] UpdateMerchant handler) =>
                 {
                     Result<UpdateMerchantResult> result = await handler.HandleAsync(command);
-                    return result.IsSuccess
-                        ? Results.Ok(result)
+                    return result is { IsSuccess: true, Data: not null }
+                        ? Results.NoContent()
                         : Results.BadRequest(result.Error);
                 })
             .WithName("UpdateMerchant")
             .WithTags("Merchant")
-            .Produces<UpdateMerchantResult>(StatusCodes.Status200OK)
+            .Produces<UpdateMerchantResult>(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
     }

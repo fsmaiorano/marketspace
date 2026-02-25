@@ -1,4 +1,5 @@
 using Merchant.Test.Fixtures;
+using System.Net;
 
 namespace Merchant.Test.Endpoints;
 
@@ -20,13 +21,11 @@ public class UpdateMerchantEndpointUnitTest(TestFixture fixture) : Base.BaseTest
         };
 
         HttpResponseMessage response = await DoPut($"/merchant", command);
-        Result<UpdateMerchantResult>? result = await response.Content.ReadFromJsonAsync<Result<UpdateMerchantResult>>();
-        
+        Assert.True(response.StatusCode.Equals(HttpStatusCode.NoContent));
+
         Context.ChangeTracker.Clear();
         MerchantEntity? updatedMerchant = await Context.Merchants.FindAsync(merchant.Id);
 
-        result?.IsSuccess.Should().BeTrue();
-        result?.Data.Should().NotBeNull();
         updatedMerchant.Should().NotBeNull();
         updatedMerchant.Name.Should().Be(command.Name);
     }

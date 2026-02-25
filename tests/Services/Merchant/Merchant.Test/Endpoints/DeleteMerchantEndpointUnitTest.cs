@@ -1,5 +1,6 @@
 using Merchant.Api.Application.Merchant.DeleteMerchant;
 using Merchant.Test.Fixtures;
+using System.Net;
 
 namespace Merchant.Test.Endpoints;
 
@@ -12,8 +13,6 @@ public class DeleteMerchantEndpointUnitTest(TestFixture fixture) : Base.BaseTest
         
         DeleteMerchantCommand command = MerchantBuilder.CreateDeleteMerchantCommandFaker(merchant.Id.Value);
         HttpResponseMessage response = await DoDelete($"/merchant/{command.Id}");
-        Result<DeleteMerchantResult>? result = await response.Content.ReadFromJsonAsync<Result<DeleteMerchantResult>>();
-        result?.IsSuccess.Should().BeTrue();
-        result?.Data.Should().NotBeNull();
+        Assert.True(response.StatusCode.Equals(HttpStatusCode.NoContent));
     }
 }
