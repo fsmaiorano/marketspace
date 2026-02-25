@@ -13,12 +13,12 @@ public static class UpdateOrderEndpoint
                 {
                     Result<UpdateOrderResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess
-                        ? Results.Ok(result)
+                        ? Results.NoContent()
                         : Results.BadRequest(result.Error);
                 })
             .WithName("UpdateOrder")
             .WithTags("Order")
-            .Produces<UpdateOrderResult>(StatusCodes.Status200OK)
+            .Produces<UpdateOrderResult>(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
     }

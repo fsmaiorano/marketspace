@@ -14,12 +14,12 @@ public static class PatchOrderStatusEndpoint
                 {
                     Result<PatchOrderStatusResult> result = await handler.HandleAsync(command);
                     return result.IsSuccess
-                        ? Results.Ok(result)
+                        ? Results.NoContent()
                         : Results.BadRequest(result.Error);
                 })
             .WithName("PatchOrderStatus")
             .WithTags("Order")
-            .Produces<PatchOrderStatusResult>(StatusCodes.Status200OK)
+            .Produces<PatchOrderStatusResult>(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
     }

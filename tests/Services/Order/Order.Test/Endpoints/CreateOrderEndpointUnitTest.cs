@@ -1,5 +1,5 @@
-using Order.Test.Base;
 using Order.Test.Fixtures;
+using System.Net;
 
 namespace Order.Test.Endpoints;
 
@@ -10,8 +10,6 @@ public class CreateOrderEndpointUnitTest(TestFixture fixture) : Base.BaseTest(fi
     {
         CreateOrderCommand command = OrderBuilder.CreateCreateOrderCommandFaker().Generate();
         HttpResponseMessage response = await DoPost("/order", command);
-        Result<CreateOrderResult>? result = await response.Content.ReadFromJsonAsync<Result<CreateOrderResult>>();
-        result?.IsSuccess.Should().BeTrue();
-        result?.Data.Should().NotBeNull();
+        Assert.True(response.StatusCode.Equals(HttpStatusCode.Created));
     }
 }

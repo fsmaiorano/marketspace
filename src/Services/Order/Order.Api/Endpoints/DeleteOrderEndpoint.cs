@@ -11,15 +11,15 @@ public static class DeleteOrderEndpoint
         app.MapDelete("/order/{id}",
                 async ([FromRoute] string id, [FromServices] DeleteOrder handler) =>
                 {
-                    DeleteOrderCommand command = new (Guid.Parse(id));
+                    DeleteOrderCommand command = new(Guid.Parse(id));
                     Result<DeleteOrderResult> result = await handler.HandleAsync(command);
-                    return result.IsSuccess
-                        ? Results.Ok(result)
-                        : Results.BadRequest(result.Error);
+                    return result is { IsSuccess: true, Data: not null }
+                        ? Results.NoContent()
+                        : Results.BadRequest(result.Error ?? "Unknown error");
                 })
             .WithName("DeleteOrder")
             .WithTags("Order")
-            .Produces<DeleteOrderResult>(StatusCodes.Status200OK)
+            .Produces<DeleteOrderResult>(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
     }

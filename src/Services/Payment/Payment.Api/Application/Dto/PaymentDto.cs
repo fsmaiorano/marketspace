@@ -11,6 +11,6 @@ public class PaymentDto
     public string Provider { get; init; } = string.Empty;
     public string? ProviderTransactionId { get; init; }
     public string? AuthorizationCode { get; init; }
-    public DateTime CreatedAt { get; init; }
-    public DateTime? LastModifiedAt { get; init; }
+    public DateTimeOffset CreatedAt { get; init; }
+    public DateTimeOffset? LastModifiedAt { get; init; }
 }

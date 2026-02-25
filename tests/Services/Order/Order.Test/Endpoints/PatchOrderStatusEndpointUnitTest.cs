@@ -1,5 +1,6 @@
 using Order.Api.Application.Order.PatchOrderStatus;
 using Order.Test.Fixtures;
+using System.Net;
 
 namespace Order.Test.Endpoints;
 
@@ -13,14 +14,12 @@ public class PatchOrderStatusEndpointUnitTest(TestFixture fixture) : Base.BaseTe
         PatchOrderStatusCommand command = OrderBuilder.CreatePatchOrderStatusCommandFaker(order.Id.Value).Generate();
 
         HttpResponseMessage response = await DoPatch("/order/status", command);
-        Result<PatchOrderStatusResult>? result = await response.Content.ReadFromJsonAsync<Result<PatchOrderStatusResult>>();
+        Assert.True(response.StatusCode.Equals(HttpStatusCode.NoContent));
 
         OrderEntity? updatedOrder = await Context.Orders
             .AsNoTracking()
             .FirstOrDefaultAsync(o => o.Id == order.Id);
-            
-        result?.IsSuccess.Should().BeTrue();
-        result?.Data.Should().NotBeNull();
+
         updatedOrder?.Status.Should().Be(command.Status);
     }
 }

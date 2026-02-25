@@ -2,9 +2,9 @@ using BuildingBlocks;
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Messaging.IntegrationEvents;
 using BuildingBlocks.Messaging.IntegrationEvents.Interfaces;
-using Order.Api.Application.Dto;
 using Order.Api.Application.Order.CreateOrder;
 using Order.Api.Domain.Enums;
+using Order.Api.Endpoints.Dto;
 
 namespace Order.Api.Application.Subscribers;
 

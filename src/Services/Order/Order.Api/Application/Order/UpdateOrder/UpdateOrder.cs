@@ -1,11 +1,11 @@
 using BuildingBlocks;
 using BuildingBlocks.Loggers;
-using Order.Api.Application.Dto;
 using Order.Api.Application.Extensions;
 using Order.Api.Domain.Entities;
 using Order.Api.Domain.Enums;
 using Order.Api.Domain.Repositories;
 using Order.Api.Domain.ValueObjects;
+using Order.Api.Endpoints.Dto;
 
 namespace Order.Api.Application.Order.UpdateOrder;
 

@@ -1,6 +1,6 @@
-using Order.Api.Application.Dto;
 using Order.Api.Domain.Entities;
 using Order.Api.Domain.ValueObjects;
+using Order.Api.Endpoints.Dto;
 
 namespace Order.Api.Application.Extensions;
 

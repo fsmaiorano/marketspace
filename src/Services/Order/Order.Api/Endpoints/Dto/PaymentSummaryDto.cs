@@ -1,4 +1,4 @@
-namespace Order.Api.Application.Dto;
+namespace Order.Api.Endpoints.Dto;
 
 public class PaymentSummaryDto
 {
