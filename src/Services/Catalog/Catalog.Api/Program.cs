@@ -1,11 +1,12 @@
 using BuildingBlocks.Exceptions;
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
+using BuildingBlocks.Services;
 using BuildingBlocks.Services.Correlation;
 using Catalog.Api.Application;
 using Catalog.Api.Endpoints;
 using Catalog.Api.Infrastructure;
-using Catalog.Api.Infrastructure.Data.Extensions;
+using Catalog.Api.Infrastructure.Data;
 using MarketSpace.ServiceDefaults;
 using Serilog;
 using Serilog.Extensions.Hosting;
@@ -38,7 +39,7 @@ app.MapDefaultEndpoints();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    await app.InitialiseDatabaseAsync();
+    await app.InitialiseDatabaseAsync<CatalogDbContext>();
 }
 
 // app.UseHttpsRedirection();

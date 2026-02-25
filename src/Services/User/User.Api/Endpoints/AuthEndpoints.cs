@@ -1,12 +1,3 @@
-using System.Security.Claims;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Primitives;
-using User.Api.Data;
-using User.Api.Data.Models;
-using User.Api.Models;
-using User.Api.Services;
-
 namespace User.Api.Endpoints;
 
 public static class AuthEndpoints
