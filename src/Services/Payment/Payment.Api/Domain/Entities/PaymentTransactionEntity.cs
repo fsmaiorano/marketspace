@@ -7,7 +7,7 @@ namespace Payment.Api.Domain.Entities;
 
 public class PaymentTransactionEntity : Entity<PaymentTransactionId>
 {
-    public PaymentId PaymentId { get; private set; }
+    public PaymentId? PaymentId { get; private set; }
 
     public PaymentTransactionTypeEnum Type { get; private set; }
     public decimal Amount { get; private set; }

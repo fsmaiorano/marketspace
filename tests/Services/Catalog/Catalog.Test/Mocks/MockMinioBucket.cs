@@ -15,7 +15,7 @@ public class MockMinioBucket : IMinioBucket
 
     public Task<string?> GetImageAsync(string imageName)
     {
-        return Task.FromResult($"https://mock-minio-catalog.test/{imageName}");
+        return Task.FromResult<string?>("https://mock-minio-catalog.test/" + imageName);
     }
 
     public Task<string> GetImageToDownload(string imageName)

@@ -6,6 +6,7 @@ using Payment.Api.Domain.Repositories;
 
 namespace Payment.Api.Application.BackgroundService;
 
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CS9107")]
 public class PaymentProcessingBackgroundService(
     IAppLogger<PaymentProcessingBackgroundService> logger,
     IServiceProvider serviceProvider)

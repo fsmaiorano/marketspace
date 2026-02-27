@@ -21,13 +21,5 @@ global using System.Net.Http.Json;
 // Global using directives
 
 global using Catalog.Api;
-global using Catalog.Api.Infrastructure.Data;
-global using Microsoft.AspNetCore.Hosting;
-global using Microsoft.AspNetCore.Mvc.Testing;
-global using Microsoft.EntityFrameworkCore;
-global using Microsoft.Extensions.DependencyInjection;
-global using Moq;
 global using Xunit;
-
-
 

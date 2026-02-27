@@ -18,7 +18,7 @@ builder.AddServiceDefaults();
 builder.Services.AddOpenApi();
 
 builder.Services
-    .AddApplicationServices(builder.Configuration)
+    .AddApplicationServices()
     .AddInfrastructureServices(builder.Configuration)
     .AddCustomLoggers();
 

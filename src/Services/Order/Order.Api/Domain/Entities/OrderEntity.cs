@@ -32,7 +32,7 @@ public class OrderEntity : Aggregate<OrderId>
                 CalculateAndSetTotalAmount();
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             throw;
         }

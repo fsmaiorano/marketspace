@@ -18,13 +18,6 @@ global using System.Net.Http.Json;
 // Global using directives
 
 global using Merchant.Api;
-global using Merchant.Api.Infrastructure.Data;
-global using Merchant.Api.Domain.Entities;
-global using Microsoft.AspNetCore.Hosting;
-global using Microsoft.AspNetCore.Mvc.Testing;
-global using Microsoft.EntityFrameworkCore;
-global using Microsoft.Extensions.DependencyInjection;
-global using Moq;
 global using Xunit;
 
 global using BuildingBlocks.Loggers;

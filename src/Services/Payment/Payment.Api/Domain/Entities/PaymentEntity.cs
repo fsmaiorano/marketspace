@@ -11,13 +11,13 @@ public class PaymentEntity : Aggregate<PaymentId>
     public Guid OrderId { get; private set; }
 
     public decimal Amount { get; private set; }
-    public string Currency { get; private set; }
+    public string? Currency { get; private set; }
 
     public PaymentStatusEnum Status { get; private set; }
     public string? StatusDetail { get; private set; }
 
-    public PaymentMethod Method { get; private set; }
-    public string Provider { get; private set; }
+    public PaymentMethod? Method { get; private set; }
+    public string? Provider { get; private set; }
 
     public string? ProviderTransactionId { get; private set; }
     public string? AuthorizationCode { get; private set; }
@@ -28,10 +28,6 @@ public class PaymentEntity : Aggregate<PaymentId>
     public ICollection<PaymentTransactionEntity> Transactions { get; private set; } = [];
 
     public RiskAnalysisEntity? RiskAnalysis { get; private set; }
-
-    public PaymentEntity()
-    {
-    }
 
     [JsonConstructor]
     public PaymentEntity(PaymentId id, Guid orderId, decimal amount, string currency, 
@@ -53,6 +49,11 @@ public class PaymentEntity : Aggregate<PaymentId>
         Attempts = attempts ?? [];
         Transactions = transactions ?? [];
         RiskAnalysis = riskAnalysis;
+    }
+
+    private PaymentEntity()
+    {
+        
     }
 
     public static PaymentEntity Create(Guid orderId, decimal amount, string currency, PaymentMethod method,
