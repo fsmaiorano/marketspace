@@ -51,13 +51,23 @@ while (!exit)
     switch (choice)
     {
         case "1":
-            await RunDirectDbModeAsync();
+            Console.Write("Quantos registros devem ser criados? [1]: ");
+            string? input = Console.ReadLine()?.Trim();
+            int recordsToCreate = 1;
+            if (!string.IsNullOrEmpty(input) && int.TryParse(input, out int n) && n > 0)
+                recordsToCreate = n;
+            await RunDirectDbModeAsync(recordsToCreate);
             break;
         case "2":
             await RunBffHttpModeAsync();
             break;
         case "3":
-            await RunDirectDbModeAsync();
+            Console.Write("Quantos registros devem ser criados? [1]: ");
+            input = Console.ReadLine()?.Trim();
+            recordsToCreate = 1;
+            if (!string.IsNullOrEmpty(input) && int.TryParse(input, out n) && n > 0)
+                recordsToCreate = n;
+            await RunDirectDbModeAsync(recordsToCreate);
             await RunBffHttpModeAsync();
             break;
         case "0":
@@ -72,7 +82,7 @@ while (!exit)
 Console.WriteLine("Simulador encerrado. Até logo!");
 
 // ── MODO 1 – Acesso direto ao banco ────────────────────────────────────────
-async Task RunDirectDbModeAsync()
+async Task RunDirectDbModeAsync(int recordsToCreate)
 {
     Console.WriteLine("===========================================");
     Console.WriteLine(" MODO 1 – Acesso Direto ao Banco");
@@ -106,94 +116,100 @@ async Task RunDirectDbModeAsync()
     await userDbContext.Database.EnsureCreatedAsync();
     Console.WriteLine("Schemas OK.");
 
-    // Usuário alvo
-    ApplicationUser? user = await userDbContext.Users
-        .FirstOrDefaultAsync(u => u.UserName == targetUserEmail);
-
-    if (user is null)
+    for (int i = 0; i < recordsToCreate; i++)
     {
-        Console.WriteLine("Criando usuário padrão...");
-        user = new ApplicationUser
+        string uniqueUsername = $"user{i+1}";
+        string uniqueEmail = $"user{i+1}@example.com";
+
+        // Usuário alvo
+        ApplicationUser? user = await userDbContext.Users
+            .FirstOrDefaultAsync(u => u.UserName == uniqueUsername);
+
+        if (user is null)
         {
-            UserName       = "user",
-            Email          = targetUserEmail,
-            EmailConfirmed = true,
-            PasswordHash   = "Password123!",
-            FirstName      = faker.Person.FirstName,
-            LastName       = faker.Person.LastName
-        };
-        await userDbContext.Users.AddAsync(user);
-        await userDbContext.SaveChangesAsync();
-    }
-    else
-    {
-        // Sempre atualiza nome para variar
-        user.FirstName = faker.Person.FirstName;
-        user.LastName  = faker.Person.LastName;
-        await userDbContext.SaveChangesAsync();
-    }
-
-    Console.WriteLine($"✅ Usuário: {user.FirstName} {user.LastName} ({user.Email})");
-
-    // Carrinho
-    ShoppingCartEntity? cart = await basketDbContext.ShoppingCarts
-        .FirstOrDefaultAsync(sc => sc.Username == user.UserName);
-
-    List<CatalogEntity> catalogItems = await catalogDbContext.Catalogs
-        .OrderBy(_ => Guid.NewGuid()) // pega itens aleatórios
-        .Take(faker.Random.Int(1, 5))
-        .ToListAsync();
-
-    if (cart is null)
-    {
-        if (catalogItems.Count == 0)
+            Console.WriteLine("Criando usuário padrão...");
+            user = new ApplicationUser
+            {
+                UserName       = uniqueUsername,
+                Email          = uniqueEmail,
+                EmailConfirmed = true,
+                PasswordHash   = "Password123!",
+                FirstName      = faker.Person.FirstName,
+                LastName       = faker.Person.LastName
+            };
+            await userDbContext.Users.AddAsync(user);
+            await userDbContext.SaveChangesAsync();
+        }
+        else
         {
-            Console.WriteLine("⚠️  Nenhum item no catálogo. Não é possível criar carrinho.");
-            return;
+            // Sempre atualiza nome para variar
+            user.FirstName = faker.Person.FirstName;
+            user.LastName  = faker.Person.LastName;
+            await userDbContext.SaveChangesAsync();
         }
 
-        cart = new ShoppingCartEntity
-        {
-            Username = user.UserName!,
-            Items    = catalogItems.Select(c => new ShoppingCartItemEntity
-            {
-                ProductId   = c.Id.Value.ToString(),
-                ProductName = c.Name,
-                Price       = c.Price.Value,
-                Quantity    = faker.Random.Int(1, 4)
-            }).ToList()
-        };
-        basketDbContext.ShoppingCarts.Add(cart);
-        await basketDbContext.SaveChangesAsync();
-        Console.WriteLine($"✅ Carrinho criado com {cart.Items.Count} item(s).");
-    }
-    else
-    {
-        // Varia as quantidades
-        foreach (ShoppingCartItemEntity item in cart.Items)
-            item.Quantity = faker.Random.Int(1, 4);
+        Console.WriteLine($"✅ Usuário: {user.FirstName} {user.LastName} ({user.Email})");
 
-        // Adiciona itens novos aleatoriamente
-        foreach (CatalogEntity newItem in catalogItems.Where(c =>
-            cart.Items.All(i => i.ProductId != c.Id.Value.ToString())))
+        // Carrinho
+        ShoppingCartEntity? cart = await basketDbContext.ShoppingCarts
+            .FirstOrDefaultAsync(sc => sc.Username == uniqueUsername);
+
+        List<CatalogEntity> catalogItems = await catalogDbContext.Catalogs
+            .OrderBy(_ => Guid.NewGuid()) // pega itens aleatórios
+            .Take(faker.Random.Int(1, 5))
+            .ToListAsync();
+
+        if (cart is null)
         {
-            cart.Items.Add(new ShoppingCartItemEntity
+            if (catalogItems.Count == 0)
             {
-                ProductId   = newItem.Id.Value.ToString(),
-                ProductName = newItem.Name,
-                Price       = newItem.Price.Value,
-                Quantity    = faker.Random.Int(1, 3)
-            });
+                Console.WriteLine("⚠️  Nenhum item no catálogo. Não é possível criar carrinho.");
+                continue;
+            }
+
+            cart = new ShoppingCartEntity
+            {
+                Username = uniqueUsername,
+                Items    = catalogItems.Select(c => new ShoppingCartItemEntity
+                {
+                    ProductId   = c.Id.Value.ToString(),
+                    ProductName = c.Name,
+                    Price       = c.Price.Value,
+                    Quantity    = faker.Random.Int(1, 4)
+                }).ToList()
+            };
+            basketDbContext.ShoppingCarts.Add(cart);
+            await basketDbContext.SaveChangesAsync();
+            Console.WriteLine($"✅ Carrinho criado com {cart.Items.Count} item(s).");
+        }
+        else
+        {
+            // Varia as quantidades
+            foreach (ShoppingCartItemEntity item in cart.Items)
+                item.Quantity = faker.Random.Int(1, 4);
+
+            // Adiciona itens novos aleatoriamente
+            foreach (CatalogEntity newItem in catalogItems.Where(c =>
+                cart.Items.All(i => i.ProductId != c.Id.Value.ToString())))
+            {
+                cart.Items.Add(new ShoppingCartItemEntity
+                {
+                    ProductId   = newItem.Id.Value.ToString(),
+                    ProductName = newItem.Name,
+                    Price       = newItem.Price.Value,
+                    Quantity    = faker.Random.Int(1, 3)
+                });
+            }
+
+            await basketDbContext.SaveChangesAsync();
+            Console.WriteLine($"✅ Carrinho atualizado com {cart.Items.Count} item(s).");
         }
 
-        await basketDbContext.SaveChangesAsync();
-        Console.WriteLine($"✅ Carrinho atualizado com {cart.Items.Count} item(s).");
+        PrintCartSummary(cart);
+
+        Console.WriteLine("\n🚀 Executando checkout via Basket API...");
+        await DoCheckoutAsync(cart, user, faker, basketApiBaseUrl);
     }
-
-    PrintCartSummary(cart);
-
-    Console.WriteLine("\n🚀 Executando checkout via Basket API...");
-    await DoCheckoutAsync(cart, user, faker, basketApiBaseUrl);
 
     Console.WriteLine("\n✅ Modo Direto ao Banco concluído.");
 }
@@ -275,7 +291,8 @@ static async Task DoCheckoutAsync(
 {
     try
     {
-        using HttpClient http = new() { BaseAddress = new Uri(baseUrl) };
+        using HttpClient http = new();
+        http.BaseAddress = new Uri(baseUrl);
         http.DefaultRequestHeaders.Add("Accept", "application/json");
 
         var payload = new
