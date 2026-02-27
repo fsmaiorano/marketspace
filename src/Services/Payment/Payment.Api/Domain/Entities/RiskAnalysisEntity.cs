@@ -7,7 +7,7 @@ namespace Payment.Api.Domain.Entities;
 
 public class RiskAnalysisEntity : Entity<RiskAnalysisId>
 {
-    public PaymentId PaymentId { get; private set; }
+    public PaymentId? PaymentId { get; private set; }
 
     public string? IpAddress { get; private set; }
     public string? Country { get; private set; }

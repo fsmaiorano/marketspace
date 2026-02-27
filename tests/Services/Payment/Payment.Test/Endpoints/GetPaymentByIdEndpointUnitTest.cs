@@ -17,7 +17,7 @@ public class GetPaymentByIdEndpointUnitTest(TestFixture fixture) : Base.BaseTest
         
         result.Should().NotBeNull();
         result!.IsSuccess.Should().BeTrue();
-        result.Data.Payment.Id.Should().Be(payment.Id.Value);
+        result.Data!.Payment.Id.Should().Be(payment.Id.Value);
     }
 
     [Fact]

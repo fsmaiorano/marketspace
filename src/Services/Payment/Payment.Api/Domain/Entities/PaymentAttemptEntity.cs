@@ -17,10 +17,6 @@ public class PaymentAttemptEntity : Entity<PaymentAttemptId>
     public string? ResponseCode { get; private set; }
     public string? ResponseMessage { get; private set; }
 
-    public PaymentAttemptEntity()
-    {
-    }
-
     [JsonConstructor]
     public PaymentAttemptEntity(PaymentAttemptId id, PaymentId paymentId, int attemptNumber, 
         PaymentAttemptStatus status, string? statusDetail, string? providerTransactionId,

@@ -10,8 +10,6 @@ public class CheckoutData
     public CheckoutPayment? Payment { get; private set; }
     public string? CorrelationId { get; private set; }
 
-    private CheckoutData() { }
-
     [JsonConstructor]
     public CheckoutData(Guid customerId, string userName, CheckoutAddress? address, CheckoutPayment? payment,
         string? correlationId)

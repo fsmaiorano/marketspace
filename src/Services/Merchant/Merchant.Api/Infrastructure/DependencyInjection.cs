@@ -14,9 +14,7 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services,
         IConfiguration configuration)
     {
-        // Try Aspire naming first (merchantdb), then fallback to default (Database)
-        string connectionString = configuration.GetConnectionString("merchantdb")
-                                  ?? configuration.GetConnectionString("Database")
+        string connectionString = configuration.GetConnectionString("Database")
                                   ?? throw new InvalidOperationException(
                                       "Database connection string is not configured.");
 
@@ -27,7 +25,8 @@ public static class DependencyInjection
         services.AddDbContext<MerchantDbContext>((serviceProvider, options) =>
         {
             options.AddInterceptors(serviceProvider.GetRequiredService<ISaveChangesInterceptor>());
-            options.AddInterceptors(serviceProvider.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>());
+            options.AddInterceptors(
+                serviceProvider.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>());
             options.UseNpgsql(connectionString);
             options.ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
         });

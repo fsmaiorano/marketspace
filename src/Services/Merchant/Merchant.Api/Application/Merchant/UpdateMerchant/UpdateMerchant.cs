@@ -42,7 +42,7 @@ public sealed class UpdateMerchant(
                 command.Description,
                 command.Address,
                 command.PhoneNumber,
-                Email.Of(command.Email));
+                Email.Of(command.Email ?? string.Empty));
 
             await repository.UpdateAsync(merchantEntity);
             

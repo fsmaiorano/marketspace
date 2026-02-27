@@ -9,6 +9,6 @@ public class CatalogDto
     public string ImageUrl { get; set; } = string.Empty;
     public decimal Price { get; set; } = 0.0m;
     public Guid MerchantId { get; set; } = Guid.Empty;
-    public new DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
 }
