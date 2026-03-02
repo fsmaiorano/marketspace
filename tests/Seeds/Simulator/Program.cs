@@ -15,9 +15,9 @@ Console.WriteLine();
 // ======================================
 // CONFIGURATION
 // ======================================
-const string targetUserEmail    = "user@example.com";
-const string bffBaseUrl         = "http://localhost:5000"; // ajuste para a porta do seu BFF
-const string basketApiBaseUrl   = "http://localhost:5001";
+const string targetUserEmail = "user@example.com";
+const string bffBaseUrl = "http://localhost:5000"; // ajuste para a porta do seu BFF
+const string basketApiBaseUrl = "http://localhost:5001";
 
 const string merchantConnectionString =
     "Server=localhost;Port=5436;Database=MerchantDb;User Id=postgres;Password=postgres;Include Error Detail=true";
@@ -28,7 +28,7 @@ const string basketConnectionString =
 const string userConnectionString =
     "Server=localhost;Port=5437;Database=UserDb;User Id=postgres;Password=postgres;Include Error Detail=true";
 
-const string minioEndpoint  = "localhost:9000";
+const string minioEndpoint = "localhost:9000";
 const string minioAccessKey = "admin";
 const string minioSecretKey = "admin123";
 // ======================================
@@ -92,10 +92,10 @@ async Task RunDirectDbModeAsync(int recordsToCreate)
 
     MarketSpaceSimulatorFactory factory = new(
         merchantConnectionString: merchantConnectionString,
-        catalogConnectionString:  catalogConnectionString,
-        basketConnectionString:   basketConnectionString,
-        userConnectionString:     userConnectionString,
-        minioEndpoint:  minioEndpoint,
+        catalogConnectionString: catalogConnectionString,
+        basketConnectionString: basketConnectionString,
+        userConnectionString: userConnectionString,
+        minioEndpoint: minioEndpoint,
         minioAccessKey: minioAccessKey,
         minioSecretKey: minioSecretKey
     );
@@ -104,10 +104,10 @@ async Task RunDirectDbModeAsync(int recordsToCreate)
     using IServiceScope scope = scopeFactory.CreateScope();
 
     MerchantDbContext merchantDbContext = scope.ServiceProvider.GetRequiredService<MerchantDbContext>();
-    CatalogDbContext  catalogDbContext  = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
-    BasketDbContext   basketDbContext   = scope.ServiceProvider.GetRequiredService<BasketDbContext>();
-    UserDbContext     userDbContext     = scope.ServiceProvider.GetRequiredService<UserDbContext>();
-    IMinioBucket      minioBucket       = scope.ServiceProvider.GetRequiredService<IMinioBucket>();
+    CatalogDbContext catalogDbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
+    BasketDbContext basketDbContext = scope.ServiceProvider.GetRequiredService<BasketDbContext>();
+    UserDbContext userDbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+    IMinioBucket minioBucket = scope.ServiceProvider.GetRequiredService<IMinioBucket>();
 
     Console.WriteLine("Creating schemas...");
     await merchantDbContext.Database.EnsureCreatedAsync();
@@ -119,10 +119,9 @@ async Task RunDirectDbModeAsync(int recordsToCreate)
     for (int i = 0; i < recordsToCreate; i++)
     {
         // Diversified user data
-        string firstName = faker.Name.FirstName();
-        string lastName = faker.Name.LastName();
-        string uniqueUsername = faker.Internet.UserName(firstName, lastName) + faker.Random.Number(1000,9999);
-        string uniqueEmail = faker.Internet.Email(firstName, lastName);
+        string name = faker.Name.FullName();
+        string uniqueUsername = faker.Internet.UserName(name) + faker.Random.Number(1000, 9999);
+        string uniqueEmail = faker.Internet.Email(name);
 
         // Target user
         ApplicationUser? user = await userDbContext.Users
@@ -133,12 +132,11 @@ async Task RunDirectDbModeAsync(int recordsToCreate)
             Console.WriteLine("Creating default user...");
             user = new ApplicationUser
             {
-                UserName       = uniqueUsername,
-                Email          = uniqueEmail,
+                UserName = uniqueUsername,
+                Email = uniqueEmail,
                 EmailConfirmed = true,
-                PasswordHash   = "Password123!",
-                FirstName      = firstName,
-                LastName       = lastName
+                PasswordHash = "Password123!",
+                Name = name,
             };
             await userDbContext.Users.AddAsync(user);
             await userDbContext.SaveChangesAsync();
@@ -146,12 +144,11 @@ async Task RunDirectDbModeAsync(int recordsToCreate)
         else
         {
             // Always update name to vary
-            user.FirstName = faker.Name.FirstName();
-            user.LastName  = faker.Name.LastName();
+            user.Name = faker.Name.FullName();
             await userDbContext.SaveChangesAsync();
         }
 
-        Console.WriteLine($"✅ User: {user.FirstName} {user.LastName} ({user.Email})");
+        Console.WriteLine($"✅ User: {user.Name} ({user.Email})");
 
         // Cart
         ShoppingCartEntity? cart = await basketDbContext.ShoppingCarts
@@ -174,12 +171,12 @@ async Task RunDirectDbModeAsync(int recordsToCreate)
             cart = new ShoppingCartEntity
             {
                 Username = uniqueUsername,
-                Items    = catalogItems.Select(c => new ShoppingCartItemEntity
+                Items = catalogItems.Select(c => new ShoppingCartItemEntity
                 {
-                    ProductId   = c.Id.Value.ToString(),
+                    ProductId = c.Id.Value.ToString(),
                     ProductName = faker.Commerce.ProductName(),
-                    Price       = faker.Random.Decimal(10, 1000),
-                    Quantity    = faker.Random.Int(1, 4)
+                    Price = faker.Random.Decimal(10, 1000),
+                    Quantity = faker.Random.Int(1, 4)
                 }).ToList()
             };
             basketDbContext.ShoppingCarts.Add(cart);
@@ -198,14 +195,14 @@ async Task RunDirectDbModeAsync(int recordsToCreate)
 
             // Add new items randomly
             foreach (CatalogEntity newItem in catalogItems.Where(c =>
-                cart.Items.All(i => i.ProductId != c.Id.Value.ToString())))
+                         cart.Items.All(i => i.ProductId != c.Id.Value.ToString())))
             {
                 cart.Items.Add(new ShoppingCartItemEntity
                 {
-                    ProductId   = newItem.Id.Value.ToString(),
+                    ProductId = newItem.Id.Value.ToString(),
                     ProductName = faker.Commerce.ProductName(),
-                    Price       = faker.Random.Decimal(10, 1000),
-                    Quantity    = faker.Random.Int(1, 3)
+                    Price = faker.Random.Decimal(10, 1000),
+                    Quantity = faker.Random.Int(1, 3)
                 });
             }
 
@@ -219,14 +216,14 @@ async Task RunDirectDbModeAsync(int recordsToCreate)
         var checkoutAddress = new
         {
             AddressLine = faker.Address.StreetAddress(),
-            Country     = faker.Address.Country(),
-            State       = faker.Address.State(),
-            ZipCode     = faker.Address.ZipCode(),
-            CardName    = $"{user.FirstName} {user.LastName}",
-            CardNumber  = faker.Finance.CreditCardNumber(),
-            Expiration  = faker.Date.Future(2).ToString("MM/yy"),
-            Cvv         = faker.Finance.CreditCardCvv(),
-            PaymentMethod = faker.PickRandom(new[] {1, 2, 3}),
+            Country = faker.Address.Country(),
+            State = faker.Address.State(),
+            ZipCode = faker.Address.ZipCode(),
+            CardName = $"{user.Name}",
+            CardNumber = faker.Finance.CreditCardNumber(),
+            Expiration = faker.Date.Future(2).ToString("MM/yy"),
+            Cvv = faker.Finance.CreditCardCvv(),
+            PaymentMethod = faker.PickRandom(new[] { 1, 2, 3 }),
             Coordinates = $"{faker.Address.Latitude()},{faker.Address.Longitude()}"
         };
 
@@ -270,9 +267,9 @@ async Task RunBffHttpModeAsync()
     Console.WriteLine($"   {products.Count} produto(s) encontrado(s).");
 
     // 3. Add items to cart
-    string username     = targetUserEmail.Split('@')[0];
-    int    itemsToAdd   = faker.Random.Int(1, Math.Min(products.Count, 4));
-    var    selectedItems = faker.PickRandom(products, itemsToAdd).ToList();
+    string username = targetUserEmail.Split('@')[0];
+    int itemsToAdd = faker.Random.Int(1, Math.Min(products.Count, 4));
+    var selectedItems = faker.PickRandom(products, itemsToAdd).ToList();
 
     Console.WriteLine($"\n🛒 Adicionando {selectedItems.Count} item(s) ao carrinho...");
     foreach (BffCatalogItem item in selectedItems)
@@ -308,10 +305,10 @@ static void PrintCartSummary(ShoppingCartEntity cart)
 
 static async Task DoCheckoutAsync(
     ShoppingCartEntity cart,
-    ApplicationUser    user,
-    Faker              faker,
-    string             baseUrl,
-    dynamic            checkoutAddress)
+    ApplicationUser user,
+    Faker faker,
+    string baseUrl,
+    dynamic checkoutAddress)
 {
     try
     {
@@ -321,23 +318,22 @@ static async Task DoCheckoutAsync(
 
         var payload = new
         {
-            UserName      = cart.Username,
-            CustomerId    = user.Id,
-            TotalPrice    = cart.TotalPrice,
-            FirstName     = user.FirstName  ?? faker.Person.FirstName,
-            LastName      = user.LastName   ?? faker.Person.LastName,
-            EmailAddress  = user.Email,
-            AddressLine   = checkoutAddress.AddressLine,
-            Country       = checkoutAddress.Country,
-            State         = checkoutAddress.State,
-            ZipCode       = checkoutAddress.ZipCode,
-            CardName      = checkoutAddress.CardName,
-            CardNumber    = checkoutAddress.CardNumber,
-            Expiration    = checkoutAddress.Expiration,
-            Cvv           = checkoutAddress.Cvv,
+            UserName = cart.Username,
+            CustomerId = user.Id,
+            TotalPrice = cart.TotalPrice,
+            FirstName = user.Name ?? faker.Person.FullName,
+            EmailAddress = user.Email,
+            AddressLine = checkoutAddress.AddressLine,
+            Country = checkoutAddress.Country,
+            State = checkoutAddress.State,
+            ZipCode = checkoutAddress.ZipCode,
+            CardName = checkoutAddress.CardName,
+            CardNumber = checkoutAddress.CardNumber,
+            Expiration = checkoutAddress.Expiration,
+            Cvv = checkoutAddress.Cvv,
             PaymentMethod = checkoutAddress.PaymentMethod,
-            RequestId     = Guid.NewGuid().ToString(),
-            Coordinates   = checkoutAddress.Coordinates
+            RequestId = Guid.NewGuid().ToString(),
+            Coordinates = checkoutAddress.Coordinates
         };
 
         HttpResponseMessage response = await http.PostAsJsonAsync("/basket/checkout", payload);
@@ -378,8 +374,8 @@ static async Task<string?> BffLoginAsync(HttpClient http, Faker faker)
 
         using JsonDocument doc = JsonDocument.Parse(await res.Content.ReadAsStringAsync());
         // Tenta as chaves mais comuns; ajuste se necessário
-        if (doc.RootElement.TryGetProperty("token",        out JsonElement t)) return t.GetString();
-        if (doc.RootElement.TryGetProperty("accessToken",  out JsonElement a)) return a.GetString();
+        if (doc.RootElement.TryGetProperty("token", out JsonElement t)) return t.GetString();
+        if (doc.RootElement.TryGetProperty("accessToken", out JsonElement a)) return a.GetString();
         if (doc.RootElement.TryGetProperty("access_token", out JsonElement b)) return b.GetString();
 
         Console.WriteLine("   ⚠️  Token não encontrado na resposta de login.");
@@ -409,17 +405,21 @@ static async Task<List<BffCatalogItem>> BffGetCatalogAsync(HttpClient http)
 
         // Suporta tanto array direto quanto objeto com propriedade "items"/"data"/"products"
         JsonElement root = doc.RootElement;
-        JsonElement arr  = root.ValueKind == JsonValueKind.Array
+        JsonElement arr = root.ValueKind == JsonValueKind.Array
             ? root
-            : root.TryGetProperty("items",    out JsonElement i1) ? i1 :
-              root.TryGetProperty("data",     out JsonElement i2) ? i2 :
-              root.TryGetProperty("products", out JsonElement i3) ? i3 : root;
+            : root.TryGetProperty("items", out JsonElement i1)
+                ? i1
+                : root.TryGetProperty("data", out JsonElement i2)
+                    ? i2
+                    : root.TryGetProperty("products", out JsonElement i3)
+                        ? i3
+                        : root;
 
         return arr.EnumerateArray().Select(e => new BffCatalogItem
         {
-            Id    = e.TryGetProperty("id",    out JsonElement id)    ? id.ToString()           : Guid.NewGuid().ToString(),
-            Name  = e.TryGetProperty("name",  out JsonElement nm)    ? nm.GetString() ?? "?"   : "?",
-            Price = e.TryGetProperty("price", out JsonElement pr)    ? pr.GetDecimal()         : 0m
+            Id = e.TryGetProperty("id", out JsonElement id) ? id.ToString() : Guid.NewGuid().ToString(),
+            Name = e.TryGetProperty("name", out JsonElement nm) ? nm.GetString() ?? "?" : "?",
+            Price = e.TryGetProperty("price", out JsonElement pr) ? pr.GetDecimal() : 0m
         }).ToList();
     }
     catch (Exception ex)
@@ -431,26 +431,17 @@ static async Task<List<BffCatalogItem>> BffGetCatalogAsync(HttpClient http)
 
 /// <summary>POST /basket  →  adiciona item ao carrinho (ajuste o endpoint conforme seu BFF)</summary>
 static async Task<bool> BffAddToBasketAsync(
-    HttpClient     http,
-    string         username,
+    HttpClient http,
+    string username,
     BffCatalogItem item,
-    int            quantity)
+    int quantity)
 {
     try
     {
         var body = new
         {
             username,
-            items = new[]
-            {
-                new
-                {
-                    productId   = item.Id,
-                    productName = item.Name,
-                    price       = item.Price,
-                    quantity
-                }
-            }
+            items = new[] { new { productId = item.Id, productName = item.Name, price = item.Price, quantity } }
         };
 
         HttpResponseMessage res = await http.PostAsJsonAsync("/basket", body);
@@ -469,30 +460,30 @@ static async Task<bool> BffCheckoutAsync(HttpClient http, string username, Faker
     {
         var body = new
         {
-            userName     = username,
-            firstName    = faker.Person.FirstName,
-            lastName     = faker.Person.LastName,
+            userName = username,
+            firstName = faker.Person.FirstName,
+            lastName = faker.Person.LastName,
             emailAddress = targetUserEmail,
-            addressLine  = faker.Address.StreetAddress(),
-            country      = faker.Address.Country(),
-            state        = faker.Address.State(),
-            zipCode      = faker.Address.ZipCode(),
-            cardName     = faker.Person.FullName,
-            cardNumber   = faker.Finance.CreditCardNumber(),
-            expiration   = faker.Date.Future().ToString("MM/yy"),
-            cvv          = faker.Random.Number(100, 999).ToString(),
+            addressLine = faker.Address.StreetAddress(),
+            country = faker.Address.Country(),
+            state = faker.Address.State(),
+            zipCode = faker.Address.ZipCode(),
+            cardName = faker.Person.FullName,
+            cardNumber = faker.Finance.CreditCardNumber(),
+            expiration = faker.Date.Future().ToString("MM/yy"),
+            cvv = faker.Random.Number(100, 999).ToString(),
             paymentMethod = faker.Random.Int(1, 3),
-            requestId    = Guid.NewGuid().ToString(),
-            coordinates  = $"{faker.Address.Latitude()},{faker.Address.Longitude()}"
+            requestId = Guid.NewGuid().ToString(),
+            coordinates = $"{faker.Address.Latitude()},{faker.Address.Longitude()}"
         };
 
         HttpResponseMessage res = await http.PostAsJsonAsync("/basket/checkout", body);
 
-        if (!res.IsSuccessStatusCode)
-        {
-            string err = await res.Content.ReadAsStringAsync();
-            Console.WriteLine($"   Detalhe: {err}");
-        }
+        if (res.IsSuccessStatusCode)
+            return res.IsSuccessStatusCode;
+
+        string err = await res.Content.ReadAsStringAsync();
+        Console.WriteLine($"   Detalhe: {err}");
 
         return res.IsSuccessStatusCode;
     }
@@ -507,7 +498,7 @@ static async Task<bool> BffCheckoutAsync(HttpClient http, string username, Faker
 
 internal sealed record BffCatalogItem
 {
-    public string  Id    { get; init; } = string.Empty;
-    public string  Name  { get; init; } = string.Empty;
+    public string Id { get; init; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
     public decimal Price { get; init; }
 }

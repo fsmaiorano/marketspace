@@ -55,8 +55,8 @@ public static class AuthEndpoints
             {
                 UserName = dto.UserName ?? dto.Email,
                 Email = dto.Email,
-                FirstName = dto.FirstName,
-                LastName = dto.LastName
+                Name = dto.Name,
+                UserType = dto.UserType!.Value
             };
 
             IdentityResult identityResult = await userManager.CreateAsync(user, dto.Password);

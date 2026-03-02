@@ -117,11 +117,8 @@ public class TokenService(
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         ];
         
-        if (!string.IsNullOrWhiteSpace(user.FirstName))
-            claims.Add(new Claim(ClaimTypes.GivenName, user.FirstName));
-        
-        if (!string.IsNullOrWhiteSpace(user.LastName))
-            claims.Add(new Claim(ClaimTypes.Surname, user.LastName));
+        if (!string.IsNullOrWhiteSpace(user.Name))
+            claims.Add(new Claim(ClaimTypes.GivenName, user.Name));
 
         IList<string> roles = await userManager.GetRolesAsync(user);
         claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
