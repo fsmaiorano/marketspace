@@ -1,4 +1,4 @@
-import apiClient from '../lib/api-client';
+import {userClient} from "@/lib/api.ts";
 
 export type UserType = 'Customer' | 'Merchant';
 
@@ -64,7 +64,7 @@ export const logout = (): void => {
             AccessToken: token,
             RefreshToken: refreshToken,
         };
-        apiClient.post('/api/auth/revoke', requestBody).catch(() => {
+        userClient.post('/api/auth/revoke', requestBody).catch(() => {
             // Ignore errors on logout
         });
     }
@@ -81,8 +81,8 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
             requestBody.UserType = credentials.userType;
         }
 
-        const response = await apiClient.post<LoginResponse>('/api/auth/login', requestBody);
-        const { accessToken, refreshToken } = response.data;
+        const response = await userClient.post<LoginResponse>('/api/auth/login', requestBody);
+        const {accessToken, refreshToken} = response.data;
 
         localStorage.setItem('token', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
@@ -104,8 +104,8 @@ export const register = async (data: RegisterRequest): Promise<LoginResponse> =>
             UserType: data.userType,
         };
 
-        const response = await apiClient.post<LoginResponse>('/api/auth/register', requestBody);
-        const { accessToken, refreshToken } = response.data;
+        const response = await userClient.post<LoginResponse>('/api/auth/register', requestBody);
+        const {accessToken, refreshToken} = response.data;
 
         localStorage.setItem('token', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
@@ -134,8 +134,8 @@ export const refreshToken = async (): Promise<string> => {
             RefreshToken: currentRefreshToken,
         };
 
-        const response = await apiClient.post<LoginResponse>('/api/auth/refresh', requestBody);
-        const { accessToken, refreshToken: newRefreshToken } = response.data;
+        const response = await userClient.post<LoginResponse>('/api/auth/refresh', requestBody);
+        const {accessToken, refreshToken: newRefreshToken} = response.data;
 
         localStorage.setItem('token', accessToken);
         localStorage.setItem('refreshToken', newRefreshToken);
