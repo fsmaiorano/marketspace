@@ -30,21 +30,24 @@ export default function AuthPage() {
         setLoading(true);
 
         try {
+            // Convert userType to number (Customer = 0, Merchant = 1)
+            const userTypeNumber = userType === 'Customer' ? 0 : 1;
+
             const credentials: LoginRequest = {
                 email,
                 password,
+                userType: userTypeNumber,
             };
 
             const response = await login(credentials);
             
-            // Store refresh token
             localStorage.setItem('refreshToken', response.refreshToken);
+            localStorage.setItem('userType', userType);
             
             setSuccess(`Welcome back, ${email}!`);
 
-            // Redirect to home page or dashboard after successful login
             setTimeout(() => {
-                window.location.href = '/';
+                window.location.href = '/home';
             }, 1500);
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'Login failed. Please try again.';
@@ -60,7 +63,6 @@ export default function AuthPage() {
         setError(null);
         setSuccess(null);
 
-        // Validation
         if (password !== confirmPassword) {
             setError('Passwords do not match');
             return;
@@ -74,28 +76,28 @@ export default function AuthPage() {
         setLoading(true);
 
         try {
+            // Convert userType to number (Customer = 0, Merchant = 1)
+            const userTypeNumber = userType === 'Customer' ? 0 : 1;
+
             const data: RegisterRequest = {
                 email: email,
                 password: password,
                 name: name,
-                username: email, // Use email as username if not provided
-                userType: userType,
+                username: email, 
+                userType: userTypeNumber,
             };
 
             const response = await register(data);
             
-            // Store refresh token
             localStorage.setItem('refreshToken', response.refreshToken);
             
             setSuccess(`Account created successfully! Welcome, ${name || email}`);
 
-            // Clear form
             setEmail('');
             setPassword('');
             setConfirmPassword('');
             setName('');
 
-            // Redirect to home page after successful registration
             setTimeout(() => {
                 window.location.href = '/';
             }, 1500);

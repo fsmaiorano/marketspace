@@ -5,6 +5,7 @@ export type UserType = 'Customer' | 'Merchant';
 export interface LoginRequest {
     email: string;
     password: string;
+    userType?: number;
 }
 
 export interface LoginResponse {
@@ -19,7 +20,26 @@ export interface RegisterRequest {
     password: string;
     name: string;
     username?: string;
-    userType: UserType;
+    userType: number;
+}
+
+interface LoginRequestBody {
+    Email: string;
+    Password: string;
+    UserType?: number;
+}
+
+interface RegisterRequestBody {
+    Email: string;
+    Password: string;
+    Name: string;
+    UserName: string;
+    UserType: number;
+}
+
+interface RefreshRequestBody {
+    AccessToken: string;
+    RefreshToken: string;
 }
 
 export const isAuthenticated = (): boolean => localStorage.getItem('token') !== null;
@@ -40,7 +60,7 @@ export const logout = (): void => {
     localStorage.removeItem('userType');
 
     if (token && refreshToken) {
-        const requestBody = {
+        const requestBody: RefreshRequestBody = {
             AccessToken: token,
             RefreshToken: refreshToken,
         };
@@ -52,13 +72,17 @@ export const logout = (): void => {
 
 export const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
     try {
-        const requestBody = {
+        const requestBody: LoginRequestBody = {
             Email: credentials.email,
             Password: credentials.password,
         };
 
+        if (credentials.userType !== undefined) {
+            requestBody.UserType = credentials.userType;
+        }
+
         const response = await apiClient.post<LoginResponse>('/api/auth/login', requestBody);
-        const {accessToken, refreshToken} = response.data;
+        const { accessToken, refreshToken } = response.data;
 
         localStorage.setItem('token', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
@@ -72,22 +96,22 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
 
 export const register = async (data: RegisterRequest): Promise<LoginResponse> => {
     try {
-        const userTypeNumber = data.userType === 'Customer' ? 0 : 1;
-
-        const requestBody = {
+        const requestBody: RegisterRequestBody = {
             Email: data.email,
             Password: data.password,
             Name: data.name,
             UserName: data.username || data.email,
-            UserType: userTypeNumber,
+            UserType: data.userType,
         };
 
         const response = await apiClient.post<LoginResponse>('/api/auth/register', requestBody);
-        const {accessToken, refreshToken} = response.data;
+        const { accessToken, refreshToken } = response.data;
 
         localStorage.setItem('token', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
-        localStorage.setItem('userType', data.userType);
+
+        const userTypeStr = data.userType === 0 ? 'Customer' : 'Merchant';
+        localStorage.setItem('userType', userTypeStr);
 
         return response.data;
     } catch (error) {
@@ -105,13 +129,13 @@ export const refreshToken = async (): Promise<string> => {
             throw new Error('No tokens available to refresh');
         }
 
-        const requestBody = {
+        const requestBody: RefreshRequestBody = {
             AccessToken: currentToken,
             RefreshToken: currentRefreshToken,
         };
 
         const response = await apiClient.post<LoginResponse>('/api/auth/refresh', requestBody);
-        const {accessToken, refreshToken: newRefreshToken} = response.data;
+        const { accessToken, refreshToken: newRefreshToken } = response.data;
 
         localStorage.setItem('token', accessToken);
         localStorage.setItem('refreshToken', newRefreshToken);

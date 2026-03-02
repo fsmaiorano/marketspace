@@ -4,4 +4,5 @@ public class AuthRequest
 {
     public string Email { get; init; } = null!;
     public string Password { get; init; } = null!;
+    public UserTypeEnum? UserType { get; init; }
 }
