@@ -1,0 +1,33 @@
+meta {
+  name: Update User Type
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{user_url}}/api/auth/update-user-type
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "userId": "your-user-id-here",
+    "userType": 1
+  }
+}
+
+docs {
+  Updates the user type for a specific user.
+  
+  UserType values:
+  - 0: Customer
+  - 1: Merchant
+  
+  Requires authentication via Bearer token.
+}
+

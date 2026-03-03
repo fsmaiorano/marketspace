@@ -25,6 +25,12 @@ public static class AuthEndpoints
         group.MapGet("/me", Me)
             .RequireAuthorization()
             .Produces(StatusCodes.Status200OK);
+
+        group.MapPut("/update-user-type", UpdateUserType)
+            .RequireAuthorization()
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> Register(
@@ -159,6 +165,59 @@ public static class AuthEndpoints
             firstName,
             lastName
         });
+    }
+
+    private static async Task<IResult> UpdateUserType(
+        UpdateUserTypeRequest dto,
+        UserManager<ApplicationUser> userManager,
+        ILoggerFactory loggerFactory)
+    {
+        ILogger logger = loggerFactory.CreateLogger("AuthEndpoints");
+        logger.LogInformation("UpdateUserType attempt for userId: {UserId}", dto.UserId);
+
+        try
+        {
+            ApplicationUser? user = await userManager.FindByIdAsync(dto.UserId);
+            if (user is null)
+            {
+                logger.LogWarning("UpdateUserType failed: User {UserId} not found", dto.UserId);
+                return Results.NotFound(new { message = "User not found." });
+            }
+
+            // Validate the UserType value
+            if (!Enum.IsDefined(dto.UserType))
+            {
+                logger.LogWarning("UpdateUserType failed: Invalid UserType value {UserType}", dto.UserType);
+                return Results.BadRequest(new { message = "Invalid user type." });
+            }
+
+            user.UserType = dto.UserType;
+            IdentityResult result = await userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                string errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                logger.LogWarning("UpdateUserType failed for {UserId}: {Errors}", dto.UserId, errors);
+                return Results.BadRequest(new
+                {
+                    message = "Update failed",
+                    errors = result.Errors.Select(e => e.Description).ToList()
+                });
+            }
+
+            logger.LogInformation("User {UserId} type updated successfully to {UserType}", dto.UserId, dto.UserType);
+            return Results.Ok(new
+            {
+                message = "User type updated successfully",
+                userId = user.Id,
+                userType = user.UserType
+            });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error during UpdateUserType for {UserId}", dto.UserId);
+            throw;
+        }
     }
 
     private static string GetIpAddress(HttpContext http)

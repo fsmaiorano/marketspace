@@ -40,14 +40,17 @@ export default function AuthPage() {
 
             const response = await login(credentials);
 
+            setUserType(userType);
             localStorage.setItem('refreshToken', response.refreshToken);
             localStorage.setItem('userType', userType);
 
-            if (userType === "Customer") {
-                window.location.href = '/customer';
-            } else {
-                window.location.href = '/merchant';
-            }
+            window.location.href = '/home';
+            
+            // if (userType === "Customer") {
+            //     window.location.href = '/customer';
+            // } else {
+            //     window.location.href = '/merchant';
+            // }
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'Login failed. Please try again.';
             setError(errorMessage);
@@ -89,6 +92,7 @@ export default function AuthPage() {
 
             localStorage.setItem('refreshToken', response.refreshToken);
 
+            setUserType(userType);
             setSuccess(`Account created successfully! Welcome, ${name || email}`);
 
             setEmail('');
@@ -142,35 +146,35 @@ export default function AuthPage() {
                 )}
 
                 {/* User Type Selection */}
-                <div className="space-y-3">
-                    <label className="block text-sm font-medium">I am a:</label>
-                    <div className="flex gap-4">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="radio"
-                                name="userType"
-                                value="Customer"
-                                checked={userType === 'Customer'}
-                                onChange={(e) => setUserType(e.target.value as UserType)}
-                                disabled={loading}
-                                className="w-4 h-4"
-                            />
-                            <span className="text-sm">Customer</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="radio"
-                                name="userType"
-                                value="Merchant"
-                                checked={userType === 'Merchant'}
-                                onChange={(e) => setUserType(e.target.value as UserType)}
-                                disabled={loading}
-                                className="w-4 h-4"
-                            />
-                            <span className="text-sm">Merchant</span>
-                        </label>
-                    </div>
-                </div>
+                {/*<div className="space-y-3">*/}
+                {/*    <label className="block text-sm font-medium">I am a:</label>*/}
+                {/*    <div className="flex gap-4">*/}
+                {/*        <label className="flex items-center gap-2 cursor-pointer">*/}
+                {/*            <input*/}
+                {/*                type="radio"*/}
+                {/*                name="userType"*/}
+                {/*                value="Customer"*/}
+                {/*                checked={userType === 'Customer'}*/}
+                {/*                onChange={(e) => setUserType(e.target.value as UserType)}*/}
+                {/*                disabled={loading}*/}
+                {/*                className="w-4 h-4"*/}
+                {/*            />*/}
+                {/*            <span className="text-sm">Customer</span>*/}
+                {/*        </label>*/}
+                {/*        <label className="flex items-center gap-2 cursor-pointer">*/}
+                {/*            <input*/}
+                {/*                type="radio"*/}
+                {/*                name="userType"*/}
+                {/*                value="Merchant"*/}
+                {/*                checked={userType === 'Merchant'}*/}
+                {/*                onChange={(e) => setUserType(e.target.value as UserType)}*/}
+                {/*                disabled={loading}*/}
+                {/*                className="w-4 h-4"*/}
+                {/*            />*/}
+                {/*            <span className="text-sm">Merchant</span>*/}
+                {/*        </label>*/}
+                {/*    </div>*/}
+                {/*</div>*/}
 
                 {/* Email Field */}
                 <div className="space-y-2">
