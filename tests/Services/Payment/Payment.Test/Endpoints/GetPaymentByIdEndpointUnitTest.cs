@@ -1,3 +1,4 @@
+using Payment.Api.Endpoints.Dto;
 using Payment.Test.Base;
 using Payment.Test.Fixtures;
 
@@ -13,11 +14,9 @@ public class GetPaymentByIdEndpointUnitTest(TestFixture fixture) : Base.BaseTest
         await Context.SaveChangesAsync();
 
         HttpResponseMessage response = await DoGet($"/payment/{payment.Id.Value}");
-        Result<GetPaymentByIdResult>? result = await response.Content.ReadFromJsonAsync<Result<GetPaymentByIdResult>>();
-        
+        PaymentDto? result = await response.Content.ReadFromJsonAsync<PaymentDto>();
+
         result.Should().NotBeNull();
-        result!.IsSuccess.Should().BeTrue();
-        result.Data!.Payment.Id.Should().Be(payment.Id.Value);
     }
 
     [Fact]

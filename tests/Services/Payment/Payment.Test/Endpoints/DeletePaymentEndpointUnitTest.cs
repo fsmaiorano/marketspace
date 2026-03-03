@@ -1,5 +1,6 @@
 using Payment.Test.Base;
 using Payment.Test.Fixtures;
+using System.Net;
 
 namespace Payment.Test.Endpoints;
 
@@ -15,11 +16,8 @@ public class DeletePaymentEndpointUnitTest(TestFixture fixture) : Base.BaseTest(
 
         HttpResponseMessage response = await DoDelete($"/payment/{payment.Id.Value}");
         
-        response.EnsureSuccessStatusCode();
-        Result<DeletePaymentResult>? result = await response.Content.ReadFromJsonAsync<Result<DeletePaymentResult>>();
-        result.Should().NotBeNull();
-        result!.IsSuccess.Should().BeTrue();
-
+        Assert.True(response.StatusCode.Equals(HttpStatusCode.NoContent));
+        
         PaymentEntity? deletedPayment = await Context.Payments.FindAsync(payment.Id);
         deletedPayment.Should().BeNull();
     }

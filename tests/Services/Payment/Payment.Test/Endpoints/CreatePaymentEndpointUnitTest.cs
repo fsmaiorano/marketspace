@@ -1,4 +1,5 @@
 using Payment.Test.Fixtures;
+using System.Net;
 
 namespace Payment.Test.Endpoints;
 
@@ -9,12 +10,6 @@ public class CreatePaymentEndpointUnitTest(TestFixture fixture) : Base.BaseTest(
     {
         CreatePaymentCommand command = PaymentBuilder.CreateCreatePaymentCommandFaker().Generate();
         HttpResponseMessage response = await DoPost("/payment", command);
-        
-        response.EnsureSuccessStatusCode();
-        Result<CreatePaymentResult>? result = await response.Content.ReadFromJsonAsync<Result<CreatePaymentResult>>();
-        
-        result.Should().NotBeNull();
-        result!.IsSuccess.Should().BeTrue();
-        result.Data.Should().NotBeNull();
+        Assert.True(response.StatusCode.Equals(HttpStatusCode.Created));
     }
 }

@@ -14,18 +14,19 @@ public static class GetPaymentByIdEndpoint
                 {
                     Result<GetPaymentByIdResult> result =
                         await handler.HandleAsync(new GetPaymentByIdQuery(Guid.Parse(id)));
+                    
                     return result is { IsSuccess: true, Data: not null }
                         ? Results.Ok(new PaymentDto()
                         {
                             Id = result.Data.Payment.Id.Value,
                             OrderId = result.Data.Payment.OrderId,
                             Amount = result.Data.Payment.Amount,
-                            Currency = result.Data.Payment.Currency,
+                            Currency = result.Data.Payment.Currency!,
                             Status = result.Data.Payment.Status.ToString(),
-                            Method = result.Data.Payment.Method.Value,
-                            Provider = result.Data.Payment.Provider,
-                            ProviderTransactionId = result.Data.Payment.ProviderTransactionId,
-                            AuthorizationCode = result.Data.Payment.AuthorizationCode,
+                            Method = result.Data.Payment.Method!.Value,
+                            Provider = result.Data.Payment.Provider!,
+                            ProviderTransactionId = result.Data.Payment.ProviderTransactionId ?? string.Empty,
+                            AuthorizationCode = result.Data.Payment.AuthorizationCode ?? string.Empty,
                             CreatedAt = result.Data.Payment.CreatedAt!.Value,
                             LastModifiedAt = result.Data.Payment.LastModifiedAt
                         })

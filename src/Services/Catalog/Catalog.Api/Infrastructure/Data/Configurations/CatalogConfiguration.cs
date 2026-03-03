@@ -35,6 +35,12 @@ public class CatalogConfiguration : IEntityTypeConfiguration<CatalogEntity>
                 price => price.Value,
                 dbPrice => Price.Of(dbPrice));
 
+        builder.Property(m => m.Stock)
+            .IsRequired()
+            .HasConversion(
+                stock => stock.Value,
+                dbStock => Stock.Of(dbStock));
+
         builder.Property(c => c.Categories)
             .HasConversion(
                 categories => string.Join(',', categories),

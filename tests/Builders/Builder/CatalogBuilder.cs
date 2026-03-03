@@ -26,7 +26,8 @@ public static class CatalogBuilder
             .RuleFor(m => m.Price, f => Price.Of(f.Finance.Amount(1, 1000, 2)))
             .RuleFor(m => m.Categories,
                 f => f.PickRandom(ProductCategories, f.Random.Int(1, 10)).ToList())
-            .RuleFor(m => m.MerchantId, f => merchantId == default ? f.Random.Guid() : merchantId);
+            .RuleFor(m => m.MerchantId, f => merchantId == default ? f.Random.Guid() : merchantId)
+            .RuleFor(m => m.Stock, f => Stock.Of(f.Random.Int(1, 100)));
     }
 
 
@@ -40,6 +41,7 @@ public static class CatalogBuilder
                 ImageUrl = f.Image.PicsumUrl(800, 600),
                 MerchantId = f.Random.Guid(),
                 Price = Price.Of(f.Finance.Amount(1, 1000, 2)),
+                Stock = Stock.Of(f.Random.Int(1, 100)),
                 Categories = f.PickRandom(ProductCategories, f.Random.Int(1, 10)).ToList()
             });
 

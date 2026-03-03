@@ -118,7 +118,8 @@ public class OrderEntity : Aggregate<OrderId>
             ShippingAddress = shippingAddress,
             BillingAddress = billingAddress,
             Payment = payment,
-            Status = status ?? OrderStatusEnum.Created
+            Status = status ?? OrderStatusEnum.Created,
+            CreatedAt = DateTime.UtcNow
         };
 
         foreach (OrderItemEntity orderItem in items)

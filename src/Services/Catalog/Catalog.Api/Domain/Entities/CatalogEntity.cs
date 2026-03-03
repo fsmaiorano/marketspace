@@ -10,6 +10,7 @@ public class CatalogEntity : Aggregate<CatalogId>
     public string Description { get; private set; } = string.Empty;
     public string ImageUrl { get; private set; } = string.Empty;
     public Price Price { get; private set; } = null!;
+    public Stock Stock { get; private set; } = null!;
     public Guid MerchantId { get; private set; } = Guid.Empty;
     public new DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset? UpdatedAt { get; private set; }
@@ -20,6 +21,7 @@ public class CatalogEntity : Aggregate<CatalogId>
         string description,
         string imageUrl,
         Price price,
+        Stock stock,
         Guid merchantId)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -33,7 +35,7 @@ public class CatalogEntity : Aggregate<CatalogId>
 
         if (merchantId == Guid.Empty)
             throw new ArgumentException("MerchantId cannot be empty.", nameof(merchantId));
-        
+
         ArgumentNullException.ThrowIfNull(categories);
         ArgumentNullException.ThrowIfNull(price);
 
@@ -44,6 +46,7 @@ public class CatalogEntity : Aggregate<CatalogId>
             ImageUrl = imageUrl,
             Price = price,
             MerchantId = merchantId,
+            Stock = stock,
             Categories = [.. categories.Distinct()],
             CreatedAt = DateTimeOffset.UtcNow
         };
@@ -121,6 +124,14 @@ public class CatalogEntity : Aggregate<CatalogId>
         MerchantId = merchantId;
     }
 
+    private void StockHandler(Stock stock)
+    {
+        if (Stock == stock)
+            return;
+        
+        Stock = stock;
+    }
+
     private void Touch() => UpdatedAt = DateTimeOffset.UtcNow;
 
     public void Update(
@@ -129,6 +140,7 @@ public class CatalogEntity : Aggregate<CatalogId>
         string? description,
         string? imageUrl,
         Price? price,
+        Stock? stock = null,
         Guid? merchantId = null)
     {
         if (name is not null)
@@ -152,6 +164,9 @@ public class CatalogEntity : Aggregate<CatalogId>
 
         if (merchantId is not null)
             ChangeMerchantId(merchantId.Value);
+
+        if (stock is not null)
+            StockHandler(stock);
 
         Touch();
     }

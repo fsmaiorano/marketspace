@@ -13,7 +13,8 @@ public class UserBuilder
             .CustomInstantiator(f => new RegisterRequest
             {
                 Email = email ?? f.Internet.Email(),
-                Password = password ?? f.Internet.Password(8, false, "", "@1Aa")
+                Password = password ?? f.Internet.Password(8, false, "", "@1Aa"),
+                UserType = f.PickRandom<UserTypeEnum>()
             });
     }
 
@@ -23,7 +24,8 @@ public class UserBuilder
             .CustomInstantiator(f => new AuthRequest
             {
                 Email = email ?? f.Internet.Email(),
-                Password = password ?? f.Internet.Password(8, false, "", "@1Aa")
+                Password = password ?? f.Internet.Password(8, false, "", "@1Aa"),
+                UserType = f.PickRandom<UserTypeEnum>()
             });
     }
 
@@ -33,7 +35,7 @@ public class UserBuilder
             .CustomInstantiator(f => new RefreshRequest
             {
                 AccessToken = accessToken ?? f.Random.AlphaNumeric(100),
-                RefreshToken = refreshToken ?? f.Random.AlphaNumeric(100)
+                RefreshToken = refreshToken ?? f.Random.AlphaNumeric(100),
             });
     }
 
@@ -41,8 +43,14 @@ public class UserBuilder
         string? email = null,
         string? userName = null)
     {
-        var userEmail = email ?? _faker.Internet.Email();
-        return new ApplicationUser { Email = userEmail, UserName = userName ?? userEmail, EmailConfirmed = true };
+        string? userEmail = email ?? _faker.Internet.Email();
+        return new ApplicationUser
+        {
+            Email = userEmail,
+            UserName = userName ?? userEmail,
+            EmailConfirmed = true,
+            UserType = UserTypeEnum.Customer
+        };
     }
 
     public static RefreshToken CreateRefreshToken(
@@ -51,7 +59,7 @@ public class UserBuilder
         DateTime? expires = null,
         bool isRevoked = false)
     {
-        var refreshToken = new RefreshToken
+        RefreshToken refreshToken = new RefreshToken
         {
             Token = token ?? Convert.ToBase64String(_faker.Random.Bytes(64)),
             UserId = userId,

@@ -1,5 +1,6 @@
 using Payment.Test.Base;
 using Payment.Test.Fixtures;
+using System.Net;
 
 namespace Payment.Test.Endpoints;
 
@@ -16,11 +17,8 @@ public class UpdatePaymentEndpointUnitTest(TestFixture fixture) : Base.BaseTest(
         UpdatePaymentCommand command = PaymentBuilder.CreateUpdatePaymentCommandFaker(payment.Id.Value).Generate();
         
         HttpResponseMessage response = await DoPut("/payment", command);
-        
-        response.EnsureSuccessStatusCode();
-        Result<UpdatePaymentResult>? result = await response.Content.ReadFromJsonAsync<Result<UpdatePaymentResult>>();
-        result.Should().NotBeNull();
-        result!.IsSuccess.Should().BeTrue();
+
+        Assert.True(response.StatusCode.Equals(HttpStatusCode.NoContent));
 
         PaymentEntity? updatedPayment = await Context.Payments.FindAsync(payment.Id);
         updatedPayment.Should().NotBeNull();

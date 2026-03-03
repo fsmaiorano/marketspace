@@ -117,7 +117,8 @@ for (int i = 0; i < createdMerchants.Count; i++)
             imageUrl: objectName,
             merchantId: createdMerchants.ElementAt(i).Id.Value,
             categories: catalog.Categories,
-            price: catalog.Price
+            price: catalog.Price,
+            stock: catalog.Stock
         );
 
         catalogEntity.Id = CatalogId.Of(Guid.CreateVersion7());

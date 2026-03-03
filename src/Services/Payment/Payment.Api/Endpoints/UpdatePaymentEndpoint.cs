@@ -13,7 +13,7 @@ public static class UpdatePaymentEndpoint
                 {
                     Result<UpdatePaymentResult> result = await handler.HandleAsync(command);
                     return result is { IsSuccess: true, Data: not null }
-                        ? Results.Ok()
+                        ? Results.NoContent()
                         : Results.BadRequest(result.Error);
                 })
             .WithName("UpdatePayment")

@@ -13,6 +13,7 @@ public record CreateCatalogCommand
     public required string Description { get; init; }
     public required string ImageUrl { get; init; }
     public required Price Price { get; init; }
+    public required Stock Stock { get; init; }
 
     public IReadOnlyList<string> Categories { get; init; } = [];
 
@@ -48,6 +49,7 @@ public sealed class CreateCatalog(
                 imageUrl: objectName,
                 categories: command.Categories,
                 price: Price.Of(command.Price.Value),
+                stock: Stock.Of(command.Stock.Value),
                 merchantId: command.MerchantId
             );
 
