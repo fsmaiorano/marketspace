@@ -7,6 +7,7 @@ namespace Merchant.Api.Application.Merchant.CreateMerchant;
 
 public record CreateMerchantCommand()
 {
+    public Guid UserId { get; init; }
     public string Name { get; init; } = string.Empty;
     public string Description { get; init; } = string.Empty;
     public string Address { get; init; } = string.Empty;
@@ -15,7 +16,6 @@ public record CreateMerchantCommand()
 }
 
 public record CreateMerchantResult();
-
 
 public sealed class CreateMerchant(
     IMerchantRepository repository,
@@ -29,6 +29,7 @@ public sealed class CreateMerchant(
                 command.Name);
 
             MerchantEntity merchantEntity = MerchantEntity.Create(
+                UserId.Of(command.UserId),
                 command.Name,
                 command.Description,
                 command.Address,
@@ -49,7 +50,7 @@ public sealed class CreateMerchant(
                 merchantEntity.Id,
                 command.Name,
                 command.Email);
-            
+
             return Result<CreateMerchantResult>.Success(new CreateMerchantResult());
         }
         catch (Exception ex)

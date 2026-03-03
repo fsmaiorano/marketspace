@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Bogus;
+using Merchant.Api.Domain.ValueObjects;
+using Microsoft.AspNetCore.Identity;
 using User.Api.Data;
 using User.Api.Models;
 
@@ -66,7 +68,7 @@ Console.WriteLine("Creating User database schema...");
 await userDbContext.Database.EnsureCreatedAsync();
 Console.WriteLine("User database schema created successfully!");
 
-var exits = userDbContext.Users.Where(u => u.UserName == "user@example.com");
+IQueryable<ApplicationUser> exits = userDbContext.Users.Where(u => u.UserName == "user@example.com");
 
 if (!exits.Any())
 {
@@ -83,10 +85,16 @@ List<ShoppingCartEntity> createdShoppingCarts = [];
 // Create merchants
 for (int i = 0; i < createMerchantCounter; i++)
 {
+    ApplicationUser user = UserBuilder.CreateApplicationUser();
+
+    userDbContext.Users.Add(user);
+    await userDbContext.SaveChangesAsync();
+
     MerchantEntity merchant = MerchantBuilder.CreateMerchantFaker().Generate();
     merchant.CreatedBy = "seed";
-
+    
     MerchantEntity merchantEntity = MerchantEntity.Create(
+        UserId.Of(Guid.Parse(user.Id)),
         merchant.Name,
         merchant.Description,
         merchant.Address,

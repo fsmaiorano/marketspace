@@ -12,6 +12,7 @@ public static class MerchantBuilder
     {
         return new Faker<MerchantEntity>()
             .RuleFor(m => m.Id, f => MerchantId.Of(f.Random.Guid()))
+            .RuleFor(m => m.UserId, f => UserId.Of(f.Random.Guid()))
             .RuleFor(m => m.Name, f => f.Company.CompanyName())
             .RuleFor(m => m.Description, f => f.Lorem.Sentence())
             .RuleFor(m => m.Address, f => f.Address.FullAddress())
@@ -20,9 +21,10 @@ public static class MerchantBuilder
                 f => string.IsNullOrWhiteSpace(email) ? Email.Of(f.Internet.Email()) : Email.Of(email));
     }
 
-    public static Faker<CreateMerchantCommand> CreateCreateMerchantCommandFaker(string email = "")
+    public static Faker<CreateMerchantCommand> CreateMerchantCommandFaker(string email = "")
     {
         return new Faker<CreateMerchantCommand>()
+            .RuleFor(m => m.UserId, f => f.Random.Guid())
             .RuleFor(m => m.Name, f => f.Company.CompanyName())
             .RuleFor(m => m.Description, f => f.Lorem.Sentence())
             .RuleFor(m => m.Address, f => f.Address.FullAddress())

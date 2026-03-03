@@ -8,7 +8,7 @@ public class CreateMerchantEndpointUnitTest(TestFixture fixture) : Base.BaseTest
     [Fact]
     public async Task Returns_Ok_When_Merchant_Is_Created_Successfully()
     {
-        CreateMerchantCommand command = MerchantBuilder.CreateCreateMerchantCommandFaker().Generate();
+        CreateMerchantCommand command = MerchantBuilder.CreateMerchantCommandFaker().Generate();
         HttpResponseMessage response = await DoPost("/merchant", command);
         Assert.True(response.StatusCode.Equals(HttpStatusCode.Created));
     }

@@ -12,21 +12,27 @@ public class MerchantConfiguration : IEntityTypeConfiguration<Merchant.Api.Domai
         builder.Property(c => c.Id)
             .HasConversion(merchantId => merchantId.Value,
                 dbId => MerchantId.Of(dbId));
-        
+
         builder.HasIndex(c => c.Id).IsUnique();
-        
+
+        builder.Property(m => m.UserId)
+            .IsRequired()
+            .HasConversion(
+                userId => userId.Value,
+                dbUserId => UserId.Of(dbUserId));
+
         builder.Property(m => m.Name)
             .IsRequired()
             .HasMaxLength(100);
-        
+
         builder.Property(m => m.Description)
             .IsRequired()
             .HasMaxLength(500);
-        
+
         builder.Property(m => m.Address)
             .IsRequired()
             .HasMaxLength(200);
-        
+
         builder.Property(m => m.PhoneNumber)
             .IsRequired()
             .HasMaxLength(50);

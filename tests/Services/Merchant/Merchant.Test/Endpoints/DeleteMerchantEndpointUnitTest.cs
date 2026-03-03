@@ -1,6 +1,7 @@
 using Merchant.Api.Application.Merchant.DeleteMerchant;
 using Merchant.Test.Fixtures;
 using System.Net;
+using User.Api.Models;
 
 namespace Merchant.Test.Endpoints;
 

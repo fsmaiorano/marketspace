@@ -5,6 +5,7 @@ namespace Merchant.Api.Domain.Entities;
 
 public class MerchantEntity : Aggregate<MerchantId>
 {
+    public UserId UserId { get; private set; } = null!;
     public string Name { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
     public string Address { get; private set; } = string.Empty;
@@ -15,6 +16,7 @@ public class MerchantEntity : Aggregate<MerchantId>
     public DateTimeOffset? UpdatedAt { get; private set; }
 
     public static MerchantEntity Create(
+        UserId userId,
         string name,
         string description,
         string address,
@@ -38,6 +40,7 @@ public class MerchantEntity : Aggregate<MerchantId>
 
         return new MerchantEntity
         {
+            UserId = userId,
             Name = name,
             Description = description,
             Address = address,
@@ -46,18 +49,18 @@ public class MerchantEntity : Aggregate<MerchantId>
             CreatedAt = DateTimeOffset.UtcNow
         };
     }
-    
+
     private void ChangeName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Name is required.", nameof(name));
-        
+
         if (Name == name)
             return;
-        
+
         Name = name;
     }
-    
+
     private void ChangeDescription(string description)
     {
         if (string.IsNullOrWhiteSpace(description))
@@ -98,7 +101,7 @@ public class MerchantEntity : Aggregate<MerchantId>
 
         Email = email;
     }
-    
+
     private void Touch() => UpdatedAt = DateTimeOffset.UtcNow;
 
     public void Update(
@@ -122,7 +125,7 @@ public class MerchantEntity : Aggregate<MerchantId>
 
         if (email is not null)
             ChangeEmail(email);
-        
+
         Touch();
     }
 }
