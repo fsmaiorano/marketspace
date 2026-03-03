@@ -30,7 +30,6 @@ export default function AuthPage() {
         setLoading(true);
 
         try {
-            // Convert userType to number (Customer = 0, Merchant = 1)
             const userTypeNumber = userType === 'Customer' ? 0 : 1;
 
             const credentials: LoginRequest = {
@@ -40,14 +39,18 @@ export default function AuthPage() {
             };
 
             const response = await login(credentials);
-            
+
             localStorage.setItem('refreshToken', response.refreshToken);
             localStorage.setItem('userType', userType);
-            
+
             setSuccess(`Welcome back, ${email}!`);
 
             setTimeout(() => {
-                window.location.href = '/home';
+                if (userType === "Customer") {
+                    window.location.href = '/customer';
+                } else {
+                    window.location.href = '/merchant';
+                }
             }, 1500);
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'Login failed. Please try again.';
@@ -83,14 +86,14 @@ export default function AuthPage() {
                 email: email,
                 password: password,
                 name: name,
-                username: email, 
+                username: email,
                 userType: userTypeNumber,
             };
 
             const response = await register(data);
-            
+
             localStorage.setItem('refreshToken', response.refreshToken);
-            
+
             setSuccess(`Account created successfully! Welcome, ${name || email}`);
 
             setEmail('');
