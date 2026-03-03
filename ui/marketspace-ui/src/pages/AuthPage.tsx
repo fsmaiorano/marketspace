@@ -43,15 +43,11 @@ export default function AuthPage() {
             localStorage.setItem('refreshToken', response.refreshToken);
             localStorage.setItem('userType', userType);
 
-            setSuccess(`Welcome back, ${email}!`);
-
-            setTimeout(() => {
-                if (userType === "Customer") {
-                    window.location.href = '/customer';
-                } else {
-                    window.location.href = '/merchant';
-                }
-            }, 1500);
+            if (userType === "Customer") {
+                window.location.href = '/customer';
+            } else {
+                window.location.href = '/merchant';
+            }
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'Login failed. Please try again.';
             setError(errorMessage);
@@ -79,7 +75,6 @@ export default function AuthPage() {
         setLoading(true);
 
         try {
-            // Convert userType to number (Customer = 0, Merchant = 1)
             const userTypeNumber = userType === 'Customer' ? 0 : 1;
 
             const data: RegisterRequest = {
