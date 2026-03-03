@@ -110,7 +110,6 @@ public static class AuthEndpoints
             if (transaction is not null)
                 await transaction.DisposeAsync();
         }
-        
     }
 
     private static async Task<IResult> Login(
@@ -150,20 +149,40 @@ public static class AuthEndpoints
         return Results.NoContent();
     }
 
-    private static IResult Me(ClaimsPrincipal user)
+    private static async Task<IResult> Me(ClaimsPrincipal user, UserManager<ApplicationUser> userManager)
     {
         string? userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         string? userName = user.FindFirst(ClaimTypes.Name)?.Value;
         string? email = user.FindFirst(ClaimTypes.Email)?.Value;
         string? firstName = user.FindFirst(ClaimTypes.GivenName)?.Value;
         string? lastName = user.FindFirst(ClaimTypes.Surname)?.Value;
+
+        string? userType = string.Empty;
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return Results.Ok(new
+            {
+                userId,
+                userName,
+                email,
+                firstName,
+                lastName,
+                userType
+            });
+        }
+
+        ApplicationUser? applicationUser = await userManager.FindByEmailAsync(email);
+        if (applicationUser is not null)
+            userType = applicationUser.UserType.ToString();
+
         return Results.Ok(new
         {
             userId,
             userName,
             email,
             firstName,
-            lastName
+            lastName,
+            userType
         });
     }
 
@@ -200,17 +219,14 @@ public static class AuthEndpoints
                 logger.LogWarning("UpdateUserType failed for {UserId}: {Errors}", dto.UserId, errors);
                 return Results.BadRequest(new
                 {
-                    message = "Update failed",
-                    errors = result.Errors.Select(e => e.Description).ToList()
+                    message = "Update failed", errors = result.Errors.Select(e => e.Description).ToList()
                 });
             }
 
             logger.LogInformation("User {UserId} type updated successfully to {UserType}", dto.UserId, dto.UserType);
             return Results.Ok(new
             {
-                message = "User type updated successfully",
-                userId = user.Id,
-                userType = user.UserType
+                message = "User type updated successfully", userId = user.Id, userType = user.UserType
             });
         }
         catch (Exception ex)
