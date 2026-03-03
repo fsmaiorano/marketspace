@@ -16,7 +16,6 @@ Console.WriteLine();
 // ======================================
 // CONFIGURATION
 // ======================================
-const string targetUserEmail = "user@marketspace.com";
 const string bffBaseUrl = "http://localhost:5000"; // ajuste para a porta do seu BFF
 const string basketApiBaseUrl = "http://localhost:5001";
 
@@ -553,13 +552,40 @@ async Task RunBffHttpModeAsync()
 
     Faker faker = new("pt_BR");
 
+    // Get a customer user from database
+    MarketSpaceSimulatorFactory factory = new(
+        merchantConnectionString: merchantConnectionString,
+        catalogConnectionString: catalogConnectionString,
+        basketConnectionString: basketConnectionString,
+        userConnectionString: userConnectionString,
+        minioEndpoint: minioEndpoint,
+        minioAccessKey: minioAccessKey,
+        minioSecretKey: minioSecretKey
+    );
+
+    IServiceScopeFactory scopeFactory = factory.Services.GetRequiredService<IServiceScopeFactory>();
+    using IServiceScope scope = scopeFactory.CreateScope();
+    UserDbContext userDbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+
+    // Find a customer user
+    ApplicationUser? customerUser = await userDbContext.Users
+        .FirstOrDefaultAsync(u => u.UserType == UserTypeEnum.Customer);
+
+    if (customerUser == null)
+    {
+        Console.WriteLine("⚠️  No customer user found in database. Please run seed mode first or create a customer user.");
+        return;
+    }
+
+    Console.WriteLine($"📋 Using customer: {customerUser.Email} (ID: {customerUser.Id})");
+
     using HttpClient http = new();
     http.BaseAddress = new Uri(bffBaseUrl);
     http.DefaultRequestHeaders.Add("Accept", "application/json");
 
     // 1. Login / get token
-    Console.WriteLine("🔐 Autenticando no BFF...");
-    string? token = await BffLoginAsync(http, faker);
+    Console.WriteLine("\n🔐 Autenticando no BFF...");
+    string? token = await BffLoginAsync(http, customerUser.Email!, "123456");
     if (token is not null)
         http.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
@@ -577,7 +603,7 @@ async Task RunBffHttpModeAsync()
     Console.WriteLine($"   {products.Count} produto(s) encontrado(s).");
 
     // 3. Add items to cart
-    string username = targetUserEmail.Split('@')[0];
+    string username = customerUser.UserName ?? customerUser.Email!;
     int itemsToAdd = faker.Random.Int(1, Math.Min(products.Count, 4));
     List<BffCatalogItem> selectedItems = faker.PickRandom(products, itemsToAdd).ToList();
 
@@ -593,7 +619,7 @@ async Task RunBffHttpModeAsync()
 
     // 4. Checkout
     Console.WriteLine("\n🚀 Realizando checkout via BFF...");
-    bool checkoutOk = await BffCheckoutAsync(http, username, faker);
+    bool checkoutOk = await BffCheckoutAsync(http, username, customerUser.Email!, faker);
     Console.WriteLine(checkoutOk
         ? "✅ Checkout realizado com sucesso!"
         : "❌ Checkout falhou. Verifique os logs da aplicação.");
@@ -669,11 +695,11 @@ static async Task DoCheckoutAsync(
 // ── BFF helpers ──────────────────────────────────────────────────────────────
 
 /// <summary>POST /auth/login  →  retorna Bearer token (ajuste o endpoint conforme seu BFF)</summary>
-static async Task<string?> BffLoginAsync(HttpClient http, Faker faker)
+static async Task<string?> BffLoginAsync(HttpClient http, string email, string password)
 {
     try
     {
-        var body = new { email = "user@marketspace.com", password = "Password123!" };
+        var body = new { email, password };
         HttpResponseMessage res = await http.PostAsJsonAsync("/auth/login", body);
 
         if (!res.IsSuccessStatusCode)
@@ -764,7 +790,7 @@ static async Task<bool> BffAddToBasketAsync(
 }
 
 /// <summary>POST /basket/checkout  →  finaliza compra via BFF</summary>
-static async Task<bool> BffCheckoutAsync(HttpClient http, string username, Faker faker)
+static async Task<bool> BffCheckoutAsync(HttpClient http, string username, string email, Faker faker)
 {
     try
     {
@@ -773,7 +799,7 @@ static async Task<bool> BffCheckoutAsync(HttpClient http, string username, Faker
             userName = username,
             firstName = faker.Person.FirstName,
             lastName = faker.Person.LastName,
-            emailAddress = targetUserEmail,
+            emailAddress = email,
             addressLine = faker.Address.StreetAddress(),
             country = faker.Address.Country(),
             state = faker.Address.State(),
