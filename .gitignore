@@ -43,5 +43,6 @@ msbuild.wrn
 
 .containers
 *.DotSettings.*
-discountdb
-discountdb-*
+
+ui/marketspace-ui/dist/*
+ui/marketspace-ui/node_modules/*
