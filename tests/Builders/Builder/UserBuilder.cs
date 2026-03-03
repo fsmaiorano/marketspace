@@ -49,7 +49,7 @@ public class UserBuilder
             Email = userEmail,
             UserName = userName ?? userEmail,
             EmailConfirmed = true,
-            UserType = UserTypeEnum.Customer
+            UserType = _faker.PickRandom<UserTypeEnum>()
         };
     }
 

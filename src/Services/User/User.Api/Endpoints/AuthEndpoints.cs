@@ -104,6 +104,7 @@ public static class AuthEndpoints
             if (transaction is not null)
                 await transaction.DisposeAsync();
         }
+        
     }
 
     private static async Task<IResult> Login(

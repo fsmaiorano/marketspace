@@ -1,5 +1,6 @@
 ﻿using Bogus;
 using Merchant.Api.Domain.ValueObjects;
+using Microsoft.AspNetCore.Identity;
 using Simulator;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -125,6 +126,8 @@ async Task RunSeedModeAsync()
     CatalogDbContext catalogDbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
     BasketDbContext basketDbContext = scope.ServiceProvider.GetRequiredService<BasketDbContext>();
     UserDbContext userDbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+    UserManager<ApplicationUser> userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    RoleManager<IdentityRole> roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     IMinioBucket minioBucket = scope.ServiceProvider.GetRequiredService<IMinioBucket>();
 
     Console.WriteLine("Creating schemas...");
@@ -138,8 +141,7 @@ async Task RunSeedModeAsync()
     Console.WriteLine("\n📝 Creating custom users...");
     
     // Check if merchant user already exists
-    ApplicationUser? existingMerchantUser = await userDbContext.Users
-        .FirstOrDefaultAsync(u => u.UserName == "merchant@marketspace.com");
+    ApplicationUser? existingMerchantUser = await userManager.FindByEmailAsync("merchant@marketspace.com");
     
     if (existingMerchantUser == null)
     {
@@ -148,12 +150,25 @@ async Task RunSeedModeAsync()
             UserName = "merchant@marketspace.com",
             Email = "merchant@marketspace.com",
             EmailConfirmed = true,
-            PasswordHash = "123456",
             Name = "Merchant User",
+            UserType = UserTypeEnum.Merchant
         };
-        await userDbContext.Users.AddAsync(existingMerchantUser);
-        await userDbContext.SaveChangesAsync();
-        Console.WriteLine($"✅ Merchant user created: {existingMerchantUser.Email} (ID: {existingMerchantUser.Id})");
+        
+        IdentityResult result = await userManager.CreateAsync(existingMerchantUser, "123456");
+        if (result.Succeeded)
+        {
+            // Ensure "Member" role exists and assign it
+            if (!await roleManager.RoleExistsAsync("Member"))
+            {
+                await roleManager.CreateAsync(new IdentityRole("Member"));
+            }
+            await userManager.AddToRoleAsync(existingMerchantUser, "Member");
+            Console.WriteLine($"✅ Merchant user created: {existingMerchantUser.Email} (ID: {existingMerchantUser.Id})");
+        }
+        else
+        {
+            Console.WriteLine($"❌ Failed to create merchant user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+        }
     }
     else
     {
@@ -161,8 +176,7 @@ async Task RunSeedModeAsync()
     }
 
     // Check if customer user already exists
-    ApplicationUser? existingCustomerUser = await userDbContext.Users
-        .FirstOrDefaultAsync(u => u.UserName == "customer@marketspace.com");
+    ApplicationUser? existingCustomerUser = await userManager.FindByEmailAsync("customer@marketspace.com");
     
     if (existingCustomerUser == null)
     {
@@ -171,12 +185,25 @@ async Task RunSeedModeAsync()
             UserName = "customer@marketspace.com",
             Email = "customer@marketspace.com",
             EmailConfirmed = true,
-            PasswordHash = "123456",
             Name = "Customer User",
+            UserType = UserTypeEnum.Customer
         };
-        await userDbContext.Users.AddAsync(existingCustomerUser);
-        await userDbContext.SaveChangesAsync();
-        Console.WriteLine($"✅ Customer user created: {existingCustomerUser.Email} (ID: {existingCustomerUser.Id})");
+        
+        IdentityResult result = await userManager.CreateAsync(existingCustomerUser, "123456");
+        if (result.Succeeded)
+        {
+            // Ensure "Member" role exists and assign it
+            if (!await roleManager.RoleExistsAsync("Member"))
+            {
+                await roleManager.CreateAsync(new IdentityRole("Member"));
+            }
+            await userManager.AddToRoleAsync(existingCustomerUser, "Member");
+            Console.WriteLine($"✅ Customer user created: {existingCustomerUser.Email} (ID: {existingCustomerUser.Id})");
+        }
+        else
+        {
+            Console.WriteLine($"❌ Failed to create customer user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+        }
     }
     else
     {
@@ -307,9 +334,22 @@ async Task RunSeedModeAsync()
     for (int i = 0; i < merchantCount; i++)
     {
         ApplicationUser user = UserBuilder.CreateApplicationUser();
+        user.UserType = UserTypeEnum.Merchant;
+        user.Name = user.Email;
 
-        await userDbContext.Users.AddAsync(user);
-        await userDbContext.SaveChangesAsync();
+        IdentityResult userResult = await userManager.CreateAsync(user, "Password123!");
+        if (!userResult.Succeeded)
+        {
+            Console.WriteLine($"   ❌ Failed to create user {user.Email}: {string.Join(", ", userResult.Errors.Select(e => e.Description))}");
+            continue;
+        }
+
+        // Ensure "Member" role exists and assign it
+        if (!await roleManager.RoleExistsAsync("Member"))
+        {
+            await roleManager.CreateAsync(new IdentityRole("Member"));
+        }
+        await userManager.AddToRoleAsync(user, "Member");
 
         MerchantEntity merchant = MerchantBuilder.CreateMerchantFaker().Generate();
         merchant.CreatedBy = "seed";
@@ -416,6 +456,8 @@ async Task RunDirectDbModeAsync(int recordsToCreate)
     CatalogDbContext catalogDbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
     BasketDbContext basketDbContext = scope.ServiceProvider.GetRequiredService<BasketDbContext>();
     UserDbContext userDbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+    UserManager<ApplicationUser> userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    RoleManager<IdentityRole> roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     IMinioBucket minioBucket = scope.ServiceProvider.GetRequiredService<IMinioBucket>();
 
     Console.WriteLine("Creating schemas...");
@@ -433,8 +475,7 @@ async Task RunDirectDbModeAsync(int recordsToCreate)
         string uniqueEmail = faker.Internet.Email(name);
 
         // Target user
-        ApplicationUser? user = await userDbContext.Users
-            .FirstOrDefaultAsync(u => u.UserName == uniqueUsername);
+        ApplicationUser? user = await userManager.FindByEmailAsync(uniqueEmail);
 
         if (user is null)
         {
@@ -444,11 +485,23 @@ async Task RunDirectDbModeAsync(int recordsToCreate)
                 UserName = uniqueUsername,
                 Email = uniqueEmail,
                 EmailConfirmed = true,
-                PasswordHash = "Password123!",
                 Name = name,
+                UserType = UserTypeEnum.Customer
             };
-            await userDbContext.Users.AddAsync(user);
-            await userDbContext.SaveChangesAsync();
+            
+            IdentityResult userResult = await userManager.CreateAsync(user, "Password123!");
+            if (!userResult.Succeeded)
+            {
+                Console.WriteLine($"   ❌ Failed to create user {user.Email}: {string.Join(", ", userResult.Errors.Select(e => e.Description))}");
+                continue;
+            }
+
+            // Ensure "Member" role exists and assign it
+            if (!await roleManager.RoleExistsAsync("Member"))
+            {
+                await roleManager.CreateAsync(new IdentityRole("Member"));
+            }
+            await userManager.AddToRoleAsync(user, "Member");
         }
         else
         {

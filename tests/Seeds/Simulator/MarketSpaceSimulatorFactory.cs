@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Identity;
 using User.Api.Data;
+using User.Api.Models;
 
 namespace Simulator;
 
@@ -64,6 +66,19 @@ public class MarketSpaceSimulatorFactory
                 
                 services.AddDbContext<UserDbContext>(options =>
                     options.UseNpgsql(_userConnectionString));
+
+                // Add Identity services
+                services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+                    {
+                        options.User.RequireUniqueEmail = true;
+                        options.Password.RequiredLength = 6;
+                        options.Password.RequireDigit = false;
+                        options.Password.RequireLowercase = false;
+                        options.Password.RequireUppercase = false;
+                        options.Password.RequireNonAlphanumeric = false;
+                    })
+                    .AddEntityFrameworkStores<UserDbContext>()
+                    .AddDefaultTokenProviders();
 
                 NpgsqlDataSourceBuilder basketDataSourceBuilder = new(_basketConnectionString);
                 basketDataSourceBuilder.EnableDynamicJson();

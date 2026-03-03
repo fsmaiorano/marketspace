@@ -49,6 +49,8 @@ MerchantDbContext merchantDbContext = scope.ServiceProvider.GetRequiredService<M
 CatalogDbContext catalogDbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
 BasketDbContext basketDbContext = scope.ServiceProvider.GetRequiredService<BasketDbContext>();
 UserDbContext userDbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+UserManager<ApplicationUser> userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+RoleManager<IdentityRole> roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 IMinioBucket minioBucket = scope.ServiceProvider.GetRequiredService<IMinioBucket>();
 
 // Create database schemas
@@ -68,13 +70,40 @@ Console.WriteLine("Creating User database schema...");
 await userDbContext.Database.EnsureCreatedAsync();
 Console.WriteLine("User database schema created successfully!");
 
-IQueryable<ApplicationUser> exits = userDbContext.Users.Where(u => u.UserName == "user@example.com");
+// Create default user using UserManager
+ApplicationUser? existingUser = await userManager.FindByEmailAsync("user@example.com");
 
-if (!exits.Any())
+if (existingUser == null)
 {
-    ApplicationUser user = new() { UserName = "user@example.com", Email = "Password123!" };
-    userDbContext.Users.Add(user);
-    await userDbContext.SaveChangesAsync();
+    ApplicationUser user = new()
+    {
+        UserName = "user@example.com",
+        Email = "user@example.com",
+        Name = "Test User",
+        UserType = UserTypeEnum.Customer,
+        EmailConfirmed = true
+    };
+
+    IdentityResult result = await userManager.CreateAsync(user, "Password123!");
+    if (result.Succeeded)
+    {
+        Console.WriteLine("Default user created: user@example.com");
+        
+        // Ensure "Member" role exists and assign it
+        if (!await roleManager.RoleExistsAsync("Member"))
+        {
+            await roleManager.CreateAsync(new IdentityRole("Member"));
+        }
+        await userManager.AddToRoleAsync(user, "Member");
+    }
+    else
+    {
+        Console.WriteLine("Failed to create default user: " + string.Join(", ", result.Errors.Select(e => e.Description)));
+    }
+}
+else
+{
+    Console.WriteLine("Default user already exists: user@example.com");
 }
 
 const int createMerchantCounter = 20;
@@ -85,10 +114,24 @@ List<ShoppingCartEntity> createdShoppingCarts = [];
 // Create merchants
 for (int i = 0; i < createMerchantCounter; i++)
 {
+    // Create user using UserManager
     ApplicationUser user = UserBuilder.CreateApplicationUser();
+    user.UserType = UserTypeEnum.Merchant;
+    user.Name = user.Email; // Set a default name
 
-    userDbContext.Users.Add(user);
-    await userDbContext.SaveChangesAsync();
+    IdentityResult userResult = await userManager.CreateAsync(user, "Password123!");
+    if (!userResult.Succeeded)
+    {
+        Console.WriteLine($"Failed to create user {user.Email}: " + string.Join(", ", userResult.Errors.Select(e => e.Description)));
+        continue;
+    }
+
+    // Ensure "Member" role exists and assign it
+    if (!await roleManager.RoleExistsAsync("Member"))
+    {
+        await roleManager.CreateAsync(new IdentityRole("Member"));
+    }
+    await userManager.AddToRoleAsync(user, "Member");
 
     MerchantEntity merchant = MerchantBuilder.CreateMerchantFaker().Generate();
     merchant.CreatedBy = "seed";
