@@ -7,6 +7,8 @@ using BackendForFrontend.Api.Catalog;
 using BackendForFrontend.Api.Catalog.Endpoints;
 using BackendForFrontend.Api.Order;
 using BackendForFrontend.Api.Order.Endpoints;
+using BackendForFrontend.Api.User;
+using BackendForFrontend.Api.User.Endpoints;
 using BuildingBlocks.Exceptions;
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
@@ -33,6 +35,7 @@ builder.Services.AddMerchantServices(builder.Configuration);
 builder.Services.AddBasketServices(builder.Configuration);
 builder.Services.AddCatalogServices(builder.Configuration);
 builder.Services.AddOrderServices(builder.Configuration);
+builder.Services.AddUserServices(builder.Configuration);
 builder.Services.AddCustomLoggers();
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
@@ -84,6 +87,7 @@ MerchantEndpoint.MapEndpoint(app);
 BasketEndpoint.MapEndpoint(app);
 CatalogEndpoint.MapEndpoint(app);
 OrderEndpoint.MapEndpoint(app);
+UserEndpoint.MapEndpoint(app);
 
 app.Run();
 
