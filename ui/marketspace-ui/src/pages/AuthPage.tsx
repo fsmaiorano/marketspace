@@ -45,12 +45,6 @@ export default function AuthPage() {
             localStorage.setItem('userType', userType);
 
             window.location.href = '/home';
-            
-            // if (userType === "Customer") {
-            //     window.location.href = '/customer';
-            // } else {
-            //     window.location.href = '/merchant';
-            // }
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'Login failed. Please try again.';
             setError(errorMessage);

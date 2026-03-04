@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {apiClient, userClient} from '@/lib/api';
@@ -39,6 +39,22 @@ export default function HomePage() {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
+    useEffect(() => {
+        const loadProfile = async () => {
+            setLoadingProfile(true);
+            try {
+                await fetchMe();
+            } catch (err: unknown) {
+                const message = err instanceof Error ? err.message : 'Failed to load profile on mount.';
+                setError(message);
+            } finally {
+                setLoadingProfile(false);
+            }
+        };
+
+        loadProfile();
+    }, [currentUserType === null]);
+
     const fetchMe = async (): Promise<MeResponse> => {
         const response = await userClient.get<MeResponse>('/api/auth/me');
         const profile = response.data;
@@ -46,7 +62,6 @@ export default function HomePage() {
 
         setCurrentUserType(profile.userType);
 
-        // Keep merchant form email in sync with authenticated profile.
         setMerchantForm((prev) => ({
             ...prev,
             email: prev.email || profile.email || '',
@@ -134,6 +149,7 @@ export default function HomePage() {
     };
 
     const alreadyMerchant = currentUserType === 'Merchant';
+
 
     return (
         <div className="min-h-screen bg-background">
