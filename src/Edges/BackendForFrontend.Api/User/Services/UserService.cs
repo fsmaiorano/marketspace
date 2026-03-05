@@ -2,6 +2,7 @@ using BackendForFrontend.Api.User.Contracts;
 using BackendForFrontend.Api.User.Dtos;
 using BuildingBlocks;
 using BuildingBlocks.Loggers;
+using System.Net.Http.Headers;
 
 namespace BackendForFrontend.Api.User.Services;
 
@@ -10,15 +11,28 @@ public class UserService : IUserService
     private readonly IAppLogger<UserService> _logger;
     private readonly HttpClient _http;
     private readonly string _baseUrl;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public UserService(
         IAppLogger<UserService> logger,
         HttpClient httpClient,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHttpContextAccessor httpContextAccessor)
     {
         _logger = logger;
         _http = httpClient;
         _baseUrl = configuration["Services:UserService:BaseUrl"] ?? throw new InvalidOperationException("UserService base url not configured");
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    private void ForwardBearerToken()
+    {
+        string? authHeader = _httpContextAccessor.HttpContext?.Request.Headers.Authorization.FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+        {
+            string token = authHeader["Bearer ".Length..];
+            _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
     }
 
     private async Task<Result<T>> ExecuteAsync<T>(Func<Task<HttpResponseMessage>> action)
@@ -43,8 +57,11 @@ public class UserService : IUserService
     public Task<Result<AuthResponse>> RegisterAsync(RegisterRequest request) =>
         ExecuteAsync<AuthResponse>(() => _http.PostAsJsonAsync($"{_baseUrl}/api/auth/register", request));
 
-    public Task<Result<MeResponse>> MeAsync() =>
-        ExecuteAsync<MeResponse>(() => _http.GetAsync($"{_baseUrl}/api/auth/me"));
+    public Task<Result<MeResponse>> MeAsync()
+    {
+        ForwardBearerToken();
+        return ExecuteAsync<MeResponse>(() => _http.GetAsync($"{_baseUrl}/api/auth/me"));
+    }
 
     public Task<Result<AuthResponse>> RefreshAsync(RefreshRequest request) =>
         ExecuteAsync<AuthResponse>(() => _http.PostAsJsonAsync($"{_baseUrl}/api/auth/refresh", request));

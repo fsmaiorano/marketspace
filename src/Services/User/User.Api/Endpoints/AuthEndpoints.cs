@@ -24,10 +24,10 @@ public static class AuthEndpoints
 
         group.MapGet("/me", Me)
             .RequireAuthorization()
-            .Produces(StatusCodes.Status200OK);
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status401Unauthorized);
 
         group.MapPut("/update-user-type", UpdateUserType)
-            .RequireAuthorization()
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound);
@@ -157,20 +157,12 @@ public static class AuthEndpoints
         string? firstName = user.FindFirst(ClaimTypes.GivenName)?.Value;
         string? lastName = user.FindFirst(ClaimTypes.Surname)?.Value;
 
-        string? userType = string.Empty;
         if (string.IsNullOrWhiteSpace(email))
         {
-            return Results.Ok(new
-            {
-                userId,
-                userName,
-                email,
-                firstName,
-                lastName,
-                userType
-            });
+            return Results.Unauthorized();
         }
 
+        string? userType = string.Empty;
         ApplicationUser? applicationUser = await userManager.FindByEmailAsync(email);
         if (applicationUser is not null)
             userType = applicationUser.UserType.ToString();

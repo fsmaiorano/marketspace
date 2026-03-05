@@ -9,7 +9,7 @@ public static class UserEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/user/login",
+        app.MapPost("/api/auth/login",
                 async ([FromBody] LoginRequest req, [FromServices] IUserUseCase usecase) =>
                 {
                     Result<AuthResponse> result = await usecase.LoginAsync(req);
@@ -20,7 +20,7 @@ public static class UserEndpoint
             .Produces<AuthResponse>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
 
-        app.MapPost("/api/user/register",
+        app.MapPost("/api/auth/register",
                 async ([FromBody] RegisterRequest req, [FromServices] IUserUseCase usecase) =>
                 {
                     Result<AuthResponse> result = await usecase.RegisterAsync(req);
@@ -31,7 +31,7 @@ public static class UserEndpoint
             .Produces<AuthResponse>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
 
-        app.MapGet("/api/user/me",
+        app.MapGet("/api/auth/me",
                 async ([FromServices] IUserUseCase usecase) =>
                 {
                     Result<MeResponse> result = await usecase.MeAsync();
@@ -43,7 +43,7 @@ public static class UserEndpoint
             .Produces<MeResponse>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
 
-        app.MapPost("/api/user/refresh",
+        app.MapPost("/api/auth/refresh",
                 async ([FromBody] RefreshRequest req, [FromServices] IUserUseCase usecase) =>
                 {
                     Result<AuthResponse> result = await usecase.RefreshAsync(req);
@@ -55,10 +55,10 @@ public static class UserEndpoint
             .Produces<AuthResponse>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
 
-        app.MapPost("/api/user/revoke",
+        app.MapPost("/api/auth/revoke",
                 async ([FromBody] RefreshRequest req, [FromServices] IUserUseCase usecase) =>
                 {
-                    var result = await usecase.RevokeAsync(req);
+                    Result<object> result = await usecase.RevokeAsync(req);
                     return result.IsSuccess ? Results.NoContent() : Results.BadRequest(result.Error);
                 })
             .RequireAuthorization()
@@ -67,10 +67,10 @@ public static class UserEndpoint
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest);
 
-        app.MapPut("/api/user/update-user-type",
+        app.MapPut("/api/auth/update-user-type",
                 async ([FromBody] UpdateUserTypeRequest req, [FromServices] IUserUseCase usecase) =>
                 {
-                    var result = await usecase.UpdateUserTypeAsync(req);
+                    Result<object> result = await usecase.UpdateUserTypeAsync(req);
                     return result.IsSuccess ? Results.Ok() : Results.BadRequest(result.Error);
                 })
             .RequireAuthorization()
