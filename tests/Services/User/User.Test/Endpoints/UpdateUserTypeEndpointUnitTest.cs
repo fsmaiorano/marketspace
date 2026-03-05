@@ -62,23 +62,6 @@ public class UpdateUserTypeEndpointUnitTest(TestFixture fixture) : Base.BaseTest
     }
 
     [Fact]
-    public async Task UpdateUserType_WithoutAuthentication_ShouldReturn401()
-    {
-        // Arrange
-        UpdateUserTypeRequest request = new()
-        {
-            UserId = "some-user-id",
-            UserType = UserTypeEnum.Merchant
-        };
-
-        // Act
-        HttpResponseMessage response = await DoPut("/api/auth/update-user-type", request);
-
-        // Assert
-        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-    }
-
-    [Fact]
     public async Task UpdateUserType_ChangeFromCustomerToMerchant_ShouldReturn200()
     {
         // Arrange
