@@ -35,7 +35,7 @@ public class UserService : IUserService
         }
     }
 
-    private async Task<Result<T>> ExecuteAsync<T>(Func<Task<HttpResponseMessage>> action)
+    private static async Task<Result<T>> ExecuteAsync<T>(Func<Task<HttpResponseMessage>> action)
     {
         HttpResponseMessage res = await action();
         if (res.IsSuccessStatusCode && res.Content is not null)

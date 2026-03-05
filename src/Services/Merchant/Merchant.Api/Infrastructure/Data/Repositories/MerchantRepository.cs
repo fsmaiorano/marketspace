@@ -18,7 +18,7 @@ public class MerchantRepository(IMerchantDbContext dbContext) : IMerchantReposit
     public async Task<int> UpdateAsync(MerchantEntity merchant, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(merchant);
-        
+
         return await dbContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -40,5 +40,15 @@ public class MerchantRepository(IMerchantDbContext dbContext) : IMerchantReposit
             query = query.AsNoTracking();
 
         return await query.FirstOrDefaultAsync(m => m.Id.Equals(id), cancellationToken);
+    }
+
+    public async Task<bool> ExistsAsync(MerchantId id, CancellationToken cancellationToken = default)
+    {
+        return await dbContext.Merchants.AsNoTracking().AnyAsync(m => m.Id.Equals(id), cancellationToken);
+    }
+
+    public async Task<bool> ExistsAsync(Guid userId, string email, CancellationToken cancellationToken = default)
+    {
+        return await dbContext.Merchants.AsNoTracking().AnyAsync(m => m.UserId.Equals(userId) || m.Email.Equals(Email.Of(email)), cancellationToken);
     }
 }

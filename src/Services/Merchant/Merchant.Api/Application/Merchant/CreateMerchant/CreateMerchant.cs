@@ -36,6 +36,16 @@ public sealed class CreateMerchant(
                 command.PhoneNumber,
                 Email.Of(command.Email));
 
+            bool alreadyExists = await repository.ExistsAsync(command.UserId, command.Email);
+
+            if (alreadyExists)
+            {
+                logger.LogWarning(LogTypeEnum.Business,
+                    "Merchant creation failed due to existing merchant with same UserId or Email. UserId: {UserId}, Email: {Email}",
+                    command.UserId, command.Email);
+                return Result<CreateMerchantResult>.Failure("A merchant with the same UserId or Email already exists.");
+            }
+
             int result = await repository.AddAsync(merchantEntity);
 
             if (result <= 0)

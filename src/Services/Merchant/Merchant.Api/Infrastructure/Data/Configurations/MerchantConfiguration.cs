@@ -21,6 +21,8 @@ public class MerchantConfiguration : IEntityTypeConfiguration<Merchant.Api.Domai
                 userId => userId.Value,
                 dbUserId => UserId.Of(dbUserId));
 
+        builder.HasIndex(m => m.UserId).IsUnique();
+
         builder.Property(m => m.Name)
             .IsRequired()
             .HasMaxLength(100);
@@ -41,7 +43,9 @@ public class MerchantConfiguration : IEntityTypeConfiguration<Merchant.Api.Domai
             .IsRequired()
             .HasMaxLength(100)
             .HasConversion(
-                email => email.Value,
-                dbEmail => Email.Of(dbEmail));
+            email => email.Value,
+            dbEmail => Email.Of(dbEmail));
+
+        builder.HasIndex(m => m.Email).IsUnique();
     }
 }
