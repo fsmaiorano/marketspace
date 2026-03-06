@@ -37,7 +37,7 @@ apiClient.interceptors.response.use(
       "URL:",
       response.config.url,
     );
-    return response.data;
+    return response;
   },
   (error) => {
     console.error(

@@ -1,7 +1,7 @@
-using BackendForFrontend.Api.Merchant.Contracts;
 using BackendForFrontend.Api.Merchant.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using BuildingBlocks;
+using BackendForFrontend.Api.Merchant.UseCases;
 
 namespace BackendForFrontend.Api.Merchant.Endpoints;
 
@@ -10,7 +10,7 @@ public static class MerchantEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("/api/merchant",
-                async ([FromBody] Dtos.CreateMerchantRequest request, [FromServices] IMerchantUseCase usecase) =>
+                async ([FromBody] CreateMerchantRequest request, [FromServices] MerchantUseCase usecase) =>
                 {
                     Result<CreateMerchantResponse> result = await usecase.CreateMerchantAsync(request);
                     return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
@@ -23,7 +23,7 @@ public static class MerchantEndpoint
             .Produces(StatusCodes.Status500InternalServerError);
 
         app.MapGet("/api/merchant/{merchantId:guid}",
-                async ([FromRoute] Guid merchantId, [FromServices] IMerchantUseCase usecase) =>
+                async ([FromRoute] Guid merchantId, [FromServices] MerchantUseCase usecase) =>
                 {
                     Result<GetMerchantByIdResponse> result = await usecase.GetMerchantByIdAsync(merchantId);
                     return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
@@ -36,8 +36,8 @@ public static class MerchantEndpoint
             .Produces(StatusCodes.Status500InternalServerError);
 
         app.MapPut("/api/merchant/{merchantId:guid}",
-                async ([FromRoute] Guid merchantId, [FromBody] Dtos.UpdateMerchantRequest request,
-                    [FromServices] IMerchantUseCase usecase) =>
+                async ([FromRoute] Guid merchantId, [FromBody] UpdateMerchantRequest request,
+                    [FromServices] MerchantUseCase usecase) =>
                 {
                     request.Id = merchantId;
                     Result<UpdateMerchantResponse> result = await usecase.UpdateMerchantAsync(request);
@@ -51,7 +51,7 @@ public static class MerchantEndpoint
             .Produces(StatusCodes.Status500InternalServerError);
 
         app.MapDelete("/api/merchant/{merchantId:guid}",
-                async ([FromRoute] Guid merchantId, [FromServices] IMerchantUseCase usecase) =>
+                async ([FromRoute] Guid merchantId, [FromServices] MerchantUseCase usecase) =>
                 {
                     Result<DeleteMerchantResponse> result = await usecase.DeleteMerchantAsync(merchantId);
                     return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);

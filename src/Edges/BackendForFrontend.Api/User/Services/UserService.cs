@@ -1,7 +1,7 @@
+using BackendForFrontend.Api.Base;
 using BackendForFrontend.Api.User.Dtos;
 using BuildingBlocks;
 using BuildingBlocks.Loggers;
-using System.Net.Http.Headers;
 
 namespace BackendForFrontend.Api.User.Services;
 
@@ -10,65 +10,148 @@ public class UserService(
     HttpClient httpClient,
     IConfiguration configuration,
     IHttpContextAccessor httpContextAccessor)
+    : BaseService(httpClient)
 {
-    private readonly HttpClient _http = httpClient;
-    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
-    private readonly string _baseUrl = configuration["Services:UserService:BaseUrl"] ?? throw new InvalidOperationException("UserService base url not configured");
+    private string BaseUrl => configuration["Services:UserService:BaseUrl"] ??
+                              throw new ArgumentNullException($"UserService BaseUrl is not configured");
 
-    private void ForwardBearerToken()
+    private string GetBearerToken()
     {
-        string? authHeader = _httpContextAccessor.HttpContext?.Request.Headers.Authorization.FirstOrDefault();
+        string? authHeader = httpContextAccessor.HttpContext?.Request.Headers.Authorization.FirstOrDefault();
         if (!string.IsNullOrWhiteSpace(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
         {
-            string token = authHeader["Bearer ".Length..];
-            _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            return authHeader["Bearer ".Length..];
         }
+        return string.Empty;
     }
 
-    private static async Task<Result<T>> ExecuteAsync<T>(Func<Task<HttpResponseMessage>> action)
+    public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
-        HttpResponseMessage res = await action();
-        if (res.IsSuccessStatusCode && res.Content is not null)
+        logger.LogInformation(LogTypeEnum.Application, "Logging in user with request: {@Request}", request);
+
+        HttpResponseMessage response = await DoPost($"{BaseUrl}/api/auth/login", request);
+        AuthResponse? content =
+            await response.Content.ReadFromJsonAsync<AuthResponse>();
+
+        if (response.IsSuccessStatusCode && content is not null)
         {
-            T? body = await res.Content.ReadFromJsonAsync<T>();
-            if (body is not null)
-            {
-                return Result<T>.Success(body);
-            }
+            logger.LogInformation(LogTypeEnum.Business, "User logged in successfully: {@User}", content);
+            return content;
         }
-
-        string error = await res.Content?.ReadAsStringAsync()! ?? "Unknown error";
-        return Result<T>.Failure(error);
+        else
+        {
+            logger.LogError(LogTypeEnum.Application, null, "Failed to login user. Status code: {StatusCode}, Response: {@Response}",
+                response.StatusCode, response.Content);
+            string errorMessage = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Error logging in user: {errorMessage}");
+        }
     }
 
-    public Task<Result<AuthResponse>> LoginAsync(LoginRequest request) =>
-        ExecuteAsync<AuthResponse>(() => _http.PostAsJsonAsync($"{_baseUrl}/api/auth/login", request));
-
-    public Task<Result<AuthResponse>> RegisterAsync(RegisterRequest request) =>
-        ExecuteAsync<AuthResponse>(() => _http.PostAsJsonAsync($"{_baseUrl}/api/auth/register", request));
-
-    public Task<Result<MeResponse>> MeAsync()
+    public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
-        ForwardBearerToken();
-        return ExecuteAsync<MeResponse>(() => _http.GetAsync($"{_baseUrl}/api/auth/me"));
+        logger.LogInformation(LogTypeEnum.Application, "Registering user with request: {@Request}", request);
+
+        HttpResponseMessage response = await DoPost($"{BaseUrl}/api/auth/register", request);
+        AuthResponse? content =
+            await response.Content.ReadFromJsonAsync<AuthResponse>();
+
+        if (response.IsSuccessStatusCode && content is not null)
+        {
+            logger.LogInformation(LogTypeEnum.Business, "User registered successfully: {@User}", content);
+            return content;
+        }
+        else
+        {
+            logger.LogError(LogTypeEnum.Application, null, "Failed to register user. Status code: {StatusCode}, Response: {@Response}",
+                response.StatusCode, response.Content);
+            string errorMessage = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Error registering user: {errorMessage}");
+        }
     }
 
-    public Task<Result<AuthResponse>> RefreshAsync(RefreshRequest request) =>
-        ExecuteAsync<AuthResponse>(() => _http.PostAsJsonAsync($"{_baseUrl}/api/auth/refresh", request));
-
-    public async Task<Result<object>> RevokeAsync(RefreshRequest request)
+    public async Task<MeResponse> MeAsync()
     {
-        HttpResponseMessage res = await _http.PostAsJsonAsync($"{_baseUrl}/api/auth/revoke", request);
-        if (res.IsSuccessStatusCode) return Result<object>.Success(null!);
-        string error = await res.Content?.ReadAsStringAsync()! ?? "Unknown error";
-        return Result<object>.Failure(error);
+        logger.LogInformation(LogTypeEnum.Application, "Retrieving user information");
+
+        string token = GetBearerToken();
+        HttpResponseMessage response = await DoGet($"{BaseUrl}/api/auth/me", token);
+        MeResponse? content =
+            await response.Content.ReadFromJsonAsync<MeResponse>();
+
+        if (response.IsSuccessStatusCode && content is not null)
+        {
+            logger.LogInformation(LogTypeEnum.Application, "User information retrieved successfully: {@User}", content);
+            return content;
+        }
+        else
+        {
+            logger.LogError(LogTypeEnum.Application, null, "Failed to retrieve user information. Status code: {StatusCode}, Response: {@Response}",
+                response.StatusCode, response.Content);
+            string errorMessage = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Error retrieving user information: {errorMessage}");
+        }
     }
 
-    public async Task<Result<object>> UpdateUserTypeAsync(UpdateUserTypeRequest request)
+    public async Task<AuthResponse> RefreshAsync(RefreshRequest request)
     {
-        HttpResponseMessage res = await _http.PutAsJsonAsync($"{_baseUrl}/api/auth/update-user-type", request);
-        if (res.IsSuccessStatusCode) return Result<object>.Success(null!);
-        string error = await res.Content?.ReadAsStringAsync()! ?? "Unknown error";
-        return Result<object>.Failure(error);
+        logger.LogInformation(LogTypeEnum.Application, "Refreshing user token with request: {@Request}", request);
+
+        HttpResponseMessage response = await DoPost($"{BaseUrl}/api/auth/refresh", request);
+        AuthResponse? content =
+            await response.Content.ReadFromJsonAsync<AuthResponse>();
+
+        if (response.IsSuccessStatusCode && content is not null)
+        {
+            logger.LogInformation(LogTypeEnum.Business, "User token refreshed successfully: {@User}", content);
+            return content;
+        }
+        else
+        {
+            logger.LogError(LogTypeEnum.Application, null, "Failed to refresh user token. Status code: {StatusCode}, Response: {@Response}",
+                response.StatusCode, response.Content);
+            string errorMessage = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Error refreshing user token: {errorMessage}");
+        }
+    }
+
+    public async Task<bool> RevokeAsync(RefreshRequest request)
+    {
+        logger.LogInformation(LogTypeEnum.Application, "Revoking user session with request: {@Request}", request);
+
+        HttpResponseMessage response = await DoPost($"{BaseUrl}/api/auth/revoke", request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            logger.LogInformation(LogTypeEnum.Business, "User session revoked successfully");
+            return true;
+        }
+        else
+        {
+            logger.LogError(LogTypeEnum.Application, null, "Failed to revoke user session. Status code: {StatusCode}, Response: {@Response}",
+                response.StatusCode, response.Content);
+            string errorMessage = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Error revoking user session: {errorMessage}");
+        }
+    }
+
+    public async Task<bool> UpdateUserTypeAsync(UpdateUserTypeRequest request)
+    {
+        logger.LogInformation(LogTypeEnum.Application, "Updating user type with request: {@Request}", request);
+
+        string token = GetBearerToken();
+        HttpResponseMessage response = await DoPut($"{BaseUrl}/api/auth/update-user-type", request, token);
+
+        if (response.IsSuccessStatusCode)
+        {
+            logger.LogInformation(LogTypeEnum.Business, "User type updated successfully");
+            return true;
+        }
+        else
+        {
+            logger.LogError(LogTypeEnum.Application, null, "Failed to update user type. Status code: {StatusCode}, Response: {@Response}",
+                response.StatusCode, response.Content);
+            string errorMessage = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Error updating user type: {errorMessage}");
+        }
     }
 }

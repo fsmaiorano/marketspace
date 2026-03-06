@@ -1,7 +1,7 @@
 using BackendForFrontend.Api.Basket.Dtos;
-using BackendForFrontend.Api.Basket.UseCases;
 using Microsoft.AspNetCore.Mvc;
 using BuildingBlocks;
+using BackendForFrontend.Api.Basket.UseCases;
 
 namespace BackendForFrontend.Api.Basket.Endpoints;
 
@@ -10,7 +10,7 @@ public static class BasketEndpoint
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("/api/basket",
-                async ([FromBody] CreateBasketRequest request, [FromServices] IBasketUseCase usecase) =>
+                async ([FromBody] CreateBasketRequest request, [FromServices] BasketUseCase usecase) =>
                 {
                     Result<CreateBasketResponse> result = await usecase.CreateBasketAsync(request);
                     return result.IsSuccess
@@ -25,7 +25,7 @@ public static class BasketEndpoint
             .Produces(StatusCodes.Status500InternalServerError);
 
         app.MapGet("/api/basket/{username}",
-                async ([FromRoute] string username, [FromServices] IBasketUseCase usecase) =>
+                async ([FromRoute] string username, [FromServices] BasketUseCase usecase) =>
                 {
                     Result<GetBasketResponse> result = await usecase.GetBasketByIdAsync(username);
                     return result.IsSuccess
@@ -40,7 +40,7 @@ public static class BasketEndpoint
             .Produces(StatusCodes.Status500InternalServerError);
 
         app.MapDelete("/api/basket/{username}",
-                async ([FromRoute] string username, [FromServices] IBasketUseCase usecase) =>
+                async ([FromRoute] string username, [FromServices] BasketUseCase usecase) =>
                 {
                     Result<DeleteBasketResponse> result = await usecase.DeleteBasketAsync(username);
                     return result.IsSuccess
@@ -55,7 +55,7 @@ public static class BasketEndpoint
             .Produces(StatusCodes.Status500InternalServerError);
 
         app.MapPost("/api/basket/checkout",
-                async ([FromBody] CheckoutBasketRequest request, [FromServices] IBasketUseCase usecase) =>
+                async ([FromBody] CheckoutBasketRequest request, [FromServices] BasketUseCase usecase) =>
                 {
                     Result<CheckoutBasketResponse> result = await usecase.CheckoutBasketAsync(request);
                     return result.IsSuccess

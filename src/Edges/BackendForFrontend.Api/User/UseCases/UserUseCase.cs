@@ -12,21 +12,21 @@ public class UserUseCase(
     private readonly IAppLogger<UserUseCase> _logger = logger;
     private readonly UserService _service = service;
 
-    public Task<Result<AuthResponse>> LoginAsync(LoginRequest request) =>
+    public Task<AuthResponse> LoginAsync(LoginRequest request) =>
         _service.LoginAsync(request);
 
-    public Task<Result<AuthResponse>> RegisterAsync(RegisterRequest request) =>
+    public Task<AuthResponse> RegisterAsync(RegisterRequest request) =>
         _service.RegisterAsync(request);
 
-    public Task<Result<MeResponse>> MeAsync() =>
+    public Task<MeResponse> MeAsync() =>
         _service.MeAsync();
 
-    public Task<Result<AuthResponse>> RefreshAsync(RefreshRequest request) =>
+    public Task<AuthResponse> RefreshAsync(RefreshRequest request) =>
         _service.RefreshAsync(request);
 
-    public Task<Result<object>> RevokeAsync(RefreshRequest request) =>
+    public Task<bool> RevokeAsync(RefreshRequest request) =>
         _service.RevokeAsync(request);
 
-    public Task<Result<object>> UpdateUserTypeAsync(UpdateUserTypeRequest request) =>
+    public Task<bool> UpdateUserTypeAsync(UpdateUserTypeRequest request) =>
         _service.UpdateUserTypeAsync(request);
 }
