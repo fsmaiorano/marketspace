@@ -5,19 +5,11 @@ using BuildingBlocks.Loggers;
 
 namespace BackendForFrontend.Api.Basket.Services;
 
-public interface IBasketService
-{
-    Task<Result<CreateBasketResponse>> CreateBasketAsync(CreateBasketRequest request);
-    Task<Result<GetBasketResponse>> GetBasketByIdAsync(string username);
-    Task<Result<DeleteBasketResponse>> DeleteBasketAsync(string username);
-    Task<Result<CheckoutBasketResponse>> CheckoutBasketAsync(CheckoutBasketRequest request);
-}
-
 public class BasketService(
     IAppLogger<BasketService> logger,
-    HttpClient httpClient, 
+    HttpClient httpClient,
     IConfiguration configuration)
-    : BaseService(httpClient), IBasketService
+    : BaseService(httpClient)
 {
     private string BaseUrl => configuration["Services:BasketService:BaseUrl"] ??
                               throw new ArgumentNullException($"BasketService BaseUrl is not configured");
@@ -25,7 +17,7 @@ public class BasketService(
     public async Task<Result<CreateBasketResponse>> CreateBasketAsync(CreateBasketRequest request)
     {
         logger.LogInformation(LogTypeEnum.Application, "Creating basket for user: {Username}", request.Username);
-        
+
         HttpResponseMessage response = await DoPost($"{BaseUrl}/basket", request);
         Result<CreateBasketResponse>? content = await response.Content.ReadFromJsonAsync<Result<CreateBasketResponse>>();
 
@@ -46,7 +38,7 @@ public class BasketService(
     public async Task<Result<GetBasketResponse>> GetBasketByIdAsync(string username)
     {
         logger.LogInformation(LogTypeEnum.Application, "Retrieving basket for user: {Username}", username);
-        
+
         HttpResponseMessage response = await DoGet($"{BaseUrl}/basket/{username}");
 
         Result<GetBasketResponse>? content = await response.Content.ReadFromJsonAsync<Result<GetBasketResponse>>();
@@ -68,7 +60,7 @@ public class BasketService(
     public async Task<Result<DeleteBasketResponse>> DeleteBasketAsync(string username)
     {
         logger.LogInformation(LogTypeEnum.Application, "Deleting basket for user: {Username}", username);
-        
+
         HttpResponseMessage response = await DoDelete($"{BaseUrl}/basket/{username}");
         Result<DeleteBasketResponse>? content = await response.Content.ReadFromJsonAsync<Result<DeleteBasketResponse>>();
 
@@ -89,7 +81,7 @@ public class BasketService(
     public async Task<Result<CheckoutBasketResponse>> CheckoutBasketAsync(CheckoutBasketRequest request)
     {
         logger.LogInformation(LogTypeEnum.Application, "Checking out basket for user: {Username}", request.Username);
-        
+
         HttpResponseMessage response = await DoPost($"{BaseUrl}/basket/checkout", request);
         Result<CheckoutBasketResponse>? content = await response.Content.ReadFromJsonAsync<Result<CheckoutBasketResponse>>();
 

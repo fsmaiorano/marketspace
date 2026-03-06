@@ -1,5 +1,5 @@
-using BackendForFrontend.Api.Merchant.Contracts;
 using BackendForFrontend.Api.Merchant.Dtos;
+using BackendForFrontend.Api.Merchant.Services;
 using BuildingBlocks;
 using BuildingBlocks.Loggers;
 
@@ -7,7 +7,7 @@ namespace BackendForFrontend.Api.Merchant.UseCases;
 
 public class MerchantUseCase(
     IAppLogger<MerchantUseCase> logger,
-    IMerchantService service) : IMerchantUseCase
+    MerchantService service)
 {
     public async Task<Result<CreateMerchantResponse>> CreateMerchantAsync(CreateMerchantRequest request)
     {

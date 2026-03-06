@@ -1,5 +1,4 @@
 using BackendForFrontend.Api.Base;
-using BackendForFrontend.Api.Catalog.Contracts;
 using BackendForFrontend.Api.Catalog.Dtos;
 using BuildingBlocks;
 using BuildingBlocks.Loggers;
@@ -8,9 +7,9 @@ namespace BackendForFrontend.Api.Catalog.Services;
 
 public class CatalogService(
     IAppLogger<CatalogService> logger,
-    HttpClient httpClient, 
+    HttpClient httpClient,
     IConfiguration configuration)
-    : BaseService(httpClient), ICatalogService
+    : BaseService(httpClient)
 {
     private string BaseUrl => configuration["Services:CatalogService:BaseUrl"] ??
                               throw new ArgumentNullException($"CatalogService BaseUrl is not configured");

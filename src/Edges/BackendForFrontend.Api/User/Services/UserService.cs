@@ -1,4 +1,3 @@
-using BackendForFrontend.Api.User.Contracts;
 using BackendForFrontend.Api.User.Dtos;
 using BuildingBlocks;
 using BuildingBlocks.Loggers;
@@ -6,24 +5,15 @@ using System.Net.Http.Headers;
 
 namespace BackendForFrontend.Api.User.Services;
 
-public class UserService : IUserService
+public class UserService(
+    IAppLogger<UserService> logger,
+    HttpClient httpClient,
+    IConfiguration configuration,
+    IHttpContextAccessor httpContextAccessor)
 {
-    private readonly IAppLogger<UserService> _logger;
-    private readonly HttpClient _http;
-    private readonly string _baseUrl;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public UserService(
-        IAppLogger<UserService> logger,
-        HttpClient httpClient,
-        IConfiguration configuration,
-        IHttpContextAccessor httpContextAccessor)
-    {
-        _logger = logger;
-        _http = httpClient;
-        _baseUrl = configuration["Services:UserService:BaseUrl"] ?? throw new InvalidOperationException("UserService base url not configured");
-        _httpContextAccessor = httpContextAccessor;
-    }
+    private readonly HttpClient _http = httpClient;
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    private readonly string _baseUrl = configuration["Services:UserService:BaseUrl"] ?? throw new InvalidOperationException("UserService base url not configured");
 
     private void ForwardBearerToken()
     {

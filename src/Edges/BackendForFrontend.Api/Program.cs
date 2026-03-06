@@ -16,9 +16,6 @@ using BuildingBlocks.Authentication;
 using MarketSpace.ServiceDefaults;
 using Serilog;
 using Serilog.Extensions.Hosting;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.OpenApi;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -32,11 +29,11 @@ builder.Services.AddOpenApi();
 builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddMerchantServices(builder.Configuration);
-builder.Services.AddBasketServices(builder.Configuration);
-builder.Services.AddCatalogServices(builder.Configuration);
-builder.Services.AddOrderServices(builder.Configuration);
-builder.Services.AddUserServices(builder.Configuration);
+builder.Services.AddMerchantServices();
+builder.Services.AddBasketServices();
+builder.Services.AddCatalogServices();
+builder.Services.AddOrderServices();
+builder.Services.AddUserServices();
 builder.Services.AddCustomLoggers();
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();

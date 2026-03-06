@@ -5,13 +5,10 @@ namespace BackendForFrontend.Api.Basket;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddBasketServices(this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddBasketServices(this IServiceCollection services)
     {
-        services.AddScoped<IBasketUseCase, BasketUseCase>();
-        
-        services.AddHttpClient<IBasketService, BasketService>();
-        
+        services.AddScoped<BasketUseCase>();
+        services.AddHttpClient<BasketService>();
         return services;
     }
 }

@@ -1,12 +1,10 @@
-using BackendForFrontend.Api.Merchant.Contracts;
 using BackendForFrontend.Api.Merchant.Services;
 using BackendForFrontend.Api.Basket.Services;
-using BackendForFrontend.Api.Catalog.Contracts;
 using BackendForFrontend.Api.Catalog.Services;
-using BackendForFrontend.Api.Order.Contracts;
 using BackendForFrontend.Api.Order.Services;
 using BuildingBlocks.Http;
 using BuildingBlocks.Services.Correlation;
+using BackendForFrontend.Api.User.Services;
 
 namespace BackendForFrontend.Api;
 
@@ -36,7 +34,7 @@ public static class DependencyInjectionExtension
         services.AddTransient<LoggingHandler>();
 
         string? merchantUrl = configuration["Services:MerchantService:BaseUrl"];
-        services.AddHttpClient<IMerchantService, MerchantService>(client =>
+        services.AddHttpClient<MerchantService>(client =>
             {
                 client.BaseAddress = new Uri(merchantUrl ?? throw new InvalidOperationException());
             })
@@ -44,7 +42,7 @@ public static class DependencyInjectionExtension
             .AddHttpMessageHandler<LoggingHandler>();
 
         string? basketUrl = configuration["Services:BasketService:BaseUrl"];
-        services.AddHttpClient<IBasketService, BasketService>(client =>
+        services.AddHttpClient<BasketService>(client =>
             {
                 client.BaseAddress = new Uri(basketUrl ?? throw new InvalidOperationException());
             })
@@ -52,7 +50,7 @@ public static class DependencyInjectionExtension
             .AddHttpMessageHandler<LoggingHandler>();
 
         string? catalogUrl = configuration["Services:CatalogService:BaseUrl"];
-        services.AddHttpClient<ICatalogService, CatalogService>(client =>
+        services.AddHttpClient<CatalogService>(client =>
             {
                 client.BaseAddress = new Uri(catalogUrl ?? throw new InvalidOperationException());
             })
@@ -60,9 +58,17 @@ public static class DependencyInjectionExtension
             .AddHttpMessageHandler<LoggingHandler>();
 
         string? orderUrl = configuration["Services:OrderService:BaseUrl"];
-        services.AddHttpClient<IOrderService, OrderService>(client =>
+        services.AddHttpClient<OrderService>(client =>
             {
                 client.BaseAddress = new Uri(orderUrl ?? throw new InvalidOperationException());
+            })
+            .AddHttpMessageHandler<CorrelationIdHandler>()
+            .AddHttpMessageHandler<LoggingHandler>();
+
+        string? userUrl = configuration["Services:UserService:BaseUrl"];
+        services.AddHttpClient<UserService>(client =>
+            {
+                client.BaseAddress = new Uri(userUrl ?? throw new InvalidOperationException());
             })
             .AddHttpMessageHandler<CorrelationIdHandler>()
             .AddHttpMessageHandler<LoggingHandler>();

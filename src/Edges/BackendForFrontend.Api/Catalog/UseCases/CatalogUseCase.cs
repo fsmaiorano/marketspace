@@ -1,5 +1,5 @@
-using BackendForFrontend.Api.Catalog.Contracts;
 using BackendForFrontend.Api.Catalog.Dtos;
+using BackendForFrontend.Api.Catalog.Services;
 using BuildingBlocks;
 using BuildingBlocks.Loggers;
 
@@ -7,7 +7,7 @@ namespace BackendForFrontend.Api.Catalog.UseCases;
 
 public class CatalogUseCase(
     IAppLogger<CatalogUseCase> logger,
-    ICatalogService service) : ICatalogUseCase
+    CatalogService service)
 {
     public async Task<Result<CreateCatalogResponse>> CreateCatalogAsync(CreateCatalogRequest request)
     {
@@ -20,8 +20,8 @@ public class CatalogUseCase(
         logger.LogInformation(LogTypeEnum.Application, "Retrieving catalog with ID: {CatalogId}", catalogId);
         return await service.GetCatalogByIdAsync(catalogId);
     }
-    
-    public async Task<Result<GetCatalogListResponse>> GetCatalogListAsync(int pageIndex, int pageSize) 
+
+    public async Task<Result<GetCatalogListResponse>> GetCatalogListAsync(int pageIndex, int pageSize)
     {
         logger.LogInformation(LogTypeEnum.Application, "Retrieving catalog list with pageIndex: {PageIndex}, pageSize: {PageSize}", pageIndex, pageSize);
         return await service.GetCatalogListAsync(pageIndex, pageSize);

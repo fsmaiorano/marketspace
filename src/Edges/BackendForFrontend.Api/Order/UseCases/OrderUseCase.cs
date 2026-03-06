@@ -1,5 +1,5 @@
-using BackendForFrontend.Api.Order.Contracts;
 using BackendForFrontend.Api.Order.Dtos;
+using BackendForFrontend.Api.Order.Services;
 using BuildingBlocks;
 using BuildingBlocks.Loggers;
 
@@ -7,7 +7,7 @@ namespace BackendForFrontend.Api.Order.UseCases;
 
 public class OrderUseCase(
     IAppLogger<OrderUseCase> logger,
-    IOrderService service) : IOrderUseCase
+    OrderService service)
 {
     public async Task<Result<CreateOrderResponse>> CreateOrderAsync(CreateOrderRequest request)
     {

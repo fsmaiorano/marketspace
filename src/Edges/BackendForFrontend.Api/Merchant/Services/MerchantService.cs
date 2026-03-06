@@ -1,5 +1,4 @@
 using BackendForFrontend.Api.Base;
-using BackendForFrontend.Api.Merchant.Contracts;
 using BackendForFrontend.Api.Merchant.Dtos;
 using BuildingBlocks;
 using BuildingBlocks.Loggers;
@@ -8,9 +7,9 @@ namespace BackendForFrontend.Api.Merchant.Services;
 
 public class MerchantService(
     IAppLogger<MerchantService> logger,
-    HttpClient httpClient, 
+    HttpClient httpClient,
     IConfiguration configuration)
-    : BaseService(httpClient), IMerchantService
+    : BaseService(httpClient)
 {
     private string BaseUrl => configuration["Services:MerchantService:BaseUrl"] ??
                               throw new ArgumentNullException($"MerchantService BaseUrl is not configured");
