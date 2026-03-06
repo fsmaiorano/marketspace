@@ -154,27 +154,25 @@ public static class AuthEndpoints
         string? userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         string? userName = user.FindFirst(ClaimTypes.Name)?.Value;
         string? email = user.FindFirst(ClaimTypes.Email)?.Value;
-        string? firstName = user.FindFirst(ClaimTypes.GivenName)?.Value;
-        string? lastName = user.FindFirst(ClaimTypes.Surname)?.Value;
+        string? name = user.FindFirst(ClaimTypes.GivenName)?.Value;
 
-        if (string.IsNullOrWhiteSpace(email))
+        if (string.IsNullOrWhiteSpace(userId))
         {
             return Results.Unauthorized();
         }
 
-        string? userType = string.Empty;
-        ApplicationUser? applicationUser = await userManager.FindByEmailAsync(email);
-        if (applicationUser is not null)
-            userType = applicationUser.UserType.ToString();
+        ApplicationUser? applicationUser = await userManager.FindByIdAsync(userId);
+        if (applicationUser is null)
+            return Results.Unauthorized();
 
         return Results.Ok(new
         {
             userId,
             userName,
             email,
-            firstName,
-            lastName,
-            userType
+            name = name ?? applicationUser.Name,
+            userType = applicationUser.UserType.ToString(),
+            enableNotifications = applicationUser.EnableNotifications
         });
     }
 
@@ -195,7 +193,6 @@ public static class AuthEndpoints
                 return Results.NotFound(new { message = "User not found." });
             }
 
-            // Validate the UserType value
             if (!Enum.IsDefined(dto.UserType))
             {
                 logger.LogWarning("UpdateUserType failed: Invalid UserType value {UserType}", dto.UserType);

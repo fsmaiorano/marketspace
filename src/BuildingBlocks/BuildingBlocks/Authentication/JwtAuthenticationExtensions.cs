@@ -9,7 +9,8 @@ namespace BuildingBlocks.Authentication;
 
 public static class JwtAuthenticationExtensions
 {
-    public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddJwtAuthentication(this IServiceCollection services,
+        IConfiguration configuration)
     {
         IConfigurationSection jwtConfig = configuration.GetSection("Jwt");
         string? issuer = jwtConfig["Issuer"];
@@ -17,33 +18,37 @@ public static class JwtAuthenticationExtensions
         string? secretKey = jwtConfig["SecretKey"] ?? jwtConfig["Key"];
 
         services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-        .AddJwtBearer(options =>
-        {
-            options.TokenValidationParameters = new TokenValidationParameters
             {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = issuer,
-                ValidAudience = audience,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!)),
-                ClockSkew = TimeSpan.Zero
-            };
-            options.Events = new JwtBearerEvents
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
             {
-                OnAuthenticationFailed = context =>
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    context.Response.StatusCode = 401;
-                    context.Response.ContentType = "application/json";
-                    return context.Response.WriteAsync("{\"error\":\"Invalid or expired token\"}");
-                }
-            };
-        });
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = issuer,
+                    ValidAudience = audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!)),
+                    ClockSkew = TimeSpan.Zero
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnChallenge = context =>
+                    {
+                        context.HandleResponse();
+                        if (context.Response.HasStarted)
+                            return Task.CompletedTask;
+
+                        context.Response.StatusCode = 401;
+                        context.Response.ContentType = "application/json";
+                        return context.Response.WriteAsync("{\"error\":\"Invalid or expired token\"}");
+                    }
+                };
+            });
         services.AddAuthorization();
         return services;
     }
