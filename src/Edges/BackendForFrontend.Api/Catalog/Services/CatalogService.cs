@@ -2,6 +2,7 @@ using BackendForFrontend.Api.Base;
 using BackendForFrontend.Api.Catalog.Dtos;
 using BuildingBlocks;
 using BuildingBlocks.Loggers;
+using BuildingBlocks.Pagination;
 
 namespace BackendForFrontend.Api.Catalog.Services;
 
@@ -63,14 +64,36 @@ public class CatalogService(
             pageSize);
 
         HttpResponseMessage response = await DoGet($"{BaseUrl}/catalog?pageIndex={pageIndex}&pageSize={pageSize}");
-        Result<GetCatalogListResponse>? content =
-            await response.Content.ReadFromJsonAsync<Result<GetCatalogListResponse>>();
 
-        if (response.IsSuccessStatusCode && content is not null)
+        if (response.IsSuccessStatusCode)
         {
-            logger.LogInformation(LogTypeEnum.Application, "Catalog list retrieved successfully with {Count} items",
-                content.Data?.Products.Count);
-            return content;
+            PaginatedResult<CatalogItemDto>? paginated =
+                await response.Content.ReadFromJsonAsync<PaginatedResult<CatalogItemDto>>();
+
+            if (paginated is null)
+                throw new HttpRequestException("Empty response from catalog service");
+
+            GetCatalogListResponse mapped = new()
+            {
+                PageIndex = paginated.PageIndex,
+                PageSize = paginated.PageSize,
+                Count = paginated.Count,
+                Products = paginated.Data.Select(p => new CatalogDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    ImageUrl = p.ImageUrl,
+                    Categories = p.Categories,
+                    MerchantId = p.MerchantId,
+                    CreatedAt = p.CreatedAt,
+                    UpdatedAt = p.UpdatedAt
+                }).ToList()
+            };
+
+            logger.LogInformation(LogTypeEnum.Application, "Catalog list retrieved successfully with {Count} items", mapped.Products.Count);
+            return Result<GetCatalogListResponse>.Success(mapped);
         }
         else
         {
