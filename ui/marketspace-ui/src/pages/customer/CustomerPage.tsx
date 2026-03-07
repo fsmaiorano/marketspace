@@ -171,7 +171,11 @@ export default function CustomerPage() {
 
     try {
       if (newItems.length === 0) {
-        await deleteBasket(me.userName);
+        try {
+          await deleteBasket(me.userName);
+        } catch {
+          // Ignore errors on delete, just clear the local state
+        }
         setBasket({ username: me.userName, items: [], totalPrice: 0 });
       } else {
         const saved = await createOrUpdateBasket(updatedBasket);

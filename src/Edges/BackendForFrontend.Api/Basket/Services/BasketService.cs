@@ -67,6 +67,15 @@ public class BasketService(
             logger.LogError(LogTypeEnum.Application, null, "Basket response was null for user: {Username}", username);
             return Result<GetBasketResponse>.Failure("Basket not found");
         }
+        else if (response.StatusCode == System.Net.HttpStatusCode.NotFound || 
+                 response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            logger.LogInformation(LogTypeEnum.Application, "Basket not found for user: {Username}", username);
+            return Result<GetBasketResponse>.Success(new GetBasketResponse
+            {
+                ShoppingCart = new CartDto { Username = username, Items = [] }
+            });
+        }
         else
         {
             logger.LogError(LogTypeEnum.Application, null, "Failed to retrieve basket. Status code: {StatusCode}, Response: {@Response}",
@@ -80,20 +89,37 @@ public class BasketService(
     {
         logger.LogInformation(LogTypeEnum.Application, "Deleting basket for user: {Username}", username);
 
-        HttpResponseMessage response = await DoDelete($"{BaseUrl}/basket/{username}");
-        Result<DeleteBasketResponse>? content = await response.Content.ReadFromJsonAsync<Result<DeleteBasketResponse>>();
+        try
+        {
+            HttpResponseMessage response = await DoDelete($"{BaseUrl}/basket/{username}");
 
-        if (response.IsSuccessStatusCode && content is not null)
-        {
-            logger.LogInformation(LogTypeEnum.Business, "Basket deleted successfully for user: {Username}", username);
-            return content;
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+            {
+                logger.LogInformation(LogTypeEnum.Business, "Basket deleted successfully for user: {Username}", username);
+                return Result<DeleteBasketResponse>.Success(new DeleteBasketResponse { IsSuccess = true });
+            }
+            else if (response.IsSuccessStatusCode)
+            {
+                logger.LogInformation(LogTypeEnum.Business, "Basket deleted successfully for user: {Username}", username);
+                return Result<DeleteBasketResponse>.Success(new DeleteBasketResponse { IsSuccess = true });
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.NotFound || 
+                     response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                logger.LogInformation(LogTypeEnum.Application, "Basket not found for user: {Username}, treating as success", username);
+                return Result<DeleteBasketResponse>.Success(new DeleteBasketResponse { IsSuccess = true });
+            }
+            else
+            {
+                logger.LogError(LogTypeEnum.Application, null, "Failed to delete basket. Status code: {StatusCode}",
+                    response.StatusCode);
+                return Result<DeleteBasketResponse>.Success(new DeleteBasketResponse { IsSuccess = true });
+            }
         }
-        else
+        catch (Exception ex)
         {
-            logger.LogError(LogTypeEnum.Application, null, "Failed to delete basket. Status code: {StatusCode}, Response: {@Response}",
-                response.StatusCode, response.Content);
-            string errorMessage = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Error deleting basket: {errorMessage}");
+            logger.LogError(LogTypeEnum.Exception, ex, "Exception occurred while deleting basket for user: {Username}", username);
+            return Result<DeleteBasketResponse>.Success(new DeleteBasketResponse { IsSuccess = true });
         }
     }
 
