@@ -25,6 +25,8 @@ apiClient.interceptors.request.use((config) => {
     console.warn("[apiClient] No token found in localStorage");
   }
   console.log("[apiClient] Request URL:", config.url);
+  console.log("[apiClient] Request method:", config.method);
+  console.log("[apiClient] Request body:", config.data);
   console.log("[apiClient] Request headers:", config.headers);
   return config;
 });

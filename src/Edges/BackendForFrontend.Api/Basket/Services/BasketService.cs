@@ -19,12 +19,22 @@ public class BasketService(
         logger.LogInformation(LogTypeEnum.Application, "Creating basket for user: {Username}", request.Username);
 
         HttpResponseMessage response = await DoPost($"{BaseUrl}/basket", request);
-        Result<CreateBasketResponse>? content = await response.Content.ReadFromJsonAsync<Result<CreateBasketResponse>>();
 
-        if (response.IsSuccessStatusCode && content is not null)
+        if (response.IsSuccessStatusCode)
         {
-            logger.LogInformation(LogTypeEnum.Business, "Basket created successfully for user: {Username}", request.Username);
-            return content;
+            logger.LogInformation(LogTypeEnum.Business, "Basket created successfully for user: {Username}, fetching basket data", request.Username);
+            
+            Result<GetBasketResponse> getResult = await GetBasketByIdAsync(request.Username);
+            
+            if (getResult.IsSuccess && getResult.Data is not null)
+            {
+                return Result<CreateBasketResponse>.Success(new CreateBasketResponse
+                {
+                    ShoppingCart = getResult.Data.ShoppingCart
+                });
+            }
+            
+            return Result<CreateBasketResponse>.Failure(getResult.Error ?? "Failed to retrieve created basket");
         }
         else
         {

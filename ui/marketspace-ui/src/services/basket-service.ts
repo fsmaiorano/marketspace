@@ -81,12 +81,12 @@ export const createOrUpdateBasket = async (basket: Basket): Promise<Basket> => {
   const response = await apiClient.post<BffResult<BffCreateBasketResponse>>(
     "/api/basket",
     {
-      username: basket.username,
-      items: basket.items.map((i) => ({
-        productId: i.productId,
-        productName: i.productName,
-        price: i.price,
-        quantity: i.quantity,
+      Username: basket.username,
+      Items: basket.items.map((i) => ({
+        ProductId: i.productId,
+        ProductName: i.productName,
+        Price: i.price,
+        Quantity: i.quantity,
       })),
     },
   );
@@ -101,19 +101,19 @@ export const deleteBasket = async (username: string): Promise<void> => {
 
 export const checkoutBasket = async (request: CheckoutRequest): Promise<void> => {
   await apiClient.post<BffResult<unknown>>("/api/basket/checkout", {
-    username: request.username,
-    customerId: request.customerId ?? "",
-    firstName: request.firstName ?? "",
-    lastName: request.lastName ?? "",
-    emailAddress: request.emailAddress ?? "",
-    addressLine: request.addressLine ?? "",
-    country: request.country ?? "",
-    state: request.state ?? "",
-    zipCode: request.zipCode ?? "",
-    cardName: request.cardName ?? "",
-    cardNumber: request.cardNumber ?? "",
-    expiration: request.expiration ?? "",
-    cvv: request.cvv ?? "",
-    paymentMethod: request.paymentMethod ?? 0,
+    Username: request.username,
+    CustomerId: request.customerId ?? "",
+    FirstName: request.firstName ?? "",
+    LastName: request.lastName ?? "",
+    EmailAddress: request.emailAddress ?? "",
+    AddressLine: request.addressLine ?? "",
+    Country: request.country ?? "",
+    State: request.state ?? "",
+    ZipCode: request.zipCode ?? "",
+    CardName: request.cardName ?? "",
+    CardNumber: request.cardNumber ?? "",
+    Expiration: request.expiration ?? "",
+    CVV: request.cvv ?? "",
+    PaymentMethod: request.paymentMethod ?? 0,
   });
 };
