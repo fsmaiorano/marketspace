@@ -51,12 +51,21 @@ public class BasketService(
 
         HttpResponseMessage response = await DoGet($"{BaseUrl}/basket/{username}");
 
-        Result<GetBasketResponse>? content = await response.Content.ReadFromJsonAsync<Result<GetBasketResponse>>();
-
-        if (response.IsSuccessStatusCode && content is not null)
+        if (response.IsSuccessStatusCode)
         {
-            logger.LogInformation(LogTypeEnum.Application, "Basket retrieved successfully for user: {Username}", username);
-            return content;
+            CartDto? cart = await response.Content.ReadFromJsonAsync<CartDto>();
+
+            if (cart is not null)
+            {
+                logger.LogInformation(LogTypeEnum.Application, "Basket retrieved successfully for user: {Username}", username);
+                return Result<GetBasketResponse>.Success(new GetBasketResponse
+                {
+                    ShoppingCart = cart
+                });
+            }
+
+            logger.LogError(LogTypeEnum.Application, null, "Basket response was null for user: {Username}", username);
+            return Result<GetBasketResponse>.Failure("Basket not found");
         }
         else
         {
