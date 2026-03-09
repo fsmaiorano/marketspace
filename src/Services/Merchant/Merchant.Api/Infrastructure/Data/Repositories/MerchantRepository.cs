@@ -51,4 +51,11 @@ public class MerchantRepository(IMerchantDbContext dbContext) : IMerchantReposit
     {
         return await dbContext.Merchants.AsNoTracking().AnyAsync(m => m.UserId.Equals(userId) || m.Email.Equals(Email.Of(email)), cancellationToken);
     }
+
+    public async Task<MerchantEntity?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        UserId userIdVO = UserId.Of(userId);
+        return await dbContext.Merchants.AsNoTracking()
+            .FirstOrDefaultAsync(m => m.UserId == userIdVO, cancellationToken);
+    }
 }

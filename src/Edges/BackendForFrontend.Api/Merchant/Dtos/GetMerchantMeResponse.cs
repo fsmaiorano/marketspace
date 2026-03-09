@@ -1,16 +1,13 @@
-using Merchant.Api.Domain.ValueObjects;
+namespace BackendForFrontend.Api.Merchant.Dtos;
 
-namespace Merchant.Api.Endpoints.Dto;
-
-public class MerchantDto
+public class GetMerchantMeResponse
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public string Address { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
-    public string Email { get; set; } = null!;
-
+    public string Address { get; set; } = string.Empty;
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
 }

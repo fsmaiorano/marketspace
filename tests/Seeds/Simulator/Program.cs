@@ -17,7 +17,7 @@ Console.WriteLine();
 // ======================================
 // CONFIGURATION
 // ======================================
-const string bffBaseUrl = "http://localhost:5000"; // ajuste para a porta do seu BFF
+const string bffBaseUrl = "https://localhost:5150"; // ajuste para a porta do seu BFF
 const string basketApiBaseUrl = "http://localhost:5001";
 
 const string merchantConnectionString =
@@ -45,6 +45,7 @@ while (!exit)
     Console.WriteLine("  [2] Via BFF HTTP     – makes real calls to your BFF");
     Console.WriteLine("  [3] Both            – executes both modes in sequence");
     Console.WriteLine("  [4] Exit");
+    Console.WriteLine("  [5] DEMO             – full end-to-end demo: merchant creates products, customer buys them");
     Console.Write("> ");
 
     string? choice = Console.ReadLine()?.Trim();
@@ -77,6 +78,9 @@ while (!exit)
             break;
         case "4":
             exit = true;
+            break;
+        case "5":
+            await RunDemoModeAsync();
             break;
         default:
             Console.WriteLine("Invalid option, please try again.");
@@ -632,7 +636,10 @@ async Task RunBffHttpModeAsync()
 
     Console.WriteLine($"📋 Using customer: {customerUser.Email} (ID: {customerUser.Id})");
 
-    using HttpClient http = new();
+    using HttpClient http = new(new HttpClientHandler
+    {
+        ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+    });
     http.BaseAddress = new Uri(bffBaseUrl);
     http.DefaultRequestHeaders.Add("Accept", "application/json");
 
@@ -883,7 +890,461 @@ static async Task<bool> BffCheckoutAsync(HttpClient http, string username, strin
     }
 }
 
-// ── Internal DTOs ────────────────────────────────────────────────────────────
+// ── MODE 5 – Full end-to-end DEMO ────────────────────────────────────────────
+async Task RunDemoModeAsync()
+{
+    const string demoMerchantEmail = "merchant@marketspace.com";
+    const string demoCustomerEmail = "customer@marketspace.com";
+    const string demoPassword = "123456";
+    List<DemoCatalogItem> merchantProducts = [];
+
+    Console.WriteLine();
+    Console.WriteLine("╔══════════════════════════════════════════════════╗");
+    Console.WriteLine("║         MarketSpace – Full DEMO Mode             ║");
+    Console.WriteLine("╚══════════════════════════════════════════════════╝");
+    Console.WriteLine();
+    Console.WriteLine($"  BFF URL : {bffBaseUrl}");
+    Console.WriteLine($"  Merchant: {demoMerchantEmail}  / password: {demoPassword}");
+    Console.WriteLine($"  Customer: {demoCustomerEmail}  / password: {demoPassword}");
+    Console.WriteLine();
+
+    Faker faker = new("en");
+
+    // ── 0. Ensure demo users exist (db-level setup) ───────────────────────
+    Console.WriteLine("── Step 0: Ensuring demo users exist in database ─────────");
+    await EnsureDemoUsersAsync();
+
+    // ── 1. Merchant Session ───────────────────────────────────────────────
+    Console.WriteLine();
+    Console.WriteLine("── Step 1: Merchant Session ──────────────────────────────");
+
+    using HttpClient merchantHttp = new(new HttpClientHandler
+    {
+        ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+    }) { BaseAddress = new Uri(bffBaseUrl) };
+    merchantHttp.DefaultRequestHeaders.Add("Accept", "application/json");
+
+    Console.WriteLine($"  🔐 Logging in as merchant ({demoMerchantEmail})...");
+    string? merchantToken = await DemoBffLoginAsync(merchantHttp, demoMerchantEmail, demoPassword);
+    if (merchantToken is null)
+    {
+        Console.WriteLine("  ❌ Merchant login failed. Make sure the BFF is running and seed mode has been run.");
+        return;
+    }
+    merchantHttp.DefaultRequestHeaders.Authorization =
+        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", merchantToken);
+    Console.WriteLine("  ✅ Merchant logged in.");
+
+    // Get merchant profile
+    Console.WriteLine("  📋 Fetching merchant profile...");
+    DemoMerchantProfile? merchantProfile = await DemoGetMerchantMeAsync(merchantHttp);
+    if (merchantProfile is null)
+    {
+        Console.WriteLine("  ⚠️  Could not retrieve merchant profile. Ensure seed mode has been run first.");
+    }
+    else
+    {
+        Console.WriteLine($"  ✅ Merchant: {merchantProfile.Name} (ID: {merchantProfile.Id})");
+
+        // Show current products
+        Console.WriteLine("  📦 Fetching merchant's current products...");
+        merchantProducts = await DemoGetMerchantProductsAsync(merchantHttp, merchantProfile.Id);
+        Console.WriteLine($"  📊 Currently {merchantProducts.Count} product(s) in catalog.");
+
+        // Create products via BFF if fewer than 10
+        int targetProducts = 10;
+        int toCreate = Math.Max(0, targetProducts - merchantProducts.Count);
+        if (toCreate > 0)
+        {
+            Console.WriteLine($"  ➕ Creating {toCreate} product(s) via BFF...");
+            for (int i = 0; i < toCreate; i++)
+            {
+                DemoCreateProductRequest newProduct = new()
+                {
+                    Name = faker.Commerce.ProductName(),
+                    Description = faker.Commerce.ProductDescription(),
+                    ImageUrl = faker.Image.PicsumUrl(800, 600),
+                    Price = faker.Random.Decimal(5, 500),
+                    Stock = faker.Random.Int(10, 100),
+                    Categories = [faker.Commerce.Department(), faker.Commerce.Department()],
+                    MerchantId = merchantProfile.Id
+                };
+
+                bool created = await DemoCreateProductAsync(merchantHttp, newProduct);
+                Console.WriteLine(created
+                    ? $"    ✅ Created: {newProduct.Name} @ ${newProduct.Price:F2} (stock: {newProduct.Stock})"
+                    : $"    ❌ Failed to create: {newProduct.Name}");
+            }
+
+            // Refresh product list
+            merchantProducts = await DemoGetMerchantProductsAsync(merchantHttp, merchantProfile.Id);
+        }
+
+        Console.WriteLine($"  📊 Merchant catalog now has {merchantProducts.Count} product(s):");
+        foreach (DemoCatalogItem p in merchantProducts.Take(5))
+            Console.WriteLine($"    • {p.Name,-35} ${p.Price,8:F2}   stock: {p.Stock}");
+    }
+
+    // ── 2. Customer Session ───────────────────────────────────────────────
+    Console.WriteLine();
+    Console.WriteLine("── Step 2: Customer Session ──────────────────────────────");
+
+    using HttpClient customerHttp = new(new HttpClientHandler
+    {
+        ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+    }) { BaseAddress = new Uri(bffBaseUrl) };
+    customerHttp.DefaultRequestHeaders.Add("Accept", "application/json");
+
+    Console.WriteLine($"  🔐 Logging in as customer ({demoCustomerEmail})...");
+    string? customerToken = await DemoBffLoginAsync(customerHttp, demoCustomerEmail, demoPassword);
+    if (customerToken is null)
+    {
+        Console.WriteLine("  ❌ Customer login failed.");
+        return;
+    }
+    customerHttp.DefaultRequestHeaders.Authorization =
+        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", customerToken);
+    Console.WriteLine("  ✅ Customer logged in.");
+
+    // Browse catalog
+    Console.WriteLine("  🔍 Browsing catalog...");
+    List<DemoCatalogItem> allProducts = await DemoGetCatalogAsync(customerHttp);
+    Console.WriteLine($"  📦 Found {allProducts.Count} product(s) in catalog.");
+
+    if (allProducts.Count == 0)
+    {
+        Console.WriteLine("  ⚠️  Catalog is empty. Cannot proceed with shopping.");
+        return;
+    }
+
+    List<DemoCatalogItem> candidateProducts = merchantProducts.Count > 0 ? merchantProducts : allProducts;
+    int itemsToPick = faker.Random.Int(1, Math.Min(3, candidateProducts.Count));
+    List<DemoCatalogItem> chosenItems = faker.PickRandom(candidateProducts, itemsToPick).ToList();
+
+    // Add to cart
+    Console.WriteLine($"  🛒 Adding {chosenItems.Count} item(s) to cart...");
+    string cartUsername = demoCustomerEmail;
+    foreach (DemoCatalogItem item in chosenItems)
+    {
+        int qty = faker.Random.Int(1, 3);
+        bool added = await DemoAddToCartAsync(customerHttp, cartUsername, item, qty);
+        Console.WriteLine(added
+            ? $"    ✅ Added: {item.Name} × {qty}  @ ${item.Price:F2}"
+            : $"    ❌ Failed to add: {item.Name}");
+    }
+
+    // Checkout
+    Console.WriteLine("  🚀 Checking out...");
+    (bool checkoutOk, string checkoutDetail) = await DemoCheckoutAsync(customerHttp, cartUsername, demoCustomerEmail, faker);
+    if (checkoutOk)
+    {
+        Console.WriteLine("  ✅ Checkout successful! Order has been placed.");
+    }
+    else
+    {
+        Console.WriteLine($"  ❌ Checkout failed: {checkoutDetail}");
+    }
+
+    // ── 3. Summary ────────────────────────────────────────────────────────
+    Console.WriteLine();
+    Console.WriteLine("╔══════════════════════════════════════════════════╗");
+    Console.WriteLine("║                  DEMO Complete                  ║");
+    Console.WriteLine("╠══════════════════════════════════════════════════╣");
+    Console.WriteLine($"║  Merchant products: {(merchantProfile is null ? "n/a" : "≥5 in catalog"),28} ║");
+    Console.WriteLine($"║  Items added to cart : {chosenItems.Count,-27} ║");
+    Console.WriteLine($"║  Checkout            : {(checkoutOk ? "✅ success" : "❌ failed"),-27} ║");
+    Console.WriteLine("╚══════════════════════════════════════════════════╝");
+}
+
+// ── DEMO helpers ─────────────────────────────────────────────────────────────
+
+async Task EnsureDemoUsersAsync()
+{
+    const string demoMerchantEmail = "merchant@marketspace.com";
+    const string demoCustomerEmail = "customer@marketspace.com";
+
+    MarketSpaceSimulatorFactory factory = new(
+        merchantConnectionString: merchantConnectionString,
+        catalogConnectionString: catalogConnectionString,
+        basketConnectionString: basketConnectionString,
+        userConnectionString: userConnectionString,
+        minioEndpoint: minioEndpoint,
+        minioAccessKey: minioAccessKey,
+        minioSecretKey: minioSecretKey
+    );
+
+    IServiceScopeFactory scopeFactory = factory.Services.GetRequiredService<IServiceScopeFactory>();
+    using IServiceScope scope = scopeFactory.CreateScope();
+    UserManager<ApplicationUser> userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    RoleManager<IdentityRole> roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    UserDbContext userDbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+    MerchantDbContext merchantDbContext = scope.ServiceProvider.GetRequiredService<MerchantDbContext>();
+    await userDbContext.Database.EnsureCreatedAsync();
+    await merchantDbContext.Database.EnsureCreatedAsync();
+
+    if (!await roleManager.RoleExistsAsync("Member"))
+        await roleManager.CreateAsync(new IdentityRole("Member"));
+
+    async Task<ApplicationUser?> EnsureUser(string email, UserTypeEnum type, string displayName)
+    {
+        ApplicationUser? existing = await userManager.FindByEmailAsync(email);
+        if (existing is null)
+        {
+            existing = new ApplicationUser
+            {
+                UserName = email,
+                Email = email,
+                EmailConfirmed = true,
+                Name = displayName,
+                UserType = type
+            };
+            IdentityResult result = await userManager.CreateAsync(existing, "123456");
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(existing, "Member");
+                Console.WriteLine($"  ✅ Created user: {email}");
+            }
+            else
+            {
+                Console.WriteLine($"  ❌ Failed to create {email}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                return null;
+            }
+        }
+        else
+        {
+            Console.WriteLine($"  ✔  User already exists: {email}");
+        }
+        return existing;
+    }
+
+    ApplicationUser? merchantUser = await EnsureUser(demoMerchantEmail, UserTypeEnum.Merchant, "Demo Merchant");
+    await EnsureUser(demoCustomerEmail, UserTypeEnum.Customer, "Demo Customer");
+
+    // Ensure a MerchantEntity exists in MerchantDb for the demo merchant user
+    if (merchantUser is not null && Guid.TryParse(merchantUser.Id, out Guid merchantUserId))
+    {
+        UserId userId = UserId.Of(merchantUserId);
+        MerchantEntity? demoMerchant = merchantDbContext.Merchants
+            .FirstOrDefault(m => m.UserId == userId);
+
+        if (demoMerchant is null)
+        {
+            demoMerchant = MerchantEntity.Create(
+                userId: userId,
+                name: "MarketSpace Demo Merchant",
+                description: "Demo merchant account used to showcase the merchant dashboard and sales flow.",
+                address: "123 Demo Street, Demo City",
+                phoneNumber: "+1-555-0100",
+                email: Merchant.Api.Domain.ValueObjects.Email.Of(demoMerchantEmail)
+            );
+            merchantDbContext.Merchants.Add(demoMerchant);
+            Console.WriteLine($"  ✅ Created merchant entity for: {demoMerchantEmail}");
+        }
+        else
+        {
+            demoMerchant.Update(
+                name: "MarketSpace Demo Merchant",
+                description: "Demo merchant account used to showcase the merchant dashboard and sales flow.",
+                address: "123 Demo Street, Demo City",
+                phoneNumber: "+1-555-0100",
+                email: Merchant.Api.Domain.ValueObjects.Email.Of(demoMerchantEmail));
+            Console.WriteLine($"  ✔  Merchant entity refreshed for: {demoMerchantEmail}");
+        }
+
+        await merchantDbContext.SaveChangesAsync();
+    }
+}
+
+static async Task<string?> DemoBffLoginAsync(HttpClient http, string email, string password)
+{
+    try
+    {
+        var body = new { Email = email, Password = password };
+        HttpResponseMessage res = await http.PostAsJsonAsync("/api/auth/login", body);
+        string responseBody = await res.Content.ReadAsStringAsync();
+
+        if (!res.IsSuccessStatusCode)
+        {
+            Console.WriteLine($"  ⚠️  Login returned HTTP {(int)res.StatusCode}: {responseBody}");
+            return null;
+        }
+
+        using JsonDocument doc = JsonDocument.Parse(responseBody);
+        if (doc.RootElement.TryGetProperty("accessToken", out JsonElement a)) return a.GetString();
+        if (doc.RootElement.TryGetProperty("token", out JsonElement t)) return t.GetString();
+
+        Console.WriteLine($"  ⚠️  No token found in response: {responseBody}");
+        return null;
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"  ⚠️  Login exception: {ex.GetType().Name}: {ex.Message}");
+        return null;
+    }
+}
+
+static async Task<DemoMerchantProfile?> DemoGetMerchantMeAsync(HttpClient http)
+{
+    try
+    {
+        HttpResponseMessage res = await http.GetAsync("/api/merchant/me");
+        if (!res.IsSuccessStatusCode) return null;
+        using JsonDocument doc = JsonDocument.Parse(await res.Content.ReadAsStringAsync());
+        JsonElement root = doc.RootElement.TryGetProperty("data", out JsonElement d) ? d : doc.RootElement;
+        return new DemoMerchantProfile
+        {
+            Id = root.TryGetProperty("id", out JsonElement id) ? id.GetGuid() : Guid.Empty,
+            Name = root.TryGetProperty("name", out JsonElement nm) ? nm.GetString() ?? "" : ""
+        };
+    }
+    catch { return null; }
+}
+
+static async Task<List<DemoCatalogItem>> DemoGetMerchantProductsAsync(HttpClient http, Guid merchantId)
+{
+    try
+    {
+        HttpResponseMessage res = await http.GetAsync($"/api/catalog/merchant/{merchantId}?PageIndex=1&PageSize=50");
+        if (!res.IsSuccessStatusCode) return [];
+        return ParseCatalogItems(await res.Content.ReadAsStringAsync());
+    }
+    catch { return []; }
+}
+
+static async Task<List<DemoCatalogItem>> DemoGetCatalogAsync(HttpClient http)
+{
+    try
+    {
+        HttpResponseMessage res = await http.GetAsync("/api/catalog?PageIndex=1&PageSize=50");
+        if (!res.IsSuccessStatusCode) return [];
+        return ParseCatalogItems(await res.Content.ReadAsStringAsync());
+    }
+    catch { return []; }
+}
+
+static List<DemoCatalogItem> ParseCatalogItems(string json)
+{
+    using JsonDocument doc = JsonDocument.Parse(json);
+    JsonElement root = doc.RootElement;
+
+    // Unwrap Result<T> envelope if present
+    JsonElement data = root.TryGetProperty("data", out JsonElement d) ? d : root;
+
+    JsonElement arr = data.ValueKind == JsonValueKind.Array
+        ? data
+        : data.TryGetProperty("products", out JsonElement p) ? p
+        : data.TryGetProperty("items", out JsonElement i) ? i
+        : data;
+
+    if (arr.ValueKind != JsonValueKind.Array) return [];
+
+    return arr.EnumerateArray().Select(e => new DemoCatalogItem
+    {
+        Id = e.TryGetProperty("id", out JsonElement id) ? id.ToString() : "",
+        Name = e.TryGetProperty("name", out JsonElement nm) ? nm.GetString() ?? "" : "",
+        Price = e.TryGetProperty("price", out JsonElement pr) ? pr.GetDecimal() : 0m,
+        Stock = e.TryGetProperty("stock", out JsonElement st) ? st.GetInt32() : 0
+    }).Where(i => !string.IsNullOrEmpty(i.Id)).ToList();
+}
+
+static async Task<bool> DemoCreateProductAsync(HttpClient http, DemoCreateProductRequest product)
+{
+    try
+    {
+        var body = new
+        {
+            name = product.Name,
+            description = product.Description,
+            imageUrl = product.ImageUrl,
+            price = product.Price,
+            stock = product.Stock,
+            categories = product.Categories,
+            merchantId = product.MerchantId
+        };
+        HttpResponseMessage res = await http.PostAsJsonAsync("/api/catalog", body);
+        return res.IsSuccessStatusCode;
+    }
+    catch { return false; }
+}
+
+static async Task<bool> DemoAddToCartAsync(HttpClient http, string username, DemoCatalogItem item, int quantity)
+{
+    try
+    {
+        var body = new
+        {
+            username,
+            items = new[] { new { productId = item.Id, productName = item.Name, price = item.Price, quantity } }
+        };
+        HttpResponseMessage res = await http.PostAsJsonAsync("/api/basket", body);
+        return res.IsSuccessStatusCode;
+    }
+    catch { return false; }
+}
+
+static async Task<(bool ok, string detail)> DemoCheckoutAsync(
+    HttpClient http, string username, string email, Faker faker)
+{
+    try
+    {
+        var body = new
+        {
+            userName = username,
+            firstName = faker.Person.FirstName,
+            lastName = faker.Person.LastName,
+            emailAddress = email,
+            addressLine = faker.Address.StreetAddress(),
+            country = faker.Address.Country(),
+            state = faker.Address.State(),
+            zipCode = faker.Address.ZipCode(),
+            cardName = faker.Person.FullName,
+            cardNumber = faker.Finance.CreditCardNumber(),
+            expiration = faker.Date.Future().ToString("MM/yy"),
+            cvv = faker.Random.Number(100, 999).ToString(),
+            paymentMethod = faker.Random.Int(1, 3),
+            requestId = Guid.NewGuid().ToString()
+        };
+
+        HttpResponseMessage res = await http.PostAsJsonAsync("/api/basket/checkout", body);
+        if (res.IsSuccessStatusCode) return (true, string.Empty);
+
+        string err = await res.Content.ReadAsStringAsync();
+        return (false, $"HTTP {(int)res.StatusCode}: {err}");
+    }
+    catch (Exception ex)
+    {
+        return (false, ex.Message);
+    }
+}
+
+// ── DEMO DTOs ─────────────────────────────────────────────────────────────────
+
+internal sealed class DemoMerchantProfile
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+}
+
+internal sealed class DemoCatalogItem
+{
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public decimal Price { get; set; }
+    public int Stock { get; set; }
+}
+
+internal sealed class DemoCreateProductRequest
+{
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string ImageUrl { get; set; } = string.Empty;
+    public decimal Price { get; set; }
+    public int Stock { get; set; }
+    public List<string> Categories { get; set; } = [];
+    public Guid MerchantId { get; set; }
+}
+
+
 
 internal sealed record BffCatalogItem
 {

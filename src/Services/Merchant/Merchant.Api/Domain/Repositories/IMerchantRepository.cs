@@ -11,4 +11,5 @@ public interface IMerchantRepository
     Task<MerchantEntity?> GetByIdAsync(MerchantId id, bool isTrackingEnabled, CancellationToken cancellationToken = default);
     Task<bool> ExistsAsync(MerchantId id, CancellationToken cancellationToken = default);
     Task<bool> ExistsAsync(Guid userId, string email, CancellationToken cancellationToken = default);
+    Task<MerchantEntity?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
 }

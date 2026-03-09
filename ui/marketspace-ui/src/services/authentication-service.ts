@@ -2,6 +2,17 @@ import { apiClient } from "@/lib/api.ts";
 
 export type UserType = "Customer" | "Merchant";
 
+export interface MeResponse {
+  userId: string;
+  userName: string | null;
+  email: string | null;
+  name?: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  userType: string;
+  enableNotifications?: boolean;
+}
+
 export interface LoginRequest {
   email: string;
   password: string;
@@ -47,9 +58,25 @@ export const isAuthenticated = (): boolean =>
 
 export const getToken = (): string | null => localStorage.getItem("token");
 
+export const normalizeUserType = (value?: string | null): UserType | null => {
+  if (value === "Customer" || value === "Merchant") {
+    return value;
+  }
+
+  return null;
+};
+
+export const storeUserType = (userType: UserType | null): void => {
+  if (userType) {
+    localStorage.setItem("userType", userType);
+    return;
+  }
+
+  localStorage.removeItem("userType");
+};
+
 export const getUserType = (): UserType | null => {
-  const userType = localStorage.getItem("userType");
-  return (userType as UserType) || null;
+  return normalizeUserType(localStorage.getItem("userType"));
 };
 
 export const logout = (): void => {
@@ -145,7 +172,7 @@ export const register = async (
     );
 
     const userTypeStr = data.userType === 0 ? "Customer" : "Merchant";
-    localStorage.setItem("userType", userTypeStr);
+    storeUserType(userTypeStr);
 
     return response.data;
   } catch (error) {
@@ -186,7 +213,7 @@ export const refreshToken = async (): Promise<string> => {
   }
 };
 
-export const getMe = async (): Promise<any> => {
+export const getMe = async (): Promise<MeResponse> => {
   try {
     const token = localStorage.getItem("token");
     console.log(
@@ -194,7 +221,7 @@ export const getMe = async (): Promise<any> => {
       token ? `${token.substring(0, 20)}...` : "NO TOKEN",
     );
     console.log('[getMe] Calling userClient.get("/api/auth/me")');
-    const response = await apiClient.get("/api/auth/me");
+    const response = await apiClient.get<MeResponse>("/api/auth/me");
     console.log("[getMe] Response received:", response.data);
     return response.data;
   } catch (error) {

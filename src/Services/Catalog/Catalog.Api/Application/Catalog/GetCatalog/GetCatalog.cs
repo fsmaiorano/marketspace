@@ -36,6 +36,7 @@ public class GetCatalog(
                 ImageUrl = product.ImageUrl,
                 Price = product.Price.Value,
                 MerchantId = product.MerchantId,
+                Stock = product.Stock.Value,
                 CreatedAt = product.CreatedAt,
                 UpdatedAt = product.UpdatedAt
             };

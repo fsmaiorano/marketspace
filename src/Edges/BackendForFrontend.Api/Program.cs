@@ -5,8 +5,10 @@ using BackendForFrontend.Api.Basket;
 using BackendForFrontend.Api.Basket.Endpoints;
 using BackendForFrontend.Api.Catalog;
 using BackendForFrontend.Api.Catalog.Endpoints;
+using BackendForFrontend.Api.MerchantDashboard;
 using BackendForFrontend.Api.Order;
 using BackendForFrontend.Api.Order.Endpoints;
+using BackendForFrontend.Api.Services;
 using BackendForFrontend.Api.User;
 using BackendForFrontend.Api.User.Endpoints;
 using BuildingBlocks.Exceptions;
@@ -35,6 +37,7 @@ builder.Services.AddCatalogServices();
 builder.Services.AddOrderServices();
 builder.Services.AddUserServices();
 builder.Services.AddCustomLoggers();
+builder.Services.AddSingleton<IStockEventService, StockEventService>();
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
@@ -105,6 +108,7 @@ BasketEndpoint.MapEndpoint(app);
 CatalogEndpoint.MapEndpoint(app);
 OrderEndpoint.MapEndpoint(app);
 UserEndpoint.MapEndpoint(app);
+MerchantDashboardEndpoint.MapEndpoint(app);
 
 app.Run();
 

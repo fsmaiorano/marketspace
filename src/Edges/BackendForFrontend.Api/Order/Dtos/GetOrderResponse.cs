@@ -11,4 +11,5 @@ public class GetOrderResponse
     public string Status { get; set; } = string.Empty;
     public List<OrderItemDto> Items { get; set; } = new();
     public decimal TotalAmount { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
 }

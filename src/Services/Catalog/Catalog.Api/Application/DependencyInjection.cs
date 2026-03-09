@@ -3,7 +3,9 @@ using Catalog.Api.Application.Catalog.CreateCatalog;
 using Catalog.Api.Application.Catalog.DeleteCatalog;
 using Catalog.Api.Application.Catalog.GetCatalog;
 using Catalog.Api.Application.Catalog.GetCatalogById;
+using Catalog.Api.Application.Catalog.GetCatalogByMerchantId;
 using Catalog.Api.Application.Catalog.UpdateCatalog;
+using Catalog.Api.Application.Catalog.UpdateStock;
 using Catalog.Api.Domain.Repositories;
 using Catalog.Api.Infrastructure.Data.Repositories;
 using Minio;
@@ -34,6 +36,8 @@ public static class DependencyInjection
         services.AddScoped<DeleteCatalog>();
         services.AddScoped<GetCatalogById>();
         services.AddScoped<GetCatalog>();
+        services.AddScoped<GetCatalogByMerchantId>();
+        services.AddScoped<UpdateStock>();
 
         return services;
     }

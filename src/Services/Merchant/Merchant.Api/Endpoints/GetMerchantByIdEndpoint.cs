@@ -15,6 +15,7 @@ public static class GetMerchantByIdEndpoint
                 return result is { IsSuccess: true, Data: not null }
                     ? Results.Ok(new MerchantDto()
                     {
+                        Id = result.Data.Merchant.Id.Value,
                         Name = result.Data.Merchant.Name,
                         Description = result.Data.Merchant.Description,
                         Email = result.Data.Merchant.Email.Value,

@@ -59,6 +59,8 @@ UpdateCatalogEndpoint.MapEndpoint(app);
 DeleteCatalogEndpoint.MapEndpoint(app);
 GetCatalogByIdEndpoint.MapEndpoint(app);
 GetCatalogEndpoint.MapEndpoint(app);
+GetCatalogByMerchantIdEndpoint.MapEndpoint(app);
+UpdateStockEndpoint.MapEndpoint(app);
 
 app.Run();
 

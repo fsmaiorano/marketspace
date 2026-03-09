@@ -57,4 +57,20 @@ public class CatalogRepository(ICatalogDbContext dbContext) : ICatalogRepository
         return new PaginatedResult<CatalogEntity>(count: totalItems, pageIndex: pagination.PageIndex,
             pageSize: pagination.PageSize, data: items);
     }
+
+    public async Task<PaginatedResult<CatalogEntity>> GetByMerchantIdAsync(Guid merchantId,
+        PaginationRequest pagination, CancellationToken cancellationToken = default)
+    {
+        IQueryable<CatalogEntity> query = dbContext.Catalogs.AsNoTracking()
+            .Where(c => c.MerchantId == merchantId);
+
+        int totalItems = await query.CountAsync(cancellationToken);
+        List<CatalogEntity> items = await query
+            .Skip(Math.Max(0, (pagination.PageIndex - 1) * pagination.PageSize))
+            .Take(pagination.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return new PaginatedResult<CatalogEntity>(count: totalItems, pageIndex: pagination.PageIndex,
+            pageSize: pagination.PageSize, data: items);
+    }
 }

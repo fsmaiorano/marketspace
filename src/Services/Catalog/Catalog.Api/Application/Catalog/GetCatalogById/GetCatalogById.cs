@@ -20,6 +20,7 @@ public record GetCatalogByIdResult(
     [property: JsonPropertyName("categories")]
     IReadOnlyList<string> Categories,
     Guid MerchantId,
+    int Stock,
     DateTimeOffset CreatedAt,
     DateTimeOffset? UpdatedAt
 );
@@ -55,6 +56,7 @@ public class GetCatalogById(
                 Price: catalog.Price.Value,
                 Categories: new ReadOnlyCollection<string>(catalog.Categories),
                 MerchantId: catalog.MerchantId,
+                Stock: catalog.Stock.Value,
                 CreatedAt: catalog.CreatedAt,
                 UpdatedAt: catalog.UpdatedAt
             );

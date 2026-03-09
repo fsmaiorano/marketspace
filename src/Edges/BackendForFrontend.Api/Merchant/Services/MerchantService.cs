@@ -86,4 +86,22 @@ public class MerchantService(
         string errorMessage = await response.Content.ReadAsStringAsync();
         throw new HttpRequestException($"Error retrieving merchant: {errorMessage}");
     }
+
+    public async Task<Result<GetMerchantMeResponse>> GetMerchantMeAsync(string userId)
+    {
+        logger.LogInformation(LogTypeEnum.Application, "Retrieving merchant for user ID: {UserId}", userId);
+
+        HttpResponseMessage response = await DoGet($"{BaseUrl}/merchant/by-user/{userId}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            GetMerchantMeResponse? result = await response.Content.ReadFromJsonAsync<GetMerchantMeResponse>();
+            return result is not null
+                ? Result<GetMerchantMeResponse>.Success(result)
+                : Result<GetMerchantMeResponse>.Failure("Merchant not found");
+        }
+
+        string errorMessage = await response.Content.ReadAsStringAsync();
+        return Result<GetMerchantMeResponse>.Failure($"Failed to retrieve merchant: {errorMessage}");
+    }
 }

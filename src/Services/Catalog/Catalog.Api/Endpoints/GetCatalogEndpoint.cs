@@ -29,6 +29,7 @@ public static class GetCatalogEndpoint
                                 ImageUrl = p.ImageUrl,
                                 Categories = p.Categories,
                                 MerchantId = p.MerchantId,
+                                Stock = p.Stock,
                                 CreatedAt = p.CreatedAt,
                                 UpdatedAt = p.UpdatedAt
                             })))

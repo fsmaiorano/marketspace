@@ -24,6 +24,7 @@ public static class GetCatalogByIdEndpoint
                         MerchantId = result.Data.MerchantId,
                         Description = result.Data.Description,
                         Categories = result.Data!.Categories.ToList(),
+                        Stock = result.Data.Stock,
                         CreatedAt = result.Data.CreatedAt,
                         UpdatedAt = result.Data.UpdatedAt
                     })

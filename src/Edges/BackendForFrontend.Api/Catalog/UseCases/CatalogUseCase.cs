@@ -38,4 +38,16 @@ public class CatalogUseCase(
         logger.LogInformation(LogTypeEnum.Application, "Deleting catalog with ID: {CatalogId}", catalogId);
         return await service.DeleteCatalogAsync(catalogId);
     }
+
+    public async Task<Result<GetCatalogListResponse>> GetCatalogByMerchantIdAsync(Guid merchantId, int pageIndex, int pageSize)
+    {
+        logger.LogInformation(LogTypeEnum.Application, "Retrieving catalog for merchant {MerchantId}", merchantId);
+        return await service.GetCatalogByMerchantIdAsync(merchantId, pageIndex, pageSize);
+    }
+
+    public async Task<Result<UpdateStockResponse>> UpdateStockAsync(Guid catalogId, int delta)
+    {
+        logger.LogInformation(LogTypeEnum.Application, "Updating stock for catalog {CatalogId}, delta: {Delta}", catalogId, delta);
+        return await service.UpdateStockAsync(catalogId, delta);
+    }
 }

@@ -14,6 +14,11 @@ public class OrderService(
     private string BaseUrl => configuration["Services:OrderService:BaseUrl"] ??
                               throw new ArgumentNullException($"OrderService BaseUrl is not configured");
 
+    private sealed class MsOrderListResponse
+    {
+        public List<MsOrderDto> Orders { get; set; } = [];
+    }
+
     private sealed record MsOrderItemDto(Guid OrderId, Guid CatalogId, int Quantity, decimal Price);
     private sealed record MsOrderDto(Guid Id, Guid CustomerId, AddressDto? ShippingAddress, AddressDto? BillingAddress,
         PaymentDto? Payment, string? Status, List<MsOrderItemDto>? Items, decimal TotalAmount, DateTimeOffset CreatedAt);
@@ -62,7 +67,8 @@ public class OrderService(
                         Quantity = i.Quantity,
                         Price = i.Price
                     }).ToList() ?? [],
-                    TotalAmount = order.TotalAmount
+                    TotalAmount = order.TotalAmount,
+                    CreatedAt = order.CreatedAt
                 };
 
                 logger.LogInformation(LogTypeEnum.Application, "Order retrieved successfully: {OrderId}", order.Id);
@@ -127,5 +133,57 @@ public class OrderService(
         logger.LogError(LogTypeEnum.Application, null, "Failed to retrieve orders. Status code: {StatusCode}", response.StatusCode);
         string errorMessage = await response.Content.ReadAsStringAsync();
         throw new HttpRequestException($"Error retrieving orders: {errorMessage}");
+    }
+
+    public async Task<Result<GetOrdersByCatalogIdsResponse>> GetOrdersByCatalogIdsAsync(IEnumerable<Guid> catalogIds, int limit = 50)
+    {
+        List<Guid> ids = catalogIds
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
+
+        if (ids.Count == 0)
+            return Result<GetOrdersByCatalogIdsResponse>.Success(new GetOrdersByCatalogIdsResponse());
+
+        HttpResponseMessage response = await DoPost($"{BaseUrl}/order/catalog-items", new
+        {
+            catalogIds = ids,
+            limit
+        });
+
+        if (response.IsSuccessStatusCode)
+        {
+            MsOrderListResponse? content = await response.Content.ReadFromJsonAsync<MsOrderListResponse>(
+                new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (content is null)
+                return Result<GetOrdersByCatalogIdsResponse>.Success(new GetOrdersByCatalogIdsResponse());
+
+            GetOrdersByCatalogIdsResponse mapped = new()
+            {
+                Orders = content.Orders.Select(order => new GetOrderResponse
+                {
+                    Id = order.Id,
+                    CustomerId = order.CustomerId,
+                    ShippingAddress = order.ShippingAddress ?? new AddressDto(),
+                    BillingAddress = order.BillingAddress ?? new AddressDto(),
+                    Payment = order.Payment ?? new PaymentDto(),
+                    Status = order.Status ?? string.Empty,
+                    Items = order.Items?.Select(item => new OrderItemDto
+                    {
+                        ProductId = item.CatalogId,
+                        Quantity = item.Quantity,
+                        Price = item.Price
+                    }).ToList() ?? [],
+                    TotalAmount = order.TotalAmount,
+                    CreatedAt = order.CreatedAt
+                }).ToList()
+            };
+
+            return Result<GetOrdersByCatalogIdsResponse>.Success(mapped);
+        }
+
+        string errorMessage = await response.Content.ReadAsStringAsync();
+        return Result<GetOrdersByCatalogIdsResponse>.Failure($"Failed to retrieve merchant orders: {errorMessage}");
     }
 }

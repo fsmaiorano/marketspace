@@ -15,4 +15,7 @@ public interface ICatalogRepository
 
     Task<PaginatedResult<CatalogEntity>> GetPaginatedListAsync(PaginationRequest pagination,
         CancellationToken cancellationToken = default);
+
+    Task<PaginatedResult<CatalogEntity>> GetByMerchantIdAsync(Guid merchantId, PaginationRequest pagination,
+        CancellationToken cancellationToken = default);
 }

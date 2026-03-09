@@ -38,4 +38,10 @@ public class OrderUseCase(
         logger.LogInformation(LogTypeEnum.Application, "Retrieving orders for customer: {CustomerId}", customerId);
         return await service.GetOrdersByCustomerIdAsync(customerId);
     }
+
+    public async Task<Result<GetOrdersByCatalogIdsResponse>> GetOrdersByCatalogIdsAsync(IEnumerable<Guid> catalogIds, int limit = 50)
+    {
+        logger.LogInformation(LogTypeEnum.Application, "Retrieving merchant orders for {CatalogCount} catalog IDs", catalogIds.Count());
+        return await service.GetOrdersByCatalogIdsAsync(catalogIds, limit);
+    }
 }

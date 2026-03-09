@@ -37,6 +37,16 @@ public static class JwtAuthenticationExtensions
                 };
                 options.Events = new JwtBearerEvents
                 {
+                    OnMessageReceived = context =>
+                    {
+                        // Allow token from query string for SSE/EventSource connections
+                        if (context.Request.Query.TryGetValue("access_token", out var token) &&
+                            !string.IsNullOrWhiteSpace(token))
+                        {
+                            context.Token = token;
+                        }
+                        return Task.CompletedTask;
+                    },
                     OnChallenge = context =>
                     {
                         context.HandleResponse();

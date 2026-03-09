@@ -1,6 +1,7 @@
 using Merchant.Api.Application.Merchant.CreateMerchant;
 using Merchant.Api.Application.Merchant.DeleteMerchant;
 using Merchant.Api.Application.Merchant.GetMerchantById;
+using Merchant.Api.Application.Merchant.GetMerchantByUserId;
 using Merchant.Api.Application.Merchant.UpdateMerchant;
 using Merchant.Api.Domain.Repositories;
 using Merchant.Api.Infrastructure.Data.Repositories;
@@ -17,6 +18,7 @@ public static class DependencyInjection
         services.AddScoped<UpdateMerchant>();
         services.AddScoped<DeleteMerchant>();
         services.AddScoped<GetMerchantById>();
+        services.AddScoped<GetMerchantByUserId>();
         
         return services;
     }

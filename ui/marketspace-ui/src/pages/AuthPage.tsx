@@ -6,7 +6,9 @@ import { Button } from "../components/ui/button";
 import {
   login,
   register,
-  type UserType,
+  getMe,
+  normalizeUserType,
+  storeUserType,
   type LoginRequest,
   type RegisterRequest,
 } from "../services/authentication-service";
@@ -34,8 +36,7 @@ const registerSchema = z
 
 export default function AuthPage() {
   const [mode, setMode] = useState<AuthMode>("login");
-  const [userType] = useState<UserType>("Customer");
-  const { setTokens, setLoading, setError, error, isLoading } = useAuthStore();
+  const { setTokens, setLoading, setError, error, isLoading, setUser } = useAuthStore();
   const [success, setSuccess] = useState<string | null>(null);
 
   const schema = mode === "login" ? loginSchema : registerSchema;
@@ -79,18 +80,26 @@ export default function AuthPage() {
 
         const values = collectedValues;
 
-        const userTypeNumber = userType === "Customer" ? 0 : 1;
+        const syncCurrentUser = async () => {
+          const me = await getMe();
+          const resolvedUserType = normalizeUserType(me.userType) ?? "Customer";
+          storeUserType(resolvedUserType);
+          setUser({
+            id: me.userId,
+            email: me.email ?? values.email,
+            userType: resolvedUserType,
+          });
+        };
 
         if (mode === "login") {
           const credentials: LoginRequest = {
             email: values.email,
             password: values.password,
-            userType: userTypeNumber,
           };
 
           const response = await login(credentials);
           setTokens(response.accessToken, response.refreshToken);
-          localStorage.setItem("userType", userType);
+          await syncCurrentUser();
 
           window.location.href = "/home";
         } else {
@@ -99,16 +108,16 @@ export default function AuthPage() {
             password: values.password,
             name: values.name,
             username: values.email,
-            userType: userTypeNumber,
+            userType: 0,
           };
 
           const response = await register(data);
           setTokens(response.accessToken, response.refreshToken);
-          localStorage.setItem("userType", userType);
+          await syncCurrentUser();
           setSuccess(`Account created successfully! Welcome, ${values.name}`);
 
           setTimeout(() => {
-            window.location.href = "/";
+            window.location.href = "/home";
           }, 1500);
         }
       } catch (err: unknown) {

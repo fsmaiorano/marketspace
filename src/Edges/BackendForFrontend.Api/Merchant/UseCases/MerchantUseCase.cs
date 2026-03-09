@@ -32,4 +32,10 @@ public class MerchantUseCase(
         logger.LogInformation(LogTypeEnum.Application, "Retrieving merchant with ID: {MerchantId}", merchantId);
         return await service.GetMerchantByIdAsync(merchantId);
     }
+
+    public async Task<Result<GetMerchantMeResponse>> GetMerchantMeAsync(string userId)
+    {
+        logger.LogInformation(LogTypeEnum.Application, "Retrieving merchant for user ID: {UserId}", userId);
+        return await service.GetMerchantMeAsync(userId);
+    }
 }

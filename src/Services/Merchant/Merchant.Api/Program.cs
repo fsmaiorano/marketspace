@@ -59,6 +59,7 @@ CreateMerchantEndpoint.MapEndpoint(app);
 UpdateMerchantEndpoint.MapEndpoint(app);
 DeleteMerchantEndpoint.MapEndpoint(app);
 GetMerchantByIdEndpoint.MapEndpoint(app);
+GetMerchantByUserIdEndpoint.MapEndpoint(app);
 
 app.Run();
 

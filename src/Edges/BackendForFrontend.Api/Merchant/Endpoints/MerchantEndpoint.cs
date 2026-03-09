@@ -2,6 +2,7 @@ using BackendForFrontend.Api.Merchant.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using BuildingBlocks;
 using BackendForFrontend.Api.Merchant.UseCases;
+using System.Security.Claims;
 
 namespace BackendForFrontend.Api.Merchant.Endpoints;
 
@@ -20,6 +21,26 @@ public static class MerchantEndpoint
             .WithTags("Merchant")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status500InternalServerError);
+
+        app.MapGet("/api/merchant/me",
+                async (ClaimsPrincipal user, [FromServices] MerchantUseCase usecase) =>
+                {
+                    string? userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                        ?? user.FindFirst("sub")?.Value;
+
+                    if (string.IsNullOrEmpty(userId))
+                        return Results.Unauthorized();
+
+                    Result<GetMerchantMeResponse> result = await usecase.GetMerchantMeAsync(userId);
+                    return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
+                })
+            .RequireAuthorization()
+            .WithName("GetMerchantMe")
+            .WithTags("Merchant")
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status500InternalServerError);
 
         app.MapGet("/api/merchant/{merchantId:guid}",

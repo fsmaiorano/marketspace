@@ -11,4 +11,6 @@ public interface IOrderRepository
 
     Task<OrderEntity?> GetByIdAsync(OrderId id, bool isTrackingEnabled = true,
         CancellationToken cancellationToken = default);
+    Task<List<OrderEntity>> GetRecentByCatalogIdsAsync(IEnumerable<Guid> catalogIds, int limit = 50,
+        CancellationToken cancellationToken = default);
 }

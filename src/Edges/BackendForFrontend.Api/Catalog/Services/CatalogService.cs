@@ -83,6 +83,7 @@ public class CatalogService(
                     ImageUrl = p.ImageUrl,
                     Categories = p.Categories,
                     MerchantId = p.MerchantId,
+                    Stock = p.Stock,
                     CreatedAt = p.CreatedAt,
                     UpdatedAt = p.UpdatedAt
                 }).ToList()
@@ -132,5 +133,64 @@ public class CatalogService(
         logger.LogError(LogTypeEnum.Application, null, "Failed to delete catalog. Status code: {StatusCode}", response.StatusCode);
         string errorMessage = await response.Content.ReadAsStringAsync();
         throw new HttpRequestException($"Error deleting catalog: {errorMessage}");
+    }
+
+    public async Task<Result<GetCatalogListResponse>> GetCatalogByMerchantIdAsync(Guid merchantId, int pageIndex, int pageSize)
+    {
+        logger.LogInformation(LogTypeEnum.Application, "Retrieving catalog for merchant {MerchantId}", merchantId);
+
+        HttpResponseMessage response = await DoGet($"{BaseUrl}/catalog/merchant/{merchantId}?pageIndex={pageIndex}&pageSize={pageSize}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            PaginatedResult<CatalogItemDto>? paginated =
+                await response.Content.ReadFromJsonAsync<PaginatedResult<CatalogItemDto>>();
+
+            if (paginated is null)
+                throw new HttpRequestException("Empty response from catalog service");
+
+            GetCatalogListResponse mapped = new()
+            {
+                PageIndex = paginated.PageIndex,
+                PageSize = paginated.PageSize,
+                Count = paginated.Count,
+                Products = paginated.Data.Select(p => new CatalogDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    ImageUrl = p.ImageUrl,
+                    Categories = p.Categories,
+                    MerchantId = p.MerchantId,
+                    Stock = p.Stock,
+                    CreatedAt = p.CreatedAt,
+                    UpdatedAt = p.UpdatedAt
+                }).ToList()
+            };
+
+            logger.LogInformation(LogTypeEnum.Application, "Merchant catalog retrieved successfully with {Count} items", mapped.Products.Count);
+            return Result<GetCatalogListResponse>.Success(mapped);
+        }
+
+        string errorMessage = await response.Content.ReadAsStringAsync();
+        return Result<GetCatalogListResponse>.Failure($"Failed to retrieve merchant catalog: {errorMessage}");
+    }
+
+    public async Task<Result<UpdateStockResponse>> UpdateStockAsync(Guid catalogId, int delta)
+    {
+        logger.LogInformation(LogTypeEnum.Application, "Updating stock for catalog {CatalogId}, delta: {Delta}", catalogId, delta);
+
+        HttpResponseMessage response = await DoPatch($"{BaseUrl}/catalog/{catalogId}/stock", new { delta });
+
+        if (response.IsSuccessStatusCode)
+        {
+            UpdateStockResponse? result = await response.Content.ReadFromJsonAsync<UpdateStockResponse>();
+            logger.LogInformation(LogTypeEnum.Business, "Stock updated successfully for catalog {CatalogId}", catalogId);
+            return Result<UpdateStockResponse>.Success(result ?? new UpdateStockResponse());
+        }
+
+        string errorMessage = await response.Content.ReadAsStringAsync();
+        return Result<UpdateStockResponse>.Failure($"Failed to update stock: {errorMessage}");
     }
 }
