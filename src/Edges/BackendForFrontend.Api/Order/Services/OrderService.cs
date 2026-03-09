@@ -14,25 +14,25 @@ public class OrderService(
     private string BaseUrl => configuration["Services:OrderService:BaseUrl"] ??
                               throw new ArgumentNullException($"OrderService BaseUrl is not configured");
 
+    private sealed record MsOrderItemDto(Guid OrderId, Guid CatalogId, int Quantity, decimal Price);
+    private sealed record MsOrderDto(Guid Id, Guid CustomerId, AddressDto? ShippingAddress, AddressDto? BillingAddress,
+        PaymentDto? Payment, string? Status, List<MsOrderItemDto>? Items, decimal TotalAmount, DateTimeOffset CreatedAt);
+
     public async Task<Result<CreateOrderResponse>> CreateOrderAsync(CreateOrderRequest request)
     {
         logger.LogInformation(LogTypeEnum.Application, "Creating order for customer: {CustomerId}", request.CustomerId);
 
         HttpResponseMessage response = await DoPost($"{BaseUrl}/order", request);
-        CreateOrderResponse? content = await response.Content.ReadFromJsonAsync<CreateOrderResponse>();
 
-        if (response.IsSuccessStatusCode && content is not null)
+        if (response.StatusCode == System.Net.HttpStatusCode.Created)
         {
-            logger.LogInformation(LogTypeEnum.Business, "Order created successfully: {@Order}", content);
-            return Result<CreateOrderResponse>.Success(content);
+            logger.LogInformation(LogTypeEnum.Business, "Order created successfully");
+            return Result<CreateOrderResponse>.Success(new CreateOrderResponse());
         }
-        else
-        {
-            logger.LogError(LogTypeEnum.Application, null, "Failed to create order. Status code: {StatusCode}, Response: {@Response}",
-                response.StatusCode, response.Content);
-            string errorMessage = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Error creating order: {errorMessage}");
-        }
+
+        logger.LogError(LogTypeEnum.Application, null, "Failed to create order. Status code: {StatusCode}", response.StatusCode);
+        string errorMessage = await response.Content.ReadAsStringAsync();
+        throw new HttpRequestException($"Error creating order: {errorMessage}");
     }
 
     public async Task<Result<GetOrderResponse>> GetOrderByIdAsync(Guid orderId)
@@ -40,20 +40,40 @@ public class OrderService(
         logger.LogInformation(LogTypeEnum.Application, "Retrieving order with ID: {OrderId}", orderId);
 
         HttpResponseMessage response = await DoGet($"{BaseUrl}/order/{orderId}");
-        Result<GetOrderResponse>? content = await response.Content.ReadFromJsonAsync<Result<GetOrderResponse>>();
 
-        if (response.IsSuccessStatusCode && content is not null)
+        if (response.IsSuccessStatusCode)
         {
-            logger.LogInformation(LogTypeEnum.Application, "Order retrieved successfully: {@Order}", content);
-            return content;
+            MsOrderDto? order = await response.Content.ReadFromJsonAsync<MsOrderDto>(
+                new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (order is not null)
+            {
+                GetOrderResponse mapped = new()
+                {
+                    Id = order.Id,
+                    CustomerId = order.CustomerId,
+                    ShippingAddress = order.ShippingAddress ?? new(),
+                    BillingAddress = order.BillingAddress ?? new(),
+                    Payment = order.Payment ?? new(),
+                    Status = order.Status ?? string.Empty,
+                    Items = order.Items?.Select(i => new OrderItemDto
+                    {
+                        ProductId = i.CatalogId,
+                        Quantity = i.Quantity,
+                        Price = i.Price
+                    }).ToList() ?? [],
+                    TotalAmount = order.TotalAmount
+                };
+
+                logger.LogInformation(LogTypeEnum.Application, "Order retrieved successfully: {OrderId}", order.Id);
+                return Result<GetOrderResponse>.Success(mapped);
+            }
+            return Result<GetOrderResponse>.Failure("Order not found");
         }
-        else
-        {
-            logger.LogError(LogTypeEnum.Application, null, "Failed to retrieve order. Status code: {StatusCode}, Response: {@Response}",
-                response.StatusCode, response.Content);
-            string errorMessage = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Error retrieving order: {errorMessage}");
-        }
+
+        logger.LogError(LogTypeEnum.Application, null, "Failed to retrieve order. Status code: {StatusCode}", response.StatusCode);
+        string errorMessage = await response.Content.ReadAsStringAsync();
+        throw new HttpRequestException($"Error retrieving order: {errorMessage}");
     }
 
     public async Task<Result<UpdateOrderResponse>> UpdateOrderAsync(UpdateOrderRequest request)
@@ -61,20 +81,16 @@ public class OrderService(
         logger.LogInformation(LogTypeEnum.Application, "Updating order with ID: {OrderId}", request.Id);
 
         HttpResponseMessage response = await DoPut($"{BaseUrl}/order", request);
-        Result<UpdateOrderResponse>? content = await response.Content.ReadFromJsonAsync<Result<UpdateOrderResponse>>();
 
-        if (response.IsSuccessStatusCode && content is not null)
+        if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
         {
-            logger.LogInformation(LogTypeEnum.Business, "Order updated successfully: {@Order}", content);
-            return content;
+            logger.LogInformation(LogTypeEnum.Business, "Order updated successfully");
+            return Result<UpdateOrderResponse>.Success(new UpdateOrderResponse());
         }
-        else
-        {
-            logger.LogError(LogTypeEnum.Application, null, "Failed to update order. Status code: {StatusCode}, Response: {@Response}",
-                response.StatusCode, response.Content);
-            string errorMessage = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Error updating order: {errorMessage}");
-        }
+
+        logger.LogError(LogTypeEnum.Application, null, "Failed to update order. Status code: {StatusCode}", response.StatusCode);
+        string errorMessage = await response.Content.ReadAsStringAsync();
+        throw new HttpRequestException($"Error updating order: {errorMessage}");
     }
 
     public async Task<Result<DeleteOrderResponse>> DeleteOrderAsync(Guid orderId)
@@ -82,20 +98,16 @@ public class OrderService(
         logger.LogInformation(LogTypeEnum.Application, "Deleting order with ID: {OrderId}", orderId);
 
         HttpResponseMessage response = await DoDelete($"{BaseUrl}/order/{orderId}");
-        Result<DeleteOrderResponse>? content = await response.Content.ReadFromJsonAsync<Result<DeleteOrderResponse>>();
 
-        if (response.IsSuccessStatusCode && content is not null)
+        if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
         {
-            logger.LogInformation(LogTypeEnum.Business, "Order deleted successfully: {@Order}", content);
-            return content;
+            logger.LogInformation(LogTypeEnum.Business, "Order deleted successfully");
+            return Result<DeleteOrderResponse>.Success(new DeleteOrderResponse { IsDeleted = true });
         }
-        else
-        {
-            logger.LogError(LogTypeEnum.Application, null, "Failed to delete order. Status code: {StatusCode}, Response: {@Response}",
-                response.StatusCode, response.Content);
-            string errorMessage = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Error deleting order: {errorMessage}");
-        }
+
+        logger.LogError(LogTypeEnum.Application, null, "Failed to delete order. Status code: {StatusCode}", response.StatusCode);
+        string errorMessage = await response.Content.ReadAsStringAsync();
+        throw new HttpRequestException($"Error deleting order: {errorMessage}");
     }
 
     public async Task<Result<GetOrderListResponse>> GetOrdersByCustomerIdAsync(Guid customerId)
@@ -111,12 +123,9 @@ public class OrderService(
                 customerId, content.Data?.Orders.Count);
             return content;
         }
-        else
-        {
-            logger.LogError(LogTypeEnum.Application, null, "Failed to retrieve orders. Status code: {StatusCode}, Response: {@Response}",
-                response.StatusCode, response.Content);
-            string errorMessage = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Error retrieving orders: {errorMessage}");
-        }
+
+        logger.LogError(LogTypeEnum.Application, null, "Failed to retrieve orders. Status code: {StatusCode}", response.StatusCode);
+        string errorMessage = await response.Content.ReadAsStringAsync();
+        throw new HttpRequestException($"Error retrieving orders: {errorMessage}");
     }
 }

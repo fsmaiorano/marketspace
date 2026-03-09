@@ -19,43 +19,33 @@ public class MerchantService(
         logger.LogInformation(LogTypeEnum.Application, "Creating merchant with request: {@Request}", request);
 
         HttpResponseMessage response = await DoPost($"{BaseUrl}/merchant", request);
-        Result<CreateMerchantResponse>? content =
-            await response.Content.ReadFromJsonAsync<Result<CreateMerchantResponse>>();
 
-        if (response.IsSuccessStatusCode && content is not null)
+        if (response.StatusCode == System.Net.HttpStatusCode.Created)
         {
-            logger.LogInformation(LogTypeEnum.Business, "Merchant created successfully: {@Merchant}", content);
-            return content;
+            logger.LogInformation(LogTypeEnum.Business, "Merchant created successfully");
+            return Result<CreateMerchantResponse>.Success(new CreateMerchantResponse());
         }
-        else
-        {
-            logger.LogError(LogTypeEnum.Application, null, "Failed to create merchant. Status code: {StatusCode}, Response: {@Response}",
-                response.StatusCode, response.Content);
-            string errorMessage = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Error updating merchant: {errorMessage}");
-        }
+
+        logger.LogError(LogTypeEnum.Application, null, "Failed to create merchant. Status code: {StatusCode}", response.StatusCode);
+        string errorMessage = await response.Content.ReadAsStringAsync();
+        throw new HttpRequestException($"Error creating merchant: {errorMessage}");
     }
 
     public async Task<Result<UpdateMerchantResponse>> UpdateMerchantAsync(UpdateMerchantRequest request)
     {
         logger.LogInformation(LogTypeEnum.Application, "Updating merchant with request: {@Request}", request);
 
-        HttpResponseMessage response = await DoPut($"{BaseUrl}/merchant/{request.Id}", request);
-        Result<UpdateMerchantResponse>? content =
-            await response.Content.ReadFromJsonAsync<Result<UpdateMerchantResponse>>();
+        HttpResponseMessage response = await DoPut($"{BaseUrl}/merchant", request);
 
-        if (response.IsSuccessStatusCode && content is not null)
+        if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
         {
-            logger.LogInformation(LogTypeEnum.Business, "Merchant updated successfully: {@Merchant}", content);
-            return content;
+            logger.LogInformation(LogTypeEnum.Business, "Merchant updated successfully");
+            return Result<UpdateMerchantResponse>.Success(new UpdateMerchantResponse { IsSuccess = true });
         }
-        else
-        {
-            logger.LogError(LogTypeEnum.Application, null, "Failed to update merchant. Status code: {StatusCode}, Response: {@Response}",
-                response.StatusCode, response.Content);
-            string errorMessage = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Error updating merchant: {errorMessage}");
-        }
+
+        logger.LogError(LogTypeEnum.Application, null, "Failed to update merchant. Status code: {StatusCode}", response.StatusCode);
+        string errorMessage = await response.Content.ReadAsStringAsync();
+        throw new HttpRequestException($"Error updating merchant: {errorMessage}");
     }
 
     public async Task<Result<DeleteMerchantResponse>> DeleteMerchantAsync(Guid merchantId)
@@ -63,21 +53,16 @@ public class MerchantService(
         logger.LogInformation(LogTypeEnum.Application, "Deleting merchant with ID: {MerchantId}", merchantId);
 
         HttpResponseMessage response = await DoDelete($"{BaseUrl}/merchant/{merchantId}");
-        Result<DeleteMerchantResponse>? content =
-            await response.Content.ReadFromJsonAsync<Result<DeleteMerchantResponse>>();
 
-        if (response.IsSuccessStatusCode && content is not null)
+        if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
         {
-            logger.LogInformation(LogTypeEnum.Business, "Merchant deleted successfully: {@Merchant}", content);
-            return content;
+            logger.LogInformation(LogTypeEnum.Business, "Merchant deleted successfully");
+            return Result<DeleteMerchantResponse>.Success(new DeleteMerchantResponse { IsSuccess = true });
         }
-        else
-        {
-            logger.LogError(LogTypeEnum.Application, null, "Failed to delete merchant. Status code: {StatusCode}, Response: {@Response}",
-                response.StatusCode, response.Content);
-            string errorMessage = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Error deleting merchant: {errorMessage}");
-        }
+
+        logger.LogError(LogTypeEnum.Application, null, "Failed to delete merchant. Status code: {StatusCode}", response.StatusCode);
+        string errorMessage = await response.Content.ReadAsStringAsync();
+        throw new HttpRequestException($"Error deleting merchant: {errorMessage}");
     }
 
     public async Task<Result<GetMerchantByIdResponse>> GetMerchantByIdAsync(Guid merchantId)
@@ -85,20 +70,20 @@ public class MerchantService(
         logger.LogInformation(LogTypeEnum.Application, "Retrieving merchant with ID: {MerchantId}", merchantId);
 
         HttpResponseMessage response = await DoGet($"{BaseUrl}/merchant/{merchantId}");
-        Result<GetMerchantByIdResponse>? content =
-            await response.Content.ReadFromJsonAsync<Result<GetMerchantByIdResponse>>();
 
-        if (response.IsSuccessStatusCode && content is not null)
+        if (response.IsSuccessStatusCode)
         {
-            logger.LogInformation(LogTypeEnum.Application, "Merchant retrieved successfully: {@Merchant}", content);
-            return content;
+            GetMerchantByIdResponse? merchant = await response.Content.ReadFromJsonAsync<GetMerchantByIdResponse>();
+            if (merchant is not null)
+            {
+                logger.LogInformation(LogTypeEnum.Application, "Merchant retrieved successfully: {@Merchant}", merchant);
+                return Result<GetMerchantByIdResponse>.Success(merchant);
+            }
+            return Result<GetMerchantByIdResponse>.Failure("Merchant not found");
         }
-        else
-        {
-            logger.LogError(LogTypeEnum.Application, null, "Failed to retrieve merchant. Status code: {StatusCode}, Response: {@Response}",
-                response.StatusCode, response.Content);
-            string errorMessage = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Error retrieving merchant: {errorMessage}");
-        }
+
+        logger.LogError(LogTypeEnum.Application, null, "Failed to retrieve merchant. Status code: {StatusCode}", response.StatusCode);
+        string errorMessage = await response.Content.ReadAsStringAsync();
+        throw new HttpRequestException($"Error retrieving merchant: {errorMessage}");
     }
 }

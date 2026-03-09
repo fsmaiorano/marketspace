@@ -20,21 +20,16 @@ public class CatalogService(
         logger.LogInformation(LogTypeEnum.Application, "Creating catalog with name: {Name}", request.Name);
 
         HttpResponseMessage response = await DoPost($"{BaseUrl}/catalog", request);
-        Result<CreateCatalogResponse>? content =
-            await response.Content.ReadFromJsonAsync<Result<CreateCatalogResponse>>();
 
-        if (response.IsSuccessStatusCode && content is not null)
+        if (response.StatusCode == System.Net.HttpStatusCode.Created)
         {
-            logger.LogInformation(LogTypeEnum.Business, "Catalog created successfully: {@Catalog}", content);
-            return content;
+            logger.LogInformation(LogTypeEnum.Business, "Catalog created successfully");
+            return Result<CreateCatalogResponse>.Success(new CreateCatalogResponse());
         }
-        else
-        {
-            logger.LogError(LogTypeEnum.Application, null, "Failed to create catalog. Status code: {StatusCode}, Response: {@Response}",
-                response.StatusCode, response.Content);
-            string errorMessage = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Error creating catalog: {errorMessage}");
-        }
+
+        logger.LogError(LogTypeEnum.Application, null, "Failed to create catalog. Status code: {StatusCode}", response.StatusCode);
+        string errorMessage = await response.Content.ReadAsStringAsync();
+        throw new HttpRequestException($"Error creating catalog: {errorMessage}");
     }
 
     public async Task<Result<GetCatalogResponse>> GetCatalogByIdAsync(Guid catalogId)
@@ -42,20 +37,21 @@ public class CatalogService(
         logger.LogInformation(LogTypeEnum.Application, "Retrieving catalog with ID: {CatalogId}", catalogId);
 
         HttpResponseMessage response = await DoGet($"{BaseUrl}/catalog/{catalogId}");
-        Result<GetCatalogResponse>? content = await response.Content.ReadFromJsonAsync<Result<GetCatalogResponse>>();
 
-        if (response.IsSuccessStatusCode && content is not null)
+        if (response.IsSuccessStatusCode)
         {
-            logger.LogInformation(LogTypeEnum.Application, "Catalog retrieved successfully: {@Catalog}", content);
-            return content;
+            GetCatalogResponse? item = await response.Content.ReadFromJsonAsync<GetCatalogResponse>();
+            if (item is not null)
+            {
+                logger.LogInformation(LogTypeEnum.Application, "Catalog retrieved successfully: {@Catalog}", item);
+                return Result<GetCatalogResponse>.Success(item);
+            }
+            return Result<GetCatalogResponse>.Failure("Catalog not found");
         }
-        else
-        {
-            logger.LogError(LogTypeEnum.Application, null, "Failed to retrieve catalog. Status code: {StatusCode}, Response: {@Response}",
-                response.StatusCode, response.Content);
-            string errorMessage = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Error retrieving catalog: {errorMessage}");
-        }
+
+        logger.LogError(LogTypeEnum.Application, null, "Failed to retrieve catalog. Status code: {StatusCode}", response.StatusCode);
+        string errorMessage = await response.Content.ReadAsStringAsync();
+        throw new HttpRequestException($"Error retrieving catalog: {errorMessage}");
     }
 
     public async Task<Result<GetCatalogListResponse>> GetCatalogListAsync(int pageIndex, int pageSize)
@@ -109,21 +105,16 @@ public class CatalogService(
         logger.LogInformation(LogTypeEnum.Application, "Updating catalog with ID: {CatalogId}", request.Id);
 
         HttpResponseMessage response = await DoPut($"{BaseUrl}/catalog", request);
-        Result<UpdateCatalogResponse>? content =
-            await response.Content.ReadFromJsonAsync<Result<UpdateCatalogResponse>>();
 
-        if (response.IsSuccessStatusCode && content is not null)
+        if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
         {
-            logger.LogInformation(LogTypeEnum.Business, "Catalog updated successfully: {@Catalog}", content);
-            return content;
+            logger.LogInformation(LogTypeEnum.Business, "Catalog updated successfully");
+            return Result<UpdateCatalogResponse>.Success(new UpdateCatalogResponse());
         }
-        else
-        {
-            logger.LogError(LogTypeEnum.Application, null, "Failed to update catalog. Status code: {StatusCode}, Response: {@Response}",
-                response.StatusCode, response.Content);
-            string errorMessage = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Error updating catalog: {errorMessage}");
-        }
+
+        logger.LogError(LogTypeEnum.Application, null, "Failed to update catalog. Status code: {StatusCode}", response.StatusCode);
+        string errorMessage = await response.Content.ReadAsStringAsync();
+        throw new HttpRequestException($"Error updating catalog: {errorMessage}");
     }
 
     public async Task<Result<DeleteCatalogResponse>> DeleteCatalogAsync(Guid catalogId)
@@ -131,20 +122,15 @@ public class CatalogService(
         logger.LogInformation(LogTypeEnum.Application, "Deleting catalog with ID: {CatalogId}", catalogId);
 
         HttpResponseMessage response = await DoDelete($"{BaseUrl}/catalog/{catalogId}");
-        Result<DeleteCatalogResponse>? content =
-            await response.Content.ReadFromJsonAsync<Result<DeleteCatalogResponse>>();
 
-        if (response.IsSuccessStatusCode && content is not null)
+        if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
         {
-            logger.LogInformation(LogTypeEnum.Business, "Catalog deleted successfully: {@Catalog}", content);
-            return content;
+            logger.LogInformation(LogTypeEnum.Business, "Catalog deleted successfully");
+            return Result<DeleteCatalogResponse>.Success(new DeleteCatalogResponse { IsSuccess = true });
         }
-        else
-        {
-            logger.LogError(LogTypeEnum.Application, null, "Failed to delete catalog. Status code: {StatusCode}, Response: {@Response}",
-                response.StatusCode, response.Content);
-            string errorMessage = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Error deleting catalog: {errorMessage}");
-        }
+
+        logger.LogError(LogTypeEnum.Application, null, "Failed to delete catalog. Status code: {StatusCode}", response.StatusCode);
+        string errorMessage = await response.Content.ReadAsStringAsync();
+        throw new HttpRequestException($"Error deleting catalog: {errorMessage}");
     }
 }
