@@ -11,7 +11,7 @@ public record Address
     public string Country { get; private set; } = null!;
     public string State { get; private set; } = null!;
     public string ZipCode { get; private set; } = null!;
-    public string Coordinates { get; private set; } = null!;
+    public string? Coordinates { get; private set; }
 
     protected Address()
     {
@@ -19,7 +19,7 @@ public record Address
 
     [JsonConstructor]
     public Address(string firstName, string lastName, string emailAddress, string addressLine, string country,
-        string state, string zipCode, string coordinates)
+        string state, string zipCode, string? coordinates = null)
     {
         FirstName = firstName;
         LastName = lastName;
@@ -32,7 +32,7 @@ public record Address
     }
 
     public static Address Of(string firstName, string lastName, string emailAddress, string addressLine,
-        string country, string state, string zipCode, string coordinates)
+        string country, string state, string zipCode, string? coordinates = null)
     {
         ValidateInput(firstName, nameof(firstName));
         ValidateInput(emailAddress, nameof(emailAddress));
@@ -40,7 +40,6 @@ public record Address
         ValidateInput(country, nameof(country));
         ValidateInput(state, nameof(state));
         ValidateInput(zipCode, nameof(zipCode));
-        ValidateInput(coordinates, nameof(coordinates));
 
         return new Address(firstName, lastName, emailAddress, addressLine, country, state, zipCode, coordinates);
     }

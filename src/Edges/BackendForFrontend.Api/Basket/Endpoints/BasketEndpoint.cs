@@ -2,6 +2,7 @@ using BackendForFrontend.Api.Basket.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using BuildingBlocks;
 using BackendForFrontend.Api.Basket.UseCases;
+using System.Security.Claims;
 
 namespace BackendForFrontend.Api.Basket.Endpoints;
 
@@ -55,12 +56,17 @@ public static class BasketEndpoint
             .Produces(StatusCodes.Status500InternalServerError);
 
         app.MapPost("/api/basket/checkout",
-                async ([FromBody] CheckoutBasketRequest request, [FromServices] BasketUseCase usecase) =>
+                async ([FromBody] CheckoutBasketRequest request, ClaimsPrincipal user, [FromServices] BasketUseCase usecase) =>
                 {
+                    string? customerId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                                         ?? user.FindFirst("sub")?.Value;
+                    if (!string.IsNullOrWhiteSpace(customerId))
+                        request.CustomerId = customerId;
+
                     Result<CheckoutBasketResponse> result = await usecase.CheckoutBasketAsync(request);
                     return result.IsSuccess
                         ? Results.Ok(result)
-                        : Results.NotFound(result.Error);
+                        : Results.BadRequest(result.Error);
                 })
             .RequireAuthorization()
             .WithName("CheckoutBasket")

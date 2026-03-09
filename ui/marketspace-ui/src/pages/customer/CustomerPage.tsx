@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { CheckCircle, X } from "lucide-react";
+import { X } from "lucide-react";
+import { toast } from "sonner";
 import { logout, getMe } from "@/services/authentication-service";
 import { getCatalogList, type CatalogItem } from "@/services/catalog-service";
 import {
@@ -15,6 +16,7 @@ import { CatalogSection } from "@/pages/customer/components/CatalogSection";
 import { CustomerHeader } from "@/pages/customer/components/CustomerHeader";
 import { OrdersSection } from "@/pages/customer/components/OrdersSection";
 import { BasketDrawer } from "@/pages/customer/components/BasketDrawer";
+import { CheckoutModal, type CheckoutFormData } from "@/pages/customer/components/CheckoutModal";
 
 type View = "catalog" | "orders";
 
@@ -38,7 +40,7 @@ export default function CustomerPage() {
   const [loadingBasket, setLoadingBasket] = useState(false);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
-  const [checkoutSuccess, setCheckoutSuccess] = useState<string | null>(null);
+  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pageIndex, setPageIndex] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -191,7 +193,12 @@ export default function CustomerPage() {
     await handleUpdateQuantity(productId, -qty);
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
+    if (!basket || basket.items.length === 0 || !me) return;
+    setCheckoutModalOpen(true);
+  };
+
+  const handleCheckoutSubmit = async (data: CheckoutFormData) => {
     if (!basket || basket.items.length === 0 || !me) return;
     setError(null);
     setCheckingOut(true);
@@ -199,14 +206,27 @@ export default function CustomerPage() {
     try {
       await checkoutBasket({
         username: me.userName ?? me.userId,
+        customerId: me.userId,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        emailAddress: data.emailAddress,
+        addressLine: data.addressLine,
+        country: data.country,
+        state: data.state,
+        zipCode: data.zipCode,
+        cardName: data.cardName,
+        cardNumber: data.cardNumber,
+        expiration: data.expiration,
+        cvv: data.cvv,
+        paymentMethod: data.paymentMethod,
       });
 
       setBasket({ username: me.userName ?? "", items: [], totalPrice: 0 });
+      setCheckoutModalOpen(false);
       setBasketOpen(false);
-      setCheckoutSuccess("Order placed successfully!");
-      setTimeout(() => setCheckoutSuccess(null), 6000);
+      toast.success("Order placed successfully! 🎉");
     } catch {
-      setError("Checkout failed. Please try again.");
+      toast.error("Checkout failed. Please try again.");
     } finally {
       setCheckingOut(false);
     }
@@ -237,13 +257,6 @@ export default function CustomerPage() {
             <button onClick={() => setError(null)}>
               <X className="h-4 w-4" />
             </button>
-          </div>
-        )}
-
-        {checkoutSuccess && (
-          <div className="flex items-center gap-2 rounded-md border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-700">
-            <CheckCircle className="h-4 w-4" />
-            {checkoutSuccess}
           </div>
         )}
 
@@ -280,6 +293,14 @@ export default function CustomerPage() {
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveItem}
         onCheckout={handleCheckout}
+      />
+
+      <CheckoutModal
+        open={checkoutModalOpen}
+        submitting={checkingOut}
+        defaultEmail={me?.email ?? undefined}
+        onClose={() => setCheckoutModalOpen(false)}
+        onSubmit={handleCheckoutSubmit}
       />
     </div>
   );

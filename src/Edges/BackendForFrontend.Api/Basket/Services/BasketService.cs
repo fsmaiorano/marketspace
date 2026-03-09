@@ -128,19 +128,19 @@ public class BasketService(
         logger.LogInformation(LogTypeEnum.Application, "Checking out basket for user: {Username}", request.Username);
 
         HttpResponseMessage response = await DoPost($"{BaseUrl}/basket/checkout", request);
-        Result<CheckoutBasketResponse>? content = await response.Content.ReadFromJsonAsync<Result<CheckoutBasketResponse>>();
 
-        if (response.IsSuccessStatusCode && content is not null)
+        if (response.IsSuccessStatusCode)
         {
+            Result<CheckoutBasketResponse>? content = await response.Content.ReadFromJsonAsync<Result<CheckoutBasketResponse>>();
             logger.LogInformation(LogTypeEnum.Business, "Basket checkout completed successfully for user: {Username}", request.Username);
-            return content;
+            return content ?? Result<CheckoutBasketResponse>.Success(new CheckoutBasketResponse());
         }
         else
         {
-            logger.LogError(LogTypeEnum.Application, null, "Failed to checkout basket. Status code: {StatusCode}, Response: {@Response}",
-                response.StatusCode, response.Content);
             string errorMessage = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException($"Error checking out basket: {errorMessage}");
+            logger.LogError(LogTypeEnum.Application, null, "Failed to checkout basket. Status code: {StatusCode}, Error: {Error}",
+                response.StatusCode, errorMessage);
+            return Result<CheckoutBasketResponse>.Failure($"Checkout failed: {errorMessage}");
         }
     }
 }
