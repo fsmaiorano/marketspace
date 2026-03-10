@@ -37,8 +37,9 @@ app.MapDefaultEndpoints();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    await app.InitialiseDatabaseAsync<BasketDbContext>();
 }
+
+await app.InitialiseDatabaseAsync<BasketDbContext>();
 
 // app.UseHttpsRedirection();
 

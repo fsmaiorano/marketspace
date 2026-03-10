@@ -1,0 +1,349 @@
+name: marketspace
+
+networks:
+  marketspace-net:
+    driver: bridge
+
+volumes:
+  postgres-catalog-data:
+  postgres-basket-data:
+  postgres-order-data:
+  postgres-merchant-data:
+  postgres-user-data:
+  postgres-payment-data:
+  rabbitmq-data:
+  minio-data:
+
+# ─── Infrastructure ────────────────────────────────────────────────────────────
+
+services:
+
+  postgres-catalog:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: CatalogDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-catalog-data:/var/lib/postgresql/data
+    networks:
+      - marketspace-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d CatalogDb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  postgres-basket:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: BasketDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-basket-data:/var/lib/postgresql/data
+    networks:
+      - marketspace-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d BasketDb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  postgres-order:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: OrderDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres-order-data:/var/lib/postgresql/data
+    networks:
+      - marketspace-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d OrderDb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  postgres-merchant:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: MerchantDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres-merchant-data:/var/lib/postgresql/data
+    networks:
+      - marketspace-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d MerchantDb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  postgres-user:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: UserDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5437:5432"
+    volumes:
+      - postgres-user-data:/var/lib/postgresql/data
+    networks:
+      - marketspace-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d UserDb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  postgres-payment:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: PaymentDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5438:5432"
+    volumes:
+      - postgres-payment-data:/var/lib/postgresql/data
+    networks:
+      - marketspace-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d PaymentDb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - marketspace-net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    networks:
+      - marketspace-net
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+# ─── Microservices ─────────────────────────────────────────────────────────────
+
+  catalog-api:
+    build:
+      context: .
+      dockerfile: src/Services/Catalog/Catalog.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__Database: "Server=postgres-catalog;Port=5432;Database=CatalogDb;User Id=postgres;Password=${POSTGRES_PASSWORD};"
+      ConnectionStrings__RabbitMq: "amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/"
+      Storage__Minio__Endpoint: "minio:9000"
+      Storage__Minio__AccessKey: "${MINIO_ROOT_USER}"
+      Storage__Minio__SecretKey: "${MINIO_ROOT_PASSWORD}"
+      Storage__Minio__BucketName: "catalog-bucket"
+    ports:
+      - "6000:8080"
+    depends_on:
+      postgres-catalog:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - marketspace-net
+    restart: unless-stopped
+
+  basket-api:
+    build:
+      context: .
+      dockerfile: src/Services/Basket/Basket.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__BasketDb: "Host=postgres-basket;Port=5432;Database=BasketDb;Username=postgres;Password=${POSTGRES_PASSWORD}"
+      ConnectionStrings__RabbitMq: "amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/"
+      OrderService__BaseUrl: "http://order-api:8080"
+    ports:
+      - "6001:8080"
+    depends_on:
+      postgres-basket:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - marketspace-net
+    restart: unless-stopped
+
+  order-api:
+    build:
+      context: .
+      dockerfile: src/Services/Order/Order.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__Database: "Host=postgres-order;Port=5432;Database=OrderDb;Username=postgres;Password=${POSTGRES_PASSWORD};"
+      ConnectionStrings__RabbitMq: "amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/"
+    ports:
+      - "6003:8080"
+    depends_on:
+      postgres-order:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - marketspace-net
+    restart: unless-stopped
+
+  merchant-api:
+    build:
+      context: .
+      dockerfile: src/Services/Merchant/Merchant.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__Database: "Host=postgres-merchant;Port=5432;Database=MerchantDb;Username=postgres;Password=${POSTGRES_PASSWORD};"
+    ports:
+      - "6005:8080"
+    depends_on:
+      postgres-merchant:
+        condition: service_healthy
+    networks:
+      - marketspace-net
+    restart: unless-stopped
+
+  user-api:
+    build:
+      context: .
+      dockerfile: src/Services/User/User.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__DefaultConnection: "Host=postgres-user;Port=5432;Database=UserDb;Username=postgres;Password=${POSTGRES_PASSWORD}"
+    ports:
+      - "6006:8080"
+    depends_on:
+      postgres-user:
+        condition: service_healthy
+    networks:
+      - marketspace-net
+    restart: unless-stopped
+
+  payment-api:
+    build:
+      context: .
+      dockerfile: src/Services/Payment/Payment.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__Database: "Host=postgres-payment;Port=5432;Database=PaymentDb;Username=postgres;Password=${POSTGRES_PASSWORD};"
+      ConnectionStrings__RabbitMq: "amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/"
+    ports:
+      - "6007:8080"
+    depends_on:
+      postgres-payment:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - marketspace-net
+    restart: unless-stopped
+
+# ─── BFF (Backend For Frontend) ────────────────────────────────────────────────
+
+  backendforfrontend-api:
+    build:
+      context: .
+      dockerfile: src/Edges/BackendForFrontend.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__RabbitMq: "amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/"
+      Services__CatalogService__BaseUrl: "http://catalog-api:8080"
+      Services__BasketService__BaseUrl: "http://basket-api:8080"
+      Services__OrderService__BaseUrl: "http://order-api:8080"
+      Services__MerchantService__BaseUrl: "http://merchant-api:8080"
+      Services__UserService__BaseUrl: "http://user-api:8080"
+    ports:
+      - "5100:8080"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      catalog-api:
+        condition: service_started
+      basket-api:
+        condition: service_started
+      order-api:
+        condition: service_started
+      merchant-api:
+        condition: service_started
+      user-api:
+        condition: service_started
+      payment-api:
+        condition: service_started
+    networks:
+      - marketspace-net
+    restart: unless-stopped
+
+# ─── Frontend ──────────────────────────────────────────────────────────────────
+
+  webapp:
+    build:
+      context: ui/marketspace-ui
+      dockerfile: Dockerfile
+      args:
+        VITE_BFF_API_URL: ${BFF_PUBLIC_URL:-http://localhost:5100}
+        VITE_ENV: docker
+    ports:
+      - "80:4000"
+    depends_on:
+      - backendforfrontend-api
+    networks:
+      - marketspace-net
+    restart: unless-stopped

@@ -12,7 +12,7 @@ COPY ["infra/MarketSpace.ServiceDefaults/MarketSpace.ServiceDefaults.csproj", "i
 COPY ["src/Services/Merchant/Merchant.Api/Merchant.Api.csproj", "src/Services/Merchant/Merchant.Api/"]
 RUN dotnet restore "src/Services/Merchant/Merchant.Api/Merchant.Api.csproj"
 COPY . .
-RUN dotnet build "src/Services/Merchant/Merchant.Api/Merchant.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "src/Services/Merchant/Merchant.Api/Merchant.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build --no-restore
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release

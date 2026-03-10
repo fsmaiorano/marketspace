@@ -1,0 +1,38 @@
+# Build output
+**/bin/
+**/obj/
+
+# Test projects (not needed in production images)
+tests/
+
+# Node / frontend
+node_modules/
+ui/marketspace-ui/node_modules/
+ui/marketspace-ui/dist/
+ui/marketspace-ui/.vite/
+
+# .NET local tools & user files
+.vs/
+.vscode/
+**/*.user
+**/*.suo
+
+# Git
+.git/
+.gitignore
+
+# Aspire / infra — exclude only the AppHost, keep ServiceDefaults
+infra/MarketSpace.AppHost/
+
+# Docs / scripts (not needed in containers)
+docs/
+scripts/
+
+# Docker files themselves (already in context)
+docker-compose.yml
+.env.docker
+
+# IDE
+**/.idea/
+**/.DS_Store
+

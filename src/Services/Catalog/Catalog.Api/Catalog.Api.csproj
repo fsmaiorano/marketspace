@@ -5,6 +5,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
     </PropertyGroup>
 
     <ItemGroup>
@@ -22,7 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include="..\..\..\..\.dockerignore">
+        <Content Include="..\..\..\..\.dockerignore" Condition="Exists('..\..\..\..\.dockerignore')">
             <Link>.dockerignore</Link>
         </Content>
     </ItemGroup>

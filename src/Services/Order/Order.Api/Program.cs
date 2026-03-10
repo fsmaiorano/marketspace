@@ -39,8 +39,9 @@ app.MapDefaultEndpoints();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    await app.InitialiseDatabaseAsync<OrderDbContext>();
 }
+
+await app.InitialiseDatabaseAsync<OrderDbContext>();
 
 // app.UseHttpsRedirection();
 

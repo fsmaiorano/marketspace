@@ -20,8 +20,9 @@ app.UseSwaggerUI(options =>
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    await app.InitialiseDatabaseAsync<UserDbContext>();
 }
+
+await app.InitialiseDatabaseAsync<UserDbContext>();
 
 app.UseCors();
 

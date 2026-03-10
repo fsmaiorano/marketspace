@@ -10,7 +10,11 @@ export default defineConfig({
       "@": resolve(__dirname, "src"),
       "@components": resolve(__dirname, "src/components"),
       "@lib": resolve(__dirname, "src/lib"),
-      // Additional alias configuration can be added here
     },
+  },
+  server: {
+    port: parseInt(process.env.PORT ?? "4001"),
+    strictPort: true,
+    host: true,
   },
 });

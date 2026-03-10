@@ -137,7 +137,7 @@ IResourceBuilder<ProjectResource> userApi = builder.AddProject<Projects.User_Api
 
 // BFF
 IConfigurationSection bffConfig = config.GetSection("Aspire:Services:BFF");
-IResourceBuilder<ProjectResource> _ = builder.AddProject<Projects.BackendForFrontend_Api>(bffConfig["ProjectName"]!)
+IResourceBuilder<ProjectResource> bffApi = builder.AddProject<Projects.BackendForFrontend_Api>(bffConfig["ProjectName"]!)
     .WaitFor(rabbitmq)
     .WithEnvironment("ConnectionStrings__RabbitMQ", $"amqp://guest:guest@localhost:{rabbitMqConfig["Port"]!}/")
     .WithReference(catalogApi)
@@ -148,5 +148,14 @@ IResourceBuilder<ProjectResource> _ = builder.AddProject<Projects.BackendForFron
     .WithReference(paymentApi)
     .WithHttpEndpoint(port: int.Parse(bffConfig["HttpPort"]!), name: "bff-http")
     .WithHttpsEndpoint(port: int.Parse(bffConfig["HttpsPort"]!), name: "bff-https");
+
+// Frontend (Vite React app)
+IConfigurationSection webAppConfig = config.GetSection("Aspire:Services:WebApp");
+builder.AddViteApp(webAppConfig["ProjectName"]!, "../../ui/marketspace-ui", "dev")
+    .WithNpm(installArgs: ["--legacy-peer-deps"])
+    .WithEndpoint("http", e => e.Port = int.Parse(webAppConfig["HttpPort"]!))
+    .WithEnvironment("VITE_BFF_API_URL", $"http://localhost:{bffConfig["HttpPort"]!}")
+    .WithEnvironment("VITE_ENV", "aspire")
+    .WaitFor(bffApi);
 
 builder.Build().Run();

@@ -40,8 +40,9 @@ app.MapDefaultEndpoints();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    await app.InitialiseDatabaseAsync<MerchantDbContext>();
 }
+
+await app.InitialiseDatabaseAsync<MerchantDbContext>();
 
 // app.UseHttpsRedirection();
 

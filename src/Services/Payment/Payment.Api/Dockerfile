@@ -12,7 +12,7 @@ COPY ["infra/MarketSpace.ServiceDefaults/MarketSpace.ServiceDefaults.csproj", "i
 COPY ["src/Services/Payment/Payment.Api/Payment.Api.csproj", "src/Services/Payment/Payment.Api/"]
 RUN dotnet restore "src/Services/Payment/Payment.Api/Payment.Api.csproj"
 COPY . .
-RUN dotnet build "src/Services/Payment/Payment.Api/Payment.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "src/Services/Payment/Payment.Api/Payment.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build --no-restore
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
