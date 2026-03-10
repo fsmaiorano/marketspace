@@ -23,7 +23,8 @@ public class OnOrderCreatedSubscriber(
             Amount = @event.TotalAmount,
             Currency = "BRL",
             Provider = @event.CardName,
-            Method = @event.PaymentMethod
+            Method = @event.PaymentMethod,
+            Items = @event.Items
         };
 
         Result<CreatePaymentResult> result = await createPaymentHandler.HandleAsync(command);

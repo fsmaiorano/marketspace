@@ -132,9 +132,12 @@ public class EventBus : IEventBus, IAsyncDisposable, IDisposable
             _logger.LogInformation("Subscribed {HandlerType} to {EventType}", handlerType.Name, eventType.Name);
         }
 
-        // Create dead letter queue and exchange
-        string queueName = $"{eventType.Name}";
-        string deadLetterQueueName = $"{eventType.Name}_dlq";
+        string safeHandlerName = (handlerType.FullName ?? handlerType.Name)
+            .Replace('+', '.')
+            .Replace('<', '_')
+            .Replace('>', '_');
+        string queueName = safeHandlerName;
+        string deadLetterQueueName = $"{safeHandlerName}_dlq";
         string deadLetterExchangeName = $"{_exchangeName}_dlq";
         string routingKey = eventType.Name;
 

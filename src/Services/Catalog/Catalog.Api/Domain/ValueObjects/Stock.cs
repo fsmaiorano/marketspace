@@ -11,6 +11,6 @@ public record Stock
 
     public static Stock Of(int value)
     {
-        return value <= 0 ? throw new ArgumentException("Stock cannot be negative.", nameof(value)) : new Stock(value);
+        return value < 0 ? throw new ArgumentException("Stock cannot be negative.", nameof(value)) : new Stock(value);
     }
 }

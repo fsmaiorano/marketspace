@@ -89,6 +89,8 @@ IResourceBuilder<ContainerResource> minio = builder
 IConfigurationSection catalogConfig = config.GetSection("Aspire:Services:Catalog");
 IResourceBuilder<ProjectResource> catalogApi = builder.AddProject<Projects.Catalog_Api>(catalogConfig["ProjectName"]!)
     .WithReference(catalogDb)
+    .WaitFor(rabbitmq)
+    .WithEnvironment("ConnectionStrings__RabbitMQ", $"amqp://guest:guest@localhost:{rabbitMqConfig["Port"]!}/")
     .WithEnvironment("Storage__Minio__Endpoint", minioConfig["Endpoint"]!)
     .WithEnvironment("Storage__Minio__AccessKey", minioConfig["RootUser"]!)
     .WithEnvironment("Storage__Minio__SecretKey", minioConfig["RootPassword"]!)
@@ -137,6 +139,7 @@ IResourceBuilder<ProjectResource> userApi = builder.AddProject<Projects.User_Api
 IConfigurationSection bffConfig = config.GetSection("Aspire:Services:BFF");
 IResourceBuilder<ProjectResource> _ = builder.AddProject<Projects.BackendForFrontend_Api>(bffConfig["ProjectName"]!)
     .WaitFor(rabbitmq)
+    .WithEnvironment("ConnectionStrings__RabbitMQ", $"amqp://guest:guest@localhost:{rabbitMqConfig["Port"]!}/")
     .WithReference(catalogApi)
     .WithReference(basketApi)
     .WithReference(orderApi)

@@ -128,13 +128,25 @@ public static class MerchantDashboardEndpoint
             .Produces(StatusCodes.Status401Unauthorized);
 
         app.MapGet("/api/merchant-dashboard/stream",
-                async (HttpContext context, ClaimsPrincipal user, IStockEventService stockEventService) =>
+                async (HttpContext context, ClaimsPrincipal user, IStockEventService stockEventService,
+                    MerchantUseCase merchantUseCase, IMerchantUserMappingService merchantUserMappingService) =>
                 {
                     string? userId = GetUserId(user);
                     if (string.IsNullOrEmpty(userId))
                     {
                         context.Response.StatusCode = 401;
                         return;
+                    }
+
+                    // Look up the merchant's entity ID so that incoming RabbitMQ stock events
+                    // (which carry merchantId) can be routed to this SSE channel (keyed by userId).
+                    string? merchantId = null;
+                    Result<BackendForFrontend.Api.Merchant.Dtos.GetMerchantMeResponse> merchantResult =
+                        await merchantUseCase.GetMerchantMeAsync(userId);
+                    if (merchantResult.IsSuccess && merchantResult.Data is not null)
+                    {
+                        merchantId = merchantResult.Data.Id.ToString();
+                        merchantUserMappingService.Register(merchantId, userId);
                     }
 
                     // Disable response buffering so SSE data is flushed immediately
@@ -176,6 +188,8 @@ public static class MerchantDashboardEndpoint
                     finally
                     {
                         stockEventService.Unsubscribe(userId);
+                        if (merchantId is not null)
+                            merchantUserMappingService.Unregister(merchantId);
                     }
                 })
             .RequireAuthorization()

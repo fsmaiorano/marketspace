@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Payment.Api.Domain.Entities;
 using Payment.Api.Domain.ValueObjects;
+using System.Text.Json;
 
 namespace Payment.Api.Infrastructure.Data.Configurations;
 
@@ -49,6 +50,22 @@ public class PaymentConfiguration : IEntityTypeConfiguration<PaymentEntity>
 
         builder.Property(p => p.AuthorizationCode)
             .HasMaxLength(50);
+
+        builder.Property(p => p.Items)
+            .HasColumnType("jsonb")
+            .HasConversion(
+                items => JsonSerializer.Serialize(items, (JsonSerializerOptions?)null),
+                json => JsonSerializer.Deserialize<List<BuildingBlocks.Messaging.IntegrationEvents.OrderItemData>>(json,
+                    (JsonSerializerOptions?)null) ?? new())
+            .IsRequired()
+            .HasDefaultValueSql("'[]'::jsonb")
+            .Metadata.SetValueComparer(
+                new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<
+                    List<BuildingBlocks.Messaging.IntegrationEvents.OrderItemData>>(
+                    (c1, c2) => JsonSerializer.Serialize(c1, (JsonSerializerOptions?)null) ==
+                                JsonSerializer.Serialize(c2, (JsonSerializerOptions?)null),
+                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => c.ToList()));
 
         builder.Property(p => p.CreatedAt).IsRequired();
 

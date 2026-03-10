@@ -26,7 +26,14 @@ public class OnOrderCreatedEventHandler(
             CardName = @event.Order.Payment.CardName,
             Expiration = @event.Order.Payment.Expiration,
             Cvv = @event.Order.Payment.Cvv,
-            PaymentMethod = @event.Order.Payment.PaymentMethod
+            PaymentMethod = @event.Order.Payment.PaymentMethod,
+            Items = @event.Order.Items
+                .Select(item => new OrderItemData
+                {
+                    CatalogId = item.CatalogId.Value,
+                    Quantity = item.Quantity,
+                    Price = item.Price.Value
+                }).ToList()
         };
 
         await eventBus.PublishAsync(integrationEvent, cancellationToken);

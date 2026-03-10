@@ -1,5 +1,6 @@
 using BuildingBlocks;
 using BuildingBlocks.Loggers;
+using BuildingBlocks.Messaging.IntegrationEvents;
 using Payment.Api.Domain.Entities;
 using Payment.Api.Domain.Repositories;
 using Payment.Api.Domain.ValueObjects;
@@ -13,6 +14,7 @@ public record CreatePaymentCommand
     public string Currency { get; init; } = string.Empty;
     public int Method { get; init; }
     public string Provider { get; init; } = string.Empty;
+    public List<OrderItemData> Items { get; init; } = [];
 }
 
 public record CreatePaymentResult();
@@ -34,7 +36,8 @@ public sealed class CreatePayment(
                 command.Amount,
                 command.Currency,
                 PaymentMethod.Of(command.Method.ToString()),
-                command.Provider
+                command.Provider,
+                command.Items
              );
              
              int result = await repository.AddAsync(payment);

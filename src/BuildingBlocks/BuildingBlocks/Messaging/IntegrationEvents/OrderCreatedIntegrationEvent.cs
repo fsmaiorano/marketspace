@@ -16,4 +16,5 @@ public class OrderCreatedIntegrationEvent : IIntegrationEvent
     public string Cvv { get; init; } = null!;
     public int PaymentMethod { get; set; } = 0!;
     public decimal TotalAmount { get; init; }
+    public List<OrderItemData> Items { get; init; } = [];
 }

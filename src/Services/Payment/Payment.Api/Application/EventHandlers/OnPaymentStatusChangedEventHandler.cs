@@ -22,7 +22,8 @@ public class OnPaymentStatusChangedEventHandler(
             CorrelationId = @event.CorrelationId,
             OrderId = @event.Payment.OrderId,
             PaymentStatus = (int)@event.Payment.Status,
-            PaymentStatusName = @event.Payment.Status.ToString()
+            PaymentStatusName = @event.Payment.Status.ToString(),
+            Items = @event.Payment.Items
         };
 
         await eventBus.PublishAsync(integrationEvent, cancellationToken);

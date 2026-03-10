@@ -1,4 +1,5 @@
 using BuildingBlocks.Abstractions;
+using BuildingBlocks.Messaging.IntegrationEvents;
 using Payment.Api.Domain.Enums;
 using Payment.Api.Domain.Events;
 using Payment.Api.Domain.ValueObjects;
@@ -29,12 +30,17 @@ public class PaymentEntity : Aggregate<PaymentId>
 
     public RiskAnalysisEntity? RiskAnalysis { get; private set; }
 
+    /// <summary>
+    /// Snapshot of the order items, used to restore stock when payment fails.
+    /// </summary>
+    public List<OrderItemData> Items { get; private set; } = [];
+
     [JsonConstructor]
     public PaymentEntity(PaymentId id, Guid orderId, decimal amount, string currency, 
         PaymentStatusEnum status, string? statusDetail, PaymentMethod method, string provider,
         string? providerTransactionId, string? authorizationCode,
         ICollection<PaymentAttemptEntity>? attempts, ICollection<PaymentTransactionEntity>? transactions,
-        RiskAnalysisEntity? riskAnalysis)
+        RiskAnalysisEntity? riskAnalysis, List<OrderItemData>? items)
     {
         Id = id;
         OrderId = orderId;
@@ -49,6 +55,7 @@ public class PaymentEntity : Aggregate<PaymentId>
         Attempts = attempts ?? [];
         Transactions = transactions ?? [];
         RiskAnalysis = riskAnalysis;
+        Items = items ?? [];
     }
 
     private PaymentEntity()
@@ -57,7 +64,7 @@ public class PaymentEntity : Aggregate<PaymentId>
     }
 
     public static PaymentEntity Create(Guid orderId, decimal amount, string currency, PaymentMethod method,
-        string provider)
+        string provider, List<OrderItemData>? items = null)
     {
         ArgumentNullException.ThrowIfNull(currency, nameof(currency));
         ArgumentNullException.ThrowIfNull(method, nameof(method));
@@ -75,6 +82,7 @@ public class PaymentEntity : Aggregate<PaymentId>
             Method = method,
             Provider = provider,
             Status = PaymentStatusEnum.Created,
+            Items = items ?? [],
             CreatedAt = DateTime.UtcNow
         };
 

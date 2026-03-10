@@ -23,4 +23,10 @@ public class PaymentStatusChangedIntegrationEvent : IIntegrationEvent
     /// Additional payment details for logging/tracking purposes
     /// </summary>
     public string? PaymentStatusName { get; set; }
+
+    /// <summary>
+    /// Order items carried from the original order, used by downstream services (e.g. Catalog) to
+    /// restore reserved stock when payment fails.
+    /// </summary>
+    public List<OrderItemData> Items { get; init; } = [];
 }

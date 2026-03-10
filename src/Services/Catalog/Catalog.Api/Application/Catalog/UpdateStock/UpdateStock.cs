@@ -8,7 +8,7 @@ namespace Catalog.Api.Application.Catalog.UpdateStock;
 
 public record UpdateStockCommand(Guid CatalogId, int Delta);
 
-public record UpdateStockResult(int NewStock);
+public record UpdateStockResult(int NewStock, Guid MerchantId, string ProductName);
 
 public class UpdateStock(
     ICatalogRepository repository,
@@ -29,8 +29,8 @@ public class UpdateStock(
 
             int newStock = entity.Stock.Value + command.Delta;
 
-            if (newStock < 1)
-                return Result<UpdateStockResult>.Failure($"Stock cannot go below 1. Current stock: {entity.Stock.Value}, delta: {command.Delta}.");
+            if (newStock < 0)
+                return Result<UpdateStockResult>.Failure($"Insufficient stock. Current stock: {entity.Stock.Value}, delta: {command.Delta}.");
 
             entity.Update(name: null, categories: null, description: null, imageUrl: null, price: null, stock: Stock.Of(newStock));
             await repository.UpdateAsync(entity);
@@ -38,7 +38,7 @@ public class UpdateStock(
             logger.LogInformation(LogTypeEnum.Business, "Stock updated for catalog {CatalogId}. New stock: {NewStock}",
                 command.CatalogId, newStock);
 
-            return Result<UpdateStockResult>.Success(new UpdateStockResult(newStock));
+            return Result<UpdateStockResult>.Success(new UpdateStockResult(newStock, entity.MerchantId, entity.Name));
         }
         catch (Exception ex)
         {

@@ -5,6 +5,8 @@ using BackendForFrontend.Api.Basket;
 using BackendForFrontend.Api.Basket.Endpoints;
 using BackendForFrontend.Api.Catalog;
 using BackendForFrontend.Api.Catalog.Endpoints;
+using BackendForFrontend.Api.Catalog.Subscribers;
+using BackendForFrontend.Api.HostedService;
 using BackendForFrontend.Api.MerchantDashboard;
 using BackendForFrontend.Api.Order;
 using BackendForFrontend.Api.Order.Endpoints;
@@ -15,6 +17,7 @@ using BuildingBlocks.Exceptions;
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
 using BuildingBlocks.Authentication;
+using BuildingBlocks.Messaging.Extensions;
 using MarketSpace.ServiceDefaults;
 using Serilog;
 using Serilog.Extensions.Hosting;
@@ -38,6 +41,11 @@ builder.Services.AddOrderServices();
 builder.Services.AddUserServices();
 builder.Services.AddCustomLoggers();
 builder.Services.AddSingleton<IStockEventService, StockEventService>();
+builder.Services.AddSingleton<IMerchantUserMappingService, MerchantUserMappingService>();
+
+builder.Services.AddEventBus(builder.Configuration);
+builder.Services.AddScoped<OnCatalogStockUpdatedSubscriber>();
+builder.Services.AddHostedService<IntegrationEventSubscriptionService>();
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
