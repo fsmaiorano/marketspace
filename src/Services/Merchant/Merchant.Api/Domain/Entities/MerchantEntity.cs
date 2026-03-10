@@ -40,6 +40,7 @@ public class MerchantEntity : Aggregate<MerchantId>
 
         return new MerchantEntity
         {
+            Id = MerchantId.Of(Guid.NewGuid()),
             UserId = userId,
             Name = name,
             Description = description,

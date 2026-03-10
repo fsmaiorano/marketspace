@@ -964,7 +964,7 @@ async Task RunDemoModeAsync()
                     Name = faker.Commerce.ProductName(),
                     Description = faker.Commerce.ProductDescription(),
                     ImageUrl = faker.Image.PicsumUrl(800, 600),
-                    Price = faker.Random.Decimal(5, 500),
+                    Price = Math.Round(faker.Random.Decimal(5, 500), 2),
                     Stock = faker.Random.Int(10, 100),
                     Categories = [faker.Commerce.Department(), faker.Commerce.Department()],
                     MerchantId = merchantProfile.Id

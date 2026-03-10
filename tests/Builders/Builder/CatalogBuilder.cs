@@ -40,8 +40,8 @@ public static class CatalogBuilder
                 Description = f.Lorem.Sentence(),
                 ImageUrl = f.Image.PicsumUrl(800, 600),
                 MerchantId = f.Random.Guid(),
-                Price = Price.Of(f.Finance.Amount(1, 1000, 2)),
-                Stock = Stock.Of(f.Random.Int(1, 100)),
+                Price = f.Finance.Amount(1, 1000, 2),
+                Stock = f.Random.Int(1, 100),
                 Categories = f.PickRandom(ProductCategories, f.Random.Int(1, 10)).ToList()
             });
 
