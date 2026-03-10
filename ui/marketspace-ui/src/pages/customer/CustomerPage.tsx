@@ -117,6 +117,11 @@ export default function CustomerPage() {
     if (!me?.userName) return;
     setError(null);
 
+    if (item.stock <= 0) {
+      toast.error(`"${item.name}" is out of stock.`);
+      return;
+    }
+
     const currentBasket: Basket = basket ?? {
       username: me.userName,
       items: [],
@@ -124,6 +129,13 @@ export default function CustomerPage() {
     };
 
     const existing = currentBasket.items.find((i) => i.productId === item.id);
+    const currentQty = existing?.quantity ?? 0;
+
+    if (currentQty + 1 > item.stock) {
+      toast.error(`Only ${item.stock} left in stock for "${item.name}".`);
+      return;
+    }
+
     const newItems: BasketItem[] = existing
       ? currentBasket.items.map((i) =>
           i.productId === item.id ? { ...i, quantity: i.quantity + 1 } : i,
@@ -157,6 +169,15 @@ export default function CustomerPage() {
   const handleUpdateQuantity = async (productId: string, delta: number) => {
     if (!basket || !me?.userName) return;
     setError(null);
+
+    if (delta > 0) {
+      const catalogItem = catalogItems.find((c) => c.id === productId);
+      const currentQty = basket.items.find((i) => i.productId === productId)?.quantity ?? 0;
+      if (catalogItem && currentQty + delta > catalogItem.stock) {
+        toast.error(`Only ${catalogItem.stock} available for "${catalogItem.name}".`);
+        return;
+      }
+    }
 
     const newItems: BasketItem[] = basket.items
       .map((i) =>
@@ -195,6 +216,21 @@ export default function CustomerPage() {
 
   const handleCheckout = () => {
     if (!basket || basket.items.length === 0 || !me) return;
+
+    const stockByProductId = Object.fromEntries(catalogItems.map((c) => [c.id, c.stock]));
+    const overStock = basket.items.find(
+      (i) => i.quantity > (stockByProductId[i.productId] ?? Infinity),
+    );
+    if (overStock) {
+      const available = stockByProductId[overStock.productId] ?? 0;
+      toast.error(
+        available === 0
+          ? `"${overStock.productName}" is out of stock. Please remove it before checking out.`
+          : `Only ${available} of "${overStock.productName}" available. Please adjust your quantity.`,
+      );
+      return;
+    }
+
     setCheckoutModalOpen(true);
   };
 
@@ -289,6 +325,7 @@ export default function CustomerPage() {
         basket={basket}
         basketItemCount={basketItemCount}
         checkingOut={checkingOut}
+        stockByProductId={Object.fromEntries(catalogItems.map((c) => [c.id, c.stock]))}
         onClose={() => setBasketOpen(false)}
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveItem}

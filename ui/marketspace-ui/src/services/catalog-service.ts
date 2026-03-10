@@ -9,6 +9,7 @@ export interface CatalogItem {
   categories: string[];
   merchantId: string;
   createdAt: string;
+  stock: number;
 }
 
 export interface CatalogListResult {

@@ -8,6 +8,7 @@ interface BasketDrawerProps {
   basket: Basket | null;
   basketItemCount: number;
   checkingOut: boolean;
+  stockByProductId: Record<string, number>;
   onClose: () => void;
   onUpdateQuantity: (productId: string, delta: number) => void;
   onRemoveItem: (productId: string) => void;
@@ -20,6 +21,7 @@ export function BasketDrawer({
   basket,
   basketItemCount,
   checkingOut,
+  stockByProductId,
   onClose,
   onUpdateQuantity,
   onRemoveItem,
@@ -54,11 +56,17 @@ export function BasketDrawer({
           ) : !basket || basket.items.length === 0 ? (
             <div className="py-16 text-center text-muted-foreground">Your basket is empty.</div>
           ) : (
-            basket.items.map((item) => (
+            basket.items.map((item) => {
+              const availableStock = stockByProductId[item.productId] ?? Infinity;
+              const atMax = item.quantity >= availableStock;
+              return (
               <div key={item.productId} className="flex items-start gap-3 rounded-lg border bg-card p-3">
                 <div className="min-w-0 flex-1">
                   <p className="line-clamp-2 text-sm font-medium leading-tight">{item.productName}</p>
                   <p className="mt-1 text-sm font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
+                  {atMax && availableStock !== Infinity && (
+                    <p className="mt-0.5 text-xs text-amber-600">Max qty ({availableStock})</p>
+                  )}
                 </div>
                 <div className="flex items-center gap-1">
                   <button
@@ -69,8 +77,9 @@ export function BasketDrawer({
                   </button>
                   <span className="w-6 text-center text-sm">{item.quantity}</span>
                   <button
-                    className="flex h-6 w-6 items-center justify-center rounded border hover:bg-muted"
-                    onClick={() => onUpdateQuantity(item.productId, 1)}
+                    className={`flex h-6 w-6 items-center justify-center rounded border ${atMax ? "cursor-not-allowed opacity-40" : "hover:bg-muted"}`}
+                    onClick={() => !atMax && onUpdateQuantity(item.productId, 1)}
+                    disabled={atMax}
                   >
                     <Plus className="h-3 w-3" />
                   </button>
@@ -82,7 +91,8 @@ export function BasketDrawer({
                   </button>
                 </div>
               </div>
-            ))
+              );
+            })
           )}
         </div>
 

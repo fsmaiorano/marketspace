@@ -38,20 +38,32 @@ function CatalogItemCard({
   const [imageBroken, setImageBroken] = useState(false);
   const imageSrc = toImageSrc(item.imageUrl);
   const showImage = imageSrc.length > 0 && !imageBroken;
+  const outOfStock = item.stock === 0;
+  const lowStock = item.stock > 0 && item.stock <= 5;
 
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-md">
-      <div className="bg-muted h-36 flex items-center justify-center">
+      <div className="bg-muted relative h-36 flex items-center justify-center">
         {showImage ? (
           <img
             src={imageSrc}
             alt={item.name}
-            className="h-full w-full object-cover"
+            className={`h-full w-full object-cover ${outOfStock ? "opacity-50" : ""}`}
             loading="lazy"
             onError={() => setImageBroken(true)}
           />
         ) : (
           <Package className="h-14 w-14 text-muted-foreground/40" />
+        )}
+        {outOfStock && (
+          <span className="absolute top-2 left-2 rounded bg-gray-800/80 px-2 py-0.5 text-xs font-semibold text-white">
+            Out of Stock
+          </span>
+        )}
+        {lowStock && (
+          <span className="absolute top-2 left-2 rounded bg-amber-500/90 px-2 py-0.5 text-xs font-semibold text-white">
+            Low Stock ({item.stock})
+          </span>
         )}
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3">
@@ -62,9 +74,21 @@ function CatalogItemCard({
         )}
         <div className="mt-auto flex items-center justify-between gap-2 pt-2">
           <span className="text-sm font-bold">${item.price?.toFixed(2)}</span>
-          <Button size="sm" className="h-7 px-2 text-xs" onClick={() => onAdd(item)}>
-            <Plus className="mr-1 h-3 w-3" />
-            Add
+          <Button
+            size="sm"
+            className="h-7 px-2 text-xs"
+            onClick={() => onAdd(item)}
+            disabled={outOfStock}
+            title={outOfStock ? "Out of stock" : undefined}
+          >
+            {outOfStock ? (
+              "Out of Stock"
+            ) : (
+              <>
+                <Plus className="mr-1 h-3 w-3" />
+                Add
+              </>
+            )}
           </Button>
         </div>
       </div>
