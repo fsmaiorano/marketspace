@@ -335,6 +335,9 @@ async Task RunSeedModeAsync()
     Console.WriteLine($"\n👨‍💼 Creating {merchantCount} additional merchant(s)...");
     List<MerchantEntity> createdMerchants = [];
 
+    if (!await roleManager.RoleExistsAsync("Member"))
+        await roleManager.CreateAsync(new IdentityRole("Member"));
+
     for (int i = 0; i < merchantCount; i++)
     {
         ApplicationUser user = UserBuilder.CreateApplicationUser();
@@ -348,11 +351,6 @@ async Task RunSeedModeAsync()
             continue;
         }
 
-        // Ensure "Member" role exists and assign it
-        if (!await roleManager.RoleExistsAsync("Member"))
-        {
-            await roleManager.CreateAsync(new IdentityRole("Member"));
-        }
         await userManager.AddToRoleAsync(user, "Member");
 
         MerchantEntity merchant = MerchantBuilder.CreateMerchantFaker().Generate();
@@ -378,7 +376,7 @@ async Task RunSeedModeAsync()
     Console.WriteLine($"\n📦 Creating {catalogsPerMerchant} catalog(s) per additional merchant...");
     int totalCatalogsCreated = merchantCatalogsCreated;
     
-    for (int i = 0; i < createdMerchants.Count; i++)
+    foreach (MerchantEntity createdMerchant in createdMerchants)
     {
         for (int j = 0; j < catalogsPerMerchant; j++)
         {
@@ -393,7 +391,7 @@ async Task RunSeedModeAsync()
                     name: catalog.Name,
                     description: catalog.Description,
                     imageUrl: objectName,
-                    merchantId: createdMerchants.ElementAt(i).Id.Value,
+                    merchantId: createdMerchant.Id.Value,
                     categories: catalog.Categories,
                     price: catalog.Price,
                     stock: catalog.Stock
@@ -403,7 +401,7 @@ async Task RunSeedModeAsync()
                 catalogDbContext.Catalogs.Add(catalogEntity);
                 await catalogDbContext.SaveChangesAsync();
                 totalCatalogsCreated++;
-                Console.WriteLine($"   ✅ {catalog.Name} for {createdMerchants.ElementAt(i).Name}");
+                Console.WriteLine($"   ✅ {catalog.Name} for {createdMerchant.Name}");
             }
             catch (Exception ex)
             {
@@ -416,14 +414,14 @@ async Task RunSeedModeAsync()
     Console.WriteLine("\n🛒 Creating shopping carts for additional merchants...");
     List<ShoppingCartEntity> createdShoppingCarts = [];
     
-    for (int i = 0; i < createdMerchants.Count; i++)
+    foreach (MerchantEntity createdMerchant in createdMerchants)
     {
-        ShoppingCartEntity shoppingCart = BasketBuilder.CreateShoppingCartFaker(username: createdMerchants.ElementAt(i).Name);
+        ShoppingCartEntity shoppingCart = BasketBuilder.CreateShoppingCartFaker(username: createdMerchant.Name);
         createdShoppingCarts.Add(shoppingCart);
         basketDbContext.ShoppingCarts.Add(shoppingCart);
-        await basketDbContext.SaveChangesAsync();
-        Console.WriteLine($"   ✅ Cart for {createdMerchants.ElementAt(i).Name} with {shoppingCart.Items.Count} items");
+        Console.WriteLine($"   ✅ Cart for {createdMerchant.Name} with {shoppingCart.Items.Count} items");
     }
+    await basketDbContext.SaveChangesAsync();
 
     Console.WriteLine("\n✅ Seed Mode completed.");
     Console.WriteLine($"   Created 1 merchant user (merchant@marketspace.com)");
@@ -431,7 +429,7 @@ async Task RunSeedModeAsync()
     Console.WriteLine($"   Created {merchantCatalogsCreated} catalog(s) for merchant user");
     Console.WriteLine($"   Created {createdMerchants.Count} additional merchant(s)");
     Console.WriteLine($"   Created {totalCatalogsCreated} total catalog(s)");
-    Console.WriteLine($"   Created {createdShoppingCarts.Count + (existingCustomerCart != null ? 1 : 1)} shopping cart(s)");
+    Console.WriteLine($"   Created {createdShoppingCarts.Count + (existingCustomerCart == null ? 1 : 0)} shopping cart(s)");
 }
 
 // ── MODE 1 – Direct database access ────────────────────────────────────────
@@ -471,6 +469,9 @@ async Task RunDirectDbModeAsync(int recordsToCreate)
     await userDbContext.Database.EnsureCreatedAsync();
     Console.WriteLine("Schemas OK.");
 
+    if (!await roleManager.RoleExistsAsync("Member"))
+        await roleManager.CreateAsync(new IdentityRole("Member"));
+
     for (int i = 0; i < recordsToCreate; i++)
     {
         // Diversified user data
@@ -500,11 +501,6 @@ async Task RunDirectDbModeAsync(int recordsToCreate)
                 continue;
             }
 
-            // Ensure "Member" role exists and assign it
-            if (!await roleManager.RoleExistsAsync("Member"))
-            {
-                await roleManager.CreateAsync(new IdentityRole("Member"));
-            }
             await userManager.AddToRoleAsync(user, "Member");
         }
         else
@@ -876,12 +872,12 @@ static async Task<bool> BffCheckoutAsync(HttpClient http, string username, strin
         HttpResponseMessage res = await http.PostAsJsonAsync("/basket/checkout", body);
 
         if (res.IsSuccessStatusCode)
-            return res.IsSuccessStatusCode;
+            return true;
 
         string err = await res.Content.ReadAsStringAsync();
         Console.WriteLine($"   Detalhe: {err}");
 
-        return res.IsSuccessStatusCode;
+        return false;
     }
     catch (Exception ex)
     {
@@ -1124,8 +1120,8 @@ async Task EnsureDemoUsersAsync()
     if (merchantUser is not null && Guid.TryParse(merchantUser.Id, out Guid merchantUserId))
     {
         UserId userId = UserId.Of(merchantUserId);
-        MerchantEntity? demoMerchant = merchantDbContext.Merchants
-            .FirstOrDefault(m => m.UserId == userId);
+        MerchantEntity? demoMerchant = await merchantDbContext.Merchants
+            .FirstOrDefaultAsync(m => m.UserId == userId);
 
         if (demoMerchant is null)
         {

@@ -8,22 +8,32 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
 using System.Reflection;
 using Serilog.Context;
 
 namespace BuildingBlocks.Messaging;
 
 /// <summary>
-/// RabbitMQ implementation of event bus for distributed event-driven communication
+/// RabbitMQ implementation of event bus for distributed event-driven communication.
+/// 
+/// Exchange topology:
+///   - One fanout exchange per integration event type: marketspace.{EventTypeName}
+///   - One dedicated fanout dead letter exchange per subscriber: marketspace.{HandlerName}_dlx
+///
+/// Each subscriber gets its own consumer channel, so a channel exception on one
+/// subscription does not affect publishing or other subscriptions.
 /// </summary>
 public class EventBus : IEventBus, IAsyncDisposable, IDisposable
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<EventBus> _logger;
     private readonly IConnection _connection;
-    private readonly IChannel _channel;
+    private readonly IChannel _publishChannel;
+    private readonly List<IChannel> _consumerChannels = new();
     private readonly Dictionary<Type, List<Type>> _handlers = new();
-    private readonly string _exchangeName = "marketspace_events";
+    private readonly HashSet<string> _declaredExchanges = new();
+    private const string ExchangePrefix = "marketspace";
 
     public EventBus(IServiceProvider serviceProvider, ILogger<EventBus> logger, string rabbitMqConnectionString)
     {
@@ -40,11 +50,9 @@ public class EventBus : IEventBus, IAsyncDisposable, IDisposable
             try
             {
                 _connection = factory.CreateConnectionAsync().GetAwaiter().GetResult();
-                _channel = _connection.CreateChannelAsync().GetAwaiter().GetResult();
-                _channel.ExchangeDeclareAsync(_exchangeName, ExchangeType.Topic, durable: true, autoDelete: false)
-                    .GetAwaiter().GetResult();
+                _publishChannel = _connection.CreateChannelAsync().GetAwaiter().GetResult();
 
-                _logger.LogInformation("RabbitMQ EventBus initialized with exchange {ExchangeName}", _exchangeName);
+                _logger.LogInformation("RabbitMQ EventBus initialized");
                 break;
             }
             catch (Exception ex)
@@ -59,14 +67,36 @@ public class EventBus : IEventBus, IAsyncDisposable, IDisposable
         }
     }
 
+    /// <summary>Returns the fanout exchange name for a given integration event type.</summary>
+    private static string GetExchangeName(Type eventType) => $"{ExchangePrefix}.{eventType.Name}";
+
+    /// <summary>Returns the dedicated dead letter exchange name for a subscriber handler.</summary>
+    private static string GetDeadLetterExchangeName(string handlerName) => $"{ExchangePrefix}.{handlerName}_dlx";
+
+    /// <summary>
+    /// Declares a fanout exchange on the publish channel, skipping if already declared.
+    /// </summary>
+    private async Task EnsurePublishExchangeDeclaredAsync(string exchangeName)
+    {
+        if (_declaredExchanges.Contains(exchangeName))
+            return;
+
+        await _publishChannel.ExchangeDeclareAsync(exchangeName, ExchangeType.Fanout, durable: true, autoDelete: false);
+        _declaredExchanges.Add(exchangeName);
+
+        _logger.LogInformation("Declared exchange {ExchangeName}", exchangeName);
+    }
+
     public async Task PublishAsync<TEvent>(TEvent @event, CancellationToken cancellationToken = default)
         where TEvent : class, IIntegrationEvent
     {
         Type eventType = @event.GetType();
-        string routingKey = eventType.Name;
+        string exchangeName = GetExchangeName(eventType);
 
-        _logger.LogInformation("Publishing integration event {EventType} with EventId {EventId}",
-            eventType.Name, @event.EventId);
+        _logger.LogInformation("Publishing integration event {EventType} with EventId {EventId} to exchange {ExchangeName}",
+            eventType.Name, @event.EventId, exchangeName);
+
+        await EnsurePublishExchangeDeclaredAsync(exchangeName);
 
         string message = JsonSerializer.Serialize(@event,
             new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
@@ -97,16 +127,16 @@ public class EventBus : IEventBus, IAsyncDisposable, IDisposable
             }
         }
 
-        await _channel.BasicPublishAsync(
-            exchange: _exchangeName,
-            routingKey: routingKey,
+        // Fanout exchanges route to all bound queues; routing key is intentionally empty
+        await _publishChannel.BasicPublishAsync(
+            exchange: exchangeName,
+            routingKey: string.Empty,
             mandatory: false,
             basicProperties: properties,
             body: body,
             cancellationToken: cancellationToken);
 
-        _logger.LogDebug("Published event {EventType} to RabbitMQ with routing key {RoutingKey}",
-            eventType.Name, routingKey);
+        _logger.LogDebug("Published event {EventType} to exchange {ExchangeName}", eventType.Name, exchangeName);
     }
 
     public void Subscribe<TEvent, THandler>()
@@ -138,47 +168,50 @@ public class EventBus : IEventBus, IAsyncDisposable, IDisposable
             .Replace('>', '_');
         string queueName = safeHandlerName;
         string deadLetterQueueName = $"{safeHandlerName}_dlq";
-        string deadLetterExchangeName = $"{_exchangeName}_dlq";
-        string routingKey = eventType.Name;
+        string exchangeName = GetExchangeName(eventType);
+        string deadLetterExchangeName = GetDeadLetterExchangeName(safeHandlerName);
 
-        // Declare dead letter exchange
-        await _channel.ExchangeDeclareAsync(deadLetterExchangeName, ExchangeType.Topic, durable: true,
-            autoDelete: false);
+        // Each subscription uses a dedicated channel so a channel-level exception
+        // (e.g. PRECONDITION_FAILED on queue redeclaration) does not affect publishing
+        // or other subscriptions.
+        IChannel channel = await _connection.CreateChannelAsync();
+        _consumerChannels.Add(channel);
 
-        // Declare dead letter queue
-        await _channel.QueueDeclareAsync(
+        // Declare the per-event fanout exchange (idempotent)
+        await channel.ExchangeDeclareAsync(exchangeName, ExchangeType.Fanout, durable: true, autoDelete: false);
+
+        // Declare the per-subscriber dedicated dead letter exchange (idempotent)
+        await channel.ExchangeDeclareAsync(deadLetterExchangeName, ExchangeType.Fanout, durable: true, autoDelete: false);
+
+        // Declare and bind the dead letter queue (QueueDeclare is idempotent when args match)
+        await channel.QueueDeclareAsync(
             queue: deadLetterQueueName,
             durable: true,
             exclusive: false,
             autoDelete: false,
             arguments: null);
 
-        // Bind dead letter queue to dead letter exchange
-        await _channel.QueueBindAsync(
+        await channel.QueueBindAsync(
             queue: deadLetterQueueName,
             exchange: deadLetterExchangeName,
-            routingKey: routingKey);
+            routingKey: string.Empty);
 
-        // Create main queue with dead letter configuration
-        Dictionary<string, object?> queueArguments = new Dictionary<string, object?>
-        {
-            { "x-dead-letter-exchange", deadLetterExchangeName }, { "x-dead-letter-routing-key", routingKey }
-        };
+        // Declare the main queue pointing to its dedicated DLX.
+        // If the queue already exists with different arguments (e.g. from a previous
+        // topology), recover: open a new channel, delete the stale queue and recreate it.
+        Dictionary<string, object?> queueArguments = new() { { "x-dead-letter-exchange", deadLetterExchangeName } };
 
-        await _channel.QueueDeclareAsync(
+        channel = await DeclareMainQueueAsync(channel, queueName, queueArguments,
+            exchangeName, deadLetterExchangeName, deadLetterQueueName);
+
+        // Bind the main queue to the per-event fanout exchange (routing key unused in fanout)
+        await channel.QueueBindAsync(
             queue: queueName,
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
-            arguments: queueArguments);
-
-        await _channel.QueueBindAsync(
-            queue: queueName,
-            exchange: _exchangeName,
-            routingKey: routingKey);
+            exchange: exchangeName,
+            routingKey: string.Empty);
 
         // Set up consumer
-        AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(_channel);
+        AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(channel);
         consumer.ReceivedAsync += async (_, ea) =>
         {
             ulong deliveryTag = ea.DeliveryTag;
@@ -213,7 +246,6 @@ public class EventBus : IEventBus, IAsyncDisposable, IDisposable
 
                 if (@event != null)
                 {
-                    // Set CorrelationId in scope before processing
                     using (IServiceScope scope = _serviceProvider.CreateScope())
                     {
                         IIdempotencyService? idempotencyService = scope.ServiceProvider.GetService<IIdempotencyService>();
@@ -225,7 +257,6 @@ public class EventBus : IEventBus, IAsyncDisposable, IDisposable
                             correlationIdService?.SetCorrelationId(correlationId);
                         }
 
-                        // Add to Serilog context for structured logging
                         using (LogContext.PushProperty("CorrelationId", correlationId ?? "N/A"))
                         {
                             if (idempotencyService != null)
@@ -243,8 +274,7 @@ public class EventBus : IEventBus, IAsyncDisposable, IDisposable
                         }
                     }
 
-                    // Acknowledge the message successfully processed
-                    await _channel.BasicAckAsync(deliveryTag, false);
+                    await channel.BasicAckAsync(deliveryTag, false);
                     _logger.LogDebug("Message acknowledged for event {EventType}", eventType.Name);
                 }
                 else
@@ -253,8 +283,7 @@ public class EventBus : IEventBus, IAsyncDisposable, IDisposable
                         "Failed to deserialize event {EventType}. Rejecting message to dead letter queue.",
                         eventType.Name);
 
-                    // Reject message without requeue - will go to dead letter queue
-                    await _channel.BasicRejectAsync(deliveryTag, false);
+                    await channel.BasicRejectAsync(deliveryTag, false);
                 }
             }
             catch (Exception ex)
@@ -262,19 +291,75 @@ public class EventBus : IEventBus, IAsyncDisposable, IDisposable
                 _logger.LogError(ex, "Error processing event {EventType}. Rejecting message to dead letter queue.",
                     eventType.Name);
 
-                // Reject message without requeue - will go to dead letter queue
-                await _channel.BasicRejectAsync(deliveryTag, false);
+                await channel.BasicRejectAsync(deliveryTag, false);
             }
         };
 
-        await _channel.BasicConsumeAsync(
+        await channel.BasicConsumeAsync(
             queue: queueName,
             autoAck: false,
             consumer: consumer);
 
         _logger.LogInformation(
-            "Started consuming messages from queue {QueueName} with dead letter queue {DeadLetterQueueName}",
-            queueName, deadLetterQueueName);
+            "Started consuming queue {QueueName} bound to exchange {ExchangeName}. Dead letters → {DeadLetterExchangeName} → {DeadLetterQueueName}",
+            queueName, exchangeName, deadLetterExchangeName, deadLetterQueueName);
+    }
+
+    /// <summary>
+    /// Declares the main consumer queue. If the queue already exists with different arguments
+    /// (PRECONDITION_FAILED), recovers by opening a new channel, deleting the stale queue, and
+    /// recreating it with the correct arguments.
+    /// </summary>
+    private async Task<IChannel> DeclareMainQueueAsync(
+        IChannel channel,
+        string queueName,
+        Dictionary<string, object?> queueArguments,
+        string exchangeName,
+        string deadLetterExchangeName,
+        string deadLetterQueueName)
+    {
+        try
+        {
+            await channel.QueueDeclareAsync(
+                queue: queueName,
+                durable: true,
+                exclusive: false,
+                autoDelete: false,
+                arguments: queueArguments);
+
+            return channel;
+        }
+        catch (OperationInterruptedException ex) when (ex.ShutdownReason?.ReplyCode == 406)
+        {
+            // PRECONDITION_FAILED: queue exists with different arguments (stale topology).
+            // The channel is now closed; open a fresh one, delete the stale queue and recreate.
+            _logger.LogWarning(
+                "Queue {QueueName} exists with incompatible arguments. Recreating with updated topology...",
+                queueName);
+
+            IChannel recoveryChannel = await _connection.CreateChannelAsync();
+            _consumerChannels[^1] = recoveryChannel;
+
+            // Re-declare exchanges on the new channel (idempotent)
+            await recoveryChannel.ExchangeDeclareAsync(exchangeName, ExchangeType.Fanout, durable: true, autoDelete: false);
+            await recoveryChannel.ExchangeDeclareAsync(deadLetterExchangeName, ExchangeType.Fanout, durable: true, autoDelete: false);
+
+            // Re-declare DLQ binding on the new channel
+            await recoveryChannel.QueueDeclareAsync(deadLetterQueueName, durable: true, exclusive: false, autoDelete: false);
+            await recoveryChannel.QueueBindAsync(deadLetterQueueName, deadLetterExchangeName, routingKey: string.Empty);
+
+            // Delete stale queue and recreate with correct arguments
+            await recoveryChannel.QueueDeleteAsync(queueName, ifUnused: false, ifEmpty: false);
+            await recoveryChannel.QueueDeclareAsync(
+                queue: queueName,
+                durable: true,
+                exclusive: false,
+                autoDelete: false,
+                arguments: queueArguments);
+
+            _logger.LogInformation("Queue {QueueName} successfully recreated with updated arguments", queueName);
+            return recoveryChannel;
+        }
     }
 
     private async Task ProcessEventAsync<TEvent>(TEvent @event, Type eventType, IServiceProvider serviceProvider,
@@ -312,16 +397,27 @@ public class EventBus : IEventBus, IAsyncDisposable, IDisposable
     public async ValueTask DisposeAsync()
     {
         _logger.LogInformation("Disposing RabbitMQ EventBus");
-        await _channel.CloseAsync();
+
+        foreach (IChannel consumerChannel in _consumerChannels)
+        {
+            await consumerChannel.CloseAsync();
+            consumerChannel.Dispose();
+        }
+
+        await _publishChannel.CloseAsync();
         await _connection.CloseAsync();
-        _channel.Dispose();
+        _publishChannel.Dispose();
         _connection.Dispose();
     }
 
     public void Dispose()
     {
         _logger.LogInformation("Disposing RabbitMQ EventBus");
-        _channel.Dispose();
+
+        foreach (IChannel consumerChannel in _consumerChannels)
+            consumerChannel.Dispose();
+
+        _publishChannel.Dispose();
         _connection.Dispose();
     }
 }
