@@ -33,6 +33,7 @@ public class EventBus : IEventBus, IAsyncDisposable, IDisposable
     private readonly List<IChannel> _consumerChannels = new();
     private readonly Dictionary<Type, List<Type>> _handlers = new();
     private readonly HashSet<string> _declaredExchanges = new();
+    private readonly object _exchangeDeclareLock = new();
     private const string ExchangePrefix = "marketspace";
 
     public EventBus(IServiceProvider serviceProvider, ILogger<EventBus> logger, string rabbitMqConnectionString)
@@ -78,11 +79,22 @@ public class EventBus : IEventBus, IAsyncDisposable, IDisposable
     /// </summary>
     private async Task EnsurePublishExchangeDeclaredAsync(string exchangeName)
     {
-        if (_declaredExchanges.Contains(exchangeName))
+        // Fast path check under lock to avoid redundant declares from concurrent publishers
+        bool alreadyDeclared;
+        lock (_exchangeDeclareLock)
+        {
+            alreadyDeclared = _declaredExchanges.Contains(exchangeName);
+        }
+
+        if (alreadyDeclared)
             return;
 
         await _publishChannel.ExchangeDeclareAsync(exchangeName, ExchangeType.Fanout, durable: true, autoDelete: false);
-        _declaredExchanges.Add(exchangeName);
+
+        lock (_exchangeDeclareLock)
+        {
+            _declaredExchanges.Add(exchangeName);
+        }
 
         _logger.LogInformation("Declared exchange {ExchangeName}", exchangeName);
     }
