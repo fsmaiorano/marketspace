@@ -11,12 +11,54 @@ volumes:
   postgres-merchant-data:
   postgres-user-data:
   postgres-payment-data:
+  postgres-ai-data:
   rabbitmq-data:
   minio-data:
+  ollama-data:
 
 # ─── Infrastructure ────────────────────────────────────────────────────────────
 
 services:
+
+  # ── AI ──────────────────────────────────────────────────────────────────────
+
+  ollama:
+    build:
+      context: .
+      dockerfile: infra/ollama/Dockerfile
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - marketspace-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:11434 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+    restart: unless-stopped
+
+  postgres-ai:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: AiDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5439:5432"
+    volumes:
+      - postgres-ai-data:/var/lib/postgresql/data
+      - ./infra/ollama/init-pgvector.sql:/docker-entrypoint-initdb.d/init-pgvector.sql:ro
+    networks:
+      - marketspace-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d AiDb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
 
   postgres-catalog:
     image: postgres:17-alpine

@@ -6,7 +6,6 @@ ConfigurationManager config = builder.Configuration;
 // Databases - Postgres
 IConfigurationSection postgresConfig = config.GetSection("Aspire:Databases:Postgres");
 IResourceBuilder<ParameterResource> postgresPassword = builder.AddParameter("postgres-password", "postgres");
-
 IConfigurationSection catalogDbConfig = postgresConfig.GetSection("Catalog");
 IResourceBuilder<PostgresDatabaseResource> catalogDb = builder
     .AddPostgres(catalogDbConfig["Name"]!, password: postgresPassword)
@@ -70,6 +69,28 @@ IResourceBuilder<ContainerResource> rabbitmq = builder.AddContainer(rabbitMqConf
     .WithEnvironment("RABBITMQ_DEFAULT_VHOST", "/")
     .WithEndpoint(port: int.Parse(rabbitMqConfig["Port"]!), targetPort: 5672, scheme: "amqp", name: "rabbitmq")
     .WithHttpEndpoint(port: int.Parse(rabbitMqConfig["Ui"]!), targetPort: 15672, name: "rabbitmq-ui");
+
+IConfigurationSection aiConfig = config.GetSection("Aspire:AI");
+IConfigurationSection ollamaConfig = aiConfig.GetSection("Ollama");
+IConfigurationSection aiDbConfig = aiConfig.GetSection("Postgres");
+
+IResourceBuilder<OllamaResource> ollama = builder
+    .AddOllama(ollamaConfig["ContainerName"]!, port: int.Parse(ollamaConfig["Port"]!))
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithDataVolume();
+
+ollama.AddModel("mistral");
+ollama.AddModel("nomic-embed-text");
+
+IResourceBuilder<PostgresDatabaseResource> aiDb = builder
+    .AddPostgres(aiDbConfig["Name"]!, password: postgresPassword)
+    .WithImage("pgvector/pgvector", "pg17")
+    .WithEnvironment("POSTGRES_DB", aiDbConfig["DatabaseName"]!)
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithDataVolume()
+    .WithHostPort(int.Parse(aiDbConfig["Port"]!))
+    .WithBindMount("../../infra/ollama/init-pgvector.sql", "/docker-entrypoint-initdb.d/init-pgvector.sql", isReadOnly: true)
+    .AddDatabase(aiDbConfig["ConnectionName"]!);
 
 // Storage - Minio
 IConfigurationSection minioConfig = config.GetSection("Aspire:Storage:Minio");
