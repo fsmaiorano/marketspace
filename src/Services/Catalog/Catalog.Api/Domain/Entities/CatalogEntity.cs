@@ -1,4 +1,6 @@
 using BuildingBlocks.Abstractions;
+using BuildingBlocks.Messaging.IntegrationEvents;
+using Catalog.Api.Domain.Events;
 using Catalog.Api.Domain.ValueObjects;
 
 namespace Catalog.Api.Domain.Entities;
@@ -140,22 +142,43 @@ public class CatalogEntity : Aggregate<CatalogId>
         Touch();
     }
 
-    public void ReserveStock(int quantity)
+    public void ReserveStock(int quantity, string? correlationId = null)
     {
         Stock = Stock.Reserve(quantity);
         Touch();
+        AddDomainEvent(new CatalogStockUpdatedDomainEvent(this, correlationId));
     }
 
-    public void ConfirmReservation(int quantity)
+    public void ConfirmReservation(int quantity, string? correlationId = null)
     {
         Stock = Stock.Confirm(quantity);
         Touch();
+        AddDomainEvent(new CatalogStockUpdatedDomainEvent(this, correlationId));
     }
 
-    public void ReleaseReservation(int quantity)
+    public void ReleaseReservation(int quantity, string? correlationId = null)
     {
         Stock = Stock.Release(quantity);
         Touch();
+        AddDomainEvent(new CatalogStockUpdatedDomainEvent(this, correlationId));
+    }
+
+    /// <summary>
+    /// Attaches a <see cref="CatalogStockReservationFailedDomainEvent"/> to this aggregate
+    /// so the Outbox can deliver it reliably after the compensation transaction commits.
+    /// </summary>
+    public void RaiseReservationFailed(
+        Guid orderId,
+        Guid customerId,
+        int requestedQuantity,
+        int availableQuantity,
+        string failureReason,
+        List<OrderItemData> items,
+        string? correlationId = null)
+    {
+        AddDomainEvent(new CatalogStockReservationFailedDomainEvent(
+            orderId, customerId, MerchantId, Name, Id.Value, requestedQuantity,
+            availableQuantity, failureReason, items, correlationId));
     }
 
     public void Update(

@@ -1,34 +1,20 @@
 using Basket.Api.Domain.Entities;
 using Basket.Api.Domain.ValueObjects;
-using BuildingBlocks.Abstractions;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using System.Text.Json.Serialization;
 
 namespace Basket.Api.Domain.Events;
 
-public class BasketCheckoutDomainEvent : IDomainEvent
+public class BasketCheckoutDomainEvent(ShoppingCartEntity shoppingCart, CheckoutData checkoutData) : IDomainEvent
 {
-    public ShoppingCartEntity ShoppingCart { get; set; } = null!;
-    public CheckoutData CheckoutData { get; set; } = null!;
-    public DateTime OccurredAt { get; set; } = DateTime.UtcNow;
+    public ShoppingCartEntity ShoppingCart { get; } = shoppingCart;
+    public CheckoutData CheckoutData { get; } = checkoutData;
+    public DateTime OccurredAt { get; } = DateTime.UtcNow;
 
     [JsonConstructor]
     public BasketCheckoutDomainEvent(ShoppingCartEntity shoppingCart, CheckoutData checkoutData, DateTime occurredAt)
+        : this(shoppingCart, checkoutData)
     {
-        ShoppingCart = shoppingCart;
-        CheckoutData = checkoutData;
         OccurredAt = occurredAt;
-    }
-
-    public BasketCheckoutDomainEvent(ShoppingCartEntity shoppingCart, CheckoutData checkoutData)
-    {
-        ShoppingCart = shoppingCart;
-        CheckoutData = checkoutData;
-        OccurredAt = DateTime.UtcNow;
-    }
-
-    public UniqueEntityId GetAggregateId()
-    {
-        return new UniqueEntityId(ShoppingCart.Id);
     }
 }

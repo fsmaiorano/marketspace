@@ -1,3 +1,4 @@
+using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using BuildingBlocks.Messaging.Extensions;
 using BuildingBlocks.Storage.Minio;
 using Catalog.Api.Application.Catalog.CreateCatalog;
@@ -8,8 +9,10 @@ using Catalog.Api.Application.Catalog.GetCatalogByMerchantId;
 using Catalog.Api.Application.Catalog.ReserveStock;
 using Catalog.Api.Application.Catalog.UpdateCatalog;
 using Catalog.Api.Application.Catalog.UpdateStock;
+using Catalog.Api.Application.EventHandlers;
 using Catalog.Api.Application.HostedService;
 using Catalog.Api.Application.Subscribers;
+using Catalog.Api.Domain.Events;
 using Catalog.Api.Domain.Repositories;
 using Catalog.Api.Infrastructure.Data.Repositories;
 using Minio;
@@ -43,6 +46,9 @@ public static class DependencyInjection
         services.AddScoped<GetCatalogByMerchantId>();
         services.AddScoped<UpdateStock>();
         services.AddScoped<ReserveStock>();
+
+        services.AddScoped<IDomainEventHandler<CatalogStockUpdatedDomainEvent>, OnCatalogStockUpdatedDomainEventHandler>();
+        services.AddScoped<IDomainEventHandler<CatalogStockReservationFailedDomainEvent>, OnCatalogStockReservationFailedDomainEventHandler>();
 
         services.AddEventBus(configuration);
         services.AddScoped<OnOrderCreatedSubscriber>();

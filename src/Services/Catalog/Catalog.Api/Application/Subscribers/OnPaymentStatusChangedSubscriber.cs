@@ -1,8 +1,6 @@
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Messaging.IntegrationEvents;
 using BuildingBlocks.Messaging.IntegrationEvents.Interfaces;
-using BuildingBlocks.Messaging.Interfaces;
-using Catalog.Api.Application.Catalog.UpdateStock;
 using Catalog.Api.Domain.Entities;
 using Catalog.Api.Domain.Repositories;
 using Catalog.Api.Domain.ValueObjects;
@@ -13,17 +11,24 @@ namespace Catalog.Api.Application.Subscribers;
 /// Handles payment status changes:
 /// - Authorized/Captured  → confirms reservation (removes from Reserved)
 /// - Failed/Rejected/Cancelled/Refunded/Chargeback → releases reservation back to Available
+///
+/// Stock mutations call <see cref="CatalogEntity.ConfirmReservation"/> or
+/// <see cref="CatalogEntity.ReleaseReservation"/>, which raise a domain event that is
+/// saved atomically to the Outbox and published by the OutboxProcessor.
 /// </summary>
 public class OnPaymentStatusChangedSubscriber(
     IAppLogger<OnPaymentStatusChangedSubscriber> logger,
-    ICatalogRepository repository,
-    IEventBus eventBus)
+    ICatalogRepository repository)
     : IIntegrationEventHandler<PaymentStatusChangedIntegrationEvent>
 {
-    // PaymentStatus: 3=Authorized, 4=Captured
-    private static readonly HashSet<int> ConfirmStatuses = [3, 4];
-    // PaymentStatus: 5=Failed, 6=Rejected, 7=Cancelled, 8=Refunded, 9=Chargeback
-    private static readonly HashSet<int> ReleaseStatuses = [5, 6, 7, 8, 9];
+    private static readonly HashSet<int> ConfirmStatuses =
+        [PaymentStatusCodes.Authorized, PaymentStatusCodes.Captured];
+
+    private static readonly HashSet<int> ReleaseStatuses =
+    [
+        PaymentStatusCodes.Failed, PaymentStatusCodes.Rejected, PaymentStatusCodes.Cancelled,
+        PaymentStatusCodes.Refunded, PaymentStatusCodes.Chargeback
+    ];
 
     public async Task HandleAsync(PaymentStatusChangedIntegrationEvent @event, CancellationToken cancellationToken = default)
     {
@@ -53,9 +58,9 @@ public class OnPaymentStatusChangedSubscriber(
             try
             {
                 if (isConfirm)
-                    entity.ConfirmReservation(item.Quantity);
+                    entity.ConfirmReservation(item.Quantity, @event.CorrelationId);
                 else
-                    entity.ReleaseReservation(item.Quantity);
+                    entity.ReleaseReservation(item.Quantity, @event.CorrelationId);
 
                 await repository.UpdateAsync(entity);
 
@@ -63,16 +68,6 @@ public class OnPaymentStatusChangedSubscriber(
                     "Reservation {Operation} for catalog {CatalogId} — {Quantity} unit(s). Available: {Available}, Reserved: {Reserved}",
                     operation.ToLowerInvariant(), item.CatalogId, item.Quantity,
                     entity.Stock.Available, entity.Stock.Reserved);
-
-                await eventBus.PublishAsync(new CatalogStockUpdatedIntegrationEvent
-                {
-                    CatalogId = item.CatalogId,
-                    MerchantId = entity.MerchantId,
-                    ProductName = entity.Name,
-                    Available = entity.Stock.Available,
-                    Reserved = entity.Stock.Reserved,
-                    CorrelationId = @event.CorrelationId
-                }, cancellationToken);
             }
             catch (Exception ex)
             {

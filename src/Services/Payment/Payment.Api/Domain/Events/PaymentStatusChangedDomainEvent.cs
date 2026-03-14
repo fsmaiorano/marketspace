@@ -1,4 +1,3 @@
-using BuildingBlocks.Abstractions;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
 using Payment.Api.Domain.Entities;
 
@@ -9,9 +8,4 @@ public class PaymentStatusChangedDomainEvent(PaymentEntity payment, string? corr
     public PaymentEntity Payment { get; } = payment;
     public string? CorrelationId { get; } = correlationId;
     public DateTime OccurredAt { get; } = DateTime.UtcNow;
-
-    public UniqueEntityId GetAggregateId()
-    {
-        return new UniqueEntityId(Payment.Id.ToString());
-    }
 }

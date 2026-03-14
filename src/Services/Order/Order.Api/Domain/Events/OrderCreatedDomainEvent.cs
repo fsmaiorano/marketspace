@@ -5,29 +5,16 @@ using System.Text.Json.Serialization;
 
 namespace Order.Api.Domain.Events;
 
-public class OrderCreatedDomainEvent : IDomainEvent
+public class OrderCreatedDomainEvent(OrderEntity order, string? correlationId = null) : IDomainEvent
 {
-    public OrderEntity Order { get; set; } = null!;
-    public string? CorrelationId { get; set; }
-    public DateTime OccurredAt { get; set; } = DateTime.UtcNow;
+    public OrderEntity Order { get; } = order;
+    public string? CorrelationId { get; } = correlationId;
+    public DateTime OccurredAt { get; } = DateTime.UtcNow;
 
     [JsonConstructor]
     public OrderCreatedDomainEvent(OrderEntity order, string? correlationId, DateTime occurredAt)
+        : this(order, correlationId)
     {
-        Order = order;
-        CorrelationId = correlationId;
         OccurredAt = occurredAt;
-    }
-
-    public OrderCreatedDomainEvent(OrderEntity order, string? correlationId = null)
-    {
-        Order = order;
-        CorrelationId = correlationId;
-        OccurredAt = DateTime.UtcNow;
-    }
-
-    public UniqueEntityId GetAggregateId()
-    {
-        return new UniqueEntityId(Order.Id.ToString());
     }
 }

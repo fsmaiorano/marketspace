@@ -1,7 +1,6 @@
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Messaging.IntegrationEvents;
 using BuildingBlocks.Messaging.IntegrationEvents.Interfaces;
-using BuildingBlocks.Messaging.Interfaces;
 using Catalog.Api.Application.Catalog.ReserveStock;
 using Catalog.Api.Domain.Entities;
 using Catalog.Api.Domain.Repositories;
@@ -12,14 +11,14 @@ namespace Catalog.Api.Application.Subscribers;
 /// <summary>
 /// Reserves stock for every item in the order when an order is created.
 /// If any reservation fails, already-reserved items are compensated (released)
-/// and a StockReservationFailedIntegrationEvent is published to trigger
-/// order and payment cancellation and merchant notification.
+/// and a <see cref="Catalog.Api.Domain.Events.CatalogStockReservationFailedDomainEvent"/>
+/// is raised on the failed entity — the Outbox then delivers
+/// <see cref="StockReservationFailedIntegrationEvent"/> reliably to Order, Payment, and BFF.
 /// </summary>
 public class OnOrderCreatedSubscriber(
     IAppLogger<OnOrderCreatedSubscriber> logger,
     ReserveStock reserveStock,
-    ICatalogRepository catalogRepository,
-    IEventBus eventBus)
+    ICatalogRepository catalogRepository)
     : IIntegrationEventHandler<OrderCreatedIntegrationEvent>
 {
     public async Task HandleAsync(OrderCreatedIntegrationEvent @event, CancellationToken cancellationToken = default)
@@ -28,12 +27,14 @@ public class OnOrderCreatedSubscriber(
             "Order {OrderId} created — reserving stock for {ItemCount} item(s). CorrelationId: {CorrelationId}",
             @event.OrderId, @event.Items.Count, @event.CorrelationId);
 
-        List<(OrderItemData Item, ReserveStockResult StockResult)> reserved = [];
+        List<OrderItemData> reserved = [];
 
         foreach (OrderItemData item in @event.Items)
         {
             BuildingBlocks.Result<ReserveStockResult> result =
-                await reserveStock.HandleAsync(new ReserveStockCommand(item.CatalogId, item.Quantity), cancellationToken);
+                await reserveStock.HandleAsync(
+                    new ReserveStockCommand(item.CatalogId, item.Quantity, @event.CorrelationId),
+                    cancellationToken);
 
             if (!result.IsSuccess)
             {
@@ -41,44 +42,39 @@ public class OnOrderCreatedSubscriber(
                     "Failed to reserve stock for catalog {CatalogId}: {Error}. Compensating {Count} previously reserved item(s).",
                     item.CatalogId, result.Error, reserved.Count);
 
-                await CompensateReservedItemsAsync(reserved, cancellationToken);
+                await CompensateReservedItemsAsync(reserved, @event.CorrelationId, cancellationToken);
 
-                // Look up product info for the notification
                 CatalogEntity? failedEntity = await catalogRepository.GetByIdAsync(
-                    CatalogId.Of(item.CatalogId), isTrackingEnabled: false);
+                    CatalogId.Of(item.CatalogId), isTrackingEnabled: true);
 
-                await eventBus.PublishAsync(new StockReservationFailedIntegrationEvent
+                if (failedEntity is not null)
                 {
-                    OrderId = @event.OrderId,
-                    CustomerId = @event.CustomerId,
-                    MerchantId = failedEntity?.MerchantId ?? Guid.Empty,
-                    ProductName = failedEntity?.Name ?? item.CatalogId.ToString(),
-                    CatalogId = item.CatalogId,
-                    RequestedQuantity = item.Quantity,
-                    AvailableQuantity = failedEntity?.Stock.Available ?? 0,
-                    FailureReason = result.Error ?? "Insufficient stock.",
-                    Items = @event.Items,
-                    CorrelationId = @event.CorrelationId
-                }, cancellationToken);
+                    failedEntity.RaiseReservationFailed(
+                        orderId: @event.OrderId,
+                        customerId: @event.CustomerId,
+                        requestedQuantity: item.Quantity,
+                        availableQuantity: failedEntity.Stock.Available,
+                        failureReason: result.Error ?? "Insufficient stock.",
+                        items: @event.Items,
+                        correlationId: @event.CorrelationId);
+
+                    await catalogRepository.UpdateAsync(failedEntity);
+                }
+                else
+                {
+                    logger.LogError(LogTypeEnum.Exception, null,
+                        "Catalog {CatalogId} not found — StockReservationFailed domain event could not be raised. OrderId: {OrderId}",
+                        item.CatalogId, @event.OrderId);
+                }
 
                 return;
             }
 
-            reserved.Add((item, result.Data!));
+            reserved.Add(item);
 
             logger.LogInformation(LogTypeEnum.Business,
                 "Stock reserved for catalog {CatalogId} — {Quantity} unit(s). Available: {Available}, Reserved: {Reserved}",
                 item.CatalogId, item.Quantity, result.Data!.Available, result.Data.Reserved);
-
-            await eventBus.PublishAsync(new CatalogStockUpdatedIntegrationEvent
-            {
-                CatalogId = item.CatalogId,
-                MerchantId = result.Data.MerchantId,
-                ProductName = result.Data.ProductName,
-                Available = result.Data.Available,
-                Reserved = result.Data.Reserved,
-                CorrelationId = @event.CorrelationId
-            }, cancellationToken);
         }
     }
 
@@ -86,10 +82,11 @@ public class OnOrderCreatedSubscriber(
     /// Releases reservations already made before a failure — compensating transaction.
     /// </summary>
     private async Task CompensateReservedItemsAsync(
-        List<(OrderItemData Item, ReserveStockResult StockResult)> reserved,
+        List<OrderItemData> reserved,
+        string? correlationId,
         CancellationToken cancellationToken)
     {
-        foreach ((OrderItemData item, _) in reserved)
+        foreach (OrderItemData item in reserved)
         {
             try
             {
@@ -103,7 +100,7 @@ public class OnOrderCreatedSubscriber(
                     continue;
                 }
 
-                entity.ReleaseReservation(item.Quantity);
+                entity.ReleaseReservation(item.Quantity, correlationId);
                 await catalogRepository.UpdateAsync(entity);
 
                 logger.LogInformation(LogTypeEnum.Business,

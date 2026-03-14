@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Catalog.Api.Application.Catalog.ReserveStock;
 
-public record ReserveStockCommand(Guid CatalogId, int Quantity);
+public record ReserveStockCommand(Guid CatalogId, int Quantity, string? CorrelationId = null);
 
 public record ReserveStockResult(int Available, int Reserved, Guid MerchantId, string ProductName);
 
@@ -38,7 +38,7 @@ public class ReserveStock(
                     return Result<ReserveStockResult>.Failure(
                         $"Insufficient stock. Available: {entity.Stock.Available}, Requested: {command.Quantity}.");
 
-                entity.ReserveStock(command.Quantity);
+                entity.ReserveStock(command.Quantity, command.CorrelationId);
                 await repository.UpdateAsync(entity);
 
                 logger.LogInformation(LogTypeEnum.Business,
