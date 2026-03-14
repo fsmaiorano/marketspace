@@ -35,7 +35,7 @@ public class CatalogConfiguration : IEntityTypeConfiguration<CatalogEntity>
                 price => price.Value,
                 dbPrice => Price.Of(dbPrice));
 
-        builder.ComplexProperty(c => c.Stock, stockBuilder =>
+        builder.OwnsOne(c => c.Stock, stockBuilder =>
         {
             stockBuilder.Property(s => s.Available)
                 .HasColumnName("StockAvailable")

@@ -17,7 +17,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Order.Api.Domain.Entities;
 using Order.Api.Infrastructure.Data;
-using Serilog.Extensions.Hosting;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using User.Api.Data;
@@ -109,7 +108,6 @@ public abstract class BaseTestFixture<T>()
             services.RemoveAll<ILoggerFactory>();
             services.RemoveAll(typeof(ILogger<>));
             services.RemoveAll<Serilog.ILogger>();
-            services.RemoveAll<DiagnosticContext>();
 
             services.AddLogging(loggingBuilder =>
             {

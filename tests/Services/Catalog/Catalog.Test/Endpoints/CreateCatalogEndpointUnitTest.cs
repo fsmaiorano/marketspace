@@ -12,4 +12,13 @@ public class CreateCatalogEndpointUnitTest(TestFixture fixture) : Base.BaseTest(
         HttpResponseMessage response = await DoPost("/catalog", command);
         Assert.True(HttpStatusCode.Created.Equals(response.StatusCode));
     }
+
+    [Fact]
+    public async Task Returns_CorrelationId_Header_In_Response()
+    {
+        CreateCatalogCommand command = CatalogBuilder.CreateCreateCatalogCommandFaker().Generate();
+        HttpResponseMessage response = await DoPost("/catalog", command);
+        Assert.True(response.Headers.Contains("X-Correlation-ID"),
+            "every response must include the X-Correlation-ID tracing header");
+    }
 }
