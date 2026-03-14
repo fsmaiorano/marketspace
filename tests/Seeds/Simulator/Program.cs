@@ -44,7 +44,8 @@ while (!exit)
     Console.WriteLine("  [1] Direct DB Access – accesses DBs directly (internal logic, varied data)");
     Console.WriteLine("  [2] DEMO             – full end-to-end demo: merchant creates products, customer buys them");
     Console.WriteLine("  [3] Concurrent       – forces concurrent execution of Direct DB mode");
-    Console.WriteLine("  [4] Exit");
+    Console.WriteLine("  [4] Traffic          – continuous traffic simulation (Small / Normal / Heavy)");
+    Console.WriteLine("  [5] Exit");
     Console.Write("> ");
 
     string? choice = Console.ReadLine()?.Trim();
@@ -70,6 +71,9 @@ while (!exit)
             await RunConcurrentModeAsync();
             break;
         case "4":
+            await RunTrafficSimulatorAsync();
+            break;
+        case "5":
             exit = true;
             break;
         default:
@@ -851,6 +855,357 @@ async Task RunConcurrentModeAsync()
     Console.WriteLine("║  ➜  Open the merchant dashboard to see real-time stock   ║");
     Console.WriteLine("║     updates and cancellation alerts from these scenarios. ║");
     Console.WriteLine("╚══════════════════════════════════════════════════════════╝");
+}
+
+
+// ── MODE 4 – Traffic Simulator ────────────────────────────────────────────────
+
+async Task RunTrafficSimulatorAsync()
+{
+    Console.WriteLine();
+    Console.WriteLine("╔═══════════════════════════════════════════════════════════╗");
+    Console.WriteLine("║             MarketSpace – Traffic Simulator               ║");
+    Console.WriteLine("╚═══════════════════════════════════════════════════════════╝");
+    Console.WriteLine();
+    Console.WriteLine("  [1] Small Traffic  — 1 user  / cycle  |  slow   (3–6 s)");
+    Console.WriteLine("  [2] Normal Traffic — 3 users / cycle  |  medium (1–3 s)");
+    Console.WriteLine("  [3] Heavy Traffic  — 10 users / cycle |  fast   (0.1–0.6 s)");
+    Console.Write("> ");
+    string? trafficChoice = Console.ReadLine()?.Trim();
+    Console.WriteLine();
+
+    (string profileName, int concurrency, int delayMinMs, int delayMaxMs) = trafficChoice switch
+    {
+        "1" => ("Small",  1,  3000, 6000),
+        "2" => ("Normal", 3,  1000, 3000),
+        "3" => ("Heavy",  10, 100,  600),
+        _   => ("Small",  1,  3000, 6000)
+    };
+
+    Console.WriteLine($"🚦 Profile    : {profileName}");
+    Console.WriteLine($"   Concurrency: {concurrency} user(s) / cycle");
+    Console.WriteLine($"   Interval   : {delayMinMs / 1000f:F1}–{delayMaxMs / 1000f:F1}s between cycles");
+    Console.WriteLine($"   BFF URL    : {bffBaseUrl}");
+    Console.WriteLine();
+    Console.WriteLine("  Press [S] or [Q] to stop at any time...");
+    Console.WriteLine();
+
+    // ── Setup: ensure all required users exist ────────────────────────────
+    Console.WriteLine("── Setup ───────────────────────────────────────────────────");
+    await EnsureDemoUsersAsync();
+    List<(string email, string password)> customerPool = await EnsureTrafficCustomersAsync();
+    Console.WriteLine($"  ✅ Customer pool: {customerPool.Count} account(s) ready");
+    Console.WriteLine();
+
+    // ── Stop mechanism ────────────────────────────────────────────────────
+    using CancellationTokenSource cts = new();
+
+    Thread keyWatcher = new(() =>
+    {
+        while (!cts.IsCancellationRequested)
+        {
+            if (Console.KeyAvailable)
+            {
+                ConsoleKeyInfo k = Console.ReadKey(intercept: true);
+                if (k.Key is ConsoleKey.S or ConsoleKey.Q or ConsoleKey.Escape)
+                {
+                    Console.WriteLine("\n⏹  Stop requested — finishing current cycle...");
+                    cts.Cancel();
+                    return;
+                }
+            }
+            Thread.Sleep(100);
+        }
+    }) { IsBackground = true };
+    keyWatcher.Start();
+
+    Faker globalFaker = new("en");
+    int cycleNumber = 0;
+    int totalActions = 0;
+    int totalSuccesses = 0;
+    DateTime startTime = DateTime.UtcNow;
+
+    // ── Main simulation loop ──────────────────────────────────────────────
+    while (!cts.IsCancellationRequested)
+    {
+        cycleNumber++;
+        Console.WriteLine($"  ── Cycle {cycleNumber,4} [{profileName}] ── {DateTime.Now:HH:mm:ss} ──────────────────────");
+
+        List<Task<(int actions, int successes)>> cycleTasks = [];
+
+        for (int i = 0; i < concurrency; i++)
+        {
+            int taskIndex = i;
+            Faker taskFaker = new("en");
+            (string email, string password) customer = globalFaker.PickRandom(customerPool);
+
+            // Every 4th cycle, first task acts as merchant creating new products
+            bool isMerchantAction = taskIndex == 0 && cycleNumber % 4 == 0;
+
+            if (isMerchantAction)
+                cycleTasks.Add(Task.Run(() => RunTrafficMerchantCycleAsync(taskFaker, cts.Token)));
+            else
+                cycleTasks.Add(Task.Run(() => RunTrafficCustomerCycleAsync(customer.email, customer.password, taskFaker, cts.Token)));
+        }
+
+        try
+        {
+            (int actions, int successes)[] results = await Task.WhenAll(cycleTasks);
+            totalActions   += results.Sum(r => r.actions);
+            totalSuccesses += results.Sum(r => r.successes);
+        }
+        catch (OperationCanceledException) { break; }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  ⚠️  Cycle {cycleNumber} error: {ex.GetType().Name}: {ex.Message}");
+        }
+
+        if (cts.IsCancellationRequested) break;
+
+        int delay = globalFaker.Random.Int(delayMinMs, delayMaxMs);
+        Console.WriteLine($"  ⏱  Running totals — {totalSuccesses}/{totalActions} succeeded | next cycle in {delay / 1000f:F1}s");
+
+        try { await Task.Delay(delay, cts.Token); }
+        catch (OperationCanceledException) { break; }
+    }
+
+    // ── Summary ───────────────────────────────────────────────────────────
+    TimeSpan elapsed = DateTime.UtcNow - startTime;
+    Console.WriteLine();
+    Console.WriteLine("╔═══════════════════════════════════════════════════════════╗");
+    Console.WriteLine("║              Traffic Simulation Complete                  ║");
+    Console.WriteLine("╠═══════════════════════════════════════════════════════════╣");
+    Console.WriteLine($"║  Profile      : {profileName,-43} ║");
+    Console.WriteLine($"║  Duration     : {$"{(int)elapsed.TotalMinutes:D2}:{elapsed.Seconds:D2}",-43} ║");
+    Console.WriteLine($"║  Cycles       : {cycleNumber,-43} ║");
+    Console.WriteLine($"║  Total actions: {totalActions,-43} ║");
+    Console.WriteLine($"║  Succeeded    : {totalSuccesses,-43} ║");
+    Console.WriteLine("╚═══════════════════════════════════════════════════════════╝");
+}
+
+// ── Traffic setup: create known customer pool ─────────────────────────────────
+
+async Task<List<(string email, string password)>> EnsureTrafficCustomersAsync()
+{
+    const string trafficPassword = "123456";
+
+    // Fixed pool of customers used during traffic simulation
+    List<(string email, string password)> pool =
+    [
+        ("customer@marketspace.com",              trafficPassword),
+        ("traffic.buyer.1@marketspace-sim.test",  trafficPassword),
+        ("traffic.buyer.2@marketspace-sim.test",  trafficPassword),
+        ("traffic.buyer.3@marketspace-sim.test",  trafficPassword),
+    ];
+
+    MarketSpaceSimulatorFactory factory = new(
+        merchantConnectionString: merchantConnectionString,
+        catalogConnectionString:  catalogConnectionString,
+        basketConnectionString:   basketConnectionString,
+        userConnectionString:     userConnectionString,
+        minioEndpoint:            minioEndpoint,
+        minioAccessKey:           minioAccessKey,
+        minioSecretKey:           minioSecretKey);
+
+    using IServiceScope scope = factory.Services
+        .GetRequiredService<IServiceScopeFactory>()
+        .CreateScope();
+
+    UserManager<ApplicationUser>  userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    RoleManager<IdentityRole>     roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    UserDbContext                 userDbCtx   = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+
+    await userDbCtx.Database.EnsureCreatedAsync();
+
+    if (!await roleManager.RoleExistsAsync("Member"))
+        await roleManager.CreateAsync(new IdentityRole("Member"));
+
+    // Skip index 0 (customer@marketspace.com) — already created by EnsureDemoUsersAsync
+    foreach ((string email, _) in pool.Skip(1))
+    {
+        if (await userManager.FindByEmailAsync(email) is null)
+        {
+            ApplicationUser newUser = new()
+            {
+                UserName       = email,
+                Email          = email,
+                EmailConfirmed = true,
+                Name           = $"Traffic Buyer ({email.Split('@')[0]})",
+                UserType       = UserTypeEnum.Customer
+            };
+            IdentityResult result = await userManager.CreateAsync(newUser, trafficPassword);
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(newUser, "Member");
+                Console.WriteLine($"  ✅ Created traffic customer: {email}");
+            }
+            else
+            {
+                Console.WriteLine($"  ⚠️  Could not create {email}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
+        }
+        else
+        {
+            Console.WriteLine($"  ✔  Traffic customer exists : {email}");
+        }
+    }
+
+    return pool;
+}
+
+// ── Single customer BFF cycle ─────────────────────────────────────────────────
+
+async Task<(int actions, int successes)> RunTrafficCustomerCycleAsync(
+    string email, string password, Faker faker, CancellationToken ct)
+{
+    int actions   = 0;
+    int successes = 0;
+
+    try
+    {
+        using HttpClient http = new(new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+        })
+        {
+            BaseAddress = new Uri(bffBaseUrl),
+            Timeout     = TimeSpan.FromSeconds(15)
+        };
+        http.DefaultRequestHeaders.Add("Accept", "application/json");
+
+        // Login
+        if (ct.IsCancellationRequested) return (actions, successes);
+        actions++;
+        string? token = await DemoBffLoginAsync(http, email, password);
+        if (token is null)
+        {
+            Console.WriteLine($"    👤 ❌ Login failed: {email}");
+            return (actions, successes);
+        }
+        http.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        successes++;
+
+        // Browse catalog
+        if (ct.IsCancellationRequested) return (actions, successes);
+        actions++;
+        List<DemoCatalogItem> catalog = await DemoGetCatalogAsync(http);
+        if (catalog.Count == 0)
+        {
+            Console.WriteLine($"    📦 Empty catalog — skipping for {email.Split('@')[0]}");
+            return (actions, successes);
+        }
+        successes++;
+
+        // Pick 1–3 random items with stock
+        List<DemoCatalogItem> available = catalog.Where(c => c.Stock > 0).ToList();
+        if (available.Count == 0) return (actions, successes);
+
+        int itemCount = faker.Random.Int(1, Math.Min(3, available.Count));
+        List<DemoCatalogItem> picked = faker.PickRandom(available, itemCount).ToList();
+
+        foreach (DemoCatalogItem item in picked)
+        {
+            if (ct.IsCancellationRequested) break;
+            actions++;
+            int qty   = faker.Random.Int(1, 2);
+            bool added = await DemoAddToCartAsync(http, email, item, qty);
+            if (added) successes++;
+
+            string shortEmail = email.Split('@')[0];
+            string shortName  = item.Name.Length > 28 ? item.Name[..28] : item.Name;
+            Console.WriteLine($"    🛒 {shortEmail,-22} + {shortName,-28} ×{qty} {(added ? "✅" : "❌")}");
+        }
+
+        // Checkout
+        if (!ct.IsCancellationRequested)
+        {
+            actions++;
+            (bool ok, string detail) = await DemoCheckoutAsync(http, email, email, faker);
+            if (ok) successes++;
+
+            string shortEmail = email.Split('@')[0];
+            string outcome    = ok ? "✅ order placed" : $"❌ {(detail.Length > 40 ? detail[..40] : detail)}";
+            Console.WriteLine($"    🚀 Checkout  {shortEmail,-22} {outcome}");
+        }
+    }
+    catch (OperationCanceledException) { /* expected on stop */ }
+    catch (Exception ex)
+    {
+        string shortEmail = email.Split('@')[0];
+        string msg        = ex.Message.Length > 60 ? ex.Message[..60] : ex.Message;
+        Console.WriteLine($"    ⚠️  {shortEmail}: {ex.GetType().Name}: {msg}");
+    }
+
+    return (actions, successes);
+}
+
+// ── Single merchant BFF cycle ─────────────────────────────────────────────────
+
+async Task<(int actions, int successes)> RunTrafficMerchantCycleAsync(Faker faker, CancellationToken ct)
+{
+    int actions   = 0;
+    int successes = 0;
+
+    const string merchantEmail    = "merchant@marketspace.com";
+    const string merchantPassword = "123456";
+
+    try
+    {
+        using HttpClient http = new(new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+        })
+        {
+            BaseAddress = new Uri(bffBaseUrl),
+            Timeout     = TimeSpan.FromSeconds(15)
+        };
+        http.DefaultRequestHeaders.Add("Accept", "application/json");
+
+        if (ct.IsCancellationRequested) return (actions, successes);
+        actions++;
+        string? token = await DemoBffLoginAsync(http, merchantEmail, merchantPassword);
+        if (token is null) return (actions, successes);
+        http.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        successes++;
+
+        if (ct.IsCancellationRequested) return (actions, successes);
+        actions++;
+        DemoMerchantProfile? profile = await DemoGetMerchantMeAsync(http);
+        if (profile is null) return (actions, successes);
+        successes++;
+
+        // Create 1–2 new catalog products for merchant@marketspace.com
+        int toCreate = faker.Random.Int(1, 2);
+        for (int i = 0; i < toCreate && !ct.IsCancellationRequested; i++)
+        {
+            actions++;
+            DemoCreateProductRequest product = new()
+            {
+                Name        = faker.Commerce.ProductName(),
+                Description = faker.Commerce.ProductDescription(),
+                ImageUrl    = faker.Image.PicsumUrl(800, 600),
+                Price       = Math.Round(faker.Random.Decimal(5, 500), 2),
+                Stock       = faker.Random.Int(5, 50),
+                Categories  = [faker.Commerce.Department(), faker.Commerce.Department()],
+                MerchantId  = profile.Id
+            };
+            bool created = await DemoCreateProductAsync(http, product);
+            if (created) successes++;
+
+            string shortName = product.Name.Length > 28 ? product.Name[..28] : product.Name;
+            Console.WriteLine($"    🏪 merchant@ms       + {shortName,-28} ${product.Price:F2} {(created ? "✅" : "❌")}");
+        }
+    }
+    catch (OperationCanceledException) { /* expected on stop */ }
+    catch (Exception ex)
+    {
+        string msg = ex.Message.Length > 60 ? ex.Message[..60] : ex.Message;
+        Console.WriteLine($"    ⚠️  Merchant cycle: {ex.GetType().Name}: {msg}");
+    }
+
+    return (actions, successes);
 }
 
 
