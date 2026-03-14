@@ -1,14 +1,22 @@
+using BuildingBlocks.Loggers;
+using BuildingBlocks.Middlewares;
 using BuildingBlocks.Services;
+using BuildingBlocks.Services.Correlation;
+using MarketSpace.ServiceDefaults;
 using User.Api.Data;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+builder.AddCustomLoggers();
 
 builder.Services
-    .AddServices(builder.Configuration);
+    .AddServices(builder.Configuration)
+    .AddCorrelationIdServices();
 
 WebApplication app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 app.UseSwagger();
 app.UseSwaggerUI(options =>
@@ -24,13 +32,14 @@ if (app.Environment.IsDevelopment())
 
 await app.InitialiseDatabaseAsync<UserDbContext>();
 
+app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseStructuredRequestLogging();
 app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapAuthEndpoints();
-app.MapDefaultEndpoints();
 
 app.Run();
 

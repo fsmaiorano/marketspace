@@ -1,32 +1,27 @@
-using Basket.Api.Application;
-using Basket.Api.Endpoints;
-using Basket.Api.Infrastructure;
-using Basket.Api.Infrastructure.Data;
 using BuildingBlocks.Exceptions;
 using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
 using BuildingBlocks.Services;
 using BuildingBlocks.Services.Correlation;
+using Basket.Api.Application;
+using Basket.Api.Endpoints;
+using Basket.Api.Infrastructure;
+using Basket.Api.Infrastructure.Data;
 using MarketSpace.ServiceDefaults;
-using Serilog;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+builder.AddCustomLoggers();
 
 builder.Services.AddOpenApi();
 
 builder.Services
     .AddApplicationServices(builder.Configuration)
     .AddInfrastructureServices(builder.Configuration)
-    .AddCustomLoggers();
-
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ICorrelationIdService, CorrelationIdService>();
+    .AddCorrelationIdServices();
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
-
-builder.Host.UseSerilog();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -51,6 +46,7 @@ app.UseSwaggerUI(options =>
 });
 
 app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseStructuredRequestLogging();
 app.UseExceptionHandler(options => { });
 
 CreateBasketEndpoint.MapEndpoint(app);

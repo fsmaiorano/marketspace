@@ -1,3 +1,6 @@
-Deploy docker-compose
+## Deploy docker-compose
 
-docker compose --env-file .env.docker up --build
+### Start full stack
+docker compose -f docker-compose.yml -f docker-compose.observability.yml up -d
+### Or observability only (services running locally)
+docker compose -f docker-compose.observability.yml up -d

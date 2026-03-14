@@ -1,20 +1,39 @@
+using System.Text.Json.Serialization;
 using Basket.Api.Domain.Entities;
 using Basket.Api.Domain.ValueObjects;
 using BuildingBlocks.Messaging.DomainEvents.Interfaces;
-using System.Text.Json.Serialization;
+using BuildingBlocks.Messaging.IntegrationEvents;
 
 namespace Basket.Api.Domain.Events;
 
-public class BasketCheckoutDomainEvent(ShoppingCartEntity shoppingCart, CheckoutData checkoutData) : IDomainEvent
+public class BasketCheckoutDomainEvent : IDomainEvent
 {
-    public ShoppingCartEntity ShoppingCart { get; } = shoppingCart;
-    public CheckoutData CheckoutData { get; } = checkoutData;
-    public DateTime OccurredAt { get; } = DateTime.UtcNow;
+    public BasketCheckoutDomainEvent(ShoppingCartEntity shoppingCart, CheckoutData checkoutData)
+    {
+        CheckoutData = checkoutData;
+        TotalPrice = shoppingCart.TotalPrice;
+        Items = shoppingCart.Items
+            .Select(i => new OrderItemData
+            {
+                CatalogId = Guid.Parse(i.ProductId),
+                Quantity = i.Quantity,
+                Price = i.Price
+            }).ToList();
+        OccurredAt = DateTime.UtcNow;
+    }
 
     [JsonConstructor]
-    public BasketCheckoutDomainEvent(ShoppingCartEntity shoppingCart, CheckoutData checkoutData, DateTime occurredAt)
-        : this(shoppingCart, checkoutData)
+    public BasketCheckoutDomainEvent(
+        CheckoutData checkoutData, decimal totalPrice, List<OrderItemData> items, DateTime occurredAt)
     {
+        CheckoutData = checkoutData;
+        TotalPrice = totalPrice;
+        Items = items;
         OccurredAt = occurredAt;
     }
+
+    public CheckoutData CheckoutData { get; }
+    public decimal TotalPrice { get; }
+    public List<OrderItemData> Items { get; }
+    public DateTime OccurredAt { get; }
 }

@@ -8,27 +8,20 @@ using Catalog.Api.Endpoints;
 using Catalog.Api.Infrastructure;
 using Catalog.Api.Infrastructure.Data;
 using MarketSpace.ServiceDefaults;
-using Serilog;
-using Serilog.Extensions.Hosting;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+builder.AddCustomLoggers();
 
 builder.Services.AddOpenApi();
 
 builder.Services
     .AddApplicationServices(builder.Configuration)
     .AddInfrastructureServices(builder.Configuration)
-    .AddCustomLoggers();
-
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ICorrelationIdService, CorrelationIdService>();
+    .AddCorrelationIdServices();
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
-
-builder.Host.UseSerilog();
-builder.Services.AddSingleton<DiagnosticContext>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -53,6 +46,7 @@ app.UseSwaggerUI(options =>
 });
 
 app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseStructuredRequestLogging();
 app.UseExceptionHandler(options => { });
 
 CreateCatalogEndpoint.MapEndpoint(app);

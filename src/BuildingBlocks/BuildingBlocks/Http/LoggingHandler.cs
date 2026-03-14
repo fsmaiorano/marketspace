@@ -1,23 +1,29 @@
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
 namespace BuildingBlocks.Http;
 
 public class LoggingHandler(ILogger<LoggingHandler> logger) : DelegatingHandler
 {
-    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-        CancellationToken cancellationToken)
+    protected override async Task<HttpResponseMessage> SendAsync(
+        HttpRequestMessage request, CancellationToken cancellationToken)
     {
+        Stopwatch sw = Stopwatch.StartNew();
         try
         {
-            logger.LogInformation("Sending request to {Url}", request.RequestUri);
-
             HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
-            logger.LogInformation("Received response with status code {StatusCode}", response.StatusCode);
+            sw.Stop();
+            logger.LogInformation(
+                "HTTP {Method} {Url} → {StatusCode} in {ElapsedMs}ms",
+                request.Method, request.RequestUri, (int)response.StatusCode, sw.ElapsedMilliseconds);
             return response;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while sending the request.");
+            sw.Stop();
+            logger.LogError(ex,
+                "HTTP {Method} {Url} failed after {ElapsedMs}ms",
+                request.Method, request.RequestUri, sw.ElapsedMilliseconds);
             throw;
         }
     }

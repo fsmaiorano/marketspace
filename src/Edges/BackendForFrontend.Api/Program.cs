@@ -18,28 +18,27 @@ using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
 using BuildingBlocks.Authentication;
 using BuildingBlocks.Messaging.Extensions;
+using BuildingBlocks.Services.Correlation;
 using MarketSpace.ServiceDefaults;
-using Serilog;
-using Serilog.Extensions.Hosting;
 using Microsoft.OpenApi;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+builder.AddCustomLoggers();
 
 builder.Services.AddApplication(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddOpenApi();
 builder.Services.AddHttpClient();
-builder.Services.AddHttpContextAccessor();
+builder.Services.AddCorrelationIdServices();
 
 builder.Services.AddMerchantServices();
 builder.Services.AddBasketServices();
 builder.Services.AddCatalogServices();
 builder.Services.AddOrderServices();
 builder.Services.AddUserServices();
-builder.Services.AddCustomLoggers();
 builder.Services.AddSingleton<IStockEventService, StockEventService>();
 builder.Services.AddSingleton<IMerchantAlertService, MerchantAlertService>();
 builder.Services.AddSingleton<IMerchantUserMappingService, MerchantUserMappingService>();
@@ -53,8 +52,6 @@ builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
-builder.Host.UseSerilog();
-builder.Services.AddSingleton<DiagnosticContext>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -107,6 +104,7 @@ app.UseSwaggerUI(options =>
 });
 
 app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseStructuredRequestLogging();
 app.UseMiddleware<JwtTokenMiddleware>();
 app.UseExceptionHandler(options => { });
 app.UseCors("CorsPolicy");

@@ -14,32 +14,26 @@ public class OnOrderCreatedEventHandler(
     {
         logger.LogInformation(LogTypeEnum.Application,
             "Order created domain event received. OrderId: {OrderId}, CustomerId: {CustomerId}, CorrelationId: {CorrelationId}",
-            @event.Order.Id.Value, @event.Order.CustomerId.Value, @event.CorrelationId);
+            @event.OrderId, @event.CustomerId, @event.CorrelationId);
 
         OrderCreatedIntegrationEvent integrationEvent = new()
         {
             CorrelationId = @event.CorrelationId,
-            OrderId = @event.Order.Id.Value,
-            CustomerId = @event.Order.CustomerId.Value,
-            TotalAmount = @event.Order.TotalAmount.Value,
-            CardNumber = @event.Order.Payment.CardNumber,
-            CardName = @event.Order.Payment.CardName,
-            Expiration = @event.Order.Payment.Expiration,
-            Cvv = @event.Order.Payment.Cvv,
-            PaymentMethod = @event.Order.Payment.PaymentMethod,
-            Items = @event.Order.Items
-                .Select(item => new OrderItemData
-                {
-                    CatalogId = item.CatalogId.Value,
-                    Quantity = item.Quantity,
-                    Price = item.Price.Value
-                }).ToList()
+            OrderId = @event.OrderId,
+            CustomerId = @event.CustomerId,
+            TotalAmount = @event.TotalAmount,
+            CardNumber = @event.CardNumber,
+            CardName = @event.CardName,
+            Expiration = @event.Expiration,
+            Cvv = @event.Cvv,
+            PaymentMethod = @event.PaymentMethod,
+            Items = @event.Items
         };
 
         await eventBus.PublishAsync(integrationEvent, cancellationToken);
 
         logger.LogInformation(LogTypeEnum.Application,
             "Order created integration event published. OrderId: {OrderId}, CustomerId: {CustomerId}, TotalAmount: {TotalAmount}, CorrelationId: {CorrelationId}",
-            @event.Order.Id.Value, @event.Order.CustomerId.Value, @event.Order.TotalAmount.Value, @event.CorrelationId);
+            @event.OrderId, @event.CustomerId, @event.TotalAmount, @event.CorrelationId);
     }
 }

@@ -37,20 +37,15 @@ public class OnBasketCheckoutEventHandler(IAppLogger<OnBasketCheckoutEventHandle
                 Cvv = @event.CheckoutData.Payment?.Cvv ?? string.Empty,
                 PaymentMethod = @event.CheckoutData.Payment?.PaymentMethod ?? 0
             },
-            Items = [.. @event.ShoppingCart.Items.Select(item => new OrderItemData
-            {
-                CatalogId = Guid.Parse(item.ProductId),
-                Quantity = item.Quantity,
-                Price = item.Price
-            })],
-            TotalPrice = @event.ShoppingCart.TotalPrice
+            Items = @event.Items,
+            TotalPrice = @event.TotalPrice
         };
 
         await eventBus.PublishAsync(integrationEvent, cancellationToken);
 
         logger.LogInformation(LogTypeEnum.Application,
             "Basket checkout integration event published for customer: {CustomerId}, TotalPrice: {TotalPrice}, ItemCount: {ItemCount}, CorrelationId: {CorrelationId}",
-            @event.CheckoutData.CustomerId, @event.ShoppingCart.TotalPrice, @event.ShoppingCart.Items.Count, @event.CheckoutData.CorrelationId);
+            @event.CheckoutData.CustomerId, @event.TotalPrice, @event.Items.Count, @event.CheckoutData.CorrelationId);
     }
 
     private static AddressData MapAddress(CheckoutAddress? source) => new()

@@ -1,4 +1,4 @@
-using BuildingBlocks.Loggers.Enrichers;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -8,40 +8,35 @@ namespace BuildingBlocks.Loggers;
 
 public static class LoggerExtensions
 {
-    /// <summary>
-    /// Adds custom logging services with Serilog configuration.
-    /// Registers IAppLogger for unified structured logging with LogType categorization.
-    /// </summary>
-    public static IServiceCollection AddCustomLoggers(this IServiceCollection services)
+    public static WebApplicationBuilder AddCustomLoggers(this WebApplicationBuilder builder)
     {
-        LoggerConfiguration loggerConfig = new LoggerConfiguration()
-            .MinimumLevel.Information() // Set minimum level to Information to remove Trace logs
+        string serviceName = builder.Environment.ApplicationName;
+
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .MinimumLevel.Override("System", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
             .Enrich.FromLogContext()
-            .Enrich.With(new ActivityEnricher())
             .Enrich.WithEnvironmentName()
-            .Enrich.WithMachineName();
+            .Enrich.WithMachineName()
+            .Enrich.WithProperty("ServiceName", serviceName)
+            .Enrich.WithProperty("LogType", "System")
+            .WriteTo.Console(
+                outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{ServiceName}] [CID:{CorrelationId}] [{LogType}] {Message:lj}{NewLine}{Exception}"
+            )
+            .CreateLogger();
 
-
-        loggerConfig.WriteTo.Console(
-            outputTemplate:
-            "[{Timestamp:HH:mm:ss} {Level:u3}] [{ServiceName}] [CorrelationId: {CorrelationId}] {Message:lj} {Properties:j}{NewLine}{Exception}",
-            restrictedToMinimumLevel: LogEventLevel.Information
-        );
-
-        Log.Logger = loggerConfig.CreateLogger();
-
-        services.AddSingleton(Log.Logger);
-        services.AddLogging(builder =>
+        builder.Services.AddSingleton(Log.Logger);
+        builder.Services.AddLogging(b =>
         {
-            builder.ClearProviders();
-            builder.AddSerilog(dispose: true);
+            b.ClearProviders();
+            b.AddSerilog(dispose: true);
         });
+        builder.Services.AddSingleton(typeof(IAppLogger<>), typeof(AppLogger<>));
 
-        services.AddSingleton(typeof(IAppLogger<>), typeof(AppLogger<>));
+        builder.Host.UseSerilog();
 
-        return services;
+        return builder;
     }
 }

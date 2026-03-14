@@ -8,27 +8,20 @@ using Order.Api.Application;
 using Order.Api.Endpoints;
 using Order.Api.Infrastructure;
 using Order.Api.Infrastructure.Data;
-using Serilog;
-using Serilog.Extensions.Hosting;
 using RabbitMQ.Client;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 builder.AddRabbitMQClient("rabbitmq");
+builder.AddCustomLoggers();
 
 builder.Services
     .AddApplicationServices(builder.Configuration)
     .AddInfrastructureServices(builder.Configuration)
-    .AddCustomLoggers();
-
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ICorrelationIdService, CorrelationIdService>();
+    .AddCorrelationIdServices();
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
-
-builder.Host.UseSerilog();
-builder.Services.AddSingleton<DiagnosticContext>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -53,6 +46,7 @@ app.UseSwaggerUI(options =>
 });
 
 app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseStructuredRequestLogging();
 app.UseExceptionHandler(options => { });
 
 CreateOrderEndpoint.MapEndpoint(app);

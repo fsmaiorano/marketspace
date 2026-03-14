@@ -14,16 +14,16 @@ public class OnPaymentStatusChangedEventHandler(
     public async Task HandleAsync(PaymentStatusChangedDomainEvent @event, CancellationToken cancellationToken = default)
     {
         logger.LogInformation(LogTypeEnum.Application,
-            "Payment status changed event received. CorrelationId: {CorrelationId}, Status: {Status}", 
-            @event.CorrelationId, @event.Payment.Status);
+            "Payment status changed event received. CorrelationId: {CorrelationId}, Status: {Status}",
+            @event.CorrelationId, @event.Status);
 
         PaymentStatusChangedIntegrationEvent integrationEvent = new()
         {
             CorrelationId = @event.CorrelationId,
-            OrderId = @event.Payment.OrderId,
-            PaymentStatus = (int)@event.Payment.Status,
-            PaymentStatusName = @event.Payment.Status.ToString(),
-            Items = @event.Payment.Items
+            OrderId = @event.OrderId,
+            PaymentStatus = (int)@event.Status,
+            PaymentStatusName = @event.Status.ToString(),
+            Items = @event.Items
         };
 
         await eventBus.PublishAsync(integrationEvent, cancellationToken);

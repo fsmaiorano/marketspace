@@ -8,28 +8,20 @@ using Merchant.Api.Application;
 using Merchant.Api.Endpoints;
 using Merchant.Api.Infrastructure;
 using Merchant.Api.Infrastructure.Data;
-using Serilog;
-using Serilog.Extensions.Hosting;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+builder.AddCustomLoggers();
 
 builder.Services.AddOpenApi();
 
 builder.Services
     .AddApplicationServices()
     .AddInfrastructureServices(builder.Configuration)
-    .AddCustomLoggers();
-
-
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ICorrelationIdService, CorrelationIdService>();
+    .AddCorrelationIdServices();
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
-
-builder.Host.UseSerilog();
-builder.Services.AddSingleton<DiagnosticContext>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -54,6 +46,7 @@ app.UseSwaggerUI(options =>
 });
 
 app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseStructuredRequestLogging();
 app.UseExceptionHandler(options => { });
 
 CreateMerchantEndpoint.MapEndpoint(app);

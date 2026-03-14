@@ -1,7 +1,7 @@
 namespace BuildingBlocks.Loggers;
 
 /// <summary>
-/// Unified logger interface using Serilog with structured logging and LogType categorization.
+/// Unified logger interface with structured logging and LogType categorization.
 /// Supports Application, Business, and Exception logging types.
 /// </summary>
 /// <typeparam name="T">The type associated with the logger (typically the class using it)</typeparam>

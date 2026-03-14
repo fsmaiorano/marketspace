@@ -3,7 +3,6 @@ using BackendForFrontend.Api.Basket.Services;
 using BackendForFrontend.Api.Catalog.Services;
 using BackendForFrontend.Api.Order.Services;
 using BuildingBlocks.Http;
-using BuildingBlocks.Services.Correlation;
 using BackendForFrontend.Api.User.Services;
 
 namespace BackendForFrontend.Api;
@@ -29,10 +28,6 @@ public static class DependencyInjectionExtension
 
     private static void AddServices(IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<ICorrelationIdService, CorrelationIdService>();
-        services.AddScoped<CorrelationIdHandler>();
-        services.AddTransient<LoggingHandler>();
-
         string? merchantUrl = configuration["Services:MerchantService:BaseUrl"];
         services.AddHttpClient<MerchantService>(client =>
             {

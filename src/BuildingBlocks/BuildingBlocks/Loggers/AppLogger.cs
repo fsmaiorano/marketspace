@@ -1,11 +1,9 @@
 using Microsoft.Extensions.Logging;
-using Serilog.Context;
 
 namespace BuildingBlocks.Loggers;
 
 /// <summary>
-/// Unified logger implementation using Serilog with structured logging.
-/// Automatically adds LogType as a structured property for filtering and categorization.
+/// Unified logger implementation with structured logging and LogType categorization.
 /// </summary>
 /// <typeparam name="T">The type associated with the logger</typeparam>
 public sealed class AppLogger<T>(ILogger<T> logger) : IAppLogger<T>
@@ -14,10 +12,8 @@ public sealed class AppLogger<T>(ILogger<T> logger) : IAppLogger<T>
 
     public void LogInformation(LogTypeEnum logTypeEnum, string messageTemplate, params object?[] propertyValues)
     {
-        using (LogContext.PushProperty("LogType", logTypeEnum.ToString()))
-        {
-            _logger.LogInformation(messageTemplate, propertyValues);
-        }
+        using var scope = _logger.BeginScope(new Dictionary<string, object> { ["LogType"] = logTypeEnum.ToString() });
+        _logger.LogInformation(messageTemplate, propertyValues);
     }
 
     public void LogInformation(string messageTemplate, params object?[] propertyValues)
@@ -27,10 +23,8 @@ public sealed class AppLogger<T>(ILogger<T> logger) : IAppLogger<T>
 
     public void LogWarning(LogTypeEnum logTypeEnum, string messageTemplate, params object?[] propertyValues)
     {
-        using (LogContext.PushProperty("LogType", logTypeEnum.ToString()))
-        {
-            _logger.LogWarning(messageTemplate, propertyValues);
-        }
+        using var scope = _logger.BeginScope(new Dictionary<string, object> { ["LogType"] = logTypeEnum.ToString() });
+        _logger.LogWarning(messageTemplate, propertyValues);
     }
 
     public void LogWarning(string messageTemplate, params object?[] propertyValues)
@@ -40,17 +34,11 @@ public sealed class AppLogger<T>(ILogger<T> logger) : IAppLogger<T>
 
     public void LogError(LogTypeEnum logTypeEnum, Exception? exception, string messageTemplate, params object?[] propertyValues)
     {
-        using (LogContext.PushProperty("LogType", logTypeEnum.ToString()))
-        {
-            if (exception != null)
-            {
-                _logger.LogError(exception, messageTemplate, propertyValues);
-            }
-            else
-            {
-                _logger.LogError(messageTemplate, propertyValues);
-            }
-        }
+        using var scope = _logger.BeginScope(new Dictionary<string, object> { ["LogType"] = logTypeEnum.ToString() });
+        if (exception != null)
+            _logger.LogError(exception, messageTemplate, propertyValues);
+        else
+            _logger.LogError(messageTemplate, propertyValues);
     }
 
     public void LogError(Exception exception, string messageTemplate, params object?[] propertyValues)
@@ -65,10 +53,8 @@ public sealed class AppLogger<T>(ILogger<T> logger) : IAppLogger<T>
 
     public void LogDebug(LogTypeEnum logTypeEnum, string messageTemplate, params object?[] propertyValues)
     {
-        using (LogContext.PushProperty("LogType", logTypeEnum.ToString()))
-        {
-            _logger.LogDebug(messageTemplate, propertyValues);
-        }
+        using var scope = _logger.BeginScope(new Dictionary<string, object> { ["LogType"] = logTypeEnum.ToString() });
+        _logger.LogDebug(messageTemplate, propertyValues);
     }
 
     public void LogDebug(string messageTemplate, params object?[] propertyValues)

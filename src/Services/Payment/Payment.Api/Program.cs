@@ -3,30 +3,29 @@ using BuildingBlocks.Loggers;
 using BuildingBlocks.Middlewares;
 using BuildingBlocks.Services;
 using BuildingBlocks.Services.Correlation;
+using MarketSpace.ServiceDefaults;
 using Payment.Api.Application;
 using Payment.Api.Endpoints;
 using Payment.Api.Infrastructure;
 using Payment.Api.Infrastructure.Data;
-using Serilog;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+builder.AddCustomLoggers();
+
 builder.Services.AddApplicationServices(builder.Configuration)
     .AddInfrastructureServices(builder.Configuration)
-    .AddCustomLoggers();
+    .AddCorrelationIdServices();
 
 builder.Services.AddOpenApi();
-
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ICorrelationIdService, CorrelationIdService>();
-
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
-
-builder.Host.UseSerilog();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 WebApplication app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 if (app.Environment.IsDevelopment())
 {
@@ -45,6 +44,7 @@ app.UseSwaggerUI(options =>
 });
 
 app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseStructuredRequestLogging();
 app.UseExceptionHandler(options => { });
 
 CreatePaymentEndpoint.MapEndpoint(app);
