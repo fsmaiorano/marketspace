@@ -36,13 +36,10 @@ public class GetCatalog(
                 ImageUrl = product.ImageUrl,
                 Price = product.Price.Value,
                 MerchantId = product.MerchantId,
-                Stock = product.Stock.Value,
+                Stock = product.Stock.Available,
                 CreatedAt = product.CreatedAt,
                 UpdatedAt = product.UpdatedAt
             };
-
-            string imageData = await minioBucket.GetImageAsync(product.ImageUrl) ?? string.Empty;
-            catalogDto.ImageUrl = imageData;
 
             catalogDtoList.Add(catalogDto);
         }

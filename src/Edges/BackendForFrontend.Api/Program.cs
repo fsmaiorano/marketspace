@@ -41,10 +41,12 @@ builder.Services.AddOrderServices();
 builder.Services.AddUserServices();
 builder.Services.AddCustomLoggers();
 builder.Services.AddSingleton<IStockEventService, StockEventService>();
+builder.Services.AddSingleton<IMerchantAlertService, MerchantAlertService>();
 builder.Services.AddSingleton<IMerchantUserMappingService, MerchantUserMappingService>();
 
 builder.Services.AddEventBus(builder.Configuration);
 builder.Services.AddScoped<OnCatalogStockUpdatedSubscriber>();
+builder.Services.AddScoped<OnStockReservationFailedSubscriber>();
 builder.Services.AddHostedService<IntegrationEventSubscriptionService>();
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();

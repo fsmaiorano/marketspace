@@ -129,7 +129,8 @@ public static class MerchantDashboardEndpoint
 
         app.MapGet("/api/merchant-dashboard/stream",
                 async (HttpContext context, ClaimsPrincipal user, IStockEventService stockEventService,
-                    MerchantUseCase merchantUseCase, IMerchantUserMappingService merchantUserMappingService) =>
+                    IMerchantAlertService merchantAlertService, MerchantUseCase merchantUseCase,
+                    IMerchantUserMappingService merchantUserMappingService) =>
                 {
                     string? userId = GetUserId(user);
                     if (string.IsNullOrEmpty(userId))
@@ -138,8 +139,6 @@ public static class MerchantDashboardEndpoint
                         return;
                     }
 
-                    // Look up the merchant's entity ID so that incoming RabbitMQ stock events
-                    // (which carry merchantId) can be routed to this SSE channel (keyed by userId).
                     string? merchantId = null;
                     Result<BackendForFrontend.Api.Merchant.Dtos.GetMerchantMeResponse> merchantResult =
                         await merchantUseCase.GetMerchantMeAsync(userId);
@@ -149,45 +148,50 @@ public static class MerchantDashboardEndpoint
                         merchantUserMappingService.Register(merchantId, userId);
                     }
 
-                    // Disable response buffering so SSE data is flushed immediately
                     context.Features.Get<Microsoft.AspNetCore.Http.Features.IHttpResponseBodyFeature>()?.DisableBuffering();
-
                     context.Response.ContentType = "text/event-stream";
                     context.Response.Headers.CacheControl = "no-cache";
                     context.Response.Headers.Connection = "keep-alive";
                     context.Response.Headers.Append("X-Accel-Buffering", "no");
 
-                    ChannelReader<StockChangedEvent> reader = stockEventService.Subscribe(userId);
+                    JsonSerializerOptions jsonOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                    Channel<string> merged = Channel.CreateUnbounded<string>();
+                    using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted);
+
+                    ChannelReader<StockChangedEvent> stockReader = stockEventService.Subscribe(userId);
+                    ChannelReader<MerchantAlertEvent> alertReader = merchantAlertService.Subscribe(userId);
+
+                    Task stockForward = ForwardAsync(stockReader, "stock", merged.Writer, jsonOptions, cts.Token);
+                    Task alertForward = ForwardAsync(alertReader, "alert", merged.Writer, jsonOptions, cts.Token);
+                    _ = Task.WhenAll(stockForward, alertForward).ContinueWith(_ => merged.Writer.TryComplete());
+
                     try
                     {
                         await context.Response.WriteAsync("data: {\"type\":\"connected\"}\n\n");
                         await context.Response.Body.FlushAsync();
 
                         using PeriodicTimer heartbeat = new(TimeSpan.FromSeconds(25));
-                        Task heartbeatTask = Task.Run(async () =>
+                        _ = Task.Run(async () =>
                         {
-                            while (await heartbeat.WaitForNextTickAsync(context.RequestAborted))
+                            while (await heartbeat.WaitForNextTickAsync(cts.Token))
                             {
                                 await context.Response.WriteAsync(": heartbeat\n\n");
                                 await context.Response.Body.FlushAsync();
                             }
-                        }, context.RequestAborted);
+                        }, cts.Token);
 
-                        await foreach (StockChangedEvent evt in reader.ReadAllAsync(context.RequestAborted))
+                        await foreach (string frame in merged.Reader.ReadAllAsync(cts.Token))
                         {
-                            string json = JsonSerializer.Serialize(evt,
-                                new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-                            await context.Response.WriteAsync($"data: {json}\n\n");
+                            await context.Response.WriteAsync(frame);
                             await context.Response.Body.FlushAsync();
                         }
                     }
-                    catch (OperationCanceledException)
-                    {
-                        // Client disconnected
-                    }
+                    catch (OperationCanceledException) { }
                     finally
                     {
+                        await cts.CancelAsync();
                         stockEventService.Unsubscribe(userId);
+                        merchantAlertService.Unsubscribe(userId);
                         if (merchantId is not null)
                             merchantUserMappingService.Unregister(merchantId);
                     }
@@ -200,4 +204,12 @@ public static class MerchantDashboardEndpoint
     private static string? GetUserId(ClaimsPrincipal user) =>
         user.FindFirst(ClaimTypes.NameIdentifier)?.Value
         ?? user.FindFirst("sub")?.Value;
+
+    private static async Task ForwardAsync<T>(
+        ChannelReader<T> reader, string eventType, ChannelWriter<string> writer,
+        JsonSerializerOptions options, CancellationToken ct)
+    {
+        await foreach (T evt in reader.ReadAllAsync(ct))
+            await writer.WriteAsync($"event: {eventType}\ndata: {JsonSerializer.Serialize(evt, options)}\n\n", ct);
+    }
 }

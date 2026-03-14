@@ -13,6 +13,7 @@ public class IntegrationEventSubscriptionService(IEventBus eventBus) : IHostedSe
     {
         // Subscribe to integration events
         eventBus.Subscribe<OrderCreatedIntegrationEvent, OnOrderCreatedSubscriber>();
+        eventBus.Subscribe<StockReservationFailedIntegrationEvent, OnStockReservationFailedSubscriber>();
         return Task.CompletedTask;
     }
 

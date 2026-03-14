@@ -3,56 +3,82 @@ using BuildingBlocks.Messaging.IntegrationEvents;
 using BuildingBlocks.Messaging.IntegrationEvents.Interfaces;
 using BuildingBlocks.Messaging.Interfaces;
 using Catalog.Api.Application.Catalog.UpdateStock;
+using Catalog.Api.Domain.Entities;
+using Catalog.Api.Domain.Repositories;
+using Catalog.Api.Domain.ValueObjects;
 
 namespace Catalog.Api.Application.Subscribers;
 
 /// <summary>
-/// Restores stock for every catalog item in the order when payment fails, is rejected or cancelled.
-/// Publishes CatalogStockUpdatedIntegrationEvent so the merchant dashboard can update in real-time.
+/// Handles payment status changes:
+/// - Authorized/Captured  → confirms reservation (removes from Reserved)
+/// - Failed/Rejected/Cancelled/Refunded/Chargeback → releases reservation back to Available
 /// </summary>
 public class OnPaymentStatusChangedSubscriber(
     IAppLogger<OnPaymentStatusChangedSubscriber> logger,
-    UpdateStock updateStock,
+    ICatalogRepository repository,
     IEventBus eventBus)
     : IIntegrationEventHandler<PaymentStatusChangedIntegrationEvent>
 {
-    // PaymentStatusEnum: 5=Failed, 6=Rejected, 7=Cancelled
-    private static readonly HashSet<int> _stockReleaseStatuses = [5, 6, 7];
+    // PaymentStatus: 3=Authorized, 4=Captured
+    private static readonly HashSet<int> ConfirmStatuses = [3, 4];
+    // PaymentStatus: 5=Failed, 6=Rejected, 7=Cancelled, 8=Refunded, 9=Chargeback
+    private static readonly HashSet<int> ReleaseStatuses = [5, 6, 7, 8, 9];
 
     public async Task HandleAsync(PaymentStatusChangedIntegrationEvent @event, CancellationToken cancellationToken = default)
     {
-        if (!_stockReleaseStatuses.Contains(@event.PaymentStatus))
+        bool isConfirm = ConfirmStatuses.Contains(@event.PaymentStatus);
+        bool isRelease = ReleaseStatuses.Contains(@event.PaymentStatus);
+
+        if (!isConfirm && !isRelease)
             return;
 
+        string operation = isConfirm ? "Confirming" : "Releasing";
         logger.LogInformation(LogTypeEnum.Application,
-            "Payment {Status} event received in Catalog Service. OrderId: {OrderId}, Releasing stock for {ItemCount} item(s), CorrelationId: {CorrelationId}",
-            @event.PaymentStatusName, @event.OrderId, @event.Items.Count, @event.CorrelationId);
+            "Payment {Status} — {Operation} reservation for order {OrderId}, {ItemCount} item(s). CorrelationId: {CorrelationId}",
+            @event.PaymentStatusName, operation, @event.OrderId, @event.Items.Count, @event.CorrelationId);
 
         foreach (OrderItemData item in @event.Items)
         {
-            BuildingBlocks.Result<UpdateStockResult> result =
-                await updateStock.HandleAsync(new UpdateStockCommand(item.CatalogId, +item.Quantity));
+            CatalogEntity? entity = await repository.GetByIdAsync(
+                CatalogId.Of(item.CatalogId), isTrackingEnabled: true);
 
-            if (result.IsSuccess)
+            if (entity is null)
             {
+                logger.LogError(LogTypeEnum.Business, null,
+                    "Catalog {CatalogId} not found while processing payment status change.", item.CatalogId);
+                continue;
+            }
+
+            try
+            {
+                if (isConfirm)
+                    entity.ConfirmReservation(item.Quantity);
+                else
+                    entity.ReleaseReservation(item.Quantity);
+
+                await repository.UpdateAsync(entity);
+
                 logger.LogInformation(LogTypeEnum.Business,
-                    "Stock restored for catalog {CatalogId} by {Quantity}. New stock: {NewStock}",
-                    item.CatalogId, item.Quantity, result.Data!.NewStock);
+                    "Reservation {Operation} for catalog {CatalogId} — {Quantity} unit(s). Available: {Available}, Reserved: {Reserved}",
+                    operation.ToLowerInvariant(), item.CatalogId, item.Quantity,
+                    entity.Stock.Available, entity.Stock.Reserved);
 
                 await eventBus.PublishAsync(new CatalogStockUpdatedIntegrationEvent
                 {
                     CatalogId = item.CatalogId,
-                    MerchantId = result.Data.MerchantId,
-                    ProductName = result.Data.ProductName,
-                    NewStock = result.Data.NewStock,
+                    MerchantId = entity.MerchantId,
+                    ProductName = entity.Name,
+                    Available = entity.Stock.Available,
+                    Reserved = entity.Stock.Reserved,
                     CorrelationId = @event.CorrelationId
                 }, cancellationToken);
             }
-            else
+            catch (Exception ex)
             {
-                logger.LogError(LogTypeEnum.Business, null,
-                    "Failed to restore stock for catalog {CatalogId}: {Error}",
-                    item.CatalogId, result.Error);
+                logger.LogError(LogTypeEnum.Exception, ex,
+                    "Error processing reservation {Operation} for catalog {CatalogId}.",
+                    operation.ToLowerInvariant(), item.CatalogId);
             }
         }
     }

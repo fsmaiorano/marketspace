@@ -56,7 +56,7 @@ public class GetCatalogById(
                 Price: catalog.Price.Value,
                 Categories: new ReadOnlyCollection<string>(catalog.Categories),
                 MerchantId: catalog.MerchantId,
-                Stock: catalog.Stock.Value,
+                Stock: catalog.Stock.Available,
                 CreatedAt: catalog.CreatedAt,
                 UpdatedAt: catalog.UpdatedAt
             );

@@ -8,7 +8,7 @@ namespace Catalog.Api.Application.Catalog.UpdateStock;
 
 public record UpdateStockCommand(Guid CatalogId, int Delta);
 
-public record UpdateStockResult(int NewStock, Guid MerchantId, string ProductName);
+public record UpdateStockResult(int Available, int Reserved, Guid MerchantId, string ProductName);
 
 public class UpdateStock(
     ICatalogRepository repository,
@@ -19,30 +19,28 @@ public class UpdateStock(
         try
         {
             logger.LogInformation(LogTypeEnum.Application,
-                "Processing update stock request for catalog: {CatalogId}, delta: {Delta}",
+                "Processing stock adjustment for catalog {CatalogId}, delta: {Delta}",
                 command.CatalogId, command.Delta);
 
-            CatalogEntity? entity = await repository.GetByIdAsync(CatalogId.Of(command.CatalogId), isTrackingEnabled: true);
+            CatalogEntity? entity = await repository.GetByIdAsync(
+                CatalogId.Of(command.CatalogId), isTrackingEnabled: true);
 
             if (entity is null)
-                return Result<UpdateStockResult>.Failure($"Catalog with ID {command.CatalogId} not found.");
+                return Result<UpdateStockResult>.Failure($"Catalog {command.CatalogId} not found.");
 
-            int newStock = entity.Stock.Value + command.Delta;
-
-            if (newStock < 0)
-                return Result<UpdateStockResult>.Failure($"Insufficient stock. Current stock: {entity.Stock.Value}, delta: {command.Delta}.");
-
-            entity.Update(name: null, categories: null, description: null, imageUrl: null, price: null, stock: Stock.Of(newStock));
+            entity.AdjustAvailableStock(command.Delta);
             await repository.UpdateAsync(entity);
 
-            logger.LogInformation(LogTypeEnum.Business, "Stock updated for catalog {CatalogId}. New stock: {NewStock}",
-                command.CatalogId, newStock);
+            logger.LogInformation(LogTypeEnum.Business,
+                "Stock adjusted for catalog {CatalogId}. Available: {Available}, Reserved: {Reserved}",
+                command.CatalogId, entity.Stock.Available, entity.Stock.Reserved);
 
-            return Result<UpdateStockResult>.Success(new UpdateStockResult(newStock, entity.MerchantId, entity.Name));
+            return Result<UpdateStockResult>.Success(
+                new UpdateStockResult(entity.Stock.Available, entity.Stock.Reserved, entity.MerchantId, entity.Name));
         }
         catch (Exception ex)
         {
-            logger.LogError(LogTypeEnum.Exception, ex, "An error occurred while updating stock.");
+            logger.LogError(LogTypeEnum.Exception, ex, "Error adjusting stock.");
             return Result<UpdateStockResult>.Failure("An error occurred while processing your request.");
         }
     }

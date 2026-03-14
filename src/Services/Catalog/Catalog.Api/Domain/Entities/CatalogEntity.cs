@@ -128,11 +128,35 @@ public class CatalogEntity : Aggregate<CatalogId>
     {
         if (Stock == stock)
             return;
-        
+
         Stock = stock;
     }
 
     private void Touch() => UpdatedAt = DateTimeOffset.UtcNow;
+
+    public void AdjustAvailableStock(int delta)
+    {
+        Stock = Stock.Apply(delta);
+        Touch();
+    }
+
+    public void ReserveStock(int quantity)
+    {
+        Stock = Stock.Reserve(quantity);
+        Touch();
+    }
+
+    public void ConfirmReservation(int quantity)
+    {
+        Stock = Stock.Confirm(quantity);
+        Touch();
+    }
+
+    public void ReleaseReservation(int quantity)
+    {
+        Stock = Stock.Release(quantity);
+        Touch();
+    }
 
     public void Update(
         string? name,

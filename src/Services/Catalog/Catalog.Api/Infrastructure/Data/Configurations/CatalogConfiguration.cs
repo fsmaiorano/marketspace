@@ -35,11 +35,23 @@ public class CatalogConfiguration : IEntityTypeConfiguration<CatalogEntity>
                 price => price.Value,
                 dbPrice => Price.Of(dbPrice));
 
-        builder.Property(m => m.Stock)
-            .IsRequired()
-            .HasConversion(
-                stock => stock.Value,
-                dbStock => Stock.Of(dbStock));
+        builder.ComplexProperty(c => c.Stock, stockBuilder =>
+        {
+            stockBuilder.Property(s => s.Available)
+                .HasColumnName("StockAvailable")
+                .IsRequired();
+            stockBuilder.Property(s => s.Reserved)
+                .HasColumnName("StockReserved")
+                .IsRequired()
+                .HasDefaultValue(0);
+        });
+
+        // PostgreSQL xmin system column: automatically updated on every row write,
+        // used as a concurrency token to detect lost updates (no extra column needed).
+        builder.Property<uint>("xmin")
+            .HasColumnType("xid")
+            .ValueGeneratedOnAddOrUpdate()
+            .IsConcurrencyToken();
 
         builder.Property(c => c.Categories)
             .HasConversion(
@@ -49,7 +61,7 @@ public class CatalogConfiguration : IEntityTypeConfiguration<CatalogEntity>
                 (c1, c2) => c1!.SequenceEqual(c2!),
                 c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                 c => c.ToList()));
-        
+
         builder.Property(c => c.Categories)
             .HasMaxLength(500);
 

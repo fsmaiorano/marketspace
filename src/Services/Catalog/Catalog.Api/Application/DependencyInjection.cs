@@ -5,6 +5,7 @@ using Catalog.Api.Application.Catalog.DeleteCatalog;
 using Catalog.Api.Application.Catalog.GetCatalog;
 using Catalog.Api.Application.Catalog.GetCatalogById;
 using Catalog.Api.Application.Catalog.GetCatalogByMerchantId;
+using Catalog.Api.Application.Catalog.ReserveStock;
 using Catalog.Api.Application.Catalog.UpdateCatalog;
 using Catalog.Api.Application.Catalog.UpdateStock;
 using Catalog.Api.Application.HostedService;
@@ -41,6 +42,7 @@ public static class DependencyInjection
         services.AddScoped<GetCatalog>();
         services.AddScoped<GetCatalogByMerchantId>();
         services.AddScoped<UpdateStock>();
+        services.AddScoped<ReserveStock>();
 
         services.AddEventBus(configuration);
         services.AddScoped<OnOrderCreatedSubscriber>();

@@ -39,7 +39,7 @@ public class GetCatalogByMerchantId(
                     Description = product.Description,
                     ImageUrl = product.ImageUrl,
                     Price = product.Price.Value,
-                    Stock = product.Stock.Value,
+                    Stock = product.Stock.Available,
                     MerchantId = product.MerchantId,
                     CreatedAt = product.CreatedAt,
                     UpdatedAt = product.UpdatedAt

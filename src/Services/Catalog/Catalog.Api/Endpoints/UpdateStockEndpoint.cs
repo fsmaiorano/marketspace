@@ -15,7 +15,7 @@ public static class UpdateStockEndpoint
                     UpdateStockCommand command = new(catalogId, request.Delta);
                     Result<UpdateStockResult> result = await handler.HandleAsync(command);
                     return result is { IsSuccess: true, Data: not null }
-                        ? Results.Ok(new { newStock = result.Data.NewStock })
+                        ? Results.Ok(new { available = result.Data.Available, reserved = result.Data.Reserved })
                         : Results.BadRequest(result.Error);
                 })
             .WithName("UpdateCatalogStock")

@@ -33,6 +33,7 @@ public static class DependencyInjection
         services.AddHostedService<PaymentProcessingBackgroundService>();
 
         services.AddScoped<OnOrderCreatedSubscriber>();
+        services.AddScoped<OnStockReservationFailedSubscriber>();
         services.AddHostedService<IntegrationEventSubscriptionService>();
         services.AddScoped<IDomainEventHandler<PaymentStatusChangedDomainEvent>, OnPaymentStatusChangedEventHandler>();
 

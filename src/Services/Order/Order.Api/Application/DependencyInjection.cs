@@ -32,6 +32,7 @@ public static class DependencyInjection
 
         services.AddScoped<OnBasketCheckoutSubscriber>();
         services.AddScoped<OnPaymentStatusChangedSubscriber>();
+        services.AddScoped<OnStockReservationFailedSubscriber>();
         services.AddHostedService<IntegrationEventSubscriptionService>();
         services.AddScoped<IDomainEventHandler<OrderCreatedDomainEvent>, OnOrderCreatedEventHandler>();
 

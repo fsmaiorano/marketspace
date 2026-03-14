@@ -12,7 +12,8 @@ public class IntegrationEventSubscriptionService(IEventBus eventBus) : IHostedSe
     public Task StartAsync(CancellationToken cancellationToken)
     {
         eventBus.Subscribe<BasketCheckoutIntegrationEvent, OnBasketCheckoutSubscriber>();
-        eventBus.Subscribe<PaymentStatusChangedIntegrationEvent, OnPaymentStatusChangedSubscriber>();    
+        eventBus.Subscribe<PaymentStatusChangedIntegrationEvent, OnPaymentStatusChangedSubscriber>();
+        eventBus.Subscribe<StockReservationFailedIntegrationEvent, OnStockReservationFailedSubscriber>();
         return Task.CompletedTask;
     }
 

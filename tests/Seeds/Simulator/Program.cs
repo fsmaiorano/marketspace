@@ -42,10 +42,9 @@ while (!exit)
     Console.WriteLine("Choose simulation mode:");
     Console.WriteLine("  [0] Seed             – seeds initial data (merchants, catalogs, carts)");
     Console.WriteLine("  [1] Direct DB Access – accesses DBs directly (internal logic, varied data)");
-    Console.WriteLine("  [2] Via BFF HTTP     – makes real calls to your BFF");
-    Console.WriteLine("  [3] Both            – executes both modes in sequence");
+    Console.WriteLine("  [2] DEMO             – full end-to-end demo: merchant creates products, customer buys them");
+    Console.WriteLine("  [3] Concurrent       – forces concurrent execution of Direct DB mode");
     Console.WriteLine("  [4] Exit");
-    Console.WriteLine("  [5] DEMO             – full end-to-end demo: merchant creates products, customer buys them");
     Console.Write("> ");
 
     string? choice = Console.ReadLine()?.Trim();
@@ -65,22 +64,13 @@ while (!exit)
             await RunDirectDbModeAsync(recordsToCreate);
             break;
         case "2":
-            await RunBffHttpModeAsync();
+            await RunDemoModeAsync();
             break;
         case "3":
-            Console.Write("How many records should be created? [1]: ");
-            input = Console.ReadLine()?.Trim();
-            recordsToCreate = 1;
-            if (!string.IsNullOrEmpty(input) && int.TryParse(input, out n) && n > 0)
-                recordsToCreate = n;
-            await RunDirectDbModeAsync(recordsToCreate);
-            await RunBffHttpModeAsync();
+            await RunConcurrentModeAsync();
             break;
         case "4":
             exit = true;
-            break;
-        case "5":
-            await RunDemoModeAsync();
             break;
         default:
             Console.WriteLine("Invalid option, please try again.");
@@ -596,16 +586,29 @@ async Task RunDirectDbModeAsync(int recordsToCreate)
     Console.WriteLine("\n✅ Direct Database Mode completed.");
 }
 
-// ── MODE 2 – Real calls to BFF ─────────────────────────────────────────
-async Task RunBffHttpModeAsync()
+// ── MODE 3 – Concurrent execution ──────────────────────────────────────
+async Task RunConcurrentModeAsync()
 {
     Console.WriteLine("===========================================");
-    Console.WriteLine(" MODO 2 – Via BFF HTTP");
+    Console.WriteLine(" MODE 3 – Concurrent Execution");
     Console.WriteLine("===========================================");
+    Console.WriteLine();
+    Console.WriteLine("  Scenarios exercised in every run:");
+    Console.WriteLine("    [A] Insufficient stock  – tasks request more than available → all orders cancelled");
+    Console.WriteLine("    [B] Race to sell-out    – multiple tasks compete for 1 unit → only 1 wins");
+    Console.WriteLine("    [C] Random quantities   – varied purchases against abundant stock");
+    Console.WriteLine();
 
-    Faker faker = new("pt_BR");
+    Console.Write("How many concurrent tasks should be created? [6]: ");
+    string? concurrencyInput = Console.ReadLine()?.Trim();
+    int concurrency = 6;
+    if (!string.IsNullOrEmpty(concurrencyInput) && int.TryParse(concurrencyInput, out int c) && c > 0)
+        concurrency = c;
 
-    // Get a customer user from database
+    Console.WriteLine();
+    Console.WriteLine($"🔧 Setting up scenario infrastructure for {concurrency} task(s)...");
+
+    // ── Setup DI ──────────────────────────────────────────────────────────────
     MarketSpaceSimulatorFactory factory = new(
         merchantConnectionString: merchantConnectionString,
         catalogConnectionString: catalogConnectionString,
@@ -617,71 +620,239 @@ async Task RunBffHttpModeAsync()
     );
 
     IServiceScopeFactory scopeFactory = factory.Services.GetRequiredService<IServiceScopeFactory>();
-    using IServiceScope scope = scopeFactory.CreateScope();
-    UserDbContext userDbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+    using IServiceScope setupScope = scopeFactory.CreateScope();
 
-    // Find a customer user
-    ApplicationUser? customerUser = await userDbContext.Users
-        .FirstOrDefaultAsync(u => u.UserType == UserTypeEnum.Customer);
+    CatalogDbContext setupCatalogDb = setupScope.ServiceProvider.GetRequiredService<CatalogDbContext>();
+    MerchantDbContext setupMerchantDb = setupScope.ServiceProvider.GetRequiredService<MerchantDbContext>();
+    UserDbContext setupUserDb = setupScope.ServiceProvider.GetRequiredService<UserDbContext>();
+    BasketDbContext setupBasketDb = setupScope.ServiceProvider.GetRequiredService<BasketDbContext>();
+    UserManager<ApplicationUser> setupUserManager = setupScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    RoleManager<IdentityRole> setupRoleManager = setupScope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    IMinioBucket setupMinio = setupScope.ServiceProvider.GetRequiredService<IMinioBucket>();
 
-    if (customerUser == null)
+    await setupCatalogDb.Database.EnsureCreatedAsync();
+    await setupMerchantDb.Database.EnsureCreatedAsync();
+    await setupUserDb.Database.EnsureCreatedAsync();
+    await setupBasketDb.Database.EnsureCreatedAsync();
+
+    if (!await setupRoleManager.RoleExistsAsync("Member"))
+        await setupRoleManager.CreateAsync(new IdentityRole("Member"));
+
+    // ── Find merchant for scenario products ───────────────────────────────────
+    Guid scenarioMerchantId = Guid.Empty;
+
+    ApplicationUser? demoMerchantUser = await setupUserManager.FindByEmailAsync("merchant@marketspace.com");
+    if (demoMerchantUser is not null && Guid.TryParse(demoMerchantUser.Id, out Guid demoUserId))
     {
-        Console.WriteLine("⚠️  No customer user found in database. Please run seed mode first or create a customer user.");
+        UserId demoMerchantUserId = UserId.Of(demoUserId);
+        MerchantEntity? demoMerchant = await setupMerchantDb.Merchants
+            .FirstOrDefaultAsync(m => m.UserId == demoMerchantUserId);
+        if (demoMerchant is not null)
+            scenarioMerchantId = demoMerchant.Id.Value;
+    }
+
+    if (scenarioMerchantId == Guid.Empty)
+    {
+        MerchantEntity? anyMerchant = await setupMerchantDb.Merchants.FirstOrDefaultAsync();
+        if (anyMerchant is not null)
+            scenarioMerchantId = anyMerchant.Id.Value;
+    }
+
+    if (scenarioMerchantId == Guid.Empty)
+    {
+        Console.WriteLine("  ❌ No merchant found. Run Seed mode [0] first to create initial data.");
         return;
     }
 
-    Console.WriteLine($"📋 Using customer: {customerUser.Email} (ID: {customerUser.Id})");
+    Console.WriteLine($"  ✅ Using merchant ID: {scenarioMerchantId}");
 
-    using HttpClient http = new(new HttpClientHandler
+    // ── Scenario product definitions ──────────────────────────────────────────
+    // [A] Always insufficient: stock=2 but every task requests qty=10
+    const string scenarioAName = "[CONCURRENT-A] Scarce Item";
+    const int scenarioAStock = 2;
+    const int scenarioARequestQty = 10;
+
+    // [B] Sell-out race: stock=1 so only the first buyer succeeds
+    const string scenarioBName = "[CONCURRENT-B] Limited Edition";
+    const int scenarioBStock = 1;
+
+    // [C] Abundant stock: stock=1000 so random buys always succeed
+    const string scenarioCName = "[CONCURRENT-C] Popular Item";
+    const int scenarioCStock = 1000;
+
+    // ── Ensure/reset scenario products ────────────────────────────────────────
+    Console.WriteLine("  📦 Ensuring scenario products and resetting stock...");
+
+    async Task<CatalogEntity> EnsureScenarioProductAsync(string productName, int targetStock, string scenarioLabel)
     {
-        ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-    });
-    http.BaseAddress = new Uri(bffBaseUrl);
-    http.DefaultRequestHeaders.Add("Accept", "application/json");
+        CatalogEntity? product = await setupCatalogDb.Catalogs
+            .FirstOrDefaultAsync(c => c.Name == productName);
 
-    // 1. Login / get token
-    Console.WriteLine("\n🔐 Autenticando no BFF...");
-    string? token = await BffLoginAsync(http, customerUser.Email!, "123456");
-    if (token is not null)
-        http.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        if (product is null)
+        {
+            Faker fk = new("en");
+            (string imageObj, string _) = await setupMinio.SendImageAsync(fk.Image.PicsumUrl(800, 600));
 
-    // 2. List catalog products
-    Console.WriteLine("\n📦 Buscando catálogo via BFF...");
-    List<BffCatalogItem> products = await BffGetCatalogAsync(http);
+            product = CatalogEntity.Create(
+                name: productName,
+                description: $"Auto-created product for concurrent mode scenario {scenarioLabel}.",
+                imageUrl: imageObj,
+                merchantId: scenarioMerchantId,
+                categories: ["Testing", "Concurrent"],
+                price: Price.Of(Math.Round(fk.Random.Decimal(10, 200), 2)),
+                stock: Stock.Of(targetStock)
+            );
+            product.Id = CatalogId.Of(Guid.CreateVersion7());
+            setupCatalogDb.Catalogs.Add(product);
+            await setupCatalogDb.SaveChangesAsync();
+            Console.WriteLine($"    ✅ Created [{scenarioLabel}] \"{productName}\" — initial stock: {targetStock}");
+        }
+        else
+        {
+            // Reset stock completely so every run starts from the same baseline
+            product.Update(name: null, categories: null, description: null, imageUrl: null, price: null, stock: Stock.Of(targetStock));
+            await setupCatalogDb.SaveChangesAsync();
+            Console.WriteLine($"    🔄 Reset [{scenarioLabel}] \"{productName}\" → available: {targetStock}, reserved: 0");
+        }
 
-    if (products.Count == 0)
-    {
-        Console.WriteLine("⚠️  Nenhum produto retornado pelo BFF. Verifique se a aplicação está rodando.");
-        return;
+        return product;
     }
 
-    Console.WriteLine($"   {products.Count} produto(s) encontrado(s).");
+    CatalogEntity productA = await EnsureScenarioProductAsync(scenarioAName, scenarioAStock, "A");
+    CatalogEntity productB = await EnsureScenarioProductAsync(scenarioBName, scenarioBStock, "B");
+    CatalogEntity productC = await EnsureScenarioProductAsync(scenarioCName, scenarioCStock, "C");
 
-    // 3. Add items to cart
-    string username = customerUser.UserName ?? customerUser.Email!;
-    int itemsToAdd = faker.Random.Int(1, Math.Min(products.Count, 4));
-    List<BffCatalogItem> selectedItems = faker.PickRandom(products, itemsToAdd).ToList();
+    // ── Task distribution ─────────────────────────────────────────────────────
+    int typeACount = Math.Max(1, concurrency / 3);
+    int typeBCount = Math.Max(1, concurrency / 3);
+    int typeCCount = Math.Max(1, concurrency - typeACount - typeBCount);
 
-    Console.WriteLine($"\n🛒 Adicionando {selectedItems.Count} item(s) ao carrinho...");
-    foreach (BffCatalogItem item in selectedItems)
+    Console.WriteLine();
+    Console.WriteLine("  📊 Scenario overview:");
+    Console.WriteLine($"    [A] Insufficient stock  : {typeACount} task(s) — request qty={scenarioARequestQty}, stock={scenarioAStock} → all CANCELLED");
+    Console.WriteLine($"    [B] Race / sell-out     : {typeBCount} task(s) — request qty=1,  stock={scenarioBStock} → {scenarioBStock} succeed, rest CANCELLED");
+    Console.WriteLine($"    [C] Random quantities   : {typeCCount} task(s) — request qty=1–5, stock={scenarioCStock} → all SUCCEED");
+    Console.WriteLine();
+    Console.WriteLine($"🚀 Launching {concurrency} concurrent task(s)...");
+    Console.WriteLine();
+
+    // ── Per-task scenario runner ──────────────────────────────────────────────
+    async Task RunScenarioTaskAsync(int taskId, string scenarioLabel, CatalogEntity product, int qty)
     {
-        int qty = faker.Random.Int(1, 3);
-        bool added = await BffAddToBasketAsync(http, username, item, qty);
-        Console.WriteLine(added
-            ? $"   ✅ {item.Name} (x{qty}) @ R${item.Price:F2}"
-            : $"   ❌ Falha ao adicionar {item.Name}");
+        Faker faker = new("en");
+        string name = faker.Name.FullName();
+        string uniqueSuffix = $"{taskId}.{faker.Random.Number(10000, 99999)}";
+        string email = $"concurrent.{scenarioLabel.ToLower()}.{uniqueSuffix}@marketspace-sim.test";
+        string username = $"concurrent_{scenarioLabel.ToLower()}_{uniqueSuffix}";
+
+        Console.WriteLine($"  ▶ Task {taskId} [{scenarioLabel}] — user: {username}, qty: {qty}");
+
+        try
+        {
+            using IServiceScope taskScope = scopeFactory.CreateScope();
+            UserManager<ApplicationUser> taskUserMgr = taskScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            BasketDbContext taskBasketDb = taskScope.ServiceProvider.GetRequiredService<BasketDbContext>();
+
+            ApplicationUser user = new()
+            {
+                UserName = username,
+                Email = email,
+                EmailConfirmed = true,
+                Name = name,
+                UserType = UserTypeEnum.Customer
+            };
+
+            IdentityResult userResult = await taskUserMgr.CreateAsync(user, "Password123!");
+            if (!userResult.Succeeded)
+            {
+                Console.WriteLine($"  ❌ Task {taskId} [{scenarioLabel}] — user creation failed: {string.Join(", ", userResult.Errors.Select(e => e.Description))}");
+                return;
+            }
+
+            await taskUserMgr.AddToRoleAsync(user, "Member");
+
+            ShoppingCartEntity cart = new()
+            {
+                Username = username,
+                Items =
+                [
+                    new ShoppingCartItemEntity
+                    {
+                        ProductId = product.Id.Value.ToString(),
+                        ProductName = product.Name,
+                        Price = product.Price.Value,
+                        Quantity = qty
+                    }
+                ]
+            };
+
+            taskBasketDb.ShoppingCarts.Add(cart);
+            await taskBasketDb.SaveChangesAsync();
+
+            var checkoutAddress = new
+            {
+                AddressLine = faker.Address.StreetAddress(),
+                Country = faker.Address.Country(),
+                State = faker.Address.State(),
+                ZipCode = faker.Address.ZipCode(),
+                CardName = name,
+                CardNumber = faker.Finance.CreditCardNumber(),
+                Expiration = faker.Date.Future(2).ToString("MM/yy"),
+                Cvv = faker.Finance.CreditCardCvv(),
+                PaymentMethod = faker.PickRandom(new[] { 1, 2, 3 }),
+                Coordinates = $"{faker.Address.Latitude()},{faker.Address.Longitude()}"
+            };
+
+            await DoCheckoutAsync(cart, user, faker, basketApiBaseUrl, checkoutAddress);
+            Console.WriteLine($"  ✅ Task {taskId} [{scenarioLabel}] checkout submitted.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  ❌ Task {taskId} [{scenarioLabel}] — exception: {ex.GetType().Name}: {ex.Message}");
+        }
     }
 
-    // 4. Checkout
-    Console.WriteLine("\n🚀 Realizando checkout via BFF...");
-    bool checkoutOk = await BffCheckoutAsync(http, username, customerUser.Email!, faker);
-    Console.WriteLine(checkoutOk
-        ? "✅ Checkout realizado com sucesso!"
-        : "❌ Checkout falhou. Verifique os logs da aplicação.");
+    // ── Launch all tasks concurrently ─────────────────────────────────────────
+    Faker rngFaker = new("en");
+    List<Task> tasks = [];
 
-    Console.WriteLine("\n✅ BFF HTTP Mode completed.");
+    // Scenario A: insufficient stock — always fails reservation
+    for (int i = 1; i <= typeACount; i++)
+    {
+        int taskId = i;
+        tasks.Add(Task.Run(() => RunScenarioTaskAsync(taskId, "A-INSUFFICIENT", productA, scenarioARequestQty)));
+    }
+
+    // Scenario B: race to buy last unit — first wins, rest cancelled
+    for (int i = typeACount + 1; i <= typeACount + typeBCount; i++)
+    {
+        int taskId = i;
+        tasks.Add(Task.Run(() => RunScenarioTaskAsync(taskId, "B-SELLOUT", productB, 1)));
+    }
+
+    // Scenario C: random quantities — all succeed
+    for (int i = typeACount + typeBCount + 1; i <= concurrency; i++)
+    {
+        int taskId = i;
+        int qty = rngFaker.Random.Int(1, 5);
+        tasks.Add(Task.Run(() => RunScenarioTaskAsync(taskId, "C-RANDOM", productC, qty)));
+    }
+
+    await Task.WhenAll(tasks);
+
+    Console.WriteLine();
+    Console.WriteLine("╔══════════════════════════════════════════════════════════╗");
+    Console.WriteLine($"║  Concurrent Mode complete — {concurrency} task(s) submitted           ║");
+    Console.WriteLine("╠══════════════════════════════════════════════════════════╣");
+    Console.WriteLine($"║  [A] Insufficient stock  : {typeACount,2} task(s) → all should be CANCELLED  ║");
+    Console.WriteLine($"║  [B] Race / sell-out     : {typeBCount,2} task(s) → ~{scenarioBStock} succeed, rest CANCELLED ║");
+    Console.WriteLine($"║  [C] Random quantities   : {typeCCount,2} task(s) → all should SUCCEED       ║");
+    Console.WriteLine("╠══════════════════════════════════════════════════════════╣");
+    Console.WriteLine("║  ➜  Open the merchant dashboard to see real-time stock   ║");
+    Console.WriteLine("║     updates and cancellation alerts from these scenarios. ║");
+    Console.WriteLine("╚══════════════════════════════════════════════════════════╝");
 }
+
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -748,145 +919,8 @@ static async Task DoCheckoutAsync(
     }
 }
 
-// ── BFF helpers ──────────────────────────────────────────────────────────────
 
-/// <summary>POST /auth/login  →  retorna Bearer token (ajuste o endpoint conforme seu BFF)</summary>
-static async Task<string?> BffLoginAsync(HttpClient http, string email, string password)
-{
-    try
-    {
-        var body = new { email, password };
-        HttpResponseMessage res = await http.PostAsJsonAsync("/auth/login", body);
-
-        if (!res.IsSuccessStatusCode)
-        {
-            Console.WriteLine($"   ⚠️  Login retornou {res.StatusCode}. Continuando sem token...");
-            return null;
-        }
-
-        using JsonDocument doc = JsonDocument.Parse(await res.Content.ReadAsStringAsync());
-        // Tenta as chaves mais comuns; ajuste se necessário
-        if (doc.RootElement.TryGetProperty("token", out JsonElement t)) return t.GetString();
-        if (doc.RootElement.TryGetProperty("accessToken", out JsonElement a)) return a.GetString();
-        if (doc.RootElement.TryGetProperty("access_token", out JsonElement b)) return b.GetString();
-
-        Console.WriteLine("   ⚠️  Token não encontrado na resposta de login.");
-        return null;
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"   ⚠️  Falha no login: {ex.Message}");
-        return null;
-    }
-}
-
-/// <summary>GET /catalog  →  lista de produtos (ajuste o endpoint conforme seu BFF)</summary>
-static async Task<List<BffCatalogItem>> BffGetCatalogAsync(HttpClient http)
-{
-    try
-    {
-        HttpResponseMessage res = await http.GetAsync("/catalog");
-        if (!res.IsSuccessStatusCode)
-        {
-            Console.WriteLine($"   ⚠️  Catálogo retornou {res.StatusCode}");
-            return [];
-        }
-
-        string json = await res.Content.ReadAsStringAsync();
-        using JsonDocument doc = JsonDocument.Parse(json);
-
-        // Suporta tanto array direto quanto objeto com propriedade "items"/"data"/"products"
-        JsonElement root = doc.RootElement;
-        JsonElement arr = root.ValueKind == JsonValueKind.Array
-            ? root
-            : root.TryGetProperty("items", out JsonElement i1)
-                ? i1
-                : root.TryGetProperty("data", out JsonElement i2)
-                    ? i2
-                    : root.TryGetProperty("products", out JsonElement i3)
-                        ? i3
-                        : root;
-
-        return arr.EnumerateArray().Select(e => new BffCatalogItem
-        {
-            Id = e.TryGetProperty("id", out JsonElement id) ? id.ToString() : Guid.NewGuid().ToString(),
-            Name = e.TryGetProperty("name", out JsonElement nm) ? nm.GetString() ?? "?" : "?",
-            Price = e.TryGetProperty("price", out JsonElement pr) ? pr.GetDecimal() : 0m
-        }).ToList();
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"   ⚠️  Erro ao buscar catálogo: {ex.Message}");
-        return [];
-    }
-}
-
-/// <summary>POST /basket  →  adiciona item ao carrinho (ajuste o endpoint conforme seu BFF)</summary>
-static async Task<bool> BffAddToBasketAsync(
-    HttpClient http,
-    string username,
-    BffCatalogItem item,
-    int quantity)
-{
-    try
-    {
-        var body = new
-        {
-            username,
-            items = new[] { new { productId = item.Id, productName = item.Name, price = item.Price, quantity } }
-        };
-
-        HttpResponseMessage res = await http.PostAsJsonAsync("/basket", body);
-        return res.IsSuccessStatusCode;
-    }
-    catch
-    {
-        return false;
-    }
-}
-
-/// <summary>POST /basket/checkout  →  finaliza compra via BFF</summary>
-static async Task<bool> BffCheckoutAsync(HttpClient http, string username, string email, Faker faker)
-{
-    try
-    {
-        var body = new
-        {
-            userName = username,
-            firstName = faker.Person.FirstName,
-            lastName = faker.Person.LastName,
-            emailAddress = email,
-            addressLine = faker.Address.StreetAddress(),
-            country = faker.Address.Country(),
-            state = faker.Address.State(),
-            zipCode = faker.Address.ZipCode(),
-            cardName = faker.Person.FullName,
-            cardNumber = faker.Finance.CreditCardNumber(),
-            expiration = faker.Date.Future().ToString("MM/yy"),
-            cvv = faker.Random.Number(100, 999).ToString(),
-            paymentMethod = faker.Random.Int(1, 3),
-            requestId = Guid.NewGuid().ToString(),
-            coordinates = $"{faker.Address.Latitude()},{faker.Address.Longitude()}"
-        };
-
-        HttpResponseMessage res = await http.PostAsJsonAsync("/basket/checkout", body);
-
-        if (res.IsSuccessStatusCode)
-            return true;
-
-        string err = await res.Content.ReadAsStringAsync();
-        Console.WriteLine($"   Detalhe: {err}");
-
-        return false;
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"   ⚠️  Exceção no checkout: {ex.Message}");
-        return false;
-    }
-}
-
-// ── MODE 5 – Full end-to-end DEMO ────────────────────────────────────────────
+// ── MODE 2 – Full end-to-end DEMO ────────────────────────────────────────────
 async Task RunDemoModeAsync()
 {
     const string demoMerchantEmail = "merchant@marketspace.com";
@@ -1338,15 +1372,6 @@ internal sealed class DemoCreateProductRequest
     public int Stock { get; set; }
     public List<string> Categories { get; set; } = [];
     public Guid MerchantId { get; set; }
-}
-
-
-
-internal sealed record BffCatalogItem
-{
-    public string Id { get; init; } = string.Empty;
-    public string Name { get; init; } = string.Empty;
-    public decimal Price { get; init; }
 }
 
 internal sealed record MerchantRawDto
