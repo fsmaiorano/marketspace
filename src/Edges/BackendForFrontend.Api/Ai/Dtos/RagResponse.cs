@@ -1,4 +1,4 @@
-namespace Ai.Api.Endpoints.Dtos;
+namespace BackendForFrontend.Api.Ai.Dtos;
 
 public record RagResponse
 {

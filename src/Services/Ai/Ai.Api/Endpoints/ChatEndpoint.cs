@@ -1,3 +1,4 @@
+using Ai.Api.Application;
 using Ai.Api.Endpoints.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,16 +8,16 @@ public static class ChatEndpoint
 {
     public static void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/chat", ([FromBody] ChatRequest request) =>
+        app.MapPost("/chat", async ([FromBody] ChatRequest request, [FromServices] ChatUseCase useCase) =>
             {
                 try
                 {
-                    ChatResponse response = new ChatResponse { Answer = $"You said: {request.Message}" };
-                    return Task.FromResult(Results.Ok(response));
+                    ChatResponse response = await useCase.ChatAsync(request);
+                    return Results.Ok(response);
                 }
                 catch (Exception exception)
                 {
-                    return Task.FromException<IResult>(exception);
+                    return Results.Problem(exception.Message);
                 }
             })
             .WithName("Chat")

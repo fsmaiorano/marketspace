@@ -324,6 +324,23 @@ services:
       - marketspace-net
     restart: unless-stopped
 
+  ai-api:
+    build:
+      context: .
+      dockerfile: src/Services/Ai/Ai.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+      ASPNETCORE_HTTP_PORTS: "8080"
+    ports:
+      - "6008:8080"
+    depends_on:
+      postgres-ai:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    networks:
+      - marketspace-net
+    restart: unless-stopped
 # ─── BFF (Backend For Frontend) ────────────────────────────────────────────────
 
   backendforfrontend-api:
@@ -349,6 +366,8 @@ services:
       user-api:
         condition: service_started
       payment-api:
+        condition: service_started
+      ai-api:
         condition: service_started
     networks:
       - marketspace-net

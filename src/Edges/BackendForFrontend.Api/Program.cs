@@ -1,4 +1,6 @@
 using BackendForFrontend.Api;
+using BackendForFrontend.Api.Ai;
+using BackendForFrontend.Api.Ai.Endpoints;
 using BackendForFrontend.Api.Merchant;
 using BackendForFrontend.Api.Merchant.Endpoints;
 using BackendForFrontend.Api.Basket;
@@ -39,6 +41,7 @@ builder.Services.AddBasketServices();
 builder.Services.AddCatalogServices();
 builder.Services.AddOrderServices();
 builder.Services.AddUserServices();
+builder.Services.AddAiServices();
 builder.Services.AddSingleton<IStockEventService, StockEventService>();
 builder.Services.AddSingleton<IMerchantAlertService, MerchantAlertService>();
 builder.Services.AddSingleton<IMerchantUserMappingService, MerchantUserMappingService>();
@@ -68,8 +71,7 @@ builder.Services.AddSwaggerGen(options =>
     options.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
     {
         {
-            new OpenApiSecuritySchemeReference("Bearer"),
-            new List<string>()
+            new OpenApiSecuritySchemeReference("Bearer"), []
         }
     });
 });
@@ -117,6 +119,7 @@ CatalogEndpoint.MapEndpoint(app);
 OrderEndpoint.MapEndpoint(app);
 UserEndpoint.MapEndpoint(app);
 MerchantDashboardEndpoint.MapEndpoint(app);
+AiEndpoint.MapEndpoint(app);
 
 app.Run();
 
