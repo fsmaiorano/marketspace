@@ -70,9 +70,18 @@ IResourceBuilder<ContainerResource> rabbitmq = builder.AddContainer(rabbitMqConf
     .WithEndpoint(port: int.Parse(rabbitMqConfig["Port"]!), targetPort: 5672, scheme: "amqp", name: "rabbitmq")
     .WithHttpEndpoint(port: int.Parse(rabbitMqConfig["Ui"]!), targetPort: 15672, name: "rabbitmq-ui");
 
-IConfigurationSection aiConfig = config.GetSection("Aspire:AI");
-IConfigurationSection ollamaConfig = aiConfig.GetSection("Ollama");
-IConfigurationSection aiDbConfig = aiConfig.GetSection("Postgres");
+// AI - Ollama (inference + embeddings) and postgres-ai (vector storage via pgvector)
+//
+// Consumer NuGet packages for microservices that need AI features:
+//   - Microsoft.Extensions.AI.Ollama          → chat completions & embeddings (MEAi abstraction)
+//   - Microsoft.SemanticKernel.Connectors.Ollama → Semantic Kernel integration
+//   - Pgvector.EntityFrameworkCore            → EF Core vector column support
+//   - Npgsql.EntityFrameworkCore.PostgreSQL   → already used; enable UseVector() option
+//
+// Inject into a service: builder.Services.AddOllamaApiClient(new Uri(builder.Configuration["services__ollama__http__0"]!))
+IConfigurationSection aiInfraConfig = config.GetSection("Aspire:AI");
+IConfigurationSection ollamaConfig = aiInfraConfig.GetSection("Ollama");
+IConfigurationSection aiDbConfig = aiInfraConfig.GetSection("Postgres");
 
 IResourceBuilder<OllamaResource> ollama = builder
     .AddOllama(ollamaConfig["ContainerName"]!, port: int.Parse(ollamaConfig["Port"]!))
@@ -155,6 +164,14 @@ IResourceBuilder<ProjectResource> userApi = builder.AddProject<Projects.User_Api
     .WaitFor(rabbitmq)
     .WithHttpEndpoint(port: int.Parse(userConfig["HttpPort"]!), name: "user-http")
     .WithHttpsEndpoint(port: int.Parse(userConfig["HttpsPort"]!), name: "user-https");
+
+IConfigurationSection aiConfig = config.GetSection("Aspire:Services:AI");
+IResourceBuilder<ProjectResource> aiApi = builder.AddProject<Projects.Ai_Api>(aiConfig["ProjectName"]!)
+    .WithReference(aiDb)
+    .WaitFor(ollama)
+    .WithEnvironment("OLLAMA_URL", ollamaConfig["Endpoint"]!)
+    .WithHttpEndpoint(port: int.Parse(aiConfig["HttpPort"]!), name: "ai-http")
+    .WithHttpsEndpoint(port: int.Parse(aiConfig["HttpsPort"]!), name: "ai-https");
 
 // BFF
 IConfigurationSection bffConfig = config.GetSection("Aspire:Services:BFF");
