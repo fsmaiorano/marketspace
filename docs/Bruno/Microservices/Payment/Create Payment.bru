@@ -1,0 +1,37 @@
+meta {
+  name: Create Payment
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{payment_url}}/payment
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "orderId": "{{order_id}}",
+    "amount": 59.98,
+    "currency": "USD",
+    "method": 1,
+    "provider": "Stripe",
+    "items": [
+      {
+        "productId": "{{catalog_id}}",
+        "quantity": 2,
+        "price": 29.99
+      }
+    ]
+  }
+}
+
+script:post-response {
+  if (res.status === 200) {
+    const response = res.body;
+    if (response.isSuccess && response.data && response.data.paymentId) {
+      bru.setVar("payment_id", response.data.paymentId);
+    }
+  }
+}

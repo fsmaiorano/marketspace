@@ -1,6 +1,34 @@
 @Ai.Api_HostAddress = http://localhost:5289
 
-GET {{Ai.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Chat
+POST {{Ai.Api_HostAddress}}/chat
+Content-Type: application/json
+
+{
+  "message": "What products do you sell?",
+  "userId": "00000000-0000-0000-0000-000000000004"
+}
+
+###
+
+### Ask with RAG
+POST {{Ai.Api_HostAddress}}/rag
+Content-Type: application/json
+
+{
+  "question": "How does the order process work?",
+  "contextId": "marketplace"
+}
+
+###
+
+### Agent (order status lookup)
+POST {{Ai.Api_HostAddress}}/agent
+Content-Type: application/json
+
+{
+  "message": "What is the status of order 00000000-0000-0000-0000-000000000003?",
+  "userId": "00000000-0000-0000-0000-000000000004"
+}
 
 ###

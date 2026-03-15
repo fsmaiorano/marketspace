@@ -1,0 +1,21 @@
+meta {
+  name: Update Stock
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{bff_url}}/api/catalog/{{catalog_id}}/stock
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "quantity": 50
+  }
+}

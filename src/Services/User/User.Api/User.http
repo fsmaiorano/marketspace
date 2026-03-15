@@ -1,6 +1,64 @@
-@User_HostAddress = http://localhost:5249
+@User_HostAddress = http://localhost:5006
 
-GET {{User_HostAddress}}/weatherforecast/
+### Register
+POST {{User_HostAddress}}/register
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "Password123!",
+  "confirmPassword": "Password123!"
+}
+
+###
+
+### Login
+POST {{User_HostAddress}}/login
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "Password123!"
+}
+
+###
+
+### Me (get current user)
+GET {{User_HostAddress}}/me
 Accept: application/json
+Authorization: Bearer {{accessToken}}
+
+###
+
+### Refresh Token
+POST {{User_HostAddress}}/refresh
+Content-Type: application/json
+
+{
+  "accessToken": "{{accessToken}}",
+  "refreshToken": "{{refreshToken}}"
+}
+
+###
+
+### Revoke Token
+POST {{User_HostAddress}}/revoke
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+###
+
+### Update User Type
+PATCH {{User_HostAddress}}/update-user-type
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "userType": 1
+}
 
 ###

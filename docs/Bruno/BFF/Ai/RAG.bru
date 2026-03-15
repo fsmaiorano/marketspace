@@ -1,0 +1,22 @@
+meta {
+  name: RAG
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{bff_url}}/api/ai/rag
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "question": "How does the order process work?",
+    "contextId": "marketplace"
+  }
+}

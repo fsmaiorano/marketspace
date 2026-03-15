@@ -1,0 +1,21 @@
+meta {
+  name: Update User Type
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{bff_url}}/api/auth/update-user-type
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "userType": 1
+  }
+}

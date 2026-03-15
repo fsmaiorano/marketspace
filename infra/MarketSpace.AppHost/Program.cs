@@ -88,7 +88,7 @@ IResourceBuilder<OllamaResource> ollama = builder
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume();
 
-ollama.AddModel("mistral");
+ollama.AddModel("llama3.2:1b");
 ollama.AddModel("nomic-embed-text");
 
 IResourceBuilder<PostgresDatabaseResource> aiDb = builder

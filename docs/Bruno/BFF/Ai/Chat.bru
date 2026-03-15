@@ -1,0 +1,22 @@
+meta {
+  name: Chat
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{bff_url}}/api/ai/chat
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "message": "What products do you sell?",
+    "userId": "{{customer_id}}"
+  }
+}

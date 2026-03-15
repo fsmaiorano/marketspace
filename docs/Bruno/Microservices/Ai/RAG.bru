@@ -1,0 +1,18 @@
+meta {
+  name: RAG
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{ai_url}}/rag
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "question": "How does the order process work?",
+    "contextId": "marketplace"
+  }
+}

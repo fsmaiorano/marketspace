@@ -1,0 +1,21 @@
+meta {
+  name: Update Payment
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{payment_url}}/payment
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "id": "{{payment_id}}",
+    "status": 1,
+    "statusDetail": "Payment processed successfully",
+    "providerTransactionId": "txn_123456",
+    "authorizationCode": "AUTH_789"
+  }
+}

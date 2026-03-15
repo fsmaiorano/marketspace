@@ -1,6 +1,48 @@
-@Basket.Api_HostAddress = http://localhost:5008
+@Basket.Api_HostAddress = http://localhost:5001
 
-GET {{Basket.Api_HostAddress}}/weatherforecast/
+### Create / Update Basket
+POST {{Basket.Api_HostAddress}}/basket
+Content-Type: application/json
+
+{
+  "userName": "testuser",
+  "items": [
+    {
+      "quantity": 2,
+      "price": 29.99,
+      "color": "Blue",
+      "productId": "00000000-0000-0000-0000-000000000002",
+      "productName": "Sample Product"
+    }
+  ]
+}
+
+###
+
+### Get Basket by Username
+GET {{Basket.Api_HostAddress}}/basket/testuser
 Accept: application/json
+
+###
+
+### Checkout Basket
+POST {{Basket.Api_HostAddress}}/basket/checkout
+Content-Type: application/json
+
+{
+  "userName": "testuser",
+  "customerId": "00000000-0000-0000-0000-000000000004",
+  "totalPrice": 59.98
+}
+
+###
+
+### Delete Basket
+DELETE {{Basket.Api_HostAddress}}/basket
+Content-Type: application/json
+
+{
+  "userName": "testuser"
+}
 
 ###

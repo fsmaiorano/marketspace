@@ -1,0 +1,24 @@
+meta {
+  name: Generate Text (llama3.2:1b)
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{ollama_url}}/api/chat
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "model": "llama3.2:1b",
+    "messages": [
+      { "role": "user", "content": "What are the benefits of using a marketplace platform?" }
+    ],
+    "stream": false,
+    "options": {
+      "num_predict": 128
+    }
+  }
+}

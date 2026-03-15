@@ -1,6 +1,54 @@
-@Catalog.Api_HostAddress = http://localhost:5145
+@Catalog.Api_HostAddress = http://localhost:5000
 
-GET {{Catalog.Api_HostAddress}}/weatherforecast/
+### Create Catalog Item
+POST {{Catalog.Api_HostAddress}}/catalog
+Content-Type: application/json
+
+{
+  "name": "Sample Product",
+  "description": "A sample product description",
+  "price": 29.99,
+  "category": ["Electronics", "Gadgets"],
+  "imageFile": "product.jpg",
+  "merchantId": "00000000-0000-0000-0000-000000000001"
+}
+
+###
+
+### Get All Catalog Items
+GET {{Catalog.Api_HostAddress}}/catalog
 Accept: application/json
+
+###
+
+### Get Catalog Item by ID
+GET {{Catalog.Api_HostAddress}}/catalog/00000000-0000-0000-0000-000000000002
+Accept: application/json
+
+###
+
+### Get Catalog by Merchant ID
+GET {{Catalog.Api_HostAddress}}/catalog/merchant/00000000-0000-0000-0000-000000000001
+Accept: application/json
+
+###
+
+### Update Catalog Item
+PUT {{Catalog.Api_HostAddress}}/catalog
+Content-Type: application/json
+
+{
+  "id": "00000000-0000-0000-0000-000000000002",
+  "name": "Updated Product",
+  "description": "Updated description",
+  "price": 39.99,
+  "category": ["Electronics"],
+  "imageFile": "updated-product.jpg"
+}
+
+###
+
+### Delete Catalog Item
+DELETE {{Catalog.Api_HostAddress}}/catalog/00000000-0000-0000-0000-000000000002
 
 ###

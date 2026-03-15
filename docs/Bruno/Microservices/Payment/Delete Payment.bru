@@ -1,0 +1,11 @@
+meta {
+  name: Delete Payment
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{payment_url}}/payment/{{payment_id}}
+  body: none
+  auth: none
+}

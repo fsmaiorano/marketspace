@@ -16,6 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{C38A8607-1
 	ProjectSection(SolutionItems) = preProject
 		docs\port-mapping.md = docs\port-mapping.md
 		docs\docker-config.md = docs\docker-config.md
+		docs\ai.md = docs\ai.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{16324693-9B2C-451C-B4B2-9833589E9FD9}"
@@ -104,6 +105,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Ai", "Ai", "{9AE0F23B-36A1-480C-995F-1730EAAA6B11}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ai.Api", "src\Services\Ai\Ai.Api\Ai.Api.csproj", "{39B965E3-5287-4CBC-87AB-4347237151EB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Ai", "Ai", "{EFB8435B-414A-3A55-1739-2038413FD866}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ai.Test", "tests\services\Ai\Ai.Test\Ai.Test.csproj", "{85ECFB5F-93DA-445A-AC5C-B1B732EBB637}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -391,6 +396,18 @@ Global
 		{39B965E3-5287-4CBC-87AB-4347237151EB}.Release|x64.Build.0 = Release|Any CPU
 		{39B965E3-5287-4CBC-87AB-4347237151EB}.Release|x86.ActiveCfg = Release|Any CPU
 		{39B965E3-5287-4CBC-87AB-4347237151EB}.Release|x86.Build.0 = Release|Any CPU
+		{85ECFB5F-93DA-445A-AC5C-B1B732EBB637}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85ECFB5F-93DA-445A-AC5C-B1B732EBB637}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85ECFB5F-93DA-445A-AC5C-B1B732EBB637}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{85ECFB5F-93DA-445A-AC5C-B1B732EBB637}.Debug|x64.Build.0 = Debug|Any CPU
+		{85ECFB5F-93DA-445A-AC5C-B1B732EBB637}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{85ECFB5F-93DA-445A-AC5C-B1B732EBB637}.Debug|x86.Build.0 = Debug|Any CPU
+		{85ECFB5F-93DA-445A-AC5C-B1B732EBB637}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85ECFB5F-93DA-445A-AC5C-B1B732EBB637}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85ECFB5F-93DA-445A-AC5C-B1B732EBB637}.Release|x64.ActiveCfg = Release|Any CPU
+		{85ECFB5F-93DA-445A-AC5C-B1B732EBB637}.Release|x64.Build.0 = Release|Any CPU
+		{85ECFB5F-93DA-445A-AC5C-B1B732EBB637}.Release|x86.ActiveCfg = Release|Any CPU
+		{85ECFB5F-93DA-445A-AC5C-B1B732EBB637}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -441,5 +458,7 @@ Global
 		{52874426-4B62-4DB7-8A3F-279A819475B9} = {77422407-D8EE-3E66-D1C5-75E625F66152}
 		{9AE0F23B-36A1-480C-995F-1730EAAA6B11} = {E2D97456-17AA-4E70-98FF-6006DE2EDDEC}
 		{39B965E3-5287-4CBC-87AB-4347237151EB} = {9AE0F23B-36A1-480C-995F-1730EAAA6B11}
+		{EFB8435B-414A-3A55-1739-2038413FD866} = {0F3DA1A4-A6D3-4215-87C7-2C44CF38DDFC}
+		{85ECFB5F-93DA-445A-AC5C-B1B732EBB637} = {EFB8435B-414A-3A55-1739-2038413FD866}
 	EndGlobalSection
 EndGlobal

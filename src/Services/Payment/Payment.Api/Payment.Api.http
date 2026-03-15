@@ -1,6 +1,58 @@
-@Payment.Api_HostAddress = http://localhost:5266
+@Payment.Api_HostAddress = http://localhost:5007
 
-GET {{Payment.Api_HostAddress}}/weatherforecast/
+### Create Payment
+POST {{Payment.Api_HostAddress}}/payment
+Content-Type: application/json
+
+{
+  "orderId": "00000000-0000-0000-0000-000000000003",
+  "amount": 59.98,
+  "currency": "USD",
+  "method": 1,
+  "provider": "Stripe",
+  "items": [
+    {
+      "productId": "00000000-0000-0000-0000-000000000002",
+      "quantity": 2,
+      "price": 29.99
+    }
+  ]
+}
+
+###
+
+### Get Payment by ID
+GET {{Payment.Api_HostAddress}}/payment/00000000-0000-0000-0000-000000000005
 Accept: application/json
+
+###
+
+### Update Payment
+PUT {{Payment.Api_HostAddress}}/payment
+Content-Type: application/json
+
+{
+  "id": "00000000-0000-0000-0000-000000000005",
+  "status": 1,
+  "statusDetail": "Payment processed successfully",
+  "providerTransactionId": "txn_123456",
+  "authorizationCode": "AUTH_789"
+}
+
+###
+
+### Patch Payment Status
+PATCH {{Payment.Api_HostAddress}}/payment/status
+Content-Type: application/json
+
+{
+  "id": "00000000-0000-0000-0000-000000000005",
+  "status": 2
+}
+
+###
+
+### Delete Payment
+DELETE {{Payment.Api_HostAddress}}/payment/00000000-0000-0000-0000-000000000005
 
 ###

@@ -1,14 +1,41 @@
-@Merchant.Api_HostAddress = https://localhost:5055
+@Merchant.Api_HostAddress = http://localhost:5005
 
-POST {{Merchant.Api_HostAddress}}/Merchant
-Accept: application/json
+### Create Merchant
+POST {{Merchant.Api_HostAddress}}/merchant
+Content-Type: application/json
 
 {
-  "Name" : "Runolfsdottir - Mills",
-  "Description" : "Unde aliquam ut excepturi eveniet excepturi animi.",
-  "Address" : "622 Flatley Forks, Moseberg, Central African Republic",
-  "PhoneNumber" : "962-484-9252",
-  "Email" : "Donny_Franecki73@yahoo.com"
+  "name": "Sample Merchant",
+  "description": "A sample merchant",
+  "address": "123 Main Street, City, State",
+  "phoneNumber": "555-1234",
+  "email": "merchant@example.com"
 }
+
+###
+
+### Get Merchant by ID
+GET {{Merchant.Api_HostAddress}}/merchant/00000000-0000-0000-0000-000000000001
+Accept: application/json
+
+###
+
+### Update Merchant
+PUT {{Merchant.Api_HostAddress}}/merchant
+Content-Type: application/json
+
+{
+  "id": "00000000-0000-0000-0000-000000000001",
+  "name": "Updated Merchant",
+  "description": "Updated description",
+  "address": "456 Updated Street, City, State",
+  "phoneNumber": "555-5678",
+  "email": "updated@example.com"
+}
+
+###
+
+### Delete Merchant
+DELETE {{Merchant.Api_HostAddress}}/merchant/00000000-0000-0000-0000-000000000001
 
 ###

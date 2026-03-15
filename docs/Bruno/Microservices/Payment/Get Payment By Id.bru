@@ -1,0 +1,11 @@
+meta {
+  name: Get Payment By Id
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{payment_url}}/payment/{{payment_id}}
+  body: none
+  auth: none
+}

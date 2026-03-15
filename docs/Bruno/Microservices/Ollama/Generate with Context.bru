@@ -1,0 +1,31 @@
+meta {
+  name: Generate with Context
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{ollama_url}}/api/chat
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "model": "llama3.2:1b",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a helpful assistant for the MarketSpace platform. Answer based only on the context provided."
+      },
+      {
+        "role": "user",
+        "content": "Context: MarketSpace is a microservices-based marketplace platform built with .NET. It uses an AI microservice for intelligent search and customer support.\n\nQuestion: What technology is MarketSpace built with?"
+      }
+    ],
+    "stream": false,
+    "options": {
+      "num_predict": 128
+    }
+  }
+}

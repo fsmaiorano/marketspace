@@ -1,8 +1,75 @@
-@BackendForFrontend_HostAddress = http://localhost:5025
+@BackendForFrontend_HostAddress = http://localhost:4000
 
 ### Health Check
 GET {{BackendForFrontend_HostAddress}}/swagger
 Accept: application/json
+
+### === AUTH ===
+
+### Register
+POST {{BackendForFrontend_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "Password123!",
+  "confirmPassword": "Password123!"
+}
+
+###
+
+### Login
+POST {{BackendForFrontend_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "Password123!"
+}
+
+###
+
+### Me
+GET {{BackendForFrontend_HostAddress}}/api/auth/me
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+
+###
+
+### Refresh Token
+POST {{BackendForFrontend_HostAddress}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "accessToken": "{{accessToken}}",
+  "refreshToken": "{{refreshToken}}"
+}
+
+###
+
+### Revoke Token
+POST {{BackendForFrontend_HostAddress}}/api/auth/revoke
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+###
+
+### Update User Type
+PATCH {{BackendForFrontend_HostAddress}}/api/auth/update-user-type
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "userType": 1
+}
+
+###
+
+### === MERCHANT ===
 
 ### Create Merchant
 POST {{BackendForFrontend_HostAddress}}/api/merchant
@@ -16,9 +83,104 @@ Content-Type: application/json
   "email": "test@merchant.com"
 }
 
+###
+
 ### Get Merchant by ID
 GET {{BackendForFrontend_HostAddress}}/api/merchant/{{$guid}}
 Accept: application/json
+
+###
+
+### Get My Merchant
+GET {{BackendForFrontend_HostAddress}}/api/merchant/me
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+
+###
+
+### Update Merchant
+PUT {{BackendForFrontend_HostAddress}}/api/merchant/{{$guid}}
+Content-Type: application/json
+
+{
+  "name": "Updated Merchant",
+  "description": "Updated description",
+  "address": "456 Updated St",
+  "phoneNumber": "555-5678",
+  "email": "updated@merchant.com"
+}
+
+###
+
+### Delete Merchant
+DELETE {{BackendForFrontend_HostAddress}}/api/merchant/{{$guid}}
+
+###
+
+### === CATALOG ===
+
+### Create Catalog Item
+POST {{BackendForFrontend_HostAddress}}/api/catalog
+Content-Type: application/json
+
+{
+  "name": "Test Product",
+  "description": "A test product for catalog",
+  "price": 29.99,
+  "category": "Electronics",
+  "summary": "Test product summary",
+  "imageFile": "test-product.jpg"
+}
+
+###
+
+### Get Catalog List
+GET {{BackendForFrontend_HostAddress}}/api/catalog
+Accept: application/json
+
+###
+
+### Get Catalog Item by ID
+GET {{BackendForFrontend_HostAddress}}/api/catalog/{{$guid}}
+Accept: application/json
+
+###
+
+### Get Catalog by Merchant
+GET {{BackendForFrontend_HostAddress}}/api/catalog/merchant/{{$guid}}
+Accept: application/json
+
+###
+
+### Update Catalog Item
+PUT {{BackendForFrontend_HostAddress}}/api/catalog/{{$guid}}
+Content-Type: application/json
+
+{
+  "name": "Updated Product",
+  "description": "Updated description",
+  "price": 39.99
+}
+
+###
+
+### Update Stock
+PATCH {{BackendForFrontend_HostAddress}}/api/catalog/{{$guid}}/stock
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "quantity": 50
+}
+
+###
+
+### Delete Catalog Item
+DELETE {{BackendForFrontend_HostAddress}}/api/catalog/{{$guid}}
+
+###
+
+### === BASKET ===
 
 ### Create Basket
 POST {{BackendForFrontend_HostAddress}}/api/basket
@@ -36,26 +198,32 @@ Content-Type: application/json
   ]
 }
 
+###
+
 ### Get Basket
 GET {{BackendForFrontend_HostAddress}}/api/basket/testuser
 Accept: application/json
 
-### Create Catalog Item
-POST {{BackendForFrontend_HostAddress}}/api/catalog
+###
+
+### Checkout Basket
+POST {{BackendForFrontend_HostAddress}}/api/basket/checkout
 Content-Type: application/json
 
 {
-  "name": "Test Product",
-  "description": "A test product for catalog",
-  "price": 29.99,
-  "category": "Electronics",
-  "summary": "Test product summary",
-  "imageFile": "test-product.jpg"
+  "userName": "testuser",
+  "customerId": "{{$guid}}",
+  "totalPrice": 59.98
 }
 
-### Get Catalog List
-GET {{BackendForFrontend_HostAddress}}/api/catalog
-Accept: application/json
+###
+
+### Delete Basket
+DELETE {{BackendForFrontend_HostAddress}}/api/basket/testuser
+
+###
+
+### === ORDER ===
 
 ### Create Order
 POST {{BackendForFrontend_HostAddress}}/api/order
@@ -97,6 +265,69 @@ Content-Type: application/json
   ]
 }
 
-### Get Customer Dashboard (Aggregation Example)
-GET {{BackendForFrontend_HostAddress}}/api/dashboard/{{$guid}}
+###
+
+### Get Order by ID
+GET {{BackendForFrontend_HostAddress}}/api/order/{{$guid}}
 Accept: application/json
+
+###
+
+### Get Orders by Customer
+GET {{BackendForFrontend_HostAddress}}/api/order/customer/{{$guid}}
+Accept: application/json
+
+###
+
+### Update Order
+PUT {{BackendForFrontend_HostAddress}}/api/order/{{$guid}}
+Content-Type: application/json
+
+{
+  "orderName": "Updated Order"
+}
+
+###
+
+### Delete Order
+DELETE {{BackendForFrontend_HostAddress}}/api/order/{{$guid}}
+
+###
+
+### === AI ===
+
+### Chat
+POST {{BackendForFrontend_HostAddress}}/api/ai/chat
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "message": "What products do you sell?",
+  "userId": "{{$guid}}"
+}
+
+###
+
+### Ask with RAG
+POST {{BackendForFrontend_HostAddress}}/api/ai/rag
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "question": "How does the order process work?",
+  "contextId": "marketplace"
+}
+
+###
+
+### Agent (order status lookup)
+POST {{BackendForFrontend_HostAddress}}/api/ai/agent
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "message": "What is the status of order {{$guid}}?",
+  "userId": "{{$guid}}"
+}
+
+###

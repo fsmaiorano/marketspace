@@ -1,0 +1,18 @@
+meta {
+  name: Patch Payment Status
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{payment_url}}/payment/status
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "id": "{{payment_id}}",
+    "status": 2
+  }
+}

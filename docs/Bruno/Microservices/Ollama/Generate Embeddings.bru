@@ -1,0 +1,18 @@
+meta {
+  name: Generate Embeddings
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{ollama_url}}/api/embeddings
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "model": "nomic-embed-text",
+    "prompt": "This is a test document for embedding generation in our marketplace"
+  }
+}

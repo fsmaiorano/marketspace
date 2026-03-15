@@ -10,11 +10,16 @@ until curl -s http://localhost:11434 > /dev/null 2>&1; do
 done
 echo "[ollama] Server is ready."
 
-echo "[ollama] Pulling mistral..."
-ollama pull mistral
+# llama3.2:1b - 1.3GB RAM, fits in 2GB+, modern & capable
+echo "[ollama] Pulling llama3.2:1b (1.3GB)..."
+ollama pull llama3.2:1b
 
-echo "[ollama] Pulling nomic-embed-text..."
+echo "[ollama] Pulling nomic-embed-text (600MB)..."
 ollama pull nomic-embed-text
+
+# Warm-up to load model into memory before first request
+echo "[ollama] Warming up models..."
+echo "hi" | ollama run llama3.2:1b > /dev/null 2>&1 || true
 
 echo "[ollama] All models ready. Serving on :11434"
 wait $OLLAMA_PID

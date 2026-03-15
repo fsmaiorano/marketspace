@@ -1,6 +1,81 @@
-@Order.Api_HostAddress = http://localhost:5070
+@Order.Api_HostAddress = http://localhost:5003
 
-GET {{Order.Api_HostAddress}}/weatherforecast/
+### Create Order
+POST {{Order.Api_HostAddress}}/order
+Content-Type: application/json
+
+{
+  "customerId": "00000000-0000-0000-0000-000000000004",
+  "orderName": "Order #1",
+  "shippingAddress": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "emailAddress": "john.doe@example.com",
+    "addressLine": "123 Main Street",
+    "country": "USA",
+    "state": "CA",
+    "zipCode": "90210"
+  },
+  "payment": {
+    "cardName": "John Doe",
+    "cardNumber": "4111111111111111",
+    "expiration": "12/25",
+    "cvv": "123",
+    "paymentMethod": 1
+  },
+  "orderItems": [
+    {
+      "orderId": "00000000-0000-0000-0000-000000000000",
+      "productId": "00000000-0000-0000-0000-000000000002",
+      "quantity": 2,
+      "price": 29.99
+    }
+  ]
+}
+
+###
+
+### Get Order by ID
+GET {{Order.Api_HostAddress}}/order/00000000-0000-0000-0000-000000000003
 Accept: application/json
+
+###
+
+### Update Order
+PUT {{Order.Api_HostAddress}}/order
+Content-Type: application/json
+
+{
+  "id": "00000000-0000-0000-0000-000000000003",
+  "customerId": "00000000-0000-0000-0000-000000000004",
+  "orderName": "Updated Order #1",
+  "shippingAddress": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "emailAddress": "john.doe@example.com",
+    "addressLine": "456 Updated Street",
+    "country": "USA",
+    "state": "CA",
+    "zipCode": "90210"
+  },
+  "payment": {
+    "cardName": "John Doe",
+    "cardNumber": "4111111111111111",
+    "expiration": "12/25",
+    "cvv": "123",
+    "paymentMethod": 1
+  },
+  "status": 1
+}
+
+###
+
+### Delete Order
+DELETE {{Order.Api_HostAddress}}/order
+Content-Type: application/json
+
+{
+  "id": "00000000-0000-0000-0000-000000000003"
+}
 
 ###

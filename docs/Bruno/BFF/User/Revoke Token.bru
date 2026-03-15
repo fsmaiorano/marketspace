@@ -1,0 +1,21 @@
+meta {
+  name: Revoke Token
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{bff_url}}/api/auth/revoke
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "refreshToken": "{{refresh_token}}"
+  }
+}

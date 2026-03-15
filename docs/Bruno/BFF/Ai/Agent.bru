@@ -1,0 +1,22 @@
+meta {
+  name: Agent
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{bff_url}}/api/ai/agent
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "message": "What is the status of order {{order_id}}?",
+    "userId": "{{customer_id}}"
+  }
+}
