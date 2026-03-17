@@ -15,6 +15,7 @@ volumes:
   rabbitmq-data:
   minio-data:
   ollama-data:
+  pgadmin-data:
 
 # ─── Infrastructure ────────────────────────────────────────────────────────────
 
@@ -221,6 +222,39 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@marketspace.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+      PGPASSFILE: /pgpassfile
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+      - ./infra/pgadmin/servers.json:/pgadmin4/servers.json:ro
+      - ./infra/pgadmin/pgpassfile:/pgpassfile:ro
+    networks:
+      - marketspace-net
+    depends_on:
+      postgres-catalog:
+        condition: service_healthy
+      postgres-basket:
+        condition: service_healthy
+      postgres-order:
+        condition: service_healthy
+      postgres-merchant:
+        condition: service_healthy
+      postgres-user:
+        condition: service_healthy
+      postgres-payment:
+        condition: service_healthy
+      postgres-ai:
+        condition: service_healthy
     restart: unless-stopped
 
 # ─── Microservices ─────────────────────────────────────────────────────────────

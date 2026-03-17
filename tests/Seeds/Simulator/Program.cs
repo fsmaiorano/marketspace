@@ -229,7 +229,7 @@ async Task RunSeedModeAsync()
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"   ⚠️  Could not query existing merchants: {ex.Message}");
+        Console.WriteLine($"   ⚠️  Could not query existing merchants: {FormatException(ex)}");
     }
     
     if (existingMerchant == null)
@@ -303,7 +303,7 @@ async Task RunSeedModeAsync()
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"   ❌ Error creating catalog: {ex.Message}");
+                Console.WriteLine($"   ❌ Error creating catalog: {FormatException(ex)}");
             }
         }
     }
@@ -399,7 +399,7 @@ async Task RunSeedModeAsync()
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"   ❌ Error creating catalog: {ex.Message}");
+                Console.WriteLine($"   ❌ Error creating catalog: {FormatException(ex)}");
             }
         }
     }
@@ -812,7 +812,7 @@ async Task RunConcurrentModeAsync()
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"  ❌ Task {taskId} [{scenarioLabel}] — exception: {ex.GetType().Name}: {ex.Message}");
+            Console.WriteLine($"  ❌ Task {taskId} [{scenarioLabel}] — exception: {FormatException(ex)}");
         }
     }
 
@@ -957,7 +957,7 @@ async Task RunTrafficSimulatorAsync()
         catch (OperationCanceledException) { break; }
         catch (Exception ex)
         {
-            Console.WriteLine($"  ⚠️  Cycle {cycleNumber} error: {ex.GetType().Name}: {ex.Message}");
+            Console.WriteLine($"  ⚠️  Cycle {cycleNumber} error: {FormatException(ex)}");
         }
 
         if (cts.IsCancellationRequested) break;
@@ -1133,8 +1133,7 @@ async Task<(int actions, int successes)> RunTrafficCustomerCycleAsync(
     catch (Exception ex)
     {
         string shortEmail = email.Split('@')[0];
-        string msg        = ex.Message.Length > 60 ? ex.Message[..60] : ex.Message;
-        Console.WriteLine($"    ⚠️  {shortEmail}: {ex.GetType().Name}: {msg}");
+        Console.WriteLine($"    ⚠️  {shortEmail}: {FormatException(ex)}");
     }
 
     return (actions, successes);
@@ -1201,8 +1200,7 @@ async Task<(int actions, int successes)> RunTrafficMerchantCycleAsync(Faker fake
     catch (OperationCanceledException) { /* expected on stop */ }
     catch (Exception ex)
     {
-        string msg = ex.Message.Length > 60 ? ex.Message[..60] : ex.Message;
-        Console.WriteLine($"    ⚠️  Merchant cycle: {ex.GetType().Name}: {msg}");
+        Console.WriteLine($"    ⚠️  Merchant cycle: {FormatException(ex)}");
     }
 
     return (actions, successes);
@@ -1269,7 +1267,7 @@ static async Task DoCheckoutAsync(
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"   ❌ Exceção: {ex.Message}");
+        Console.WriteLine($"   ❌ Exceção: {FormatException(ex)}");
         Console.WriteLine($"   Verifique se a Basket API está rodando em {baseUrl}");
     }
 }
@@ -1563,7 +1561,7 @@ static async Task<string?> DemoBffLoginAsync(HttpClient http, string email, stri
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"  ⚠️  Login exception: {ex.GetType().Name}: {ex.Message}");
+        Console.WriteLine($"  ⚠️  Login exception: {FormatException(ex)}");
         return null;
     }
 }
@@ -1582,7 +1580,7 @@ static async Task<DemoMerchantProfile?> DemoGetMerchantMeAsync(HttpClient http)
             Name = root.TryGetProperty("name", out JsonElement nm) ? nm.GetString() ?? "" : ""
         };
     }
-    catch { return null; }
+    catch (Exception ex) { Console.WriteLine($"    ⚠️  DemoGetMerchantMeAsync: {FormatException(ex)}"); return null; }
 }
 
 static async Task<List<DemoCatalogItem>> DemoGetMerchantProductsAsync(HttpClient http, Guid merchantId)
@@ -1593,7 +1591,7 @@ static async Task<List<DemoCatalogItem>> DemoGetMerchantProductsAsync(HttpClient
         if (!res.IsSuccessStatusCode) return [];
         return ParseCatalogItems(await res.Content.ReadAsStringAsync());
     }
-    catch { return []; }
+    catch (Exception ex) { Console.WriteLine($"    ⚠️  DemoGetMerchantProductsAsync: {FormatException(ex)}"); return []; }
 }
 
 static async Task<List<DemoCatalogItem>> DemoGetCatalogAsync(HttpClient http)
@@ -1604,7 +1602,7 @@ static async Task<List<DemoCatalogItem>> DemoGetCatalogAsync(HttpClient http)
         if (!res.IsSuccessStatusCode) return [];
         return ParseCatalogItems(await res.Content.ReadAsStringAsync());
     }
-    catch { return []; }
+    catch (Exception ex) { Console.WriteLine($"    ⚠️  DemoGetCatalogAsync: {FormatException(ex)}"); return []; }
 }
 
 static List<DemoCatalogItem> ParseCatalogItems(string json)
@@ -1649,7 +1647,7 @@ static async Task<bool> DemoCreateProductAsync(HttpClient http, DemoCreateProduc
         HttpResponseMessage res = await http.PostAsJsonAsync("/api/catalog", body);
         return res.IsSuccessStatusCode;
     }
-    catch { return false; }
+    catch (Exception ex) { Console.WriteLine($"    ⚠️  DemoCreateProductAsync: {FormatException(ex)}"); return false; }
 }
 
 static async Task<bool> DemoAddToCartAsync(HttpClient http, string username, DemoCatalogItem item, int quantity)
@@ -1664,7 +1662,7 @@ static async Task<bool> DemoAddToCartAsync(HttpClient http, string username, Dem
         HttpResponseMessage res = await http.PostAsJsonAsync("/api/basket", body);
         return res.IsSuccessStatusCode;
     }
-    catch { return false; }
+    catch (Exception ex) { Console.WriteLine($"    ⚠️  DemoAddToCartAsync: {FormatException(ex)}"); return false; }
 }
 
 static async Task<(bool ok, string detail)> DemoCheckoutAsync(
@@ -1698,8 +1696,23 @@ static async Task<(bool ok, string detail)> DemoCheckoutAsync(
     }
     catch (Exception ex)
     {
-        return (false, ex.Message);
+        return (false, FormatException(ex));
     }
+}
+
+// ── Exception formatting helper ───────────────────────────────────────────────
+
+static string FormatException(Exception ex)
+{
+    var parts = new System.Text.StringBuilder();
+    Exception? current = ex;
+    while (current != null)
+    {
+        if (parts.Length > 0) parts.Append(" → ");
+        parts.Append($"{current.GetType().Name}: {current.Message}");
+        current = current.InnerException;
+    }
+    return parts.ToString();
 }
 
 // ── DEMO DTOs ─────────────────────────────────────────────────────────────────

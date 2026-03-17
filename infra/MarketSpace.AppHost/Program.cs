@@ -13,6 +13,7 @@ IResourceBuilder<PostgresDatabaseResource> catalogDb = builder
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume()
     .WithHostPort(int.Parse(catalogDbConfig["Port"]!))
+    .WithPgAdmin()
     .AddDatabase(catalogDbConfig["ConnectionName"]!);
 
 IConfigurationSection orderDbConfig = postgresConfig.GetSection("Order");
@@ -22,6 +23,7 @@ IResourceBuilder<PostgresDatabaseResource> orderDb = builder
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume()
     .WithHostPort(int.Parse(orderDbConfig["Port"]!))
+    .WithPgAdmin()
     .AddDatabase(orderDbConfig["ConnectionName"]!);
 
 IConfigurationSection merchantDbConfig = postgresConfig.GetSection("Merchant");
@@ -31,6 +33,7 @@ IResourceBuilder<PostgresDatabaseResource> merchantDb = builder
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume()
     .WithHostPort(int.Parse(merchantDbConfig["Port"]!))
+    .WithPgAdmin()
     .AddDatabase(merchantDbConfig["ConnectionName"]!);
 
 IConfigurationSection userDbConfig = postgresConfig.GetSection("User");
@@ -40,6 +43,7 @@ IResourceBuilder<PostgresDatabaseResource> userDb = builder
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume()
     .WithHostPort(int.Parse(userDbConfig["Port"]!))
+    .WithPgAdmin()
     .AddDatabase(userDbConfig["ConnectionName"]!);
 
 IConfigurationSection basketDbConfig = postgresConfig.GetSection("Basket");
@@ -49,6 +53,7 @@ IResourceBuilder<PostgresDatabaseResource> basketDb = builder
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume()
     .WithHostPort(int.Parse(basketDbConfig["Port"]!))
+    .WithPgAdmin()
     .AddDatabase(basketDbConfig["ConnectionName"]!);
 
 IConfigurationSection paymentDbConfig = postgresConfig.GetSection("Payment");
@@ -58,6 +63,7 @@ IResourceBuilder<PostgresDatabaseResource> paymentDb = builder
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume()
     .WithHostPort(int.Parse(paymentDbConfig["Port"]!))
+    .WithPgAdmin()
     .AddDatabase(paymentDbConfig["ConnectionName"]!);
 
 // Message Broker
@@ -99,6 +105,7 @@ IResourceBuilder<PostgresDatabaseResource> aiDb = builder
     .WithDataVolume()
     .WithHostPort(int.Parse(aiDbConfig["Port"]!))
     .WithBindMount("../../infra/ollama/init-pgvector.sql", "/docker-entrypoint-initdb.d/init-pgvector.sql", isReadOnly: true)
+    .WithPgAdmin()
     .AddDatabase(aiDbConfig["ConnectionName"]!);
 
 // Storage - Minio

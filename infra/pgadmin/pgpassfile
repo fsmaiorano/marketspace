@@ -1,0 +1,7 @@
+postgres-catalog:5432:*:postgres:postgres
+postgres-basket:5432:*:postgres:postgres
+postgres-order:5432:*:postgres:postgres
+postgres-merchant:5432:*:postgres:postgres
+postgres-user:5432:*:postgres:postgres
+postgres-payment:5432:*:postgres:postgres
+postgres-ai:5432:*:postgres:postgres

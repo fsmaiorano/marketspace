@@ -1,0 +1,74 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Catalog DB",
+      "Group": "MarketSpace",
+      "Host": "postgres-catalog",
+      "Port": 5432,
+      "MaintenanceDB": "CatalogDb",
+      "Username": "postgres",
+      "SSLMode": "prefer",
+      "PassFile": "/pgpassfile"
+    },
+    "2": {
+      "Name": "Basket DB",
+      "Group": "MarketSpace",
+      "Host": "postgres-basket",
+      "Port": 5432,
+      "MaintenanceDB": "BasketDb",
+      "Username": "postgres",
+      "SSLMode": "prefer",
+      "PassFile": "/pgpassfile"
+    },
+    "3": {
+      "Name": "Order DB",
+      "Group": "MarketSpace",
+      "Host": "postgres-order",
+      "Port": 5432,
+      "MaintenanceDB": "OrderDb",
+      "Username": "postgres",
+      "SSLMode": "prefer",
+      "PassFile": "/pgpassfile"
+    },
+    "4": {
+      "Name": "Merchant DB",
+      "Group": "MarketSpace",
+      "Host": "postgres-merchant",
+      "Port": 5432,
+      "MaintenanceDB": "MerchantDb",
+      "Username": "postgres",
+      "SSLMode": "prefer",
+      "PassFile": "/pgpassfile"
+    },
+    "5": {
+      "Name": "User DB",
+      "Group": "MarketSpace",
+      "Host": "postgres-user",
+      "Port": 5432,
+      "MaintenanceDB": "UserDb",
+      "Username": "postgres",
+      "SSLMode": "prefer",
+      "PassFile": "/pgpassfile"
+    },
+    "6": {
+      "Name": "Payment DB",
+      "Group": "MarketSpace",
+      "Host": "postgres-payment",
+      "Port": 5432,
+      "MaintenanceDB": "PaymentDb",
+      "Username": "postgres",
+      "SSLMode": "prefer",
+      "PassFile": "/pgpassfile"
+    },
+    "7": {
+      "Name": "AI DB",
+      "Group": "MarketSpace",
+      "Host": "postgres-ai",
+      "Port": 5432,
+      "MaintenanceDB": "AiDb",
+      "Username": "postgres",
+      "SSLMode": "prefer",
+      "PassFile": "/pgpassfile"
+    }
+  }
+}
