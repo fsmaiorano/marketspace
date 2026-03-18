@@ -1,9 +1,8 @@
 # 🛒 MarketSpace
 
-> A modern, cloud-native **e-commerce marketplace** built with a microservices architecture.  
-> MarketSpace provides a scalable and modular platform for managing catalogs, baskets, orders, merchants, users, payments, and an **AI assistant** — all orchestrated behind a BFF (Backend For Frontend) and served through a responsive React web application.
+A modern, cloud-native **e-commerce marketplace** built with a microservices architecture.  
 
-**GitHub Description:** *Cloud-native e-commerce marketplace built with .NET microservices, React, AI-powered assistant (RAG + Agent), RabbitMQ event bus, MinIO storage, and PostgreSQL.*
+MarketSpace provides a scalable and modular platform for managing catalogs, baskets, orders, merchants, users, payments, and an **AI assistant** — all orchestrated behind a BFF (Backend For Frontend) and served through a responsive React web application.
 
 ---
 
