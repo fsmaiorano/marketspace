@@ -28,7 +28,7 @@ public class CorrelationIdMiddlewareTests
     [Fact]
     public async Task InvokeAsync_NoIncomingHeader_GeneratesNewCorrelationId()
     {
-        var (middleware, serviceMock, ctx) = BuildSut();
+        (CorrelationIdMiddleware middleware, Mock<ICorrelationIdService> serviceMock, DefaultHttpContext ctx) = BuildSut();
         string? capturedId = null;
         serviceMock.Setup(s => s.SetCorrelationId(It.IsAny<string>()))
                    .Callback<string>(id => capturedId = id);
@@ -43,7 +43,7 @@ public class CorrelationIdMiddlewareTests
     public async Task InvokeAsync_WithIncomingHeader_UsesExistingId()
     {
         const string existingId = "my-existing-cid-abc123";
-        var (middleware, serviceMock, ctx) = BuildSut(addIncomingHeader: true, incomingId: existingId);
+        (CorrelationIdMiddleware middleware, Mock<ICorrelationIdService> serviceMock, DefaultHttpContext ctx) = BuildSut(addIncomingHeader: true, incomingId: existingId);
         string? capturedId = null;
         serviceMock.Setup(s => s.SetCorrelationId(It.IsAny<string>()))
                    .Callback<string>(id => capturedId = id);
@@ -56,7 +56,7 @@ public class CorrelationIdMiddlewareTests
     [Fact]
     public async Task InvokeAsync_CallsSetCorrelationIdOnService()
     {
-        var (middleware, serviceMock, ctx) = BuildSut();
+        (CorrelationIdMiddleware middleware, Mock<ICorrelationIdService> serviceMock, DefaultHttpContext ctx) = BuildSut();
 
         await middleware.InvokeAsync(ctx, serviceMock.Object);
 
@@ -66,7 +66,7 @@ public class CorrelationIdMiddlewareTests
     [Fact]
     public async Task InvokeAsync_SetsRequestHeaderWhenAbsent()
     {
-        var (middleware, serviceMock, ctx) = BuildSut();
+        (CorrelationIdMiddleware middleware, Mock<ICorrelationIdService> serviceMock, DefaultHttpContext ctx) = BuildSut();
 
         await middleware.InvokeAsync(ctx, serviceMock.Object);
 

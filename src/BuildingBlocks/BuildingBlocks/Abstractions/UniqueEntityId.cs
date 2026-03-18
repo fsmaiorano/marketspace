@@ -10,7 +10,7 @@ public sealed record UniqueEntityId
     {
         _value = value is null
             ? GenerateNewGuid()
-            : Guid.TryParse(value, out var guidValue)
+            : Guid.TryParse(value, out Guid guidValue)
                 ? guidValue
                 : throw new ArgumentException("Invalid GUID format.", nameof(value));
     }

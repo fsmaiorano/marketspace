@@ -35,7 +35,7 @@ public class CorrelationIdHandlerTests
     public async Task SendAsync_NoExistingHeader_AddsCorrelationIdHeader()
     {
         const string expectedCid = "cid-12345-abcde";
-        var (handler, innerMock) = BuildSut(expectedCid);
+        (CorrelationIdHandler handler, Mock<HttpMessageHandler> innerMock) = BuildSut(expectedCid);
         using HttpClient client = new(handler);
 
         await client.GetAsync("https://example.com/api/orders");
@@ -53,7 +53,7 @@ public class CorrelationIdHandlerTests
     public async Task SendAsync_ExistingHeader_DoesNotOverwrite()
     {
         const string existingCid = "already-set-cid";
-        var (handler, innerMock) = BuildSut("service-generated-cid");
+        (CorrelationIdHandler handler, Mock<HttpMessageHandler> innerMock) = BuildSut("service-generated-cid");
         using HttpClient client = new(handler);
         client.DefaultRequestHeaders.Add(CorrelationIdHeader, existingCid);
 
@@ -71,7 +71,7 @@ public class CorrelationIdHandlerTests
     [Fact]
     public async Task SendAsync_ReturnsInnerHandlerResponse()
     {
-        var (handler, _) = BuildSut();
+        (CorrelationIdHandler handler, _) = BuildSut();
         using HttpClient client = new(handler);
 
         HttpResponseMessage response = await client.GetAsync("https://example.com/test");

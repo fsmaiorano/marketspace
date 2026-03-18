@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -40,7 +41,7 @@ public static class JwtAuthenticationExtensions
                     OnMessageReceived = context =>
                     {
                         // Allow token from query string for SSE/EventSource connections
-                        if (context.Request.Query.TryGetValue("access_token", out var token) &&
+                        if (context.Request.Query.TryGetValue("access_token", out StringValues token) &&
                             !string.IsNullOrWhiteSpace(token))
                         {
                             context.Token = token;

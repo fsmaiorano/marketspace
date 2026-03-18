@@ -3,6 +3,7 @@ using Merchant.Api.Domain.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using Simulator;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using User.Api.Data;
 using User.Api.Models;
@@ -1704,7 +1705,7 @@ static async Task<(bool ok, string detail)> DemoCheckoutAsync(
 
 static string FormatException(Exception ex)
 {
-    var parts = new System.Text.StringBuilder();
+    StringBuilder parts = new System.Text.StringBuilder();
     Exception? current = ex;
     while (current != null)
     {

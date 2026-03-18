@@ -30,7 +30,7 @@ public class UpdateUserTypeEndpointUnitTest(TestFixture fixture) : Base.BaseTest
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         
-        var result = await response.Content.ReadFromJsonAsync<dynamic>();
+        dynamic? result = await response.Content.ReadFromJsonAsync<dynamic>();
         Assert.NotNull(result);
 
         // Verify the user type was actually updated - reload from database

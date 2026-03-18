@@ -8,7 +8,7 @@ public class CorrelationIdService(IHttpContextAccessor httpContextAccessor) : IC
 
     public string GetCorrelationId()
     {
-        if (httpContextAccessor.HttpContext?.Items.TryGetValue("CorrelationId", out var contextCorrelationId) == true)
+        if (httpContextAccessor.HttpContext?.Items.TryGetValue("CorrelationId", out object? contextCorrelationId) == true)
             return contextCorrelationId?.ToString() ?? GenerateNewCorrelationId();
 
         return _correlationId ?? GenerateNewCorrelationId();

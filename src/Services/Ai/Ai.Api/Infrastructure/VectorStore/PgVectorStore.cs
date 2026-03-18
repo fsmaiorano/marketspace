@@ -16,7 +16,7 @@ public class PgVectorStore : IVectorStore
 
     public async Task<IEnumerable<string>> Search(float[] vector, string? contextId = null, int limit = 5)
     {
-        var embedding = new Vector(vector);
+        Vector embedding = new Vector(vector);
         List<string> results = [];
 
         await using NpgsqlDataSource dataSource = CreateDataSource();
@@ -51,7 +51,7 @@ public class PgVectorStore : IVectorStore
 
     public async Task Upsert(string content, float[] embedding, string? contextId = null, string? metadata = null)
     {
-        var vector = new Vector(embedding);
+        Vector vector = new Vector(embedding);
 
         await using NpgsqlDataSource dataSource = CreateDataSource();
         await using NpgsqlConnection conn = await dataSource.OpenConnectionAsync();

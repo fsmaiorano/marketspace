@@ -44,7 +44,7 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
             )
         };
 
-        var problemDetails = new ProblemDetails
+        ProblemDetails problemDetails = new ProblemDetails
         {
             Title = details.Title,
             Status = details.StatusCode,

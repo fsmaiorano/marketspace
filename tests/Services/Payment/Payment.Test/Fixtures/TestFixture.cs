@@ -17,7 +17,7 @@ public sealed class TestFixture : BaseTestFixture<Payment.Api.PaymentProgram>
 
         builder.ConfigureTestServices(services =>
         {
-            var descriptor = services.SingleOrDefault(
+            ServiceDescriptor? descriptor = services.SingleOrDefault(
                 d => d.ServiceType == typeof(DbContextOptions<PaymentDbContext>));
 
             if (descriptor != null)
@@ -29,7 +29,7 @@ public sealed class TestFixture : BaseTestFixture<Payment.Api.PaymentProgram>
             });
             
              // Ensure IPaymentDbContext resolves to the new PaymentDbContext
-            var interfaceDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IPaymentDbContext));
+            ServiceDescriptor? interfaceDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IPaymentDbContext));
             if(interfaceDescriptor != null) services.Remove(interfaceDescriptor);
 
             services.AddScoped<IPaymentDbContext>(provider => provider.GetRequiredService<PaymentDbContext>());

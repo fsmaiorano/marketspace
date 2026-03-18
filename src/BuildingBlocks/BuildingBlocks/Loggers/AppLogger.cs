@@ -12,7 +12,7 @@ public sealed class AppLogger<T>(ILogger<T> logger) : IAppLogger<T>
 
     public void LogInformation(LogTypeEnum logTypeEnum, string messageTemplate, params object?[] propertyValues)
     {
-        using var scope = _logger.BeginScope(new Dictionary<string, object> { ["LogType"] = logTypeEnum.ToString() });
+        using IDisposable? scope = _logger.BeginScope(new Dictionary<string, object> { ["LogType"] = logTypeEnum.ToString() });
         _logger.LogInformation(messageTemplate, propertyValues);
     }
 
@@ -23,7 +23,7 @@ public sealed class AppLogger<T>(ILogger<T> logger) : IAppLogger<T>
 
     public void LogWarning(LogTypeEnum logTypeEnum, string messageTemplate, params object?[] propertyValues)
     {
-        using var scope = _logger.BeginScope(new Dictionary<string, object> { ["LogType"] = logTypeEnum.ToString() });
+        using IDisposable? scope = _logger.BeginScope(new Dictionary<string, object> { ["LogType"] = logTypeEnum.ToString() });
         _logger.LogWarning(messageTemplate, propertyValues);
     }
 
@@ -34,7 +34,7 @@ public sealed class AppLogger<T>(ILogger<T> logger) : IAppLogger<T>
 
     public void LogError(LogTypeEnum logTypeEnum, Exception? exception, string messageTemplate, params object?[] propertyValues)
     {
-        using var scope = _logger.BeginScope(new Dictionary<string, object> { ["LogType"] = logTypeEnum.ToString() });
+        using IDisposable? scope = _logger.BeginScope(new Dictionary<string, object> { ["LogType"] = logTypeEnum.ToString() });
         if (exception != null)
             _logger.LogError(exception, messageTemplate, propertyValues);
         else
@@ -53,7 +53,7 @@ public sealed class AppLogger<T>(ILogger<T> logger) : IAppLogger<T>
 
     public void LogDebug(LogTypeEnum logTypeEnum, string messageTemplate, params object?[] propertyValues)
     {
-        using var scope = _logger.BeginScope(new Dictionary<string, object> { ["LogType"] = logTypeEnum.ToString() });
+        using IDisposable? scope = _logger.BeginScope(new Dictionary<string, object> { ["LogType"] = logTypeEnum.ToString() });
         _logger.LogDebug(messageTemplate, propertyValues);
     }
 

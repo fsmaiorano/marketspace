@@ -103,8 +103,8 @@ public abstract class WatchedList<T>(List<T>? initialItems = null)
 
     public void Update(List<T> items)
     {
-        var newItems = items.Where(a => !GetItems().Any(b => CompareItems(a, b))).ToList();
-        var removedItems = GetItems().Where(a => !items.Any(b => CompareItems(a, b))).ToList();
+        List<T> newItems = items.Where(a => !GetItems().Any(b => CompareItems(a, b))).ToList();
+        List<T> removedItems = GetItems().Where(a => !items.Any(b => CompareItems(a, b))).ToList();
 
         CurrentItems = items;
         _new = newItems;
