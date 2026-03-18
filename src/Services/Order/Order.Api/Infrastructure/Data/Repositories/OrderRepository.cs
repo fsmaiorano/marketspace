@@ -50,10 +50,12 @@ public class OrderRepository(IOrderDbContext dbContext) : IOrderRepository
     public async Task<List<OrderEntity>> GetByCustomerIdAsync(Guid customerId, int limit = 10,
         CancellationToken cancellationToken = default)
     {
+        CustomerId customerIdVo = CustomerId.Of(customerId);
+
         return await dbContext.Orders
             .Include(o => o.Items)
             .AsNoTracking()
-            .Where(o => o.CustomerId.Value == customerId)
+            .Where(o => o.CustomerId == customerIdVo)
             .OrderByDescending(o => o.CreatedAt)
             .Take(limit)
             .ToListAsync(cancellationToken);

@@ -21,6 +21,7 @@ using BuildingBlocks.Middlewares;
 using BuildingBlocks.Authentication;
 using BuildingBlocks.Messaging.Extensions;
 using BuildingBlocks.Services.Correlation;
+using BuildingBlocks.Services.CurrentUser;
 using MarketSpace.ServiceDefaults;
 using Microsoft.OpenApi;
 
@@ -35,6 +36,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddOpenApi();
 builder.Services.AddHttpClient();
 builder.Services.AddCorrelationIdServices();
+builder.Services.AddCurrentUserService();
 
 builder.Services.AddMerchantServices();
 builder.Services.AddBasketServices();

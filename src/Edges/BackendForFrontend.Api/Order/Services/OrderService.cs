@@ -121,19 +121,50 @@ public class OrderService(
         logger.LogInformation(LogTypeEnum.Application, "Retrieving orders for customer: {CustomerId}", customerId);
 
         HttpResponseMessage response = await DoGet($"{BaseUrl}/order/customer/{customerId}");
-        Result<GetOrderListResponse>? content = await response.Content.ReadFromJsonAsync<Result<GetOrderListResponse>>();
 
-        if (response.IsSuccessStatusCode && content is not null)
+        if (response.IsSuccessStatusCode)
         {
-            logger.LogInformation(LogTypeEnum.Application, "Orders retrieved successfully for customer: {CustomerId} with {Count} orders",
-                customerId, content.Data?.Orders.Count);
-            return content;
+            List<MsOrderDto>? orders = await response.Content.ReadFromJsonAsync<List<MsOrderDto>>(
+                new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            GetOrderListResponse result = new()
+            {
+                Orders = (orders ?? []).Select(o => new OrderSummaryDto
+                {
+                    Id = o.Id,
+                    CustomerId = o.CustomerId,
+                    OrderName = $"Order #{o.Id.ToString().ToUpper()}",
+                    Status = MapOrderStatus(o.Status),
+                    TotalAmount = o.TotalAmount,
+                    CreatedAt = o.CreatedAt.UtcDateTime
+                }).ToList()
+            };
+
+            logger.LogInformation(LogTypeEnum.Application,
+                "Orders retrieved successfully for customer: {CustomerId} with {Count} orders",
+                customerId, result.Orders.Count);
+
+            return Result<GetOrderListResponse>.Success(result);
         }
 
         logger.LogError(LogTypeEnum.Application, null, "Failed to retrieve orders. Status code: {StatusCode}", response.StatusCode);
         string errorMessage = await response.Content.ReadAsStringAsync();
-        throw new HttpRequestException($"Error retrieving orders: {errorMessage}");
+        return Result<GetOrderListResponse>.Failure($"Error retrieving orders: {errorMessage}");
     }
+
+    private static int MapOrderStatus(string? status) => status switch
+    {
+        "Created" => 1,
+        "Processing" => 2,
+        "Completed" => 3,
+        "ReadyForDelivery" => 4,
+        "DeliveryInProgress" => 5,
+        "Delivered" => 6,
+        "Finalized" => 7,
+        "Cancelled" => 90,
+        "CancelledByCustomer" => 91,
+        _ => 0
+    };
 
     public async Task<Result<GetOrdersByCatalogIdsResponse>> GetOrdersByCatalogIdsAsync(IEnumerable<Guid> catalogIds, int limit = 50)
     {

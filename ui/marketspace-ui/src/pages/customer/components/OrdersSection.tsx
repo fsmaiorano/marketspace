@@ -33,30 +33,40 @@ export function OrdersSection({ orders, loading, onRefresh }: OrdersSectionProps
         <div className="space-y-3">
           {orders.map((order) => {
             const statusLabel =
-              order.status === 0
-                ? "Pending"
-                : order.status === 1
+              order.status === 1
+                ? "Created"
+                : order.status === 2
                   ? "Processing"
-                  : order.status === 2
-                    ? "Shipped"
-                    : order.status === 3
-                      ? "Delivered"
-                      : "Cancelled";
+                  : order.status === 3
+                    ? "Completed"
+                    : order.status === 4
+                      ? "Ready for Delivery"
+                      : order.status === 5
+                        ? "In Delivery"
+                        : order.status === 6
+                          ? "Delivered"
+                          : order.status === 7
+                            ? "Finalized"
+                            : order.status === 90 || order.status === 91
+                              ? "Cancelled"
+                              : "Unknown";
             const statusClass =
-              order.status === 3
+              order.status === 6 || order.status === 7
                 ? "bg-green-100 text-green-700"
-                : order.status === 4
+                : order.status === 90 || order.status === 91
                   ? "bg-red-100 text-red-700"
-                  : order.status === 2
+                  : order.status === 5
                     ? "bg-blue-100 text-blue-700"
-                    : "bg-yellow-100 text-yellow-700";
+                    : order.status === 4
+                      ? "bg-purple-100 text-purple-700"
+                      : "bg-yellow-100 text-yellow-700";
 
             return (
               <div key={order.id} className="space-y-3 rounded-xl border bg-card p-4">
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <p className="text-sm font-semibold">
-                      {order.orderName || `Order #${order.id.split("-")[0].toUpperCase()}`}
+                      {order.orderName || `Order #${order.id.toUpperCase()}`}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {order.createdAt

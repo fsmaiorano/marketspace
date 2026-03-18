@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { LogOut, Package, ShoppingCart } from "lucide-react";
+import { Bot, LogOut, Package, ShoppingCart } from "lucide-react";
 
 type View = "catalog" | "orders";
 
@@ -9,6 +9,7 @@ interface CustomerHeaderProps {
   greeting?: string | null;
   onViewChange: (view: View) => void;
   onBasketOpen: () => void;
+  onAiOpen: () => void;
   onLogout: () => void;
 }
 
@@ -18,6 +19,7 @@ export function CustomerHeader({
   greeting,
   onViewChange,
   onBasketOpen,
+  onAiOpen,
   onLogout,
 }: CustomerHeaderProps) {
   return (
@@ -51,6 +53,9 @@ export function CustomerHeader({
                 {basketItemCount}
               </span>
             )}
+          </Button>
+          <Button variant="outline" size="sm" onClick={onAiOpen} title="AI Assistant">
+            <Bot className="h-4 w-4" />
           </Button>
           <Button variant="ghost" size="sm" onClick={onLogout}>
             <LogOut className="h-4 w-4" />

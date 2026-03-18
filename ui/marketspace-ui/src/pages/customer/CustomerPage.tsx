@@ -17,6 +17,7 @@ import { CustomerHeader } from "@/pages/customer/components/CustomerHeader";
 import { OrdersSection } from "@/pages/customer/components/OrdersSection";
 import { BasketDrawer } from "@/pages/customer/components/BasketDrawer";
 import { CheckoutModal, type CheckoutFormData } from "@/pages/customer/components/CheckoutModal";
+import { AiChatDrawer } from "@/pages/customer/components/AiChatDrawer";
 
 type View = "catalog" | "orders";
 
@@ -36,6 +37,7 @@ export default function CustomerPage() {
   const [basket, setBasket] = useState<Basket | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [basketOpen, setBasketOpen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
   const [loadingCatalog, setLoadingCatalog] = useState(false);
   const [loadingBasket, setLoadingBasket] = useState(false);
   const [loadingOrders, setLoadingOrders] = useState(false);
@@ -283,6 +285,7 @@ export default function CustomerPage() {
         greeting={me?.firstName ?? me?.userName ?? me?.email}
         onViewChange={setView}
         onBasketOpen={() => setBasketOpen(true)}
+        onAiOpen={() => setAiOpen(true)}
         onLogout={handleLogout}
       />
 
@@ -338,6 +341,11 @@ export default function CustomerPage() {
         defaultEmail={me?.email ?? undefined}
         onClose={() => setCheckoutModalOpen(false)}
         onSubmit={handleCheckoutSubmit}
+      />
+
+      <AiChatDrawer
+        open={aiOpen}
+        onClose={() => setAiOpen(false)}
       />
     </div>
   );
