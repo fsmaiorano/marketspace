@@ -22,4 +22,16 @@ public static class AiBuilder
 
     public static AgentRequest CreateAgentRequestWithOrderId(Guid orderId) =>
         new() { Message = $"What is the status of order {orderId}?", UserId = Guid.NewGuid().ToString() };
+
+    public static AgentRequest CreateAgentRequestForMyOrders(string userId) =>
+        new() { Message = "Show me my recent orders", UserId = userId };
+
+    public static AgentRequest CreateAgentRequestForProducts() =>
+        new() { Message = "What products do you have available?", UserId = Guid.NewGuid().ToString() };
+
+    public static Faker<IngestRequest> CreateIngestRequestFaker() =>
+        new Faker<IngestRequest>()
+            .RuleFor(r => r.Documents, f => [f.Lorem.Paragraph(), f.Lorem.Paragraph()])
+            .RuleFor(r => r.ContextId, f => f.Random.Word().ToLower())
+            .RuleFor(r => r.Metadata, f => f.Random.Word());
 }

@@ -5,7 +5,7 @@ namespace Ai.Api.Application.Tools;
 public class GetOrderStatusTool(HttpClient httpClient, IConfiguration configuration)
 {
     private string BaseUrl => configuration["Services:OrderService:BaseUrl"]
-        ?? throw new ArgumentNullException("Services:OrderService:BaseUrl is not configured");
+                              ?? throw new ArgumentNullException("Services:OrderService:BaseUrl is not configured");
 
     public async Task<string?> GetOrderStatusAsync(Guid orderId)
     {
@@ -18,10 +18,9 @@ public class GetOrderStatusTool(HttpClient httpClient, IConfiguration configurat
 
             OrderDto? order = await response.Content.ReadFromJsonAsync<OrderDto>();
 
-            if (order is null)
-                return null;
-
-            return $"Order {order.Id} — Status: {order.Status}, Total: {order.TotalAmount:C}, Created: {order.CreatedAt:g}";
+            return order is null
+                ? null
+                : $"Order {order.Id} — Status: {order.Status}, Total: {order.TotalAmount:C}, Created: {order.CreatedAt:g}";
         }
         catch
         {
@@ -30,9 +29,12 @@ public class GetOrderStatusTool(HttpClient httpClient, IConfiguration configurat
     }
 
     private record OrderDto(
-        [property: JsonPropertyName("id")]          Guid Id,
-        [property: JsonPropertyName("customerId")]  Guid CustomerId,
-        [property: JsonPropertyName("status")]      string Status,
-        [property: JsonPropertyName("totalAmount")] decimal TotalAmount,
-        [property: JsonPropertyName("createdAt")]   DateTimeOffset CreatedAt);
+        [property: JsonPropertyName("id")] Guid Id,
+        [property: JsonPropertyName("customerId")]
+        Guid CustomerId,
+        [property: JsonPropertyName("status")] string Status,
+        [property: JsonPropertyName("totalAmount")]
+        decimal TotalAmount,
+        [property: JsonPropertyName("createdAt")]
+        DateTimeOffset CreatedAt);
 }

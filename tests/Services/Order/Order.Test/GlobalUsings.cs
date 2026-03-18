@@ -13,10 +13,13 @@ global using Order.Api;
 global using Order.Api.Application.Order.CreateOrder;
 global using Order.Api.Application.Order.DeleteOrder;
 global using Order.Api.Application.Order.GetOrderById;
+global using Order.Api.Application.Order.GetOrdersByCustomer;
 global using Order.Api.Application.Order.UpdateOrder;
 global using Order.Api.Domain.Entities;
 global using Order.Api.Domain.Repositories;
+global using Order.Api.Endpoints.Dto;
 global using Order.Api.Infrastructure.Data;
+global using System.Net;
 global using System.Net.Http.Json;
 global using Xunit;
 

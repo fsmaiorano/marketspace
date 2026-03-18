@@ -1,0 +1,39 @@
+meta {
+  name: Agent - Search Products
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{ai_url}}/agent
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "message": "Do you have any electronics available? What is the cheapest item?",
+    "userId": "{{customer_id}}"
+  }
+}
+
+docs {
+  ## Agent — Search Products
+
+  Triggers the `SearchProductsTool` inside the agent.
+  The agent fetches up to 20 products from the Catalog API and lets the LLM answer the user's question.
+
+  ### When is this tool triggered?
+  The agent detects keywords like: **product, products, item, items, catalog, buy, purchase,
+  available, price, stock, sell, shop, find, search, show, list**
+
+  ### Response
+  ```json
+  {
+    "answer": "Yes! We have the following electronics...",
+    "usedTools": true
+  }
+  ```
+
+  > `usedTools: true` means the agent called the Catalog API and grounded the answer with real data.
+}

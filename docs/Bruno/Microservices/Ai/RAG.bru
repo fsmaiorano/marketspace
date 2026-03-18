@@ -13,6 +13,35 @@ post {
 body:json {
   {
     "question": "How does the order process work?",
-    "contextId": "marketplace"
+    "contextId": "marketspace-docs"
   }
 }
+
+docs {
+  ## RAG (Retrieval-Augmented Generation)
+
+  Answers a question by first searching the vector store for relevant documents,
+  then using those documents as context for the LLM to generate a grounded answer.
+
+  ### Body fields
+  | Field     | Description |
+  |-----------|-------------|
+  | question  | Natural language question |
+  | contextId | Vector store namespace to search (e.g. "marketspace-docs", "policies", "catalog") |
+
+  ### Built-in context IDs
+  | contextId         | What's stored there |
+  |-------------------|----------------------|
+  | marketspace-docs  | Order lifecycle, shipping, payment, cancellation docs (auto-seeded on startup) |
+  | catalog           | Product catalog (seeded by CatalogSeeder on startup if Catalog API is reachable) |
+  | any custom        | Documents you ingested via `POST /rag/ingest` |
+
+  ### Response
+  ```json
+  {
+    "answer": "Orders in MarketSpace go through: Created → Processing → ReadyForDelivery → ...",
+    "sources": ["Orders in MarketSpace go from Created to Processing..."]
+  }
+  ```
+}
+

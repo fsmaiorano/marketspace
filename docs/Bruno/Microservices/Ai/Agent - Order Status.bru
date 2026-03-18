@@ -1,0 +1,38 @@
+meta {
+  name: Agent - Order Status
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{ai_url}}/agent
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "message": "What is the status of order {{order_id}}?",
+    "userId": "{{customer_id}}"
+  }
+}
+
+docs {
+  ## Agent — Order Status
+
+  Triggers the `GetOrderStatusTool` inside the agent.
+  The agent extracts the order GUID from the message, calls `GET /order/{id}`, and returns the current status.
+
+  ### When is this tool triggered?
+  The message must contain **order / order status / track order** AND a valid UUID.
+
+  ### Response
+  ```json
+  {
+    "answer": "Your order abc-123 is currently Processing. Total: $99.00, placed on 2026-01-15.",
+    "usedTools": true
+  }
+  ```
+
+  > If the order ID is not found, `usedTools` is `false` and the LLM replies generically.
+}

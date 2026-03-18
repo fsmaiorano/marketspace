@@ -196,9 +196,9 @@ public abstract class BaseTestFixture<T>()
 
     public new Task DisposeAsync() => Task.CompletedTask;
 
-    public async Task<OrderEntity> CreateOrder()
+    public async Task<OrderEntity> CreateOrder(Guid customerId = default)
     {
-        OrderEntity? order = OrderBuilder.CreateOrderFaker().Generate();
+        OrderEntity? order = OrderBuilder.CreateOrderFaker(customerId).Generate();
         OrderDbContext?.Orders.Add(order);
         await OrderDbContext?.SaveChangesAsync()!;
 

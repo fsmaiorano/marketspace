@@ -6,6 +6,7 @@ using Order.Api.Application.Order.CreateOrder;
 using Order.Api.Application.Order.DeleteOrder;
 using Order.Api.Application.Order.GetOrderById;
 using Order.Api.Application.Order.GetOrdersByCatalogIds;
+using Order.Api.Application.Order.GetOrdersByCustomer;
 using Order.Api.Application.Order.PatchOrderStatus;
 using Order.Api.Application.Order.UpdateOrder;
 using Order.Api.Application.Subscribers;
@@ -27,6 +28,7 @@ public static class DependencyInjection
         services.AddScoped<DeleteOrder>();
         services.AddScoped<GetOrderById>();
         services.AddScoped<GetOrdersByCatalogIds>();
+        services.AddScoped<GetOrdersByCustomer>();
 
         services.AddEventBus(configuration);
 

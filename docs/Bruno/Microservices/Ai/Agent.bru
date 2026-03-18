@@ -12,7 +12,29 @@ post {
 
 body:json {
   {
-    "message": "What is the status of order {{order_id}}?",
+    "message": "Hello, what can you help me with?",
     "userId": "{{customer_id}}"
   }
 }
+
+docs {
+  ## Agent (Generic)
+
+  General-purpose agent entry point. The agent analyses the message and automatically
+  picks the right tool (or answers directly from the LLM if no tool fits).
+
+  ### Available tools
+  | Tool                    | Triggered by |
+  |-------------------------|--------------|
+  | GetOrderStatusTool      | Message contains "order status / track order" + a valid UUID |
+  | GetOrdersByCustomerTool | Message contains "my orders / order history / recent orders" + valid userId |
+  | SearchProductsTool      | Message contains "product / item / buy / price / catalog / available / search / show / list" |
+
+  ### Response
+  ```json
+  { "answer": "...", "usedTools": false }
+  ```
+
+  > See the specific **Agent - *** requests for targeted tool examples.
+}
+

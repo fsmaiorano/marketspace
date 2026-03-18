@@ -15,6 +15,7 @@ public static class DependencyInjection
         services.AddHttpClient<IEmbeddingGenerator, OllamaEmbedding>();
         services.AddSingleton<IVectorStore, PgVectorStore>();
         services.AddHostedService<VectorSeeder>();
+        services.AddHostedService<CatalogSeeder>();
         return services;
     }
 }

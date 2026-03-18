@@ -55,6 +55,7 @@ PatchOrderStatusEndpoint.MapEndpoint(app);
 DeleteOrderEndpoint.MapEndpoint(app);
 GetOrderByIdEndpoint.MapEndpoint(app);
 GetOrdersByCatalogIdsEndpoint.MapEndpoint(app);
+GetOrdersByCustomerEndpoint.MapEndpoint(app);
 
 app.Run();
 

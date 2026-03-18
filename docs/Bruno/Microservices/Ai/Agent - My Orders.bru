@@ -1,0 +1,39 @@
+meta {
+  name: Agent - My Orders
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{ai_url}}/agent
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "message": "Show me my recent orders",
+    "userId": "{{customer_id}}"
+  }
+}
+
+docs {
+  ## Agent — My Orders
+
+  Triggers the `GetOrdersByCustomerTool` inside the agent.
+  The agent calls `GET /order/customer/{userId}` and summarises the customer's last 5 orders.
+
+  ### Requirements
+  - `userId` must be a valid customer GUID that exists in the Order service.
+
+  ### When is this tool triggered?
+  The agent detects phrases like: **my orders, order history, recent orders, past orders, list my orders**
+
+  ### Response
+  ```json
+  {
+    "answer": "Here are your recent orders:\n- Order abc-123 | Status: Delivered | Total: $49.99 | Created: ...",
+    "usedTools": true
+  }
+  ```
+}

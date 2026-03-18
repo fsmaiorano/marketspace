@@ -1,0 +1,48 @@
+meta {
+  name: RAG Ingest
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{ai_url}}/rag/ingest
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "documents": [
+      "MarketSpace return policy: customers can return any item within 30 days of delivery for a full refund.",
+      "MarketSpace shipping policy: standard delivery takes 3-5 business days. Express delivery (1-2 days) is available at extra cost.",
+      "MarketSpace payment policy: we accept credit cards, debit cards, and cash on delivery. Payments are processed securely."
+    ],
+    "contextId": "policies",
+    "metadata": "store-policies-v1"
+  }
+}
+
+docs {
+  ## RAG Ingest
+
+  Embeds one or more text documents and stores them in the vector store.
+  Once ingested, documents become immediately available for semantic search via `POST /rag`.
+
+  ### Body fields
+  | Field       | Type     | Description |
+  |-------------|----------|-------------|
+  | documents   | string[] | Array of plain-text documents to embed and store |
+  | contextId   | string   | Namespace to group documents (e.g. "policies", "catalog") |
+  | metadata    | string?  | Optional tag for tracking the source version |
+
+  ### Response
+  ```json
+  { "ingested": 3 }
+  ```
+
+  ### Try it
+  After ingesting, query with:
+  ```
+  POST /rag  { "question": "What is the return policy?", "contextId": "policies" }
+  ```
+}

@@ -1,0 +1,47 @@
+meta {
+  name: Get Orders By Customer
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{order_url}}/order/customer/{{customer_id}}
+  body: none
+  auth: none
+}
+
+params:query {
+  limit: 10
+}
+
+docs {
+  ## Get Orders By Customer
+
+  Returns the most recent orders for a given customer, sorted by creation date descending.
+
+  ### Path parameters
+  | Param       | Description           |
+  |-------------|-----------------------|
+  | customer_id | Customer UUID         |
+
+  ### Query parameters
+  | Param | Default | Description                         |
+  |-------|---------|-------------------------------------|
+  | limit | 10      | Max number of orders to return      |
+
+  ### Response
+  ```json
+  [
+    {
+      "id": "...",
+      "customerId": "...",
+      "status": "Delivered",
+      "totalAmount": 99.99,
+      "createdAt": "2026-01-15T10:00:00Z"
+    }
+  ]
+  ```
+
+  > This endpoint is also used by the AI Agent's `GetOrdersByCustomerTool`
+  > when the user asks "Show me my recent orders".
+}

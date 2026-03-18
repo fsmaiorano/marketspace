@@ -47,6 +47,18 @@ public class OrderRepository(IOrderDbContext dbContext) : IOrderRepository
         return await query.FirstOrDefaultAsync(m => m.Id.Equals(id), cancellationToken);
     }
 
+    public async Task<List<OrderEntity>> GetByCustomerIdAsync(Guid customerId, int limit = 10,
+        CancellationToken cancellationToken = default)
+    {
+        return await dbContext.Orders
+            .Include(o => o.Items)
+            .AsNoTracking()
+            .Where(o => o.CustomerId.Value == customerId)
+            .OrderByDescending(o => o.CreatedAt)
+            .Take(limit)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<List<OrderEntity>> GetRecentByCatalogIdsAsync(IEnumerable<Guid> catalogIds, int limit = 50,
         CancellationToken cancellationToken = default)
     {

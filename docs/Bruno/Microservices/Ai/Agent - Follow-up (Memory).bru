@@ -1,0 +1,37 @@
+meta {
+  name: Agent - Follow-up (Memory)
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{ai_url}}/agent
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "message": "And what was the total amount?",
+    "userId": "{{customer_id}}"
+  }
+}
+
+docs {
+  ## Agent — Follow-up (Conversation Memory)
+
+  Demonstrates multi-turn conversation memory.
+  The agent stores every turn (user + assistant) keyed by `userId`.
+  On subsequent requests with the **same userId**, the history is injected into the prompt so the LLM can answer follow-up questions without repeating context.
+
+  ### How to use
+  1. First send `Agent - Order Status` or `Agent - My Orders` with `userId = {{customer_id}}`
+  2. Then send this request with the **same** `{{customer_id}}`
+  3. The LLM will answer referencing the previous response
+
+  ### Memory limits
+  Up to **10 turns** (20 messages) per session are kept. Older messages are dropped automatically.
+
+  ### Reset memory
+  Change the `userId` to start a fresh conversation.
+}
