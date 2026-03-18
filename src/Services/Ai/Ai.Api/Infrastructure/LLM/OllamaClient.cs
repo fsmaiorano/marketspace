@@ -15,8 +15,6 @@ public class OllamaClient : ILLMClient
         _model = configuration["Ollama:GenerationModel"] ?? "llama3.2:1b";
         _numPredict = configuration.GetValue<int>("Ollama:NumPredict", 128);
 
-        // Create the HttpClient directly so it bypasses the global Polly resilience pipeline.
-        // LLM inference can take minutes — the standard 10-second attempt timeout would always trigger.
         _httpClient = new HttpClient
         {
             BaseAddress = new Uri(baseUrl),
@@ -26,7 +24,6 @@ public class OllamaClient : ILLMClient
 
     public async Task<string> Generate(string prompt)
     {
-        // llama3.2:1b is a chat-tuned model — use /api/chat with messages format
         var payload = new
         {
             model = _model,
