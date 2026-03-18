@@ -11,7 +11,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
     {
-        services.AddHttpClient<ILLMClient, OllamaClient>();
+        services.AddSingleton<ILLMClient, OllamaClient>();
         services.AddHttpClient<IEmbeddingGenerator, OllamaEmbedding>();
         services.AddSingleton<IVectorStore, PgVectorStore>();
         services.AddHostedService<VectorSeeder>();

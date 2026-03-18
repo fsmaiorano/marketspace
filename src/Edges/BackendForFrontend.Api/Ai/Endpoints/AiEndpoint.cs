@@ -19,7 +19,7 @@ public static class AiEndpoint
                     Result<ChatResponse> result = await usecase.ChatAsync(enriched);
                     return result.IsSuccess
                         ? Results.Ok(result)
-                        : Results.BadRequest(result.Error);
+                        : Results.Problem(result.Error, statusCode: StatusCodes.Status503ServiceUnavailable);
                 })
             .RequireAuthorization()
             .WithName("AiChat")
@@ -36,7 +36,7 @@ public static class AiEndpoint
                     Result<AgentResponse> result = await usecase.AgentAsync(enriched);
                     return result.IsSuccess
                         ? Results.Ok(result)
-                        : Results.BadRequest(result.Error);
+                        : Results.Problem(result.Error, statusCode: StatusCodes.Status503ServiceUnavailable);
                 })
             .RequireAuthorization()
             .WithName("AiAgent")
@@ -53,7 +53,7 @@ public static class AiEndpoint
                     Result<RagResponse> result = await usecase.RagAsync(enriched);
                     return result.IsSuccess
                         ? Results.Ok(result)
-                        : Results.BadRequest(result.Error);
+                        : Results.Problem(result.Error, statusCode: StatusCodes.Status503ServiceUnavailable);
                 })
             .RequireAuthorization()
             .WithName("AiRag")

@@ -9,14 +9,19 @@ public class OllamaClient : ILLMClient
     private readonly string _model;
     private readonly int _numPredict;
 
-    public OllamaClient(HttpClient httpClient, IConfiguration configuration)
+    public OllamaClient(IConfiguration configuration)
     {
-        _httpClient = httpClient;
-        _httpClient.BaseAddress = new Uri(
-            configuration["Ollama:BaseUrl"] ?? throw new ArgumentNullException("Ollama:BaseUrl is not configured"));
-        _httpClient.Timeout = TimeSpan.FromSeconds(300);
+        string baseUrl = configuration["Ollama:BaseUrl"] ?? throw new ArgumentNullException("Ollama:BaseUrl is not configured");
         _model = configuration["Ollama:GenerationModel"] ?? "llama3.2:1b";
         _numPredict = configuration.GetValue<int>("Ollama:NumPredict", 128);
+
+        // Create the HttpClient directly so it bypasses the global Polly resilience pipeline.
+        // LLM inference can take minutes — the standard 10-second attempt timeout would always trigger.
+        _httpClient = new HttpClient
+        {
+            BaseAddress = new Uri(baseUrl),
+            Timeout = TimeSpan.FromMinutes(10)
+        };
     }
 
     public async Task<string> Generate(string prompt)
